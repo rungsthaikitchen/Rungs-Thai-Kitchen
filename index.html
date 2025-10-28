@@ -59,7 +59,7 @@
       transition:max-height .28s ease, padding .28s ease;
       padding:0 12px;
     }
-    .category-body.open{ max-height:1000px; padding:12px; }
+    .category-body.open{ padding:12px; }
     .menu-item{display:flex;justify-content:space-between;align-items:flex-start;padding:10px;border-radius:8px;border:1px solid #f7efee;margin-bottom:8px}
     .menu-item .meta{max-width:72%}
     .menu-item .meta .title{font-weight:700}
@@ -279,9 +279,9 @@
     <footer id="contact">
       <div style="max-width:700px;margin:0 auto">
         <div style="font-weight:800">Contact Us</div>
-        <div class="muted" style="margin-top:6px">Phone: 01234 567890 &nbsp; • &nbsp; Email: hello@rungsthaikitchen.example</div>
+        <div class="muted" style="margin-top:6px">Phone: 0113 3447431 &nbsp; • &nbsp; Email: hello@rungsthaikitchen.example</div>
         <div style="margin-top:10px;font-weight:700">Opening Hours</div>
-        <div class="muted">Mon–Fri: 11:30 – 22:00 • Sat–Sun: 12:00 – 22:30</div>
+        <div class="muted">Wed–Sun: 17:00 – 21:00</div>
       </div>
     </footer>
   </div>
@@ -597,19 +597,31 @@
           body.appendChild(el);
         });
 
-        // Accordion behavior (one open at a time)
-        header.addEventListener('click', ()=> {
-          const wasOpen = body.classList.contains('open');
-          document.querySelectorAll('.category-body').forEach(b => {
-            b.classList.remove('open');
-            const caret = b.previousElementSibling?.querySelector('.caret');
-            if (caret) caret.textContent = '▶';
-          });
-          if(!wasOpen){
-            body.classList.add('open');
-            const caret = header.querySelector('.caret'); if(caret) caret.textContent = '▼';
-          }
-        });
+		// Accordion behavior: close others when opening this one
+		header.addEventListener('click', ()=> {
+		  const wasOpen = body.classList.contains('open');
+
+		  // Close all categories
+		  document.querySelectorAll('.category-body').forEach(b => {
+			b.classList.remove('open');
+			b.style.maxHeight = '0px';
+			const hdr = b.previousElementSibling;
+			if (hdr) {
+			  const caret = hdr.querySelector('.caret');
+			  if (caret) caret.textContent = '▶';
+			}
+		  });
+
+		  // If it was not open, open it
+		  if (!wasOpen) {
+			body.classList.add('open');
+			// Dynamically set height for smooth expand
+			body.style.maxHeight = body.scrollHeight + 'px';
+			const caret = header.querySelector('.caret');
+			if (caret) caret.textContent = '▼';
+		  }
+		});
+
 
         catEl.appendChild(header);
         catEl.appendChild(body);
@@ -1171,6 +1183,14 @@
   const subtotal = basket.reduce((s,i)=> s + i.unitPrice * i.qty, 0);
   openCheckout(subtotal);
 });
+
+// Recalculate open sections on window resize
+window.addEventListener('resize', () => {
+  document.querySelectorAll('.category-body.open').forEach(b => {
+    b.style.maxHeight = b.scrollHeight + 'px';
+  });
+});
+
 
 </script>
 </body>
