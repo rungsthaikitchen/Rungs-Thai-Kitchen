@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RTK — Admin Orders</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --accent:#d9464a; --muted:#6b7280; --card:#fff;
+      --shadow: 0 8px 24px rgba(15,23,42,0.06);
+      font-family: 'Nunito', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    body{margin:0;background:#faf9f8;color:#111}
+    header{position:sticky;top:0;background:#fff;border-bottom:1px solid #eee;z-index:10}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    h1{margin:0;font-size:22px}
+    .muted{color:var(--muted)}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .btn{padding:8px 12px;border-radius:8px;border:1px solid #e8e6e6;background:#fff;cursor:pointer;font-weight:700}
+    .btn-accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+    main .wrap{padding-top:16px}
+    table{width:100%;border-collapse:separate;border-spacing:0 10px}
+    thead th{font-size:13px;color:var(--muted);text-align:left;padding:0 10px}
+    tbody tr{background:#fff;box-shadow:var(--shadow)}
+    td{padding:12px 10px;vertical-align:top}
+    .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;border:1px solid #eee;background:#fff}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+    .small{font-size:13px}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .row{border-radius:12px}
+    .expander{cursor:pointer;color:var(--accent);font-weight:700}
+    .details{display:none;border-top:1px dashed #eee;margin-top:8px;padding-top:10px}
+    .line{display:flex;justify-content:space-between;gap:10px}
+    .line small{color:var(--muted)}
+    .nowrap{white-space:nowrap}
+    .badge{display:inline-flex;gap:6px;align-items:center;padding:4px 8px;border:1px solid #eee;border-radius:999px;background:#fff;font-size:12px}
+    .allergens{display:flex;gap:6px;flex-wrap:wrap}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap" style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <h1>Rung’s Thai Kitchen — Orders</h1>
+        <div class="muted small">Live dashboard (auto-updates)</div>
+      </div>
+      <div class="controls">
+        <button id="refresh" class="btn">Refresh</button>
+        <button id="export" class="btn">Export CSV</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>Type</th>
+            <th class="nowrap">Subtotal</th>
+            <th class="nowrap">Delivery</th>
+            <th class="nowrap">Total</th>
+            <th style="text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <!-- rows injected here -->
+        </tbody>
+      </table>
+      <div id="empty" class="muted" style="margin-top:12px;display:none">No orders yet.</div>
+    </div>
+  </main>
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ---------- Config ----------
+    const SUPABASE_URL = 'https://ubyjrrsvbbqomitpaidb.supabase.co';
+	const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVieWpycnN2YmJxb21pdHBhaWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NTYyNjMsImV4cCI6MjA3NjUzMjI2M30.WTllxO5KnaMI0i1d4VHNBhjLuRMfu4_Xx5arqZmYevw';
+
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ---------- Helpers ----------
+    const fmtMoney = v => '£' + (Math.round(Number(v || 0)*100)/100).toFixed(2);
+    const sumTotal = (o) => Number(o.subtotal || 0) + Number(o.delivery_fee || 0);
+    const fmtDate = iso => {
+      try { const d = new Date(iso); return d.toLocaleString(); } catch { return iso || ''; }
+    };
+    function csvEscape(val){
+      if(val == null) return '';
+      const s = String(val);
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+        return '"' + s.replace(/"/g,'""') + '"';
+      }
+      return s;
+    }
+
+    // ---------- Fetch ----------
+    async function fetchOrders(){
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          id, created_at, subtotal, delivery_fee, order_type, notes,
+          customers:customers ( full_name, email, phone, address ),
+          order_items ( id, name, qty, unit_price, modifiers, spice, img )
+        `)
+        .order('created_at', { ascending:false })
+        .limit(200);
+      if(error){
+        console.error('Fetch orders error', error);
+        return [];
+      }
+      return data || [];
+    }
+
+    // ---------- Render ----------
+    const tbody = document.getElementById('tbody');
+    const empty = document.getElementById('empty');
+
+    function render(orders){
+      tbody.innerHTML = '';
+      if(!orders.length){
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      orders.forEach(o => {
+        const tr = document.createElement('tr'); tr.className = 'row';
+        const customer = o.customers || {};
+        const total = sumTotal(o);
+
+        tr.innerHTML = `
+          <td class="mono">#${o.id}</td>
+          <td>${fmtDate(o.created_at)}</td>
+          <td>
+            <div><strong>${customer.full_name || '—'}</strong></div>
+            <div class="small muted">${customer.phone || ''}</div>
+          </td>
+          <td><span class="pill">${(o.order_type || 'collection').toUpperCase()}</span></td>
+          <td class="nowrap">${fmtMoney(o.subtotal)}</td>
+          <td class="nowrap">${fmtMoney(o.delivery_fee)}</td>
+          <td class="nowrap"><strong>${fmtMoney(total)}</strong></td>
+          <td class="actions">
+            <button class="btn" data-action="toggle">Details</button>
+            <button class="btn" data-action="print">Print ticket</button>
+          </td>
+        `;
+
+        // details row
+        const details = document.createElement('div');
+        details.className = 'details';
+        details.innerHTML = buildDetailsHTML(o);
+        const detailsRow = document.createElement('tr');
+        const detailsCell = document.createElement('td');
+        detailsCell.colSpan = 8;
+        detailsCell.appendChild(details);
+        detailsRow.appendChild(detailsCell);
+
+        // actions
+        tr.querySelector('[data-action="toggle"]').addEventListener('click', () => {
+          details.style.display = (details.style.display === 'block') ? 'none' : 'block';
+        });
+        tr.querySelector('[data-action="print"]').addEventListener('click', () => {
+          printTicket(o);
+        });
+
+        tbody.appendChild(tr);
+        tbody.appendChild(detailsRow);
+      });
+    }
+
+    function buildDetailsHTML(o){
+      const c = o.customers || {};
+      const lines = (o.order_items || []).map(item => {
+        const mods = (item.modifiers || []).map(m => m.name).join(', ');
+        const spice = (item.spice == null) ? '' : (' '.repeat(1) + '🌶️'.repeat(Math.max(0, Math.min(3, Number(item.spice)))));
+        const modsFrag = mods ? `<div class="small muted">Mods: ${mods}</div>` : '';
+        const img = item.img ? `<img src="${item.img}" alt="${item.name}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #eee;margin-right:8px">` : '';
+        return `
+          <div class="line">
+            <div style="display:flex;align-items:center;gap:8px">
+              ${img}
+              <div>
+                <div><strong>${item.name}</strong> × ${item.qty}${spice}</div>
+                ${modsFrag}
+              </div>
+            </div>
+            <div><strong>${fmtMoney(Number(item.unit_price)*Number(item.qty))}</strong></div>
+          </div>
+        `;
+      }).join('');
+
+      const addr = [c.address].filter(Boolean).join('<br>');
+
+      return `
+        <div class="grid" style="margin-bottom:8px">
+          <div>
+            <div class="muted small">Customer</div>
+            <div><strong>${c.full_name || '—'}</strong></div>
+            <div class="small">${c.phone || ''}</div>
+            <div class="small">${c.email || ''}</div>
+          </div>
+          <div>
+            <div class="muted small">Address</div>
+            <div class="small">${addr || '—'}</div>
+          </div>
+          <div>
+            <div class="muted small">Order</div>
+            <div class="small">Type: <strong>${(o.order_type || 'collection').toUpperCase()}</strong></div>
+            <div class="small">Subtotal: ${fmtMoney(o.subtotal)}</div>
+            <div class="small">Delivery: ${fmtMoney(o.delivery_fee)}</div>
+            <div class="small"><strong>Total: ${fmtMoney(sumTotal(o))}</strong></div>
+          </div>
+        </div>
+        <div class="muted small">Notes: ${o.notes ? o.notes : '—'}</div>
+        <div style="margin-top:10px;border-top:1px dashed #eee;padding-top:10px">${lines || '<div class="muted small">No items.</div>'}</div>
+      `;
+    }
+
+    // ---------- Print ticket ----------
+    function printTicket(o){
+	  const c = o.customers || {};
+	  const w = window.open('', 'PRINT', 'height=700,width=600');
+
+	  const lines = (o.order_items || []).map(it => {
+		const mods = (it.modifiers || []).map(m => m.name).join(', ');
+		const spice = (it.spice == null) ? '' : ' ' + '🌶️'.repeat(Math.max(0, Math.min(3, Number(it.spice))));
+		return `
+		  <tr>
+			<td style="padding:6px 0">
+			  <strong>${it.name}</strong> × ${it.qty}${spice}
+			  ${mods ? `<div style="font-size:12px;color:#666">Mods: ${mods}</div>`:''}
+			</td>
+			<td style="padding:6px 0;text-align:right">
+			  £${(Number(it.unit_price)*Number(it.qty)).toFixed(2)}
+			</td>
+		  </tr>
+		`;
+	  }).join('');
+
+	  const html = `
+		<html>
+		<head>
+		  <title>Order #${o.id}</title>
+		  <style>
+			body{font-family:ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto; font-size:14px; margin:24px;}
+			h1{font-size:18px;margin:0}
+			.muted{color:#6b7280}
+			table{width:100%;border-collapse:collapse;margin-top:10px}
+			td{border-bottom:1px dashed #ddd}
+		  </style>
+		</head>
+		<body onload="window.print(); setTimeout(function(){ window.close(); }, 300)">
+		  <h1>Rung’s Thai Kitchen — Ticket</h1>
+		  <div class="muted">Order #${o.id} • ${new Date(o.created_at).toLocaleString()}</div>
+		  <div style="margin-top:8px">
+			<div><strong>${(o.order_type || 'collection').toUpperCase()}</strong></div>
+			<div>${c.full_name || ''} • ${c.phone || ''}</div>
+			<div>${c.address || ''}</div>
+		  </div>
+		  <table>${lines}</table>
+		  <div style="margin-top:10px;border-top:1px dashed #ddd;padding-top:8px">
+			<div>Subtotal: £${Number(o.subtotal||0).toFixed(2)}</div>
+			<div>Delivery: £${Number(o.delivery_fee||0).toFixed(2)}</div>
+			<div><strong>Total: £${(Number(o.subtotal||0)+Number(o.delivery_fee||0)).toFixed(2)}</strong></div>
+		  </div>
+		  <div style="margin-top:8px"><em>Notes:</em> ${o.notes || '—'}</div>
+		</body>
+		</html>
+	  `;
+
+	  w.document.write(html);
+	  w.document.close();
+	}
+
+
+    // ---------- CSV export ----------
+    function exportCSV(current){
+      const headers = [
+        'id','created_at','customer_name','customer_email','customer_phone','address',
+        'order_type','subtotal','delivery_fee','total','notes'
+      ];
+      const rows = current.map(o => {
+        const c = o.customers || {};
+        return [
+          o.id,
+          o.created_at,
+          c.full_name || '',
+          c.email || '',
+          c.phone || '',
+          (c.address || '').replace(/\r?\n/g,' '),
+          o.order_type || 'collection',
+          Number(o.subtotal || 0).toFixed(2),
+          Number(o.delivery_fee || 0).toFixed(2),
+          sumTotal(o).toFixed(2),
+          (o.notes || '').replace(/\r?\n/g,' ')
+        ].map(csvEscape).join(',');
+      });
+      const csv = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `orders_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ---------- Realtime ----------
+    let currentOrders = [];
+    async function loadAndRender(){
+      currentOrders = await fetchOrders();
+      render(currentOrders);
+    }
+
+    document.getElementById('refresh').addEventListener('click', loadAndRender);
+    document.getElementById('export').addEventListener('click', () => exportCSV(currentOrders));
+
+    // Listen for new/updated orders & items
+    const channel = supabase.channel('orders-stream')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
+        // Simple strategy: re-fetch on INSERT/UPDATE/DELETE
+        loadAndRender();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, payload => {
+        loadAndRender();
+      })
+      .subscribe();
+
+    // initial
+    loadAndRender();
+  </script>
+</body>
+</html>

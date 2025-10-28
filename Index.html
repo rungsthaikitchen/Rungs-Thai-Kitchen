@@ -1,0 +1,1177 @@
+<a<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rung's Thai Kitchen</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --accent:#d9464a;
+      --accent-dark:#b02a2a;
+      --muted:#6b7280;
+      --card:#fff;
+      --shadow: 0 8px 24px rgba(15,23,42,0.06);
+      font-family: 'Nunito', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#fff 0%,#fff8f6 100%);color:#111;}
+    .container{max-width:1100px;margin:0 auto;padding:20px;}
+
+    /* Header */
+    header{
+      background:var(--card);
+      box-shadow:var(--shadow);
+      border-radius:10px;
+      margin-bottom:20px;
+      padding-top:max(5px, env(safe-area-inset-top));
+      padding-bottom:5px;
+      position: sticky; top: 12px; z-index: 1100;
+    }
+    .header-inner{display:flex;align-items:center;justify-content:space-between;padding:2px 25px}
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo img {height: 125px; width: auto;}
+    nav ul{display:flex;gap:16px;list-style:none;margin:0;padding:0}
+    nav a{color:#111;text-decoration:none;font-weight:700;font-size:14px}
+
+    /* Layout */
+    main{display:grid;grid-template-columns:1fr 360px;gap:18px}
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:var(--shadow)}
+    h1,h2,h3{margin:0}
+    h1{font-size:20px}
+    .muted{color:var(--muted)}
+    .small{font-size:13px}
+    .price{font-weight:800}
+    .btn{display:inline-block;padding:8px 12px;border-radius:8px;text-decoration:none;font-weight:700;cursor:pointer;font-size:13px}
+    .btn-accent{background:var(--accent);color:white;border:none}
+    .btn-ghost{background:transparent;border:1px solid #eee}
+    .btn[disabled]{opacity:.55;cursor:not-allowed;filter:grayscale(10%)}
+
+    /* Menu categories (accordion) */
+    .menu-section{display:grid;gap:12px}
+    .category{border-radius:10px;border:1px solid #f3e7e6;overflow:hidden}
+    .category-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#fff4f3;cursor:pointer}
+    .category-header h3{margin:0;font-size:16px}
+    .category-body{
+      max-height:0; overflow:hidden;
+      transition:max-height .28s ease, padding .28s ease;
+      padding:0 12px;
+    }
+    .category-body.open{ max-height:1000px; padding:12px; }
+    .menu-item{display:flex;justify-content:space-between;align-items:flex-start;padding:10px;border-radius:8px;border:1px solid #f7efee;margin-bottom:8px}
+    .menu-item .meta{max-width:72%}
+    .menu-item .meta .title{font-weight:700}
+
+    /* Order */
+    aside { align-self: start; }
+    #order-panel{ position: sticky; top: 20px; z-index: 1000; width: 100%; }
+    .order-list{display:flex;flex-direction:column;gap:10px}
+    .order-row{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;border:1px dashed #f0e6e5;gap:10px}
+    .item-thumb{width:54px;height:54px;object-fit:cover;border-radius:8px;border:1px solid #eee;background:#f8f8f8}
+
+    /* Our Food gallery */
+    .food-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .food-grid img{width:100%;height:140px;object-fit:cover;border-radius:8px;box-shadow:0 6px 16px rgba(15,23,42,0.06);cursor:pointer}
+    .food-grid img:hover{transform:translateY(-4px);transition:transform .18s ease,box-shadow .18s ease}
+
+    /* Modal (customize & checkout) */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:1200; overflow:auto; -webkit-overflow-scrolling:touch}
+    .modal{width:100%;max-width:720px;background:var(--card);border-radius:12px;padding:16px;box-shadow:0 12px 40px rgba(0,0,0,0.25); max-height:90vh; overflow:auto}
+    .mods{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .chip{padding:8px 10px;border-radius:999px;border:1px solid #eee;cursor:pointer;font-size:13px;background:#fff; min-height:44px; touch-action:manipulation}
+    .chip.selected{background:#fff4f3;border-color:var(--accent)}
+    input[type=number]{width:72px;padding:8px;border-radius:8px;border:1px solid #e7e3e3}
+    .qty-controls{display:flex;align-items:center;gap:8px}
+    .totals{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+    .mod-required-note{margin-top:8px;font-size:13px;color:#b02a2a;display:none}
+    .mod-limit-note{margin-top:6px;font-size:12px;color:var(--muted);display:none}
+
+    /* Spice selector */
+    .spice-wrap{margin-top:12px}
+    .spice-label{font-size:13px;color:var(--muted)}
+    .spice-buttons{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+    .spice-btn{border:1px solid #eee;background:#fff;border-radius:999px;padding:6px 10px;font-size:13px;cursor:pointer; min-height:44px; touch-action:manipulation}
+    .spice-btn.active{border-color:var(--accent);background:#fff4f3}
+
+    /* Allergens */
+    .allergen-icon{font-size:18px;margin-right:6px}
+    .allergen-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+    .allergen-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #eee;border-radius:999px;background:#fff;font-size:12px}
+
+    footer{margin-top:18px;text-align:center;padding:18px;border-radius:10px;background:#111;color:white; padding-bottom:max(18px, env(safe-area-inset-bottom));}
+
+    /* Responsive */
+    @media (max-width:980px){
+      main{grid-template-columns:1fr}
+      .header-inner{flex-direction:column;gap:10px}
+      nav ul{gap:10px}
+      #order-panel{ position: static; top: auto; }
+      header { position: relative; }
+      .food-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:560px){
+      .food-grid{grid-template-columns:repeat(1,1fr)}
+      .food-grid img{height:200px}
+    }
+
+    /* Form spacing */
+    #checkout-form > div { margin-top: 10px; }
+	/* Form layout */
+	.form-grid { display:grid; gap:12px; }
+	.form-grid .row-2 { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+	@media (max-width:560px){ .form-grid .row-2 { grid-template-columns:1fr; } }
+
+	/* Unified input/textarea styling */
+	.field { display:flex; flex-direction:column; gap:6px; }
+	.field label { font-size:13px; color:var(--muted); }
+
+	.input, .textarea, .select {
+	  font: inherit;                 /* same font family/size as the page */
+	  padding: 10px 12px;
+	  border-radius: 8px;
+	  border: 1px solid #e7e3e3;
+	  background:#fff;
+	  outline: none;
+	  box-shadow: none;
+	}
+	.input:focus, .textarea:focus, .select:focus {
+	  border-color: var(--accent);
+	  box-shadow: 0 0 0 3px rgba(217,70,74,.12);
+	}
+	/* Let inputs grow but never exceed their container */
+	.input.auto-fit {
+	  width: auto;
+	  max-width: 100%;
+	  min-width: 18ch;          /* nice starting width */
+	  white-space: nowrap;      /* single line */
+	}
+
+	/* hidden mirror used for measuring text width */
+	.input-measure {
+	  position: absolute;
+	  visibility: hidden;
+	  white-space: pre;
+	  font: inherit;
+	  padding: 10px 12px;       /* match .input padding so width matches */
+	  border: 1px solid transparent;
+	}
+
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="header-inner">
+        <div class="logo">
+          <div class="logo"><img src="images/RTKWhite1.png" alt="Rung's Thai Kitchen Logo" /></div>
+          <div><div style="font-weight:800;font-size:20px">Authentic Thai Takeaway</div></div>
+        </div>
+        <nav>
+          <ul>
+            <li><a href="#about">About</a></li>
+            <li><a href="#our-food">Our Food</a></li>
+            <li><a href="#allergens">Allergens</a></li>
+            <li><a href="#menu">Menu</a></li>
+            <li><a href="#order">Order</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <!-- Left column -->
+      <section>
+        <!-- About -->
+        <div class="card" id="about">
+          <h1>About Rung's Thai Kitchen</h1>
+          <p class="muted" style="margin-top:8px">
+            Welcome to Rung's Thai Kitchen, where I take pride in delivering authentic Thai takeaway food right to your doorstep in Leeds. My culinary journey began with a passion for traditional Thai recipes handed down through generations. I believe that the secret to great Thai cuisine lies in using fresh, high-quality ingredients and a careful balance of flavours. Each dish is crafted with love and dedication, ensuring that you experience the vibrant and aromatic taste of Thailand in every bite. Whether you're craving a comforting curry or a refreshing salad, I've got you covered.
+          </p>
+        </div>
+
+        <!-- Our Food -->
+        <div class="card" id="our-food" style="margin-top:14px">
+          <h2 style="margin-bottom:10px">Our Food</h2>
+          <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
+            <div style="flex:1 1 320px;min-width:240px">
+              <p class="muted">
+                At Rung's Thai Kitchen we use fresh, locally sourced ingredients and traditional Thai techniques.
+                Our dishes are prepared to order — bold flavours, balanced spice, and a focus on bright, fresh herbs.
+              </p>
+              <p class="muted" style="margin-top:8px">
+                If you have dietary requirements please mention them when placing your order. We adapt where we can.
+              </p>
+            </div>
+            <div style="flex:1 1 360px;min-width:260px">
+              <div class="food-grid" id="food-grid">
+                <img src="images/SpringRoll.jpg" alt="Spring Rolls" loading="lazy" />
+                <img src="images/Prawns.jpg" alt="Deep Fried Tiger Prawns" loading="lazy" />
+                <img src="images/TomYum.jpg" alt="Tom Yum" loading="lazy" />
+                <img src="images/thaifishcakesjpg.jpg" alt="Thai Fish Cakes" loading="lazy" />
+                <img src="images/somtam.jpg" alt="Papaya salad" loading="lazy" />
+                <img src="images/PrawnCrackers.jpg" alt="Prawn Crackers" loading="lazy" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Allergens -->
+        <div class="card" id="allergens" style="margin-top:14px">
+          <h2 style="margin-bottom:10px">Allergens & Ingredients</h2>
+          <p class="muted">
+            We take food allergies seriously. Many of our dishes can be prepared without certain allergens — please
+            mention any allergies when placing your order. The icons below indicate dishes that contain:
+          </p>
+          <div style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;line-height:1.5">
+            <div><span class="allergen-icon">🥜</span> Peanuts</div>
+            <div><span class="allergen-icon">🌰</span> Tree Nuts</div>
+            <div><span class="allergen-icon">🌾</span> Gluten (Cereals)</div>
+            <div><span class="allergen-icon">🦐</span> Crustaceans (Shellfish)</div>
+            <div><span class="allergen-icon">🦪</span> Molluscs (e.g. squid, mussels)</div>
+            <div><span class="allergen-icon">🥛</span> Milk / Dairy</div>
+            <div><span class="allergen-icon">🍳</span> Egg</div>
+            <div><span class="allergen-icon">🐟</span> Fish</div>
+            <div><span class="allergen-icon">🌿</span> Celery</div>
+            <div><span class="allergen-icon">🌼</span> Lupin</div>
+            <div><span class="allergen-icon">&#x1F331;</span> Mustard</div>
+            <div><span class="allergen-icon">⚫</span> Sesame Seeds</div>
+            <div><span class="allergen-icon">🫘</span> Soya</div>
+            <div><span class="allergen-icon">💨</span> Sulphur Dioxide / Sulphites</div>
+            <div><span class="allergen-icon">🌶️</span> Spice Level (heat indicator)</div>
+          </div>
+        </div>
+
+        <!-- Menu -->
+        <div class="card" id="menu" style="margin-top:14px">
+          <h2 style="margin-bottom:10px">Menu</h2>
+          <div class="menu-section" id="menu-list"><!-- built by JS --></div>
+        </div>
+      </section>
+
+      <!-- Right column: Order -->
+      <aside>
+        <div class="card" id="order-panel">
+          <h2>Your Order</h2>
+          <div id="order-list" class="order-list" style="margin-top:12px">
+            <div class="muted small">No items yet — add something from the menu.</div>
+          </div>
+          <div class="totals" style="margin-top:14px">
+            <div class="muted small">Total</div>
+            <div id="order-total" style="font-weight:800">£0.00</div>
+          </div>
+          <!-- This opens the checkout modal -->
+          <!-- Order panel -->
+			<button id="open-checkout" type="button" class="btn btn-accent" style="width:100%;margin-top:12px">
+			  Proceed to Checkout
+			</button>
+
+          <div id="order-msg" class="muted small" style="margin-top:8px"></div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Footer -->
+    <footer id="contact">
+      <div style="max-width:700px;margin:0 auto">
+        <div style="font-weight:800">Contact Us</div>
+        <div class="muted" style="margin-top:6px">Phone: 01234 567890 &nbsp; • &nbsp; Email: hello@rungsthaikitchen.example</div>
+        <div style="margin-top:10px;font-weight:700">Opening Hours</div>
+        <div class="muted">Mon–Fri: 11:30 – 22:00 • Sat–Sun: 12:00 – 22:30</div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Customize Modal -->
+  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div id="modal-title" style="font-weight:800">Customize</div>
+          <div id="modal-base" class="muted small" style="margin-top:4px" data-price="0">Base price: £0.00</div>
+        </div>
+        <button id="modal-close" class="btn btn-ghost">Close</button>
+      </div>
+
+      <!-- Dish image preview -->
+      <img id="modal-img" alt="" style="margin-top:10px;width:100%;max-height:220px;object-fit:cover;border-radius:10px;display:none">
+
+      <!-- Quantity -->
+      <div style="display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px">
+        <div>
+          <label class="small">Quantity</label>
+          <div class="qty-controls" style="margin-top:6px">
+            <button id="qty-decr" class="btn btn-ghost">-</button>
+            <input id="qty-input" type="number" min="1" value="1" />
+            <button id="qty-incr" class="btn btn-ghost">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modifiers -->
+      <div style="margin-top:12px">
+        <div class="small">Modifiers (protein / extras)</div>
+        <div id="mods" class="mods"></div>
+        <div id="mod-required-note" class="mod-required-note">Please choose at least one option to continue.</div>
+        <div id="mod-limit-note" class="mod-limit-note"></div>
+      </div>
+
+      <!-- Dish allergens (icons + labels) -->
+      <div id="modal-allergens-wrap" style="margin-top:10px;display:none">
+        <div class="small">Allergens in this dish</div>
+        <div id="modal-allergens" class="allergen-badges"></div>
+      </div>
+
+      <!-- Spice selector -->
+      <div id="spice-wrap" class="spice-wrap" style="display:none">
+        <div class="spice-label">Spice level</div>
+        <div id="spice-buttons" class="spice-buttons"></div>
+      </div>
+
+      <div class="totals" style="margin-top:12px">
+        <div class="muted small">Unit price</div>
+        <div id="unit-price" style="font-weight:800">£0.00</div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">
+        <button id="modal-cancel" class="btn btn-ghost">Cancel</button>
+        <button id="modal-add" class="btn btn-accent">Add to basket</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout Modal -->
+	  <div id="checkout-modal" class="modal-backdrop" style="display:none" aria-modal="true" role="dialog">
+		<div class="modal">
+		  <div style="display:flex;justify-content:space-between;align-items:center">
+			<div>
+			  <div style="font-weight:800">Customer details</div>
+			  <div class="muted small" style="margin-top:4px">We’ll save with your order.</div>
+			</div>
+			<button id="checkout-close" class="btn btn-ghost">Close</button>
+		  </div>
+
+		  <form id="checkout-form" class="form-grid">
+	  <div class="field">
+		<label for="cust-name">Full name</label>
+		<input id="cust-name" name="name" type="text" autocomplete="name" required class="input auto-fit">
+	  </div>
+
+	  <div class="row-2">
+		<div class="field">
+		  <label for="cust-email">Email</label>
+		  <input id="cust-email" name="email" type="email" inputmode="email" autocomplete="email" class="input auto-fit">
+		</div>
+		<div class="field">
+		  <label for="cust-phone">Phone</label>
+		  <input id="cust-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required class="input auto-fit">
+		</div>
+	  </div>
+
+
+
+		<!-- ✅ NEW: Order type radios -->
+		<div class="field">
+		  <label for="cust-address">Address (flat/house number, street name & post code please)</label>
+		  <input id="cust-address" name="address" type="text" autocomplete="street-address"
+				 inputmode="text" class="input auto-fit" placeholder="House no., street, town, postcode">
+		</div>
+
+		<!-- ✅ NEW: Order type radios -->
+		<div class="field">
+		  <label>Order type</label>
+		  <div style="display:flex;gap:12px;align-items:center">
+			<label><input type="radio" name="order-type" id="order-type-collection" value="collection" checked> Collection</label>
+			<label><input type="radio" name="order-type" id="order-type-delivery" value="delivery"> Delivery</label>
+		  </div>
+		  <div id="delivery-note" class="muted small" style="margin-top:4px;display:none">
+			Delivery is £3 for orders under £20, free for £20 and above.
+		  </div>
+		</div>
+
+
+
+	  <div class="field">
+		<label for="cust-notes">Notes (optional)</label>
+		<input id="cust-notes" name="notes" type="text" class="input auto-fit"
+			   placeholder="Allergies, delivery instructions, etc.">
+	  </div>
+
+
+        <!-- Totals -->
+        <div class="totals">
+          <div class="muted small">Subtotal</div>
+          <div id="checkout-subtotal" style="font-weight:800">£0.00</div>
+        </div>
+        <div class="totals">
+          <div class="muted small">Delivery Fee</div>
+          <div id="checkout-delivery" style="font-weight:800">£0.00</div>
+        </div>
+        <div class="totals">
+          <div class="muted small">Total</div>
+          <div id="checkout-total" style="font-weight:800">£0.00</div>
+        </div>
+
+
+
+        <div class="checkout-actions" style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px;position:sticky;bottom:0;background:#fff;padding-top:8px">
+          <button type="button" id="checkout-cancel" class="btn btn-ghost">Cancel</button>
+          <button type="submit" id="checkout-submit" class="btn btn-accent">Place order</button>
+        </div>
+        <div id="checkout-msg" class="muted small" style="margin-top:6px"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lightbox for gallery -->
+  <div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;z-index:1500">
+    <img id="lightbox-img" style="max-width:92%;max-height:92%;border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,0.6)" alt="">
+  </div>
+
+  <script>
+    // ---------- Allergen registry (separate peanuts vs tree nuts) ----------
+    // NOTE: Mustard icon uses requested HTML hex &#x1F331;
+    const ALLERGENS = {
+      peanuts:   { icon:'🥜',        label:'Peanuts' },
+      tree_nuts: { icon:'🌰',        label:'Tree Nuts' },
+      gluten:    { icon:'🌾',        label:'Gluten (Cereals)' },
+      shellfish: { icon:'🦐',        label:'Crustaceans (Shellfish)' },
+      molluscs:  { icon:'🦪',        label:'Molluscs' },
+      dairy:     { icon:'🥛',        label:'Milk / Dairy' },
+      egg:       { icon:'🍳',        label:'Egg' },
+      fish:      { icon:'🐟',        label:'Fish' },
+      celery:    { icon:'🌿',        label:'Celery' },
+      lupin:     { icon:'🌼',        label:'Lupin' },
+      mustard:   { icon:'&#x1F331;', label:'Mustard' },
+      sesame:    { icon:'⚫',        label:'Sesame Seeds' },
+      soya:      { icon:'🫘',        label:'Soya' },
+      sulphites: { icon:'💨',        label:'Sulphur Dioxide / Sulphites' },
+      spicy:     { icon:'🌶️',       label:'Spicy (heat)' }
+    };
+    function normalizeAllergens(list){
+      const out = [];
+      (list || []).forEach(k => {
+        if (k === 'nuts') out.push('peanuts','tree_nuts'); else out.push(k);
+      });
+      return [...new Set(out)];
+    }
+    function renderAllergenIconsCompact(list){
+      const normalized = normalizeAllergens(list);
+      if(!normalized.length) return '';
+      const spans = normalized.map(key => {
+        const a = ALLERGENS[key]; if(!a) return '';
+        return `<span class="allergen-icon" title="${a.label}" aria-label="${a.label}">${a.icon}</span>`;
+      }).join(' ');
+      return `<div class="muted small">${spans}</div>`;
+    }
+    function renderAllergenBadges(list){
+      const normalized = normalizeAllergens(list);
+      if(!normalized.length) return '';
+      return normalized.map(key => {
+        const a = ALLERGENS[key]; if(!a) return '';
+        return `<span class="allergen-badge" title="${a.label}" aria-label="${a.label}">
+                 <span class="allergen-icon">${a.icon}</span><span>${a.label}</span>
+               </span>`;
+      }).join('');
+    }
+
+    // ---------- Data ----------
+    const MENU_CATEGORIES = [
+      { id: 'starters', title: 'Starter', items: [
+        { id: 'veg-spring-rolls', name: 'Vegetable Spring Rolls (x4)', desc: 'Crispy, served with sweet chili sauce.', price: 4.50, allergens: ['gluten'] },
+        { id: 'chicken-satay', name: 'Chicken Satay', desc: 'Marinated chicken skewers with peanut sauce.', price: 5.00, allergens: ['peanuts','soya','sesame'] },
+        { id: 'prawn-crackers', name: 'Prawn Crackers', desc: 'Light, crunchy snacks with sweet chilli sauce.', price: 2.50, allergens: ['shellfish','gluten'] },
+        { id: 'moo-ping', name: 'Pork Skewer (Moo Ping)', desc: 'Sweet & savoury grilled pork skewers.', price: 5.00, allergens: [] },
+        { id: 'chicken-spring-rolls', name: 'Chicken Spring Rolls (x4)', desc: 'Crispy rolls with chicken & veg.', price: 5.00, allergens: ['gluten'] },
+        { id: 'fried-tofu', name: 'Deep Fried Tofu', desc: 'Crispy tofu with sweet-spicy peanut sauce.', price: 3.50, allergens: ['soya','peanuts','sesame'] },
+        { id: 'fish-cakes', name: 'Thai Fish Cakes', desc: 'Fragrant, bouncy fish cakes with herbs.', price: 5.00, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','egg','soya'] },
+        { id: 'porkprawn-dumplings', name: 'Pork & Prawn Steamed Dumplings', desc: 'Savory dumplings with pork & prawns.', price: 4.50, allergens: ['gluten','shellfish'] },
+        { id: 'fried-prawns', name: 'Deep Fried Tiger Prawns (x4)', desc: 'Tempura prawns with sweet chilli sauce.', price: 6.00, allergens: ['shellfish','gluten','egg'] },
+        { id: 'thai-sausage', name: 'Thai Pork Sausage', desc: 'Traditional Thai-style sausage with herbs.', price: 5.00, allergens: [] }
+      ]},
+      { id: 'soup', title: 'Soup', items: [
+        { id: 'tom-yum', name: 'Tom Yum Soup 🌶️🌶️', desc: 'Hot & sour broth with lemongrass, galangal, kaffir lime leaves.', price: 6.50, allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'] },
+        { id: 'tom-kha', name: 'Tom Kha🌶️', desc: 'Coconut soup with galangal, lemongrass, kaffir lime.', price: 5.50, allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','dairy'] },
+        { id: 'dumpling-broth', name: 'Chicken Steamed Dumplings Broth (Gaew Naam)', desc: 'Broth with chicken-stuffed wontons.', price: 5.50, allergens: ['gluten','egg','soya'] }
+      ]},
+      { id: 'salad', title: 'Salad', items: [
+        { id: 'papaya-salad', name: 'Green Papaya Salad (Som Tam)🌶️🌶️🌶️', desc: 'Shredded papaya, lime, chillies, peanuts.', price: 7.00, spiceEnabled: true, spiceDefault: 3, allergens: ['peanuts','fish','soya'] },
+        { id: 'beef-salad', name: 'Spicy Beef Salad (Yum Nuea)🌶️🌶️', desc: 'Steak, herbs, tangy lime-fish sauce dressing.', price: 9.00, spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'] },
+        { id: 'pork-salad', name: 'Grilled Pork Salad (Nam Tok)🌶️', desc: 'Charred pork, lime, fish sauce, rice powder.', price: 8.50, spiceEnabled: true, spiceDefault: 1, allergens: ['fish'] },
+        { id: 'laab', name: 'Laab🌶️🌶️', desc: 'Vibrant meat salad with spice & herbs.', price: 8.00, spiceEnabled: true, spiceDefault: 2, allergens: ['fish'] }
+      ]},
+      { id: 'curry', title: 'Curry', items: [
+        { id: 'rung-curry', name: 'Chefs Special Rainbow Curry🌶️', desc: 'Rich, mildly spiced curry.', price: 9.50, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','soya'] },
+        { id: 'green-curry', name: 'Green Curry🌶️🌶️', desc: 'Creamy coconut curry with green chilli paste.', price: 9.50, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2, img: 'images/greencurry.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'] },
+        { id: 'red-curry', name: 'Red Curry🌶️', desc: 'Coconut milk, red curry paste, Thai basil.', price: 9.50, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','soya'] },
+        { id: 'massaman-curry', name: 'Massaman Curry', desc: 'Mild curry with potatoes, onions, peanuts.', price: 9.50, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, spiceEnabled: true, spiceDefault: 0, allergens: ['peanuts','fish','soya'] },
+        { id: 'panang-curry', name: 'Panang Curry🌶️', desc: 'Thick, savory-sweet red curry with lime.', price: 9.50, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','soya'] }
+      ]},
+      { id: 'stir-fry', title: 'Stir Fry', items: [
+        { id: 'stir-basil', name: 'Stir Fried Chilli & Basil (Pad Kra Pao)🌶️🌶️', desc: 'Street food classic with holy basil.', price: 8.50, allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn','fried-egg' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 2, allergens: ['soya'] },
+        { id: 'stir-ginger', name: 'Stir Fried Ginger (Pad Khing)🌶️', desc: 'Zesty ginger-forward stir fry.', price: 8.50, allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['soya'] },
+        { id: 'stir-cashew', name: 'Stir Fried Cashew Nuts', desc: 'Chicken, cashews, veg, savory-sweet sauce.', price: 8.50, allowedModifiers: ['batter-chicken','tofu' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['tree_nuts','soya','sesame'] },
+        { id: 'stir-sweetsour', name: 'Sweet & Sour (Pad Priew Wan)', desc: 'Veg, pineapple, peppers, onions, tomatoes.', price: 8.50, allowedModifiers: ['batter-chicken','tofu' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 0, allergens: ['soya'] },
+        { id: 'stir-yellow', name: 'Stir Fried Yellow Curry (Pad Pong Karee)', desc: 'Mild yellow curry stir-fry.', price: 8.50, allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','soya','mustard'] },
+        { id: 'stir-chilli', name: 'Stir Fried Chilli Paste (Pad Nam Prik Pao)🌶️🌶️', desc: 'Roasted chilli paste sauce.', price: 8.50, allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 2, allergens: ['soya'] },
+        { id: 'stir-pepper', name: 'Stir Fried Black Pepper Sauce', desc: 'Aromatic black pepper sauce.', price: 7.50, allowedModifiers: ['batter-chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['soya'] }
+      ]},
+      { id: 'noodles', title: 'Noodles & Rice', items: [
+        { id: 'chef-pad-thai', name: 'Chefs Special Pad Thai🌶️', desc: 'Rice noodles, tamarind, egg, bean sprouts.', price: 8.50, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','fish','soya','peanuts'] },
+        { id: 'pad-thai', name: 'Pad Thai', desc: 'Rice noodles, tamarind sauce, egg, bean sprouts.', price: 8.50, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','fish','soya','peanuts'] },
+        { id: 'pad-see-ew', name: 'Thai Stir Fried Noodles (Pad See Ew)', desc: 'Wide rice noodles, Chinese broccoli, egg.', price: 8.50, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya'] },
+        { id: 'fried-rice', name: 'Thai Special Fried Rice (Khao Pad)', desc: 'Aromatic jasmine rice, classic seasoning.', price: 7.50, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya'] }
+      ]},
+      { id: 'sides', title: 'Side Dishes', items: [
+        { id: 'jasmine-rice', name: 'Jasmine Rice (Khao Suay)', desc: 'Fragrant, long-grain rice.', price: 2.00, allergens: [] },
+        { id: 'egg-rice', name: 'Egg Fried Rice (Khao Pad Khai)', desc: 'Rice with egg, simple & comforting.', price: 2.50, allergens: ['egg','soya'] },
+        { id: 'sticky-rice', name: 'Sticky Rice (Khao Neow)', desc: 'Perfect sticky jasmine rice.', price: 2.50, allergens: [] },
+        { id: 'coconut-ricee', name: 'Coconut Rice (Khao Man)', desc: 'Jasmine rice simmered in coconut milk.', price: 0.50, allergens: ['dairy'] }
+      ]}
+    ];
+
+    const MODIFIERS = [
+      { id: 'chicken', name: 'Chicken', delta: 0.00 },
+      { id: 'beef', name: 'Beef', delta: 1.00 },
+      { id: 'pork', name: 'Pork', delta: 0.75 },
+      { id: 'tofu', name: 'Tofu', delta: 0.00 },
+      { id: 'prawn', name: 'Prawn', delta: 1.50 },
+      { id: 'vegetable', name: 'Vegetable', delta: 0.00 },
+      { id: 'fried-egg', name: 'Fried Egg', delta: 1.00 },
+      { id: 'batter-chicken', name: 'Battered Chicken', delta: 1.00 }
+    ];
+
+    // ---------- State ----------
+    let basket = []; // { name, itemId, mods:[{id,name,delta}], unitPrice, qty, img, spice }
+    const ITEMS_BY_ID = new Map();
+
+    // ---------- Helpers ----------
+    function formatCurrency(n){ const cents = Math.round((n + Number.EPSILON) * 100); return '£' + (cents/100).toFixed(2); }
+    function roundToTwo(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
+    function chilliIcons(n){ return '🌶️'.repeat(Math.max(0, Math.min(3, n||0))); }
+
+    // ---------- Build menu (accordion categories) ----------
+    function buildMenu(){
+      const container = document.getElementById('menu-list');
+      container.innerHTML = '';
+
+      MENU_CATEGORIES.forEach(cat => {
+        const catEl = document.createElement('div'); catEl.className = 'category';
+        const header = document.createElement('div'); header.className = 'category-header';
+        header.innerHTML = `<h3>${cat.title}</h3><div class="caret">▶</div>`;
+        const body = document.createElement('div'); body.className = 'category-body';
+
+        cat.items.forEach(item => {
+          ITEMS_BY_ID.set(item.id, item);
+
+          const el = document.createElement('div'); el.className = 'menu-item';
+          el.dataset.id = item.id;
+          el.dataset.price = item.price;
+          if (item.allowedModifiers) el.dataset.allowedModifiers = item.allowedModifiers.join(',');
+          if (item.modifierRequired) el.dataset.modifierRequired = 'true';
+          if (item.modifiersMulti) el.dataset.modifiersMulti = 'true';
+          if (item.modifierMax) el.dataset.modifierMax = String(item.modifierMax);
+          if (item.img) el.dataset.img = item.img;
+          if (item.spiceEnabled) el.dataset.spiceEnabled = 'true';
+          if (typeof item.spiceDefault === 'number') el.dataset.spiceDefault = String(item.spiceDefault);
+
+          const allergenHTML = renderAllergenIconsCompact(item.allergens || []);
+
+          el.innerHTML = `
+            <div class="meta">
+              <div class="title">${item.name}</div>
+              <div class="muted small">${item.desc || ''}</div>
+              ${allergenHTML}
+            </div>
+            <div style="text-align:right">
+              <div class="price">${formatCurrency(item.price)}</div>
+              <div style="margin-top:8px">
+                <button class="btn btn-accent" data-id="${item.id}">Customize</button>
+              </div>
+            </div>
+          `;
+          body.appendChild(el);
+        });
+
+        // Accordion behavior (one open at a time)
+        header.addEventListener('click', ()=> {
+          const wasOpen = body.classList.contains('open');
+          document.querySelectorAll('.category-body').forEach(b => {
+            b.classList.remove('open');
+            const caret = b.previousElementSibling?.querySelector('.caret');
+            if (caret) caret.textContent = '▶';
+          });
+          if(!wasOpen){
+            body.classList.add('open');
+            const caret = header.querySelector('.caret'); if(caret) caret.textContent = '▼';
+          }
+        });
+
+        catEl.appendChild(header);
+        catEl.appendChild(body);
+        container.appendChild(catEl);
+      });
+    }
+
+    // ---------- Order rendering ----------
+    const orderListEl = document.getElementById('order-list');
+    const orderTotalEl = document.getElementById('order-total');
+
+    function renderOrder(){
+      orderListEl.innerHTML = '';
+      if(basket.length === 0){
+        orderListEl.innerHTML = '<div class="muted small">No items yet — add something from the menu.</div>';
+        orderTotalEl.textContent = formatCurrency(0);
+        return;
+      }
+      basket.forEach((row, idx) => {
+        const r = document.createElement('div'); r.className = 'order-row';
+
+        const leftWrap = document.createElement('div');
+        leftWrap.style.display = 'flex';
+        leftWrap.style.alignItems = 'center';
+        leftWrap.style.gap = '10px';
+
+        const img = document.createElement('img');
+        img.className = 'item-thumb';
+        img.alt = row.name;
+        img.loading = 'lazy';
+        img.src = (row.img && row.img.trim())
+          ? row.img
+          : 'data:image/svg+xml;utf8,' + encodeURIComponent(
+              `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">
+                 <rect width="100%" height="100%" fill="#f1f1f1"/>
+                 <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle"
+                       font-family="sans-serif" font-size="12" fill="#999">No image</text>
+               </svg>`
+            );
+
+        const modsText = row.mods && row.mods.length ? (' • ' + row.mods.map(m=>m.name).join(', ')) : '';
+        const spiceText = (typeof row.spice === 'number') ? (` ${chilliIcons(row.spice)}`) : '';
+
+        const text = document.createElement('div');
+        text.innerHTML = `
+          <div style="font-weight:700">${row.name}
+            <span class="muted small">${modsText}</span>
+            <span>${spiceText}</span>
+          </div>
+          <div class="muted small">Unit: ${formatCurrency(row.unitPrice)}</div>
+        `;
+
+        const right = document.createElement('div'); right.style.textAlign='right';
+        right.innerHTML = `
+          <div style="font-weight:800">${formatCurrency(roundToTwo(row.unitPrice * row.qty))}</div>
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center;justify-content:flex-end">
+            <button class="btn btn-ghost" data-action="dec" data-idx="${idx}">-</button>
+            <div class="muted">${row.qty}</div>
+            <button class="btn btn-ghost" data-action="inc" data-idx="${idx}">+</button>
+            <button class="btn" style="background:transparent;color:#b02a2a;border:none;padding:6px 8px" data-action="remove" data-idx="${idx}">Remove</button>
+          </div>`;
+
+        leftWrap.appendChild(img);
+        leftWrap.appendChild(text);
+        r.appendChild(leftWrap);
+        r.appendChild(right);
+        orderListEl.appendChild(r);
+      });
+      const total = basket.reduce((s, i) => s + i.unitPrice * i.qty, 0);
+      orderTotalEl.textContent = formatCurrency(roundToTwo(total));
+    }
+
+    // ---------- Modal (Customize) ----------
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBase = document.getElementById('modal-base');
+    const qtyInput = document.getElementById('qty-input');
+    const qtyIncr = document.getElementById('qty-incr');
+    const qtyDecr = document.getElementById('qty-decr');
+    const modsEl = document.getElementById('mods');
+    const unitPriceEl = document.getElementById('unit-price');
+    const modalClose = document.getElementById('modal-close');
+    const modalCancel = document.getElementById('modal-cancel');
+    const modalAdd = document.getElementById('modal-add');
+    const modalImg = document.getElementById('modal-img');
+    const modRequiredNote = document.getElementById('mod-required-note');
+    const modLimitNote = document.getElementById('mod-limit-note');
+    const modalAllWrap = document.getElementById('modal-allergens-wrap');
+    const modalAll = document.getElementById('modal-allergens');
+
+    const spiceWrap = document.getElementById('spice-wrap');
+    const spiceButtons = document.getElementById('spice-buttons');
+
+    let currentItem = null;
+    let selectedMods = new Set();
+    let currentAllowedMods = null;
+    let currentRequires = false;
+    let currentMulti = false;
+    let currentMax = null;
+    let currentSpice = null; // 0..3 or null
+
+    function buildModifierChips(allowed, required=false, multi=false, max=null){
+      modsEl.innerHTML = '';
+      selectedMods.clear();
+      currentAllowedMods = Array.isArray(allowed) && allowed.length ? allowed.slice() : null;
+      currentRequires = !!required;
+      currentMulti = !!multi || (typeof max === 'number' && max > 0);
+      currentMax = (typeof max === 'number' && max > 0) ? max : null;
+
+      if(currentRequires && currentAllowedMods){ modRequiredNote.style.display = 'block'; modalAdd.disabled = true; }
+      else { modRequiredNote.style.display = 'none'; modalAdd.disabled = false; }
+
+      if(currentMulti && currentMax){ modLimitNote.style.display = 'block'; modLimitNote.textContent = `Choose up to ${currentMax} options`; }
+      else { modLimitNote.style.display = 'none'; }
+
+      if(!currentAllowedMods){ modsEl.style.display = 'none'; return; }
+      modsEl.style.display = 'flex';
+
+      MODIFIERS.forEach(m => {
+        if(!currentAllowedMods.includes(m.id)) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'chip';
+        btn.innerHTML = `${m.name}${m.delta ? ` (+${formatCurrency(m.delta)})` : ''}`;
+        btn.dataset.id = m.id;
+
+        btn.addEventListener('click', () => {
+          if(currentMulti){
+            if(selectedMods.has(m.id)){
+              selectedMods.delete(m.id);
+              btn.classList.remove('selected');
+            } else {
+              if(currentMax && selectedMods.size >= currentMax){
+                btn.animate([{transform:'translateY(-2px)'},{transform:'translateY(0)'}],{duration:140});
+                return;
+              }
+              selectedMods.add(m.id);
+              btn.classList.add('selected');
+            }
+            if(currentRequires) modalAdd.disabled = (selectedMods.size === 0);
+            if(currentMax && currentMulti){ modLimitNote.textContent = `Selected ${selectedMods.size}/${currentMax}`; }
+          } else {
+            if(selectedMods.has(m.id)){
+              selectedMods.delete(m.id);
+              btn.classList.remove('selected');
+            } else {
+              selectedMods.clear();
+              modsEl.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
+              selectedMods.add(m.id);
+              btn.classList.add('selected');
+            }
+            if(currentRequires) modalAdd.disabled = (selectedMods.size === 0);
+          }
+          updateUnitPricePreview();
+        });
+
+        modsEl.appendChild(btn);
+      });
+    }
+
+    function buildSpiceSelector(enabled, defaultLevel=0){
+      if(!enabled){
+        spiceWrap.style.display = 'none';
+        spiceButtons.innerHTML = '';
+        currentSpice = null;
+        return;
+      }
+      spiceWrap.style.display = 'block';
+      spiceButtons.innerHTML = '';
+      currentSpice = Math.max(0, Math.min(3, Number(defaultLevel)||0));
+
+      const labels = [
+        {v:0, text:'No spice'},
+        {v:1, text:'Mild 🌶️'},
+        {v:2, text:'Medium 🌶️🌶️'},
+        {v:3, text:'Very spicy 🌶️🌶️🌶️'}
+      ];
+      labels.forEach(l=>{
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'spice-btn' + (l.v===currentSpice ? ' active':'');
+        b.textContent = l.text;
+        b.setAttribute('aria-pressed', l.v===currentSpice ? 'true':'false');
+        b.addEventListener('click', ()=>{
+          currentSpice = l.v;
+          [...spiceButtons.querySelectorAll('.spice-btn')].forEach(x=>{
+            x.classList.remove('active'); x.setAttribute('aria-pressed','false');
+          });
+          b.classList.add('active'); b.setAttribute('aria-pressed','true');
+        });
+        spiceButtons.appendChild(b);
+      });
+    }
+
+    function closeModal(){
+      modal.style.display = 'none';
+      currentItem = null;
+      selectedMods.clear();
+      currentAllowedMods = null;
+      if (modalImg){ modalImg.removeAttribute('src'); modalImg.style.display = 'none'; }
+      buildSpiceSelector(false);
+    }
+
+    function updateUnitPricePreview(){
+      if(!currentItem) return;
+      const base = Number(modalBase.dataset.price) || 0;
+      let modsTotal = 0;
+      selectedMods.forEach(id => {
+        if(!currentAllowedMods || !currentAllowedMods.includes(id)) return;
+        const m = MODIFIERS.find(x => x.id === id);
+        if(m){ modsTotal += m.delta; }
+      });
+      const unit = roundToTwo(base + modsTotal);
+      unitPriceEl.textContent = formatCurrency(unit);
+    }
+
+    function openCustomize(itemId){
+      const found = ITEMS_BY_ID.get(itemId);
+      if(!found) return;
+      currentItem = found;
+
+      const allowed = Array.isArray(found.allowedModifiers) ? found.allowedModifiers : null;
+      const requiresModifier = !!found.modifierRequired;
+      const isMulti = !!found.modifiersMulti || (typeof found.modifierMax === 'number' && found.modifierMax > 0);
+      const max = (typeof found.modifierMax === 'number' && found.modifierMax > 0) ? found.modifierMax : null;
+
+      buildModifierChips(allowed, requiresModifier, isMulti, max);
+
+      modalTitle.textContent = `Customize — ${found.name}`;
+      modalBase.dataset.price = found.price;
+      modalBase.textContent = `Base price: ${formatCurrency(found.price)}`;
+      qtyInput.value = 1;
+      updateUnitPricePreview();
+
+      if (modalImg) {
+        if (found.img) { modalImg.src = found.img; modalImg.style.display = 'block'; }
+        else { modalImg.removeAttribute('src'); modalImg.style.display = 'none'; }
+      }
+
+      // Allergens in modal
+      if (found.allergens && found.allergens.length) {
+        modalAll.innerHTML = renderAllergenBadges(found.allergens);
+        modalAllWrap.style.display = 'block';
+      } else {
+        modalAll.innerHTML = '';
+        modalAllWrap.style.display = 'none';
+      }
+
+      // Spice
+      buildSpiceSelector(!!found.spiceEnabled, typeof found.spiceDefault==='number'?found.spiceDefault:0);
+
+      modal.style.display = 'flex';
+    }
+
+    document.getElementById('qty-incr').addEventListener('click', ()=>{ qtyInput.value = Math.max(1, parseInt(qtyInput.value || '1') + 1); });
+    document.getElementById('qty-decr').addEventListener('click', ()=>{ qtyInput.value = Math.max(1, parseInt(qtyInput.value || '1') - 1); });
+
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', (ev) => { if(ev.target === modal) closeModal(); });
+
+    document.getElementById('modal-add').addEventListener('click', ()=>{
+      if(!currentItem) return;
+
+      if(currentItem.modifierRequired && selectedMods.size === 0){
+        modRequiredNote.style.display = 'block';
+        modsEl.scrollIntoView({behavior:'smooth', block:'center'});
+        return;
+      }
+      if(currentMulti && currentMax && selectedMods.size > currentMax){
+        return;
+      }
+
+      const base = Number(modalBase.dataset.price) || 0;
+      const modsArr = []; let modsTotal = 0;
+      selectedMods.forEach(id => {
+        if(!currentAllowedMods || !currentAllowedMods.includes(id)) return;
+        const m = MODIFIERS.find(x => x.id === id);
+        if(m){ modsTotal += m.delta; modsArr.push(m); }
+      });
+      const unitPrice = roundToTwo(base + modsTotal);
+      const qty = Math.max(1, parseInt(qtyInput.value || '1'));
+
+      basket.push({
+        name: currentItem.name,
+        itemId: currentItem.id,
+        mods: modsArr,
+        unitPrice,
+        qty,
+        img: currentItem.img || '',
+        spice: currentSpice // 0..3 or null
+      });
+      closeModal();
+      renderOrder();
+    });
+
+    // open customize on menu buttons (delegation)
+    document.getElementById('menu-list').addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if(!btn || !btn.dataset.id) return;
+      openCustomize(btn.dataset.id);
+    });
+
+    // order panel event delegation
+    document.getElementById('order-panel').addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if(!btn) return;
+      const action = btn.dataset.action;
+      const idx = Number(btn.dataset.idx);
+      if(action === 'inc'){ basket[idx].qty += 1; renderOrder(); }
+      if(action === 'dec'){ basket[idx].qty = Math.max(1, basket[idx].qty - 1); renderOrder(); }
+      if(action === 'remove'){ basket.splice(idx, 1); renderOrder(); }
+    });
+
+    // Lightbox
+    document.querySelectorAll('#food-grid img').forEach(img => {
+      img.addEventListener('click', ()=> {
+        const lb = document.getElementById('lightbox');
+        const lbImg = document.getElementById('lightbox-img');
+        lbImg.src = img.src || '';
+        lb.style.display = 'flex';
+      });
+    });
+    document.getElementById('lightbox').addEventListener('click', (e) => {
+      if(e.target.id === 'lightbox' || e.target.id === 'lightbox-img') e.currentTarget.style.display = 'none';
+    });
+
+    // Escape closes modal
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape' && modal.style.display === 'flex') closeModal();
+      if(e.key === 'Escape' && checkoutModal.style.display === 'flex') closeCheckout();
+    });
+
+    // Build & first render
+    buildMenu();
+    renderOrder();
+  </script>
+
+  <!-- Supabase JS (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Init Supabase
+    const SUPABASE_URL = 'https://ubyjrrsvbbqomitpaidb.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVieWpycnN2YmJxb21pdHBhaWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NTYyNjMsImV4cCI6MjA3NjUzMjI2M30.WTllxO5KnaMI0i1d4VHNBhjLuRMfu4_Xx5arqZmYevw';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Checkout modal helpers
+    const checkoutModal = document.getElementById('checkout-modal');
+    const checkoutClose = document.getElementById('checkout-close');
+    const checkoutCancel = document.getElementById('checkout-cancel');
+    const checkoutForm = document.getElementById('checkout-form');
+    const checkoutMsg = document.getElementById('checkout-msg');
+    const checkoutSubtotalEl = document.getElementById('checkout-subtotal');
+    const checkoutDeliveryEl = document.getElementById('checkout-delivery');
+    const checkoutTotalEl = document.getElementById('checkout-total');
+    const deliveryNote = document.getElementById('delivery-note');
+    const orderMsg = document.getElementById('order-msg');
+    const openCheckoutBtn = document.getElementById('open-checkout');
+
+    const orderTypeRadios = document.querySelectorAll('input[name="order-type"]');
+    let checkoutBaseSubtotal = 0; // set when opening modal
+
+    function calcDeliveryFee(subtotal, orderType){
+      if(orderType !== 'delivery') return 0;
+      return subtotal < 20 ? 3 : 0;
+    }
+    function recomputeCheckoutTotals(){
+      const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+      const fee = calcDeliveryFee(checkoutBaseSubtotal, orderType);
+      const total = checkoutBaseSubtotal + fee;
+      deliveryNote.style.display = (orderType === 'delivery') ? 'block' : 'none';
+      checkoutSubtotalEl.textContent = formatCurrency(checkoutBaseSubtotal);
+      checkoutDeliveryEl.textContent = formatCurrency(fee);
+      checkoutTotalEl.textContent = formatCurrency(total);
+    }
+    orderTypeRadios.forEach(r => r.addEventListener('change', recomputeCheckoutTotals));
+
+    function openCheckout(subtotal){
+      checkoutBaseSubtotal = Math.round(subtotal*100)/100;
+      checkoutMsg.textContent = '';
+      // reset to default selection (collection) each time
+      document.querySelector('input[name="order-type"][value="collection"]').checked = true;
+      recomputeCheckoutTotals();
+      checkoutModal.style.display = 'flex';
+    }
+    function closeCheckout(){ checkoutModal.style.display = 'none'; }
+    checkoutClose.addEventListener('click', closeCheckout);
+    checkoutCancel.addEventListener('click', closeCheckout);
+    checkoutModal.addEventListener('click', (e)=>{ if(e.target === checkoutModal) closeCheckout(); });
+
+    // Open checkout from order panel
+    openCheckoutBtn.addEventListener('click', ()=>{
+      if(basket.length === 0){
+        orderMsg.textContent = 'Your basket is empty.'; orderMsg.style.color = '#b02a2a';
+        return;
+      }
+      orderMsg.textContent = '';
+      const subtotal = basket.reduce((s,i)=> s + i.unitPrice * i.qty, 0);
+      openCheckout(subtotal);
+    });
+
+    // Submit checkout → Supabase
+    checkoutForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      checkoutMsg.style.color = ''; checkoutMsg.textContent = 'Placing order…';
+
+      const name = document.getElementById('cust-name').value.trim();
+      const email = document.getElementById('cust-email').value.trim() || null;
+      const phone = document.getElementById('cust-phone').value.trim() || null;
+      const address = document.getElementById('cust-address').value.trim() || null;
+      const notes = document.getElementById('cust-notes').value.trim() || null;
+
+      if(!name){ checkoutMsg.style.color = '#b02a2a'; checkoutMsg.textContent = 'Please enter your name.'; return; }
+
+      function fail(step, err){
+        console.error(`[Checkout] ${step} failed:`, err);
+        checkoutMsg.style.color = '#b02a2a';
+        checkoutMsg.textContent = `${step} failed: ${err?.message || err?.hint || 'Unknown error'}`;
+      }
+
+      try {
+        // Insert or find customer
+        let customerId = null;
+
+        if(email){
+          const { data, error } = await supabase
+            .from('customers')
+            .insert([{ full_name: name, email, phone, address }])
+            .select('id')
+            .single();
+          if(error && error.code !== '23505') return fail('Create customer', error);
+          customerId = data?.id ?? null;
+
+          if(!customerId){
+            const { data: found, error: e2 } = await supabase
+              .from('customers')
+              .select('id')
+              .ilike('email', email)
+              .limit(1)
+              .maybeSingle();
+            if(e2) return fail('Find existing customer', e2);
+            customerId = found?.id ?? null;
+          }
+        } else if (phone){
+          const { data, error } = await supabase
+            .from('customers')
+            .insert([{ full_name: name, phone, address }])
+            .select('id')
+            .single();
+          if(error && error.code !== '23505') return fail('Create customer', error);
+          customerId = data?.id ?? null;
+
+          if(!customerId){
+            const { data: found, error: e2 } = await supabase
+              .from('customers')
+              .select('id')
+              .eq('phone', phone)
+              .limit(1)
+              .maybeSingle();
+            if(e2) return fail('Find existing customer', e2);
+            customerId = found?.id ?? null;
+          }
+        } else {
+          const { data, error } = await supabase
+            .from('customers')
+            .insert([{ full_name: name, address }])
+            .select('id')
+            .single();
+          if(error) return fail('Create customer', error);
+          customerId = data.id;
+        }
+
+        // Compute delivery details
+        const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+        const subtotal = checkoutBaseSubtotal;
+        const deliveryFee = (orderType === 'delivery') ? (subtotal < 20 ? 3.00 : 0.00) : 0.00;
+
+        // Create order
+        const { data: order, error: e6 } = await supabase
+          .from('orders')
+          .insert([{
+            customer_id: customerId,
+            subtotal: Number(subtotal.toFixed(2)),
+            delivery_fee: Number(deliveryFee.toFixed(2)),
+            order_type: orderType,
+            notes
+          }])
+          .select('id')
+          .single();
+        if(e6) return fail('Create order', e6);
+
+        // Create order_items
+        const rows = basket.map(line => ({
+          order_id: order.id,
+          item_id: line.itemId,
+          name: line.name,
+          unit_price: Number(line.unitPrice.toFixed(2)),
+          qty: line.qty,
+          modifiers: (line.mods ?? []).map(m => ({ id: m.id, name: m.name, delta: m.delta })),
+          spice: (typeof line.spice === 'number') ? line.spice : null,
+          img: line.img || null
+        }));
+        const { error: e7 } = await supabase.from('order_items').insert(rows);
+        if(e7) return fail('Add order items', e7);
+
+        checkoutMsg.style.color = 'green';
+        checkoutMsg.textContent = 'Order placed! Thank you.';
+        basket = [];
+        renderOrder();
+        setTimeout(()=>{ closeCheckout(); }, 900);
+		} catch (err){
+		  fail('Unexpected error', err);
+		}
+		});
+		</script>   <!-- ✅ properly close the first script -->
+
+	<script>
+  // Auto-fit any input with .auto-fit by measuring its content
+  (function setupAutoFitInputs(){
+    const form = document.getElementById('checkout-form');
+    if(!form) return;
+
+    // Create a hidden measuring span
+    const measurer = document.createElement('span');
+    measurer.className = 'input-measure';
+    document.body.appendChild(measurer);
+
+    function fit(el){
+      // Use placeholder when empty so it doesn't collapse
+      const text = el.value || el.placeholder || '';
+      measurer.style.font = getComputedStyle(el).font;
+      measurer.style.padding = getComputedStyle(el).padding;
+      measurer.textContent = text + ' ';
+      // Add 2ch breathing room, but never exceed container width
+      const px = measurer.getBoundingClientRect().width;
+      el.style.width = Math.min(px + 4, el.parentElement.getBoundingClientRect().width) + 'px';
+    }
+
+    function init(el){
+      // Start with a sensible width (min 18ch via CSS), then fit
+      fit(el);
+      ['input','change'].forEach(evt => el.addEventListener(evt, () => fit(el)));
+      // Re-fit on window resize (container may change)
+      window.addEventListener('resize', () => fit(el));
+    }
+
+    form.querySelectorAll('input.auto-fit').forEach(init);
+  })();
+  document.addEventListener('click', (e)=>{
+  const btn = e.target.closest('#open-checkout');
+  if (!btn) return;
+  e.preventDefault();
+  if (basket.length === 0) {
+    orderMsg.textContent = 'Your basket is empty.';
+    orderMsg.style.color = '#b02a2a';
+    return;
+  }
+  orderMsg.textContent = '';
+  const subtotal = basket.reduce((s,i)=> s + i.unitPrice * i.qty, 0);
+  openCheckout(subtotal);
+});
+
+</script>
+</body>
+</html>
