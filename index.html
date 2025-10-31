@@ -48,6 +48,40 @@
     .btn-accent{background:var(--accent);color:white;border:none}
     .btn-ghost{background:transparent;border:1px solid #eee}
     .btn[disabled]{opacity:.55;cursor:not-allowed;filter:grayscale(10%)}
+	
+	body {
+  background: #16205B;
+background: linear-gradient(90deg,rgba(204, 12, 26, 1) 0%, rgba(255, 255, 255, 1) 50%, rgba(22, 32, 91, 1) 100%);
+	}
+
+	header {
+	  background: rgba(255,255,255,0.95);
+	  backdrop-filter: blur(8px);
+	}
+
+	.menu-item {
+	  background: rgba(255,255,255,0.85);
+	  transition: transform .12s ease, box-shadow .12s ease;
+	}
+	.menu-item:hover {
+	  transform: translateY(-2px);
+	  box-shadow: 0 4px 16px rgba(217,70,74,0.08);
+	}
+
+	.btn-accent {
+	  background: linear-gradient(135deg, #d9464a 0%, #b02a2a 100%);
+	  box-shadow: 0 6px 16px rgba(217,70,74,0.35);
+	}
+
+	#menu h2 {
+	  display:flex;
+	  align-items:center;
+	  gap:6px;
+	}
+	#menu h2::after {
+	  content:'🍜';
+	}
+
 
     /* Menu categories (accordion) */
     .menu-section{display:grid;gap:12px}
@@ -76,7 +110,7 @@
     .food-grid img{width:100%;height:140px;object-fit:cover;border-radius:8px;box-shadow:0 6px 16px rgba(15,23,42,0.06);cursor:pointer}
     .food-grid img:hover{transform:translateY(-4px);transition:transform .18s ease,box-shadow .18s ease}
 
-    /* Modal (customize & checkout & success) */
+    /* Modal (customise & checkout & success) */
     .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:1200; overflow:auto; -webkit-overflow-scrolling:touch}
     .modal{width:100%;max-width:720px;background:var(--card);border-radius:12px;padding:16px;box-shadow:0 12px 40px rgba(0,0,0,0.25); max-height:90vh; overflow:auto}
     .mods{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
@@ -167,6 +201,24 @@
     width: 100%;
     margin-top: 20px;
   }
+
+	  #order-success .order-line {
+	  display:flex;
+	  justify-content:space-between;
+	  gap:12px;
+	  align-items:flex-start;
+	}
+		#order-success .order-line-left {
+		  display:flex;
+		  flex-wrap:wrap;
+		  gap:4px;
+		  align-items:cente
+		}
+		#order-success .spice {
+		  display:inline-block;
+		  min-width:3.2rem; /* keeps 🌶️ from jumping */
+		}
+
 
   /* menu items: full width on mobile */
   .menu-item {
@@ -291,19 +343,19 @@
     <footer id="contact">
       <div style="max-width:700px;margin:0 auto">
         <div style="font-weight:800">Contact Us</div>
-        <div class="muted" style="margin-top:6px">Phone: 0113 3447431 &nbsp; • &nbsp; Email: hello@rungsthaikitchen.example</div>
+        <div class="muted" style="margin-top:6px">Phone: 0113 3447431 &nbsp; • &nbsp; Email: hello@rungsthaikitchen.co.uk</div>
         <div style="margin-top:10px;font-weight:700">Opening Hours</div>
         <div class="muted">Wed–Sun: 17:00 – 21:00</div>
       </div>
     </footer>
   </div>
 
-  <!-- Customize Modal -->
+  <!-- customise Modal -->
   <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
-          <div id="modal-title" style="font-weight:800">Customize</div>
+          <div id="modal-title" style="font-weight:800">customise</div>
           <div id="modal-base" class="muted small" style="margin-top:4px" data-price="0">Base price: £0.00</div>
         </div>
         <button id="modal-close" class="btn btn-ghost">Close</button>
@@ -452,8 +504,10 @@
     </div>
 
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
-      <button id="order-success-close" class="btn btn-accent" type="button">OK</button>
-    </div>
+	  <button id="order-success-pdf" class="btn btn-ghost" type="button">Download receipt</button>
+	  <button id="order-success-close" class="btn btn-accent" type="button">OK</button>
+	</div>
+
   </div>
 </div>
 
@@ -627,7 +681,7 @@
             <div style="text-align:right">
               <div class="price">${formatCurrency(item.price)}</div>
               <div style="margin-top:8px">
-                <button class="btn btn-accent" data-id="${item.id}">Customize</button>
+                <button class="btn btn-accent" data-id="${item.id}">customise</button>
               </div>
             </div>
           `;
@@ -737,7 +791,7 @@
 		}
 
 
-    // ---------- Modal (Customize) ----------
+    // ---------- Modal (customise) ----------
     const modal = document.getElementById('modal');
     const modalTitle = document.getElementById('modal-title');
     const modalBase = document.getElementById('modal-base');
@@ -932,6 +986,7 @@
 		);
 		return;
 	  }
+	  
 
 	  // Fallback if the new function isn’t there
 	  alert(
@@ -1008,7 +1063,7 @@
       unitPriceEl.textContent = formatCurrency(unit);
     }
 
-    function openCustomize(itemId){
+    function opencustomise(itemId){
       const found = ITEMS_BY_ID.get(itemId);
       if(!found) return;
       currentItem = found;
@@ -1020,7 +1075,7 @@
 
       buildModifierChips(allowed, requiresModifier, isMulti, max);
 
-      modalTitle.textContent = `Customize — ${found.name}`;
+      modalTitle.textContent = `customise — ${found.name}`;
       modalBase.dataset.price = found.price;
       modalBase.textContent = `Base price: ${formatCurrency(found.price)}`;
       qtyInput.value = 1;
@@ -1087,7 +1142,7 @@
     document.getElementById('menu-list').addEventListener('click', e => {
       const btn = e.target.closest('button');
       if(!btn || !btn.dataset.id) return;
-      openCustomize(btn.dataset.id);
+      opencustomise(btn.dataset.id);
     });
     document.getElementById('order-panel').addEventListener('click', e => {
       const btn = e.target.closest('button');
@@ -1243,66 +1298,160 @@
       return 'RTK-' + String(num).padStart(3,'0');
     }
 	
-	// --- Success popup renderer ---
-	window.showOrderSuccessNew = function (summary, items, preferredTimeStr) {
-	  const wrap     = document.getElementById('order-success');
-	  const titleEl  = document.getElementById('order-success-title');
-	  const msgEl    = document.getElementById('order-success-msg');
-	  const listEl   = document.getElementById('order-success-items');
-	  const totalEl  = document.getElementById('order-success-total');
+		// --- Success popup renderer (with Download PDF) ---
+		window.__lastOrderForPdf = null;
+		
+		// helper: strip any 🌶️ from item names so we only show user's chosen level
+		function stripChillies(str) {
+		  return (str || '').replace(/🌶️+/g, '').replace(/\s{2,}/g, ' ').trim();
+		}
 
-	  if (!wrap) {
-		alert(summary?.ref || 'Order placed!');
-		return;
-	  }
 
-	  const ref = summary?.ref || 'RTK-???';
-	  if (titleEl) titleEl.textContent = `Order confirmed — ${ref}`;
+		window.showOrderSuccessNew = function (summary, items, preferredTimeStr) {
+		  const wrap     = document.getElementById('order-success');
+		  const titleEl  = document.getElementById('order-success-title');
+		  const msgEl    = document.getElementById('order-success-msg');
+		  const listEl   = document.getElementById('order-success-items');
+		  const totalEl  = document.getElementById('order-success-total');
 
-	  const orderType = summary?.orderType === 'delivery' ? 'delivery' : 'collection';
-	  const note = preferredTimeStr
-		? `Thanks! We’ll contact you to confirm your ${orderType} for ${preferredTimeStr}.`
-		: `Thanks! We’ll contact you to confirm your ${orderType}.`;
-	  if (msgEl) msgEl.textContent = note;
+		  if (!wrap) {
+			alert(`Order placed! ${summary?.ref || ''}`);
+			return;
+		  }
 
-	  if (listEl) {
-		listEl.innerHTML = (items || []).map(line => {
-		  const mods = (line.mods && line.mods.length)
-			? ` • ${line.mods.map(m => m.name).join(', ')}`
-			: '';
+		  // header
+		  if (titleEl) {
+			titleEl.textContent = `Order confirmed — ${summary.ref}`;
+		  }
 
-		  // Only show the user-selected spice, never the default
-		  const spice = (typeof line.spice === 'number')
-			? ` ${'🌶️'.repeat(Math.max(0, Math.min(3, line.spice)))}`
-			: '';
+		  // note
+		  if (msgEl) {
+			const suffix = summary.orderType === 'delivery' ? 'delivery' : 'collection';
+			const note = preferredTimeStr
+			  ? `Thanks! We’ll contact you to confirm your ${suffix} time (${preferredTimeStr}).`
+			  : `Thanks! We’ll contact you to confirm your ${suffix} time.`;
+			msgEl.textContent = note;
+		  }
 
-		  // Remove any baked-in 🌶️ from menu name
-		  const cleanName = (typeof window.nameWithoutChillies === 'function')
-			? window.nameWithoutChillies(line.name)
-			: (line.name || '');
+		  // items
+		  if (listEl) {
+			listEl.innerHTML = items.map((row) => {
+	  const cleanName = stripChillies(row.name);
+	  const hasMods  = row.mods && row.mods.length;
+	  const hasSpice = typeof row.spice === 'number';
+	  const spiceStr = hasSpice ? ' ' + '🌶️'.repeat(Math.max(0, Math.min(3, row.spice))) : '';
+	  return `
+		<div style="padding:6px 0;border-bottom:1px dashed #eee">
+		  ${row.qty} × ${cleanName}
+		  ${hasMods ? `<span class="muted small"> • ${row.mods.map(m => m.name).join(', ')}</span>` : ''}
+		  ${spiceStr}
+		  <div class="muted small">Line: ${window.formatCurrency(row.qty * row.unitPrice)}</div>
+		</div>
+	  `;
+	}).join('');
 
-		  return `<div style="padding:6px 0;border-bottom:1px dashed #eee">
-					${line.qty} × ${cleanName}${mods}${spice}
-				  </div>`;
-		}).join('');
-	  }
+		  }
 
-	  const total = (typeof summary?.total === 'number') ? summary.total : 0;
-	  if (totalEl) {
-		totalEl.textContent = (typeof window.formatCurrency === 'function')
-		  ? window.formatCurrency(total)
-		  : '£' + total.toFixed(2);
-	  }
+		  // total
+		  if (totalEl) {
+			totalEl.textContent = window.formatCurrency(summary.total);
+		  }
 
-	  const btnClose = document.getElementById('order-success-close');
-	  const btnX     = document.getElementById('order-success-x');
-	  const hide = () => { wrap.style.display = 'none'; };
-	  if (btnClose) btnClose.onclick = hide;
-	  if (btnX)     btnX.onclick = hide;
-	  wrap.onclick = (e) => { if (e.target === wrap) hide(); };
+		  // ✅ store for PDF generation
+		  window.__lastOrderForPdf = { summary, items, preferredTimeStr };
 
-	  wrap.style.display = 'flex';
-	};
+		  wrap.style.display = 'flex';
+		};
+
+		// --- PDF download handler ---
+		(function setupReceiptDownload(){
+		  const btn = document.getElementById('order-success-pdf');
+		  if (!btn) return;
+
+		  btn.addEventListener('click', async () => {
+			const payload = window.__lastOrderForPdf;
+			if (!payload) {
+			  alert('No order data to export yet.');
+			  return;
+			}
+
+			const { jsPDF } = window.jspdf;
+			const doc = new jsPDF();
+
+			const { summary, items, preferredTimeStr } = payload;
+			let y = 10;
+
+			// Header
+			doc.setFontSize(16);
+			doc.text("Rung's Thai Kitchen — Receipt", 10, y);
+			y += 8;
+
+			doc.setFontSize(11);
+			doc.text(`Order Ref: ${summary.ref}`, 10, y); y += 6;
+			doc.text(`Order type: ${summary.orderType}`, 10, y); y += 6;
+			if (preferredTimeStr) {
+			  doc.text(`Preferred time: ${preferredTimeStr}`, 10, y); y += 6;
+			}
+			y += 2;
+
+			// Items
+			doc.setFontSize(12);
+			doc.text("Items", 10, y);
+			y += 5;
+			doc.setFontSize(10);
+
+			items.forEach(item => {
+			  doc.text(`${item.qty} × ${item.name}`, 10, y);
+			  const lineTotal = (item.qty * item.unitPrice).toFixed(2);
+			  doc.text(`£${lineTotal}`, 170, y, { align: 'right' });
+			  y += 5;
+
+			  // modifiers + spice (PDF-safe — no emoji)
+			const extras = [];
+			if (item.mods?.length) {
+			  extras.push(item.mods.map(m => m.name).join(', '));
+			}
+			if (typeof item.spice === 'number') {
+			  const lvl = Math.max(0, Math.min(3, item.spice));
+			  const spiceLabel =
+				lvl === 0 ? 'Spice: None' :
+				lvl === 1 ? 'Spice: Mild' :
+				lvl === 2 ? 'Spice: Medium' :
+				'Spice: Hot';
+			  extras.push(spiceLabel);
+			}
+
+			if (extras.length) {
+			  doc.setFontSize(9);
+			  doc.text(`• ${extras.join(' • ')}`, 14, y);
+			  doc.setFontSize(10);
+			  y += 4;
+			}
+
+
+			  if (y > 270) { doc.addPage(); y = 10; }
+			});
+
+			y += 4;
+			doc.setLineWidth(0.5);
+			doc.line(10, y, 200, y);
+			y += 6;
+
+			// Totals
+			doc.setFontSize(11);
+			doc.text(`Subtotal: £${summary.subtotal.toFixed(2)}`, 10, y); y += 5;
+			doc.text(`Delivery: £${summary.delivery.toFixed(2)}`, 10, y); y += 5;
+			doc.setFontSize(12);
+			doc.text(`Total: £${summary.total.toFixed(2)}`, 10, y); y += 8;
+
+			doc.setFontSize(9);
+			doc.text("Thank you for ordering with Rung's Thai Kitchen!", 10, y);
+
+			// download
+			doc.save(`${summary.ref}.pdf`);
+		  });
+		})();
+
 
 
     // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
@@ -1498,6 +1647,27 @@
         }));
         const { error: itemsErr } = await supabase.from('order_items').insert(rows);
         if (itemsErr) return fail('Add order items', itemsErr);
+		
+		// after order + order_items succeed:
+		try {
+		  await fetch('https://YOUR-FUNCTION-URL/send-order-confirmation', {
+			method: 'POST',
+			headers: { 'Content-Type':'application/json' },
+			body: JSON.stringify({
+			  order_id: orderId,
+			  order_ref: orderRef,
+			  name,
+			  email,
+			  phone,
+			  order_type: orderType,
+			  preferred_time: preferredTimeRaw,
+			  total
+			})
+		  });
+		} catch (err) {
+		  console.warn('[Order] Confirmation hook failed (non-blocking)', err);
+		}
+
 
        // --- SUCCESS UI (step 2) ---
 		checkoutMsg.textContent = '';
@@ -1576,5 +1746,7 @@
   <div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;z-index:1500">
     <img id="lightbox-img" style="max-width:92%;max-height:92%;border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,0.6)" alt="">
   </div>
+  <!-- jsPDF (client-side PDF generator) -->
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </body>
 </html>
