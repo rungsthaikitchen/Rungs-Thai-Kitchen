@@ -1,4 +1,4 @@
-<a<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -76,7 +76,7 @@
     .food-grid img{width:100%;height:140px;object-fit:cover;border-radius:8px;box-shadow:0 6px 16px rgba(15,23,42,0.06);cursor:pointer}
     .food-grid img:hover{transform:translateY(-4px);transition:transform .18s ease,box-shadow .18s ease}
 
-    /* Modal (customize & checkout) */
+    /* Modal (customize & checkout & success) */
     .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:1200; overflow:auto; -webkit-overflow-scrolling:touch}
     .modal{width:100%;max-width:720px;background:var(--card);border-radius:12px;padding:16px;box-shadow:0 12px 40px rgba(0,0,0,0.25); max-height:90vh; overflow:auto}
     .mods{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
@@ -102,63 +102,28 @@
 
     footer{margin-top:18px;text-align:center;padding:18px;border-radius:10px;background:#111;color:white; padding-bottom:max(18px, env(safe-area-inset-bottom));}
 
-    /* Responsive */
-    @media (max-width:980px){
-      main{grid-template-columns:1fr}
-      .header-inner{flex-direction:column;gap:10px}
-      nav ul{gap:10px}
-      #order-panel{ position: static; top: auto; }
-      header { position: relative; }
-      .food-grid{grid-template-columns:repeat(2,1fr)}
-    }
-    @media (max-width:560px){
-      .food-grid{grid-template-columns:repeat(1,1fr)}
-      .food-grid img{height:200px}
-    }
-
-    /* Form spacing */
+    /* Checkout form layout/styling */
     #checkout-form > div { margin-top: 10px; }
-	/* Form layout */
-	.form-grid { display:grid; gap:12px; }
-	.form-grid .row-2 { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
-	@media (max-width:560px){ .form-grid .row-2 { grid-template-columns:1fr; } }
-
-	/* Unified input/textarea styling */
-	.field { display:flex; flex-direction:column; gap:6px; }
-	.field label { font-size:13px; color:var(--muted); }
-
-	.input, .textarea, .select {
-	  font: inherit;                 /* same font family/size as the page */
-	  padding: 10px 12px;
-	  border-radius: 8px;
-	  border: 1px solid #e7e3e3;
-	  background:#fff;
-	  outline: none;
-	  box-shadow: none;
-	}
-	.input:focus, .textarea:focus, .select:focus {
-	  border-color: var(--accent);
-	  box-shadow: 0 0 0 3px rgba(217,70,74,.12);
-	}
-	/* Let inputs grow but never exceed their container */
-	.input.auto-fit {
-	  width: auto;
-	  max-width: 100%;
-	  min-width: 18ch;          /* nice starting width */
-	  white-space: nowrap;      /* single line */
-	}
-
-	/* hidden mirror used for measuring text width */
-	.input-measure {
-	  position: absolute;
-	  visibility: hidden;
-	  white-space: pre;
-	  font: inherit;
-	  padding: 10px 12px;       /* match .input padding so width matches */
-	  border: 1px solid transparent;
-	}
-
-
+    .form-grid { display:grid; gap:12px; }
+    .form-grid .row-2 { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    @media (max-width:560px){ .form-grid .row-2 { grid-template-columns:1fr; } }
+    .field { display:flex; flex-direction:column; gap:6px; }
+    .field label { font-size:13px; color:var(--muted); }
+    .input, .textarea, .select {
+      font: inherit;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #e7e3e3;
+      background:#fff;
+      outline: none;
+      box-shadow: none;
+    }
+    .input:focus, .textarea:focus, .select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(217,70,74,.12);
+    }
+    .input.auto-fit { width:auto; max-width:100%; min-width:18ch; white-space:nowrap; }
+    .input-measure { position:absolute; visibility:hidden; white-space:pre; font:inherit; padding:10px 12px; border:1px solid transparent; }
   </style>
 </head>
 <body>
@@ -264,12 +229,7 @@
             <div class="muted small">Total</div>
             <div id="order-total" style="font-weight:800">£0.00</div>
           </div>
-          <!-- This opens the checkout modal -->
-          <!-- Order panel -->
-			<button id="open-checkout" type="button" class="btn btn-accent" style="width:100%;margin-top:12px">
-			  Proceed to Checkout
-			</button>
-
+          <button id="open-checkout" type="button" class="btn btn-accent" style="width:100%;margin-top:12px">Proceed to Checkout</button>
           <div id="order-msg" class="muted small" style="margin-top:8px"></div>
         </div>
       </aside>
@@ -297,10 +257,8 @@
         <button id="modal-close" class="btn btn-ghost">Close</button>
       </div>
 
-      <!-- Dish image preview -->
       <img id="modal-img" alt="" style="margin-top:10px;width:100%;max-height:220px;object-fit:cover;border-radius:10px;display:none">
 
-      <!-- Quantity -->
       <div style="display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px">
         <div>
           <label class="small">Quantity</label>
@@ -312,7 +270,6 @@
         </div>
       </div>
 
-      <!-- Modifiers -->
       <div style="margin-top:12px">
         <div class="small">Modifiers (protein / extras)</div>
         <div id="mods" class="mods"></div>
@@ -320,13 +277,11 @@
         <div id="mod-limit-note" class="mod-limit-note"></div>
       </div>
 
-      <!-- Dish allergens (icons + labels) -->
       <div id="modal-allergens-wrap" style="margin-top:10px;display:none">
         <div class="small">Allergens in this dish</div>
         <div id="modal-allergens" class="allergen-badges"></div>
       </div>
 
-      <!-- Spice selector -->
       <div id="spice-wrap" class="spice-wrap" style="display:none">
         <div class="spice-label">Spice level</div>
         <div id="spice-buttons" class="spice-buttons"></div>
@@ -345,64 +300,63 @@
   </div>
 
   <!-- Checkout Modal -->
-	  <div id="checkout-modal" class="modal-backdrop" style="display:none" aria-modal="true" role="dialog">
-		<div class="modal">
-		  <div style="display:flex;justify-content:space-between;align-items:center">
-			<div>
-			  <div style="font-weight:800">Customer details</div>
-			  <div class="muted small" style="margin-top:4px">We’ll save with your order.</div>
-			</div>
-			<button id="checkout-close" class="btn btn-ghost">Close</button>
-		  </div>
+  <div id="checkout-modal" class="modal-backdrop" style="display:none" aria-modal="true" role="dialog">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:800">Customer details</div>
+          <div class="muted small" style="margin-top:4px">We’ll save with your order.</div>
+        </div>
+        <button id="checkout-close" class="btn btn-ghost">Close</button>
+      </div>
 
-		  <form id="checkout-form" class="form-grid">
-	  <div class="field">
-		<label for="cust-name">Full name</label>
-		<input id="cust-name" name="name" type="text" autocomplete="name" required class="input auto-fit">
-	  </div>
+      <form id="checkout-form" class="form-grid">
+        <div class="field">
+          <label for="cust-name">Full name</label>
+          <input id="cust-name" name="name" type="text" autocomplete="name" required class="input auto-fit">
+        </div>
 
-	  <div class="row-2">
-		<div class="field">
-		  <label for="cust-email">Email</label>
-		  <input id="cust-email" name="email" type="email" inputmode="email" autocomplete="email" class="input auto-fit">
-		</div>
-		<div class="field">
-		  <label for="cust-phone">Phone</label>
-		  <input id="cust-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required class="input auto-fit">
-		</div>
-	  </div>
+        <div class="row-2">
+          <div class="field">
+            <label for="cust-email">Email</label>
+            <input id="cust-email" name="email" type="email" inputmode="email" autocomplete="email" class="input auto-fit">
+          </div>
+          <div class="field">
+            <label for="cust-phone">Phone</label>
+            <input id="cust-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required class="input auto-fit">
+          </div>
+        </div>
 
+        <div class="field">
+          <label for="cust-address">Address (flat/house number, street name & post code please)</label>
+          <input id="cust-address" name="address" type="text" autocomplete="street-address"
+                 inputmode="text" class="input auto-fit" placeholder="House no., street, town, postcode">
+        </div>
 
+        <div class="field">
+          <label>Order type</label>
+          <div style="display:flex;gap:12px;align-items:center">
+            <label><input type="radio" name="order-type" id="order-type-collection" value="collection" checked> Collection</label>
+            <label><input type="radio" name="order-type" id="order-type-delivery" value="delivery"> Delivery</label>
+          </div>
+          <div id="delivery-note" class="muted small" style="margin-top:4px;display:none">
+            Delivery is £3 for orders under £20, free for £20 and above.
+          </div>
+        </div>
 
-		<!-- ✅ NEW: Order type radios -->
-		<div class="field">
-		  <label for="cust-address">Address (flat/house number, street name & post code please)</label>
-		  <input id="cust-address" name="address" type="text" autocomplete="street-address"
-				 inputmode="text" class="input auto-fit" placeholder="House no., street, town, postcode">
-		</div>
+        <!-- Preferred time -->
+        <div class="field">
+          <label for="cust-preferred-time">Preferred collection/delivery time</label>
+          <input id="cust-preferred-time" name="preferred_time" type="datetime-local" class="input">
+          <div class="muted small">We’ll do our best to meet this time. We’ll contact you to confirm.</div>
+        </div>
 
-		<!-- ✅ NEW: Order type radios -->
-		<div class="field">
-		  <label>Order type</label>
-		  <div style="display:flex;gap:12px;align-items:center">
-			<label><input type="radio" name="order-type" id="order-type-collection" value="collection" checked> Collection</label>
-			<label><input type="radio" name="order-type" id="order-type-delivery" value="delivery"> Delivery</label>
-		  </div>
-		  <div id="delivery-note" class="muted small" style="margin-top:4px;display:none">
-			Delivery is £3 for orders under £20, free for £20 and above.
-		  </div>
-		</div>
+        <div class="field">
+          <label for="cust-notes">Notes (optional)</label>
+          <input id="cust-notes" name="notes" type="text" class="input auto-fit"
+                 placeholder="Allergies, delivery instructions, etc.">
+        </div>
 
-
-
-	  <div class="field">
-		<label for="cust-notes">Notes (optional)</label>
-		<input id="cust-notes" name="notes" type="text" class="input auto-fit"
-			   placeholder="Allergies, delivery instructions, etc.">
-	  </div>
-
-
-        <!-- Totals -->
         <div class="totals">
           <div class="muted small">Subtotal</div>
           <div id="checkout-subtotal" style="font-weight:800">£0.00</div>
@@ -416,8 +370,6 @@
           <div id="checkout-total" style="font-weight:800">£0.00</div>
         </div>
 
-
-
         <div class="checkout-actions" style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px;position:sticky;bottom:0;background:#fff;padding-top:8px">
           <button type="button" id="checkout-cancel" class="btn btn-ghost">Cancel</button>
           <button type="submit" id="checkout-submit" class="btn btn-accent">Place order</button>
@@ -427,15 +379,38 @@
     </div>
   </div>
 
-  <!-- Lightbox for gallery -->
-  <div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;z-index:1500">
-    <img id="lightbox-img" style="max-width:92%;max-height:92%;border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,0.6)" alt="">
+  <!-- Order Success Modal -->
+<div id="order-success" class="modal-backdrop" style="display:none" role="dialog" aria-modal="true">
+  <div class="modal" style="max-width:560px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <h3 id="order-success-title" style="margin:0">Order placed</h3>
+      <button id="order-success-x" class="btn btn-ghost" type="button">×</button>
+    </div>
+
+    <div id="order-success-msg" class="muted small" style="margin-bottom:10px"></div>
+
+    <div id="order-success-items" class="small"
+         style="max-height:260px;overflow:auto;border:1px solid #eee;
+                border-radius:8px;padding:8px;margin-bottom:10px">
+    </div>
+
+    <div class="totals">
+      <div class="muted small">Total</div>
+      <div id="order-success-total" style="font-weight:800">£0.00</div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+      <button id="order-success-close" class="btn btn-accent" type="button">OK</button>
+    </div>
   </div>
+</div>
+
 
   <script>
-    // ---------- Allergen registry (separate peanuts vs tree nuts) ----------
-    // NOTE: Mustard icon uses requested HTML hex &#x1F331;
-    const ALLERGENS = {
+	document.addEventListener('DOMContentLoaded', () => {
+  // ---------- Allergen registry ----------
+  const ALLERGENS = {
+
       peanuts:   { icon:'🥜',        label:'Peanuts' },
       tree_nuts: { icon:'🌰',        label:'Tree Nuts' },
       gluten:    { icon:'🌾',        label:'Gluten (Cereals)' },
@@ -454,9 +429,7 @@
     };
     function normalizeAllergens(list){
       const out = [];
-      (list || []).forEach(k => {
-        if (k === 'nuts') out.push('peanuts','tree_nuts'); else out.push(k);
-      });
+      (list || []).forEach(k => { if (k === 'nuts') out.push('peanuts','tree_nuts'); else out.push(k); });
       return [...new Set(out)];
     }
     function renderAllergenIconsCompact(list){
@@ -547,7 +520,19 @@
 
     // ---------- State ----------
     let basket = []; // { name, itemId, mods:[{id,name,delta}], unitPrice, qty, img, spice }
+	window.basket = basket;  // expose the array reference to the second script
     const ITEMS_BY_ID = new Map();
+	
+	// remove chilli emojis that are baked into menu item names
+		const CHILLI_RE = /🌶️+/g;
+		function nameWithoutChillies(str) {
+		  return (str || '')
+			.replace(CHILLI_RE, '')
+			.replace(/\s{2,}/g, ' ')
+			.trim();
+		}
+
+
 
     // ---------- Helpers ----------
     function formatCurrency(n){ const cents = Math.round((n + Number.EPSILON) * 100); return '£' + (cents/100).toFixed(2); }
@@ -597,31 +582,22 @@
           body.appendChild(el);
         });
 
-		// Accordion behavior: close others when opening this one
-		header.addEventListener('click', ()=> {
-		  const wasOpen = body.classList.contains('open');
-
-		  // Close all categories
-		  document.querySelectorAll('.category-body').forEach(b => {
-			b.classList.remove('open');
-			b.style.maxHeight = '0px';
-			const hdr = b.previousElementSibling;
-			if (hdr) {
-			  const caret = hdr.querySelector('.caret');
-			  if (caret) caret.textContent = '▶';
-			}
-		  });
-
-		  // If it was not open, open it
-		  if (!wasOpen) {
-			body.classList.add('open');
-			// Dynamically set height for smooth expand
-			body.style.maxHeight = body.scrollHeight + 'px';
-			const caret = header.querySelector('.caret');
-			if (caret) caret.textContent = '▼';
-		  }
-		});
-
+        // Accordion behavior
+        header.addEventListener('click', ()=> {
+          const wasOpen = body.classList.contains('open');
+          document.querySelectorAll('.category-body').forEach(b => {
+            b.classList.remove('open');
+            b.style.maxHeight = '0px';
+            const hdr = b.previousElementSibling;
+            if (hdr) { const caret = hdr.querySelector('.caret'); if (caret) caret.textContent = '▶'; }
+          });
+          if (!wasOpen) {
+            body.classList.add('open');
+            body.style.maxHeight = body.scrollHeight + 'px';
+            const caret = header.querySelector('.caret');
+            if (caret) caret.textContent = '▼';
+          }
+        });
 
         catEl.appendChild(header);
         catEl.appendChild(body);
@@ -630,69 +606,84 @@
     }
 
     // ---------- Order rendering ----------
-    const orderListEl = document.getElementById('order-list');
-    const orderTotalEl = document.getElementById('order-total');
+			function renderOrder(){
+		  const orderListEl  = document.getElementById('order-list');
+		  const orderTotalEl = document.getElementById('order-total');
 
-    function renderOrder(){
-      orderListEl.innerHTML = '';
-      if(basket.length === 0){
-        orderListEl.innerHTML = '<div class="muted small">No items yet — add something from the menu.</div>';
-        orderTotalEl.textContent = formatCurrency(0);
-        return;
-      }
-      basket.forEach((row, idx) => {
-        const r = document.createElement('div'); r.className = 'order-row';
+		  orderListEl.innerHTML = '';
 
-        const leftWrap = document.createElement('div');
-        leftWrap.style.display = 'flex';
-        leftWrap.style.alignItems = 'center';
-        leftWrap.style.gap = '10px';
+		  if (basket.length === 0){
+			orderListEl.innerHTML = '<div class="muted small">No items yet — add something from the menu.</div>';
+			orderTotalEl.textContent = formatCurrency(0);
+			return;
+		  }
 
-        const img = document.createElement('img');
-        img.className = 'item-thumb';
-        img.alt = row.name;
-        img.loading = 'lazy';
-        img.src = (row.img && row.img.trim())
-          ? row.img
-          : 'data:image/svg+xml;utf8,' + encodeURIComponent(
-              `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">
-                 <rect width="100%" height="100%" fill="#f1f1f1"/>
-                 <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle"
-                       font-family="sans-serif" font-size="12" fill="#999">No image</text>
-               </svg>`
-            );
+		  basket.forEach((row, idx) => {
+			const r = document.createElement('div');
+			r.className = 'order-row';
 
-        const modsText = row.mods && row.mods.length ? (' • ' + row.mods.map(m=>m.name).join(', ')) : '';
-        const spiceText = (typeof row.spice === 'number') ? (` ${chilliIcons(row.spice)}`) : '';
+			const leftWrap = document.createElement('div');
+			leftWrap.style.display = 'flex';
+			leftWrap.style.alignItems = 'center';
+			leftWrap.style.gap = '10px';
 
-        const text = document.createElement('div');
-        text.innerHTML = `
-          <div style="font-weight:700">${row.name}
-            <span class="muted small">${modsText}</span>
-            <span>${spiceText}</span>
-          </div>
-          <div class="muted small">Unit: ${formatCurrency(row.unitPrice)}</div>
-        `;
+			const img = document.createElement('img');
+			img.className = 'item-thumb';
+			img.alt = row.name;
+			img.loading = 'lazy';
+			img.src = (row.img && row.img.trim())
+			  ? row.img
+			  : 'data:image/svg+xml;utf8,' + encodeURIComponent(
+				`<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">
+				   <rect width="100%" height="100%" fill="#f1f1f1"/>
+				   <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle"
+						 font-family="sans-serif" font-size="12" fill="#999">No image</text>
+				 </svg>`
+			  );
 
-        const right = document.createElement('div'); right.style.textAlign='right';
-        right.innerHTML = `
-          <div style="font-weight:800">${formatCurrency(roundToTwo(row.unitPrice * row.qty))}</div>
-          <div style="margin-top:8px;display:flex;gap:8px;align-items:center;justify-content:flex-end">
-            <button class="btn btn-ghost" data-action="dec" data-idx="${idx}">-</button>
-            <div class="muted">${row.qty}</div>
-            <button class="btn btn-ghost" data-action="inc" data-idx="${idx}">+</button>
-            <button class="btn" style="background:transparent;color:#b02a2a;border:none;padding:6px 8px" data-action="remove" data-idx="${idx}">Remove</button>
-          </div>`;
+			// ✅ HERE: use clean name (no built-in chillies)
+			const cleanName = nameWithoutChillies(row.name);
 
-        leftWrap.appendChild(img);
-        leftWrap.appendChild(text);
-        r.appendChild(leftWrap);
-        r.appendChild(right);
-        orderListEl.appendChild(r);
-      });
-      const total = basket.reduce((s, i) => s + i.unitPrice * i.qty, 0);
-      orderTotalEl.textContent = formatCurrency(roundToTwo(total));
-    }
+			const details = [];
+			if (row.mods && row.mods.length) {
+			  details.push(row.mods.map(m => m.name).join(', '));
+			}
+			if (typeof row.spice === 'number') {
+			  details.push(chilliIcons(row.spice));
+			}
+
+			const text = document.createElement('div');
+			text.innerHTML = `
+			  <div style="font-weight:700">
+				${cleanName}
+				${details.length ? ` <span class="muted small">• ${details.join(' • ')}</span>` : ''}
+			  </div>
+			  <div class="muted small">Unit: ${formatCurrency(row.unitPrice)}</div>
+			`;
+
+			const right = document.createElement('div');
+			right.style.textAlign = 'right';
+			right.innerHTML = `
+			  <div style="font-weight:800">${formatCurrency(roundToTwo(row.unitPrice * row.qty))}</div>
+			  <div style="margin-top:8px;display:flex;gap:8px;align-items:center;justify-content:flex-end">
+				<button class="btn btn-ghost" data-action="dec" data-idx="${idx}">-</button>
+				<div class="muted">${row.qty}</div>
+				<button class="btn btn-ghost" data-action="inc" data-idx="${idx}">+</button>
+				<button class="btn" style="background:transparent;color:#b02a2a;border:none;padding:6px 8px" data-action="remove" data-idx="${idx}">Remove</button>
+			  </div>
+			`;
+
+			leftWrap.appendChild(img);
+			leftWrap.appendChild(text);
+			r.appendChild(leftWrap);
+			r.appendChild(right);
+			orderListEl.appendChild(r);
+		  });
+
+		  const total = basket.reduce((s, i) => s + i.unitPrice * i.qty, 0);
+		  orderTotalEl.textContent = formatCurrency(roundToTwo(total));
+		}
+
 
     // ---------- Modal (Customize) ----------
     const modal = document.getElementById('modal');
@@ -711,7 +702,6 @@
     const modLimitNote = document.getElementById('mod-limit-note');
     const modalAllWrap = document.getElementById('modal-allergens-wrap');
     const modalAll = document.getElementById('modal-allergens');
-
     const spiceWrap = document.getElementById('spice-wrap');
     const spiceButtons = document.getElementById('spice-buttons');
 
@@ -781,6 +771,134 @@
         modsEl.appendChild(btn);
       });
     }
+	
+	// ---------- Success popup (matches #order-success in HTML) ----------
+	const orderSuccess      = document.getElementById('order-success');
+	const orderSuccessX     = document.getElementById('order-success-x');
+	const orderSuccessClose = document.getElementById('order-success-close');
+
+	function showOrderSuccess({ ref, subtotal, delivery, total, orderType }, items, preferredTimeStr) {
+	  if (!orderSuccess) {
+		// fallback
+		alert(`Order placed! ${ref}`);
+		return;
+	  }
+
+	  // 1) header
+	  const titleEl = document.getElementById('order-success-title');
+	  if (titleEl) {
+		// ⬅️ use ref AS-IS, do NOT add "RTK-" again
+		titleEl.textContent = `Order confirmed — ${ref}`;
+	  }
+
+	  // 2) message
+	  const msgEl = document.getElementById('order-success-msg');
+	  if (msgEl) {
+		const suffix = orderType === 'delivery' ? 'delivery' : 'collection';
+		const note = preferredTimeStr
+		  ? `Thanks! We’ll contact you to confirm your ${suffix} time (${preferredTimeStr}).`
+		  : `Thanks! We’ll contact you to confirm your ${suffix}.`;
+		msgEl.textContent = note;
+	  }
+
+	  // 3) items
+	  const listEl = document.getElementById('order-success-items');
+	  if (listEl) {
+		listEl.innerHTML = '';
+		items.forEach(row => {
+		  const details = [];
+		  if (row.mods?.length) details.push(row.mods.map(m => m.name).join(', '));
+		  if (typeof row.spice === 'number') details.push('🌶️'.repeat(row.spice));
+
+		  const div = document.createElement('div');
+		  div.style.padding = '6px 0';
+		  div.style.borderBottom = '1px dashed #eee';
+		  div.innerHTML = `
+			${row.qty} × ${row.name}
+			${details.length ? ` <span class="muted small">• ${details.join(' • ')}</span>` : ''}
+		  `;
+		  listEl.appendChild(div);
+		});
+	  }
+
+	  // 4) total
+	  const totalEl = document.getElementById('order-success-total');
+	  if (totalEl) {
+		totalEl.textContent = formatCurrency(total);
+	  }
+
+	  orderSuccess.style.display = 'flex';
+	}
+
+	// close buttons
+	if (orderSuccessX)     orderSuccessX.addEventListener('click', () => orderSuccess.style.display = 'none');
+	if (orderSuccessClose) orderSuccessClose.addEventListener('click', () => orderSuccess.style.display = 'none');
+	if (orderSuccess) {
+	  orderSuccess.addEventListener('click', (e) => {
+		if (e.target === orderSuccess) orderSuccess.style.display = 'none';
+	  });
+	}
+
+
+	// make it available to the second script
+	window.showOrderSuccess = showOrderSuccess;
+
+	
+		// ----  (pure front-end) ----
+
+	(function(){
+	  const wrap  = document.getElementById('order-success');
+	  const title = document.getElementById('order-success-title');
+	  const msg   = document.getElementById('order-success-msg');
+	  const list  = document.getElementById('order-success-items');
+	  const totalEl = document.getElementById('order-success-total');
+	  const btnClose = document.getElementById('order-success-close');
+	  const btnX     = document.getElementById('order-success-x');
+
+	  function hide() {
+		if (wrap) wrap.style.display = 'none';
+	  }
+
+	  // expose a global helper we can call later (kept for backwards compatibility)
+	function showOrderSuccess(orderId, items, total, orderType, preferredTime) {
+	  // If the new-style function exists, delegate to it
+	  if (typeof window.showOrderSuccessNew === 'function') {
+		window.showOrderSuccessNew(
+		  {
+			// if checkout already passed "RTK-012", keep it;
+			// if it passed just "012", add RTK-
+			ref: (typeof orderId === 'string' && orderId.startsWith('RTK-'))
+			  ? orderId
+			  : `RTK-${orderId}`,
+			subtotal: 0,
+			delivery: 0,
+			total: total || 0,
+			orderType: orderType || 'collection'
+		  },
+		  items || [],
+		  preferredTime || null
+		);
+		return;
+	  }
+
+	  // Fallback if the new function isn’t there
+	  alert(
+		(typeof orderId === 'string' ? orderId : `RTK-${orderId}`) ||
+		'Order placed!'
+	  );
+	}
+
+
+	  if (btnClose) btnClose.addEventListener('click', hide);
+	  if (btnX)     btnX.addEventListener('click', hide);
+	  if (wrap)     wrap.addEventListener('click', e => {
+		if (e.target === wrap) hide();
+	  });
+
+	  // make available to other scripts
+	  window.showOrderSuccess = showOrderSuccess;
+	})();
+
 
     function buildSpiceSelector(enabled, defaultLevel=0){
       if(!enabled){
@@ -845,7 +963,7 @@
 
       const allowed = Array.isArray(found.allowedModifiers) ? found.allowedModifiers : null;
       const requiresModifier = !!found.modifierRequired;
-      const isMulti = !!found.modifiersMulti || (typeof found.modifierMax === 'number' && found.modifierMax > 0);
+      const isMulti = !!found.modifierMax || !!found.modifiersMulti;
       const max = (typeof found.modifierMax === 'number' && found.modifierMax > 0) ? found.modifierMax : null;
 
       buildModifierChips(allowed, requiresModifier, isMulti, max);
@@ -861,7 +979,6 @@
         else { modalImg.removeAttribute('src'); modalImg.style.display = 'none'; }
       }
 
-      // Allergens in modal
       if (found.allergens && found.allergens.length) {
         modalAll.innerHTML = renderAllergenBadges(found.allergens);
         modalAllWrap.style.display = 'block';
@@ -870,7 +987,6 @@
         modalAllWrap.style.display = 'none';
       }
 
-      // Spice
       buildSpiceSelector(!!found.spiceEnabled, typeof found.spiceDefault==='number'?found.spiceDefault:0);
 
       modal.style.display = 'flex';
@@ -891,9 +1007,7 @@
         modsEl.scrollIntoView({behavior:'smooth', block:'center'});
         return;
       }
-      if(currentMulti && currentMax && selectedMods.size > currentMax){
-        return;
-      }
+      if(currentMulti && currentMax && selectedMods.size > currentMax){ return; }
 
       const base = Number(modalBase.dataset.price) || 0;
       const modsArr = []; let modsTotal = 0;
@@ -918,14 +1032,11 @@
       renderOrder();
     });
 
-    // open customize on menu buttons (delegation)
     document.getElementById('menu-list').addEventListener('click', e => {
       const btn = e.target.closest('button');
       if(!btn || !btn.dataset.id) return;
       openCustomize(btn.dataset.id);
     });
-
-    // order panel event delegation
     document.getElementById('order-panel').addEventListener('click', e => {
       const btn = e.target.closest('button');
       if(!btn) return;
@@ -949,16 +1060,38 @@
       if(e.target.id === 'lightbox' || e.target.id === 'lightbox-img') e.currentTarget.style.display = 'none';
     });
 
-    // Escape closes modal
     document.addEventListener('keydown', (e) => {
       if(e.key === 'Escape' && modal.style.display === 'flex') closeModal();
       if(e.key === 'Escape' && checkoutModal.style.display === 'flex') closeCheckout();
+      if(e.key === 'Escape' && successModal.style.display === 'flex') hideOrderSuccess();
     });
 
     // Build & first render
     buildMenu();
     renderOrder();
-  </script>
+	// expose helpers that the second script uses
+	window.formatCurrency = formatCurrency;
+	window.openCheckout = openCheckout;
+	window.orderMsg = document.getElementById('order-msg');
+	window.basket = basket;
+	window.renderOrder = renderOrder;
+	window.roundToTwo = roundToTwo;
+	window.chilliIcons = chilliIcons;
+	window.nameWithoutChillies = nameWithoutChillies;
+
+
+
+	}); // end DOMContentLoaded
+</script>
+	<script>
+	  if (typeof window.formatCurrency !== 'function') {
+		window.formatCurrency = n => '£' + Number(n || 0).toFixed(2);
+	  }
+	  if (typeof window.roundToTwo !== 'function') {
+		window.roundToTwo = n => Math.round((n || 0) * 100) / 100;
+	  }
+	</script>
+
 
   <!-- Supabase JS (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -982,7 +1115,7 @@
     const openCheckoutBtn = document.getElementById('open-checkout');
 
     const orderTypeRadios = document.querySelectorAll('input[name="order-type"]');
-    let checkoutBaseSubtotal = 0; // set when opening modal
+    let checkoutBaseSubtotal = 0;
 
     function calcDeliveryFee(subtotal, orderType){
       if(orderType !== 'delivery') return 0;
@@ -1002,28 +1135,125 @@
     function openCheckout(subtotal){
       checkoutBaseSubtotal = Math.round(subtotal*100)/100;
       checkoutMsg.textContent = '';
-      // reset to default selection (collection) each time
       document.querySelector('input[name="order-type"][value="collection"]').checked = true;
       recomputeCheckoutTotals();
+      // min for preferred time (now + 30 mins)
+      const t = document.getElementById('cust-preferred-time');
+      if (t){
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 30);
+        const pad = n => String(n).padStart(2,'0');
+        t.min = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      }
       checkoutModal.style.display = 'flex';
     }
-    function closeCheckout(){ checkoutModal.style.display = 'none'; }
-    checkoutClose.addEventListener('click', closeCheckout);
-    checkoutCancel.addEventListener('click', closeCheckout);
-    checkoutModal.addEventListener('click', (e)=>{ if(e.target === checkoutModal) closeCheckout(); });
+			function closeCheckout(){
+		  if (checkoutModal) checkoutModal.style.display = 'none';
+		}
 
-    // Open checkout from order panel
-    openCheckoutBtn.addEventListener('click', ()=>{
-      if(basket.length === 0){
-        orderMsg.textContent = 'Your basket is empty.'; orderMsg.style.color = '#b02a2a';
-        return;
-      }
-      orderMsg.textContent = '';
-      const subtotal = basket.reduce((s,i)=> s + i.unitPrice * i.qty, 0);
-      openCheckout(subtotal);
-    });
+		// safe listeners
+		if (checkoutClose) {
+		  checkoutClose.addEventListener('click', closeCheckout);
+		}
+		if (checkoutCancel) {
+		  checkoutCancel.addEventListener('click', closeCheckout);
+		}
+		if (checkoutModal) {
+		  checkoutModal.addEventListener('click', (e) => {
+			if (e.target === checkoutModal) closeCheckout();
+		  });
+		}
 
-    // Submit checkout → Supabase
+		// Open checkout (safe)
+		if (openCheckoutBtn) {
+		  openCheckoutBtn.addEventListener('click', () => {
+			if (!window.basket || window.basket.length === 0) {
+			  if (orderMsg) {
+				orderMsg.textContent = 'Your basket is empty.';
+				orderMsg.style.color = '#b02a2a';
+			  }
+			  return;
+			}
+			if (orderMsg) orderMsg.textContent = '';
+			const subtotal = window.basket.reduce((s, i) => s + i.unitPrice * i.qty, 0);
+			openCheckout(subtotal);
+		  });
+		}
+
+
+		// ---------- Helpers to call Supabase RPC & REST ----------
+    async function getNextOrderRef(){
+      // Calls public.get_next_order_number() and returns "RTK-###"
+      const { data, error } = await supabase.rpc('get_next_order_number');
+      if (error) { console.error('get_next_order_number failed', error); throw error; }
+      const assigned = Array.isArray(data) ? data[0]?.assigned : (data?.assigned ?? data);
+      const num = Number(assigned || 0);
+      return 'RTK-' + String(num).padStart(3,'0');
+    }
+	
+	// --- Success popup renderer ---
+	window.showOrderSuccessNew = function (summary, items, preferredTimeStr) {
+	  const wrap     = document.getElementById('order-success');
+	  const titleEl  = document.getElementById('order-success-title');
+	  const msgEl    = document.getElementById('order-success-msg');
+	  const listEl   = document.getElementById('order-success-items');
+	  const totalEl  = document.getElementById('order-success-total');
+
+	  if (!wrap) {
+		alert(summary?.ref || 'Order placed!');
+		return;
+	  }
+
+	  const ref = summary?.ref || 'RTK-???';
+	  if (titleEl) titleEl.textContent = `Order confirmed — ${ref}`;
+
+	  const orderType = summary?.orderType === 'delivery' ? 'delivery' : 'collection';
+	  const note = preferredTimeStr
+		? `Thanks! We’ll contact you to confirm your ${orderType} for ${preferredTimeStr}.`
+		: `Thanks! We’ll contact you to confirm your ${orderType}.`;
+	  if (msgEl) msgEl.textContent = note;
+
+	  if (listEl) {
+		listEl.innerHTML = (items || []).map(line => {
+		  const mods = (line.mods && line.mods.length)
+			? ` • ${line.mods.map(m => m.name).join(', ')}`
+			: '';
+
+		  // Only show the user-selected spice, never the default
+		  const spice = (typeof line.spice === 'number')
+			? ` ${'🌶️'.repeat(Math.max(0, Math.min(3, line.spice)))}`
+			: '';
+
+		  // Remove any baked-in 🌶️ from menu name
+		  const cleanName = (typeof window.nameWithoutChillies === 'function')
+			? window.nameWithoutChillies(line.name)
+			: (line.name || '');
+
+		  return `<div style="padding:6px 0;border-bottom:1px dashed #eee">
+					${line.qty} × ${cleanName}${mods}${spice}
+				  </div>`;
+		}).join('');
+	  }
+
+	  const total = (typeof summary?.total === 'number') ? summary.total : 0;
+	  if (totalEl) {
+		totalEl.textContent = (typeof window.formatCurrency === 'function')
+		  ? window.formatCurrency(total)
+		  : '£' + total.toFixed(2);
+	  }
+
+	  const btnClose = document.getElementById('order-success-close');
+	  const btnX     = document.getElementById('order-success-x');
+	  const hide = () => { wrap.style.display = 'none'; };
+	  if (btnClose) btnClose.onclick = hide;
+	  if (btnX)     btnX.onclick = hide;
+	  wrap.onclick = (e) => { if (e.target === wrap) hide(); };
+
+	  wrap.style.display = 'flex';
+	};
+
+
+    // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
     checkoutForm.addEventListener('submit', async (e)=>{
       e.preventDefault();
       checkoutMsg.style.color = ''; checkoutMsg.textContent = 'Placing order…';
@@ -1033,8 +1263,16 @@
       const phone = document.getElementById('cust-phone').value.trim() || null;
       const address = document.getElementById('cust-address').value.trim() || null;
       const notes = document.getElementById('cust-notes').value.trim() || null;
+      const preferredTimeRaw = document.getElementById('cust-preferred-time').value; // '' or 'YYYY-MM-DDTHH:mm'
+      const preferredTimeISO = preferredTimeRaw ? new Date(preferredTimeRaw).toISOString() : null;
 
       if(!name){ checkoutMsg.style.color = '#b02a2a'; checkoutMsg.textContent = 'Please enter your name.'; return; }
+
+      const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+      const itemsSnapshot = basket.map(i => ({ ...i }));
+      const subtotal = itemsSnapshot.reduce((s,i)=> s + i.unitPrice * i.qty, 0);
+      const deliveryFee = (orderType === 'delivery' && subtotal < 20) ? 3.00 : 0.00;
+      const total = subtotal + deliveryFee;
 
       function fail(step, err){
         console.error(`[Checkout] ${step} failed:`, err);
@@ -1043,79 +1281,161 @@
       }
 
       try {
-        // Insert or find customer
-        let customerId = null;
+				// 1) get or create customer
+		let customerId = null;
 
-        if(email){
-          const { data, error } = await supabase
-            .from('customers')
-            .insert([{ full_name: name, email, phone, address }])
-            .select('id')
-            .single();
-          if(error && error.code !== '23505') return fail('Create customer', error);
-          customerId = data?.id ?? null;
+		// normalise
+		const normEmail = email ? email.trim().toLowerCase() : null;
+		const normPhone = phone ? phone.trim() : null;
 
-          if(!customerId){
-            const { data: found, error: e2 } = await supabase
-              .from('customers')
-              .select('id')
-              .ilike('email', email)
-              .limit(1)
-              .maybeSingle();
-            if(e2) return fail('Find existing customer', e2);
-            customerId = found?.id ?? null;
-          }
-        } else if (phone){
-          const { data, error } = await supabase
-            .from('customers')
-            .insert([{ full_name: name, phone, address }])
-            .select('id')
-            .single();
-          if(error && error.code !== '23505') return fail('Create customer', error);
-          customerId = data?.id ?? null;
+		if (normEmail) {
+		  // 1A. is there already a customer with this email?
+		  const { data: existingByEmail, error: findEmailErr } = await supabase
+			.from('customers')
+			.select('id, phone')
+			.eq('email', normEmail)
+			.maybeSingle();
 
-          if(!customerId){
-            const { data: found, error: e2 } = await supabase
-              .from('customers')
-              .select('id')
-              .eq('phone', phone)
-              .limit(1)
-              .maybeSingle();
-            if(e2) return fail('Find existing customer', e2);
-            customerId = found?.id ?? null;
-          }
-        } else {
-          const { data, error } = await supabase
-            .from('customers')
-            .insert([{ full_name: name, address }])
-            .select('id')
-            .single();
-          if(error) return fail('Create customer', error);
-          customerId = data.id;
+		  if (findEmailErr) return fail('Find customer (email)', findEmailErr);
+
+		  if (existingByEmail) {
+			// update that customer – but only set phone if it's empty on that row
+			const updatePayload = {
+			  full_name: name,
+			  address
+			};
+			if (!existingByEmail.phone && normPhone) {
+			  // safe to set phone
+			  updatePayload.phone = normPhone;
+			}
+
+			const { data: updated, error: updErr } = await supabase
+			  .from('customers')
+			  .update(updatePayload)
+			  .eq('id', existingByEmail.id)
+			  .select('id')
+			  .single();
+
+			if (updErr) return fail('Update customer (email)', updErr);
+			customerId = updated.id;
+
+		  } else {
+			// 1B. no email yet → try to insert
+			// but phone might already exist on someone else, so we'll try with phone first,
+			// and if that fails with duplicate phone, we retry without phone
+			const baseInsert = {
+			  full_name: name,
+			  email: normEmail,
+			  address
+			};
+			if (normPhone) baseInsert.phone = normPhone;
+
+			let { data: inserted, error: insErr } = await supabase
+			  .from('customers')
+			  .insert([baseInsert])
+			  .select('id')
+			  .single();
+
+			// if phone is duplicate, try again without phone
+			if (insErr && insErr.code === '23505') {
+			  // duplicate key → try again without phone
+			  const { data: inserted2, error: insErr2 } = await supabase
+				.from('customers')
+				.insert([{
+				  full_name: name,
+				  email: normEmail,
+				  address
+				}])
+				.select('id')
+				.single();
+
+			  if (insErr2) return fail('Insert customer (email, no phone)', insErr2);
+			  customerId = inserted2.id;
+			} else if (insErr) {
+			  return fail('Insert customer (email)', insErr);
+			} else {
+			  customerId = inserted.id;
+			}
+		  }
+
+		} else if (normPhone) {
+		  // no email, but we do have a phone → find by phone
+		  const { data: existingByPhone, error: findPhoneErr } = await supabase
+			.from('customers')
+			.select('id')
+			.eq('phone', normPhone)
+			.maybeSingle();
+
+		  if (findPhoneErr) return fail('Find customer (phone)', findPhoneErr);
+
+		  if (existingByPhone) {
+			customerId = existingByPhone.id;
+			// optionally update name/address
+			await supabase
+			  .from('customers')
+			  .update({ full_name: name, address })
+			  .eq('id', customerId);
+		  } else {
+			// create new with phone
+			const { data: inserted, error: insErr } = await supabase
+			  .from('customers')
+			  .insert([{ full_name: name, phone: normPhone, address }])
+			  .select('id')
+			  .single();
+			if (insErr) return fail('Insert customer (phone)', insErr);
+			customerId = inserted.id;
+		  }
+
+		} else {
+		  // no email, no phone → just insert bare customer
+		  const { data: inserted, error: insErr } = await supabase
+			.from('customers')
+			.insert([{ full_name: name, address }])
+			.select('id')
+			.single();
+		  if (insErr) return fail('Insert customer (bare)', insErr);
+		  customerId = inserted.id;
+		}
+
+
+        // 2) Get global sequential order ref
+        let orderRef = 'RTK-???';
+        try {
+          orderRef = await getNextOrderRef();
+        } catch (err) {
+          console.warn('Falling back to timestamp-based ref');
+          orderRef = 'RTK-' + Date.now();
         }
 
-        // Compute delivery details
-        const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
-        const subtotal = checkoutBaseSubtotal;
-        const deliveryFee = (orderType === 'delivery') ? (subtotal < 20 ? 3.00 : 0.00) : 0.00;
-
-        // Create order
-        const { data: order, error: e6 } = await supabase
+        // 3) Create order (attempt with preferred_time; if column missing, retry without)
+        let orderId = null;
+        const baseOrderPayload = {
+          customer_id: customerId,
+          subtotal: Number(subtotal.toFixed(2)),
+          delivery_fee: Number(deliveryFee.toFixed(2)),
+          order_type: orderType,
+          notes,
+          order_ref: orderRef
+        };
+        let { data: order, error: orderErr } = await supabase
           .from('orders')
-          .insert([{
-            customer_id: customerId,
-            subtotal: Number(subtotal.toFixed(2)),
-            delivery_fee: Number(deliveryFee.toFixed(2)),
-            order_type: orderType,
-            notes
-          }])
+          .insert([ { ...baseOrderPayload, preferred_time: preferredTimeISO } ])
           .select('id')
           .single();
-        if(e6) return fail('Create order', e6);
 
-        // Create order_items
-        const rows = basket.map(line => ({
-          order_id: order.id,
+        if (orderErr && orderErr.code === '42703') {
+          // Column preferred_time missing → retry without it
+          const retry = await supabase.from('orders').insert([ baseOrderPayload ]).select('id').single();
+          if (retry.error) return fail('Create order', retry.error);
+          order = retry.data;
+        } else if (orderErr) {
+          return fail('Create order', orderErr);
+        }
+        orderId = order.id;
+
+        // 4) Items
+        const rows = itemsSnapshot.map(line => ({
+          order_id: orderId,
           item_id: line.itemId,
           name: line.name,
           unit_price: Number(line.unitPrice.toFixed(2)),
@@ -1124,74 +1444,85 @@
           spice: (typeof line.spice === 'number') ? line.spice : null,
           img: line.img || null
         }));
-        const { error: e7 } = await supabase.from('order_items').insert(rows);
-        if(e7) return fail('Add order items', e7);
+        const { error: itemsErr } = await supabase.from('order_items').insert(rows);
+        if (itemsErr) return fail('Add order items', itemsErr);
 
-        checkoutMsg.style.color = 'green';
-        checkoutMsg.textContent = 'Order placed! Thank you.';
-        basket = [];
-        renderOrder();
-        setTimeout(()=>{ closeCheckout(); }, 900);
-		} catch (err){
-		  fail('Unexpected error', err);
+       // --- SUCCESS UI (step 2) ---
+		checkoutMsg.textContent = '';
+		closeCheckout?.(); // safe close if the function exists
+
+		// snapshot BEFORE clearing
+		const basketSnapshot = itemsSnapshot; // we already copied basket above
+
+		// clear your UI basket and re-render
+		basket.length = 0;
+		renderOrder();
+
+		// Pretty preferred time string (local)
+		const prefPretty = preferredTimeRaw
+		  ? new Date(preferredTimeRaw).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })
+		  : null;
+
+		/* ---- FIX 1: make sure ref is a string like "RTK-012" ---- */
+		let refText;
+		if (orderRef && typeof orderRef === 'object') {
+		  // e.g. RPC returned { assigned: 12 }
+		  const num = Number(orderRef.assigned || orderRef.id || orderRef.value || 0);
+		  refText = 'RTK-' + String(num).padStart(3, '0');
+		} else {
+		  // e.g. we already got "RTK-012" or "RTK-1730392039"
+		  refText = String(orderRef);
 		}
-		});
-		</script>   <!-- ✅ properly close the first script -->
 
-	<script>
-  // Auto-fit any input with .auto-fit by measuring its content
-  (function setupAutoFitInputs(){
-    const form = document.getElementById('checkout-form');
-    if(!form) return;
+		/* ---- FIX 2: make sure total is numeric ---- */
+		const subtotalNum = Number(subtotal) || 0;
+		const deliveryNum = Number(deliveryFee) || 0;
+		const grandTotal = subtotalNum + deliveryNum;
 
-    // Create a hidden measuring span
-    const measurer = document.createElement('span');
-    measurer.className = 'input-measure';
-    document.body.appendChild(measurer);
+		showOrderSuccess(orderRef, itemsSnapshot, total, orderType, prefPretty);
 
-    function fit(el){
-      // Use placeholder when empty so it doesn't collapse
-      const text = el.value || el.placeholder || '';
-      measurer.style.font = getComputedStyle(el).font;
-      measurer.style.padding = getComputedStyle(el).padding;
-      measurer.textContent = text + ' ';
-      // Add 2ch breathing room, but never exceed container width
-      const px = measurer.getBoundingClientRect().width;
-      el.style.width = Math.min(px + 4, el.parentElement.getBoundingClientRect().width) + 'px';
-    }
+      } catch (err){
+        fail('Unexpected error', err);
+      }
+    });
 
-    function init(el){
-      // Start with a sensible width (min 18ch via CSS), then fit
-      fit(el);
-      ['input','change'].forEach(evt => el.addEventListener(evt, () => fit(el)));
-      // Re-fit on window resize (container may change)
-      window.addEventListener('resize', () => fit(el));
-    }
+    // Auto-fit inputs
+    (function setupAutoFitInputs(){
+      const form = document.getElementById('checkout-form');
+      if(!form) return;
+      const measurer = document.createElement('span');
+      measurer.className = 'input-measure';
+      document.body.appendChild(measurer);
 
-    form.querySelectorAll('input.auto-fit').forEach(init);
-  })();
-  document.addEventListener('click', (e)=>{
-  const btn = e.target.closest('#open-checkout');
-  if (!btn) return;
-  e.preventDefault();
-  if (basket.length === 0) {
-    orderMsg.textContent = 'Your basket is empty.';
-    orderMsg.style.color = '#b02a2a';
-    return;
-  }
-  orderMsg.textContent = '';
-  const subtotal = basket.reduce((s,i)=> s + i.unitPrice * i.qty, 0);
-  openCheckout(subtotal);
-});
+      function fit(el){
+        const text = el.value || el.placeholder || '';
+        const cs = getComputedStyle(el);
+        measurer.style.font = cs.font;
+        measurer.style.padding = cs.padding;
+        measurer.textContent = text + ' ';
+        const px = measurer.getBoundingClientRect().width;
+        const maxW = el.parentElement.getBoundingClientRect().width;
+        el.style.width = Math.min(px + 4, maxW) + 'px';
+      }
+      function init(el){
+        fit(el);
+        ['input','change'].forEach(evt => el.addEventListener(evt, () => fit(el)));
+        window.addEventListener('resize', () => fit(el));
+      }
+      form.querySelectorAll('input.auto-fit').forEach(init);
+    })();
 
-// Recalculate open sections on window resize
-window.addEventListener('resize', () => {
-  document.querySelectorAll('.category-body.open').forEach(b => {
-    b.style.maxHeight = b.scrollHeight + 'px';
-  });
-});
+    // Recalculate open sections on resize (accordion)
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('.category-body.open').forEach(b => {
+        b.style.maxHeight = b.scrollHeight + 'px';
+      });
+    });
+  </script>
 
-
-</script>
+  <!-- Lightbox backdrop -->
+  <div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;z-index:1500">
+    <img id="lightbox-img" style="max-width:92%;max-height:92%;border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,0.6)" alt="">
+  </div>
 </body>
 </html>
