@@ -124,6 +124,59 @@
     }
     .input.auto-fit { width:auto; max-width:100%; min-width:18ch; white-space:nowrap; }
     .input-measure { position:absolute; visibility:hidden; white-space:pre; font:inherit; padding:10px 12px; border:1px solid transparent; }
+	/* ===== mobile / small screens ===== */
+@media (max-width: 900px) {
+
+  /* header: stack logo + nav */
+  header {
+    position: static;  /* easier on mobile */
+  }
+  .header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  nav ul {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* main layout: 1 column */
+  main {
+    display: block;
+  }
+
+  /* order panel: put it UNDER the menu, full width, no sticky */
+  #order-panel {
+    position: static;
+    width: 100%;
+    margin-top: 16px;
+  }
+
+  /* menu items: let them breathe full width */
+  .menu-item {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* even smaller phones */
+@media (max-width: 540px) {
+  nav ul {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .header-inner {
+    padding: 8px 14px;
+  }
+  .food-grid {
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+  .card {
+    padding: 14px;
+  }
+}
+
   </style>
 </head>
 <body>
