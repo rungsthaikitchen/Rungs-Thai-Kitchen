@@ -126,56 +126,55 @@
     .input-measure { position:absolute; visibility:hidden; white-space:pre; font:inherit; padding:10px 12px; border:1px solid transparent; }
 	/* ===== mobile / small screens ===== */
 @media (max-width: 900px) {
-
-  /* header: stack logo + nav */
+  /* header: stack logo above nav, but keep nav links horizontal */
   header {
-    position: static;  /* easier on mobile */
+    position: static;
   }
   .header-inner {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  nav ul {
-    flex-wrap: wrap;
+    align-items: center;
+    text-align: center;
     gap: 8px;
   }
 
-  /* main layout: 1 column */
+  /* nav: horizontal list that wraps nicely */
+  nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 14px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  nav ul li {
+    display: inline-block;
+  }
+
+  nav a {
+    font-size: 0.95rem;
+    padding: 4px 8px;
+  }
+
+  /* main layout: single column, order summary below menu */
   main {
     display: block;
   }
 
-  /* order panel: put it UNDER the menu, full width, no sticky */
   #order-panel {
     position: static;
     width: 100%;
-    margin-top: 16px;
+    margin-top: 20px;
   }
 
-  /* menu items: let them breathe full width */
+  /* menu items: full width on mobile */
   .menu-item {
     flex-direction: column;
     gap: 8px;
   }
 }
 
-/* even smaller phones */
-@media (max-width: 540px) {
-  nav ul {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .header-inner {
-    padding: 8px 14px;
-  }
-  .food-grid {
-    grid-template-columns: repeat(2, minmax(120px, 1fr));
-  }
-  .card {
-    padding: 14px;
-  }
-}
 
   </style>
 </head>
