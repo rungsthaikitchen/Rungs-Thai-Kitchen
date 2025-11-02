@@ -226,6 +226,11 @@
   }
 }
 
+<script>
+console.info('Console levels forced');
+console.log = console.info = console.debug = console.warn = console.error = console.log.bind(console);
+</script>
+
 
   </style>
 </head>
@@ -560,27 +565,27 @@
     // ---------- Data ----------
     const MENU_CATEGORIES = [
       { id: 'starters', title: 'Starter', items: [
-        { id: 'veg-spring-rolls', name: 'Vegetable Spring Rolls (x4)', desc: 'Crispy, served with sweet chili sauce.', price: 4.50, allergens: ['gluten'] },
+        { id: 'veg-spring-rolls', name: 'Vegetable Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of glass noodles and vegetables, served with a sweet chilli sauce.', price: 4.50, allergens: ['gluten'] },
         { id: 'chicken-satay', name: 'Chicken Satay', desc: 'Marinated chicken skewers with peanut sauce.', price: 5.00, allergens: ['peanuts','soya','sesame'] },
         { id: 'prawn-crackers', name: 'Prawn Crackers', desc: 'Light, crunchy snacks with sweet chilli sauce.', price: 2.50, allergens: ['shellfish','gluten'] },
         { id: 'moo-ping', name: 'Pork Skewer (Moo Ping)', desc: 'Sweet & savoury grilled pork skewers.', price: 5.00, allergens: [] },
-        { id: 'chicken-spring-rolls', name: 'Chicken Spring Rolls (x4)', desc: 'Crispy rolls with chicken & veg.', price: 5.00, allergens: ['gluten'] },
-        { id: 'fried-tofu', name: 'Deep Fried Tofu', desc: 'Crispy tofu with sweet-spicy peanut sauce.', price: 3.50, allergens: ['soya','peanuts','sesame'] },
-        { id: 'fish-cakes', name: 'Thai Fish Cakes', desc: 'Fragrant, bouncy fish cakes with herbs.', price: 5.00, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','egg','soya'] },
-        { id: 'porkprawn-dumplings', name: 'Pork & Prawn Steamed Dumplings', desc: 'Savory dumplings with pork & prawns.', price: 4.50, allergens: ['gluten','shellfish'] },
-        { id: 'fried-prawns', name: 'Deep Fried Tiger Prawns (x4)', desc: 'Tempura prawns with sweet chilli sauce.', price: 6.00, allergens: ['shellfish','gluten','egg'] },
-        { id: 'thai-sausage', name: 'Thai Pork Sausage', desc: 'Traditional Thai-style sausage with herbs.', price: 5.00, allergens: [] }
+        { id: 'chicken-spring-rolls', name: 'Chicken Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of meat, glass noodles, and vegetables, served with a sweet chilli sauce.', price: 5.00, allergens: ['gluten'] },
+        { id: 'fried-tofu', name: 'Deep Fried Tofu', desc: 'Crispy Thai Fried Tofu with a sweet-spicy Thai peanut sauce!', price: 3.50, allergens: ['soya','peanuts','sesame'] },
+        { id: 'fish-cakes', name: 'Thai Fish Cakes', desc: 'Flavourful, bite-sized fritters with a blend of savoury, spicy, and tangy flavours.', price: 5.00, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','egg','soya'] },
+        { id: 'porkprawn-dumplings', name: 'Pork & Prawn Steamed Dumplings', desc: ' Steamed dumplings filled with a savoury combination of tender pork and juicy prawns.', price: 4.50, allergens: ['gluten','shellfish'] },
+        { id: 'fried-prawns', name: 'Deep Fried Tiger Prawns (x4)', desc: 'Tiger Prawns cooked in a crispy tempura batter served with Authentic Thai sweet Chilli Sauce.', price: 6.00, allergens: ['shellfish','gluten','egg'] },
+        { id: 'thai-sausage', name: 'Thai Pork Sausage', desc: 'A traditional fermented Thai sausage made with ground pork, sticky rice, and fragrant seasonings. Served with fresh sliced ginger, whole peanuts and slices of cucumber.', price: 5.00, allergens: [] }
       ]},
       { id: 'soup', title: 'Soup', items: [
-        { id: 'tom-yum', name: 'Tom Yum Soup 🌶️🌶️', desc: 'Hot & sour broth with lemongrass, galangal, kaffir lime leaves.', price: 6.50, allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'] },
-        { id: 'tom-kha', name: 'Tom Kha🌶️', desc: 'Coconut soup with galangal, lemongrass, kaffir lime.', price: 5.50, allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','dairy'] },
-        { id: 'dumpling-broth', name: 'Chicken Steamed Dumplings Broth (Gaew Naam)', desc: 'Broth with chicken-stuffed wontons.', price: 5.50, allergens: ['gluten','egg','soya'] }
+        { id: 'tom-yum', name: 'Tom Yum Soup 🌶️🌶️', desc: 'A vibrant and aromatic Thai classic featuring a hot and sour clear broth infused with lemongrass, galangal, and kaffir lime leaves.', price: 6.50, allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'] },
+        { id: 'tom-kha', name: 'Tom Kha🌶️', desc: 'A creamy and aromatic Thai coconut soup featuring fragrant galangal, lemongrass, and kaffir lime leaves.', price: 5.50, allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','dairy'] },
+        { id: 'dumpling-broth', name: 'Chicken Steamed Dumplings Broth (Gaew Naam)', desc: 'A savoury and flavourful broth with fragrant chicken-stuffed wontons.', price: 5.50, allergens: ['gluten','egg','soya'] }
       ]},
       { id: 'salad', title: 'Salad', items: [
-        { id: 'papaya-salad', name: 'Green Papaya Salad (Som Tam)🌶️🌶️🌶️', desc: 'Shredded papaya, lime, chillies, peanuts.', price: 7.00, spiceEnabled: true, spiceDefault: 3, allergens: ['peanuts','fish','soya'] },
-        { id: 'beef-salad', name: 'Spicy Beef Salad (Yum Nuea)🌶️🌶️', desc: 'Steak, herbs, tangy lime-fish sauce dressing.', price: 9.00, spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'] },
-        { id: 'pork-salad', name: 'Grilled Pork Salad (Nam Tok)🌶️', desc: 'Charred pork, lime, fish sauce, rice powder.', price: 8.50, spiceEnabled: true, spiceDefault: 1, allergens: ['fish'] },
-        { id: 'laab', name: 'Laab🌶️🌶️', desc: 'Vibrant meat salad with spice & herbs.', price: 8.00, spiceEnabled: true, spiceDefault: 2, allergens: ['fish'] }
+        { id: 'papaya-salad', name: 'Green Papaya Salad (Som Tam)🌶️🌶️🌶️', desc: 'A spicy, savoury, and sweet Thai salad made primarily of shredded green papaya.', price: 7.00, spiceEnabled: true, spiceDefault: 3, allergens: ['peanuts','fish','soya'] },
+        { id: 'beef-salad', name: 'Spicy Beef Salad (Yum Nuea)🌶️🌶️', desc: 'A classic Thai salad with juicy grilled steak, tossed with crisp vegetables, fresh mint, coriander, and a tangy lime-fish sauce dressing.', price: 9.00, spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'] },
+        { id: 'pork-salad', name: 'Grilled Pork Salad (Nam Tok)🌶️', desc: 'This classic North-eastern Thai salad features smoky, charred grilled pork slices tossed with a fiery dressing of lime, fish sauce, and chili flakes.', price: 8.50, spiceEnabled: true, spiceDefault: 1, allergens: ['fish'] },
+        { id: 'laab', name: 'Laab🌶️🌶️', desc: 'A vibrant and flavourful meat salad known for its harmony of spicy, sour, salty, and savoury flavours.', price: 8.00, spiceEnabled: true, spiceDefault: 2, allergens: ['fish'] }
       ]},
       { id: 'curry', title: 'Curry', items: [
         { id: 'rung-curry', name: 'Chefs Special Rainbow Curry🌶️', desc: 'Rich, mildly spiced curry.', price: 9.50, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','soya'] },
@@ -1184,8 +1189,7 @@
 	window.roundToTwo = roundToTwo;
 	window.chilliIcons = chilliIcons;
 	window.nameWithoutChillies = nameWithoutChillies;
-
-
+	
 
 	}); // end DOMContentLoaded
 </script>
@@ -1197,6 +1201,25 @@
 		window.roundToTwo = n => Math.round((n || 0) * 100) / 100;
 	  }
 	</script>
+	
+	<script>
+	  // hard-sanitize anything we send to the PDF
+	  function pdfSafe(str) {
+		return (str || '')
+		  // remove chilli emoji (both with vs16 and plain)
+		  .replace(/🌶️/gu, '')
+		  .replace(/🌶/g, '')
+		  // remove any emoji / symbols in the big emoji planes
+		  .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
+		  // finally, strip anything not basic ASCII
+		  .replace(/[^\x20-\x7E]/g, '')
+		  .trim();
+	  }
+</script>
+
+	<!-- jsPDF (must be before our downloadReceipt) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 
 
   <!-- Supabase JS (CDN) -->
@@ -1355,102 +1378,25 @@
 		  if (totalEl) {
 			totalEl.textContent = window.formatCurrency(summary.total);
 		  }
+		  
+		    // hook up the "Download receipt" button
+  const dlBtn = document.getElementById('order-success-download');
+  if (dlBtn) {
+    dlBtn.onclick = () => {
+      // make it loud so we see it even if console is filtered
+      console.error('[Receipt] download clicked', items);
+      if (typeof window.downloadReceipt === 'function') {
+        window.downloadReceiptPlain(summary, items, preferredTimeStr);
+      }
+    };
+  }
+
 
 		  // ✅ store for PDF generation
 		  window.__lastOrderForPdf = { summary, items, preferredTimeStr };
 
 		  wrap.style.display = 'flex';
 		};
-
-		// --- PDF download handler ---
-		(function setupReceiptDownload(){
-		  const btn = document.getElementById('order-success-pdf');
-		  if (!btn) return;
-
-		  btn.addEventListener('click', async () => {
-			const payload = window.__lastOrderForPdf;
-			if (!payload) {
-			  alert('No order data to export yet.');
-			  return;
-			}
-
-			const { jsPDF } = window.jspdf;
-			const doc = new jsPDF();
-
-			const { summary, items, preferredTimeStr } = payload;
-			let y = 10;
-
-			// Header
-			doc.setFontSize(16);
-			doc.text("Rung's Thai Kitchen — Receipt", 10, y);
-			y += 8;
-
-			doc.setFontSize(11);
-			doc.text(`Order Ref: ${summary.ref}`, 10, y); y += 6;
-			doc.text(`Order type: ${summary.orderType}`, 10, y); y += 6;
-			if (preferredTimeStr) {
-			  doc.text(`Preferred time: ${preferredTimeStr}`, 10, y); y += 6;
-			}
-			y += 2;
-
-			// Items
-			doc.setFontSize(12);
-			doc.text("Items", 10, y);
-			y += 5;
-			doc.setFontSize(10);
-
-			items.forEach(item => {
-			  doc.text(`${item.qty} × ${item.name}`, 10, y);
-			  const lineTotal = (item.qty * item.unitPrice).toFixed(2);
-			  doc.text(`£${lineTotal}`, 170, y, { align: 'right' });
-			  y += 5;
-
-			  // modifiers + spice (PDF-safe — no emoji)
-			const extras = [];
-			if (item.mods?.length) {
-			  extras.push(item.mods.map(m => m.name).join(', '));
-			}
-			if (typeof item.spice === 'number') {
-			  const lvl = Math.max(0, Math.min(3, item.spice));
-			  const spiceLabel =
-				lvl === 0 ? 'Spice: None' :
-				lvl === 1 ? 'Spice: Mild' :
-				lvl === 2 ? 'Spice: Medium' :
-				'Spice: Hot';
-			  extras.push(spiceLabel);
-			}
-
-			if (extras.length) {
-			  doc.setFontSize(9);
-			  doc.text(`• ${extras.join(' • ')}`, 14, y);
-			  doc.setFontSize(10);
-			  y += 4;
-			}
-
-
-			  if (y > 270) { doc.addPage(); y = 10; }
-			});
-
-			y += 4;
-			doc.setLineWidth(0.5);
-			doc.line(10, y, 200, y);
-			y += 6;
-
-			// Totals
-			doc.setFontSize(11);
-			doc.text(`Subtotal: £${summary.subtotal.toFixed(2)}`, 10, y); y += 5;
-			doc.text(`Delivery: £${summary.delivery.toFixed(2)}`, 10, y); y += 5;
-			doc.setFontSize(12);
-			doc.text(`Total: £${summary.total.toFixed(2)}`, 10, y); y += 8;
-
-			doc.setFontSize(9);
-			doc.text("Thank you for ordering with Rung's Thai Kitchen!", 10, y);
-
-			// download
-			doc.save(`${summary.ref}.pdf`);
-		  });
-		})();
-
 
 
     // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
@@ -1740,6 +1686,13 @@
       });
     });
   </script>
+  
+<script>
+  // … your Supabase / checkout code …
+
+  // ⬇️ put this somewhere after you've defined window.formatCurrency,
+  // and before the closing </script> 
+</script>
 
   <!-- Lightbox backdrop -->
   <div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;z-index:1500">
@@ -1747,5 +1700,191 @@
   </div>
   <!-- jsPDF (client-side PDF generator) -->
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<!-- receipt helper (put this just before </body>) -->
+<script>
+(function () {
+  // safety: currency helper
+  if (typeof window.formatCurrency !== 'function') {
+    window.formatCurrency = function (n) {
+      return '£' + Number(n || 0).toFixed(2);
+    };
+  }
+
+// ✅ final, ASCII-safe, UTF-8 receipt
+	window.downloadReceipt = function downloadReceipt(summary, items, preferredTimeStr) {
+	  const pound = '\u00A3'; // £
+	  const bullet = '\u2022'; // •
+	  const colon = '\u003A'; // :
+
+	  const noChilli = (s = '') =>
+		s.replace(/🌶️/g, '').replace(/🌶/g, '').replace(/\s{2,}/g, ' ').trim();
+
+	  const lines = [];
+	  lines.push("Rung's Thai Kitchen");
+	  lines.push('----------------------------------------');
+	  lines.push(`Order ref: ${summary?.ref || 'RTK-???'}`);
+	  lines.push(`Total: ${pound}${(summary?.total || 0).toFixed(2)}`);
+	  lines.push(`Type: ${summary?.orderType || ''}`);
+	  if (preferredTimeStr) lines.push(`Preferred time: ${preferredTimeStr}`);
+	  lines.push('');
+	  lines.push('Items');
+
+	  (items || []).forEach((row) => {
+		const cleanName = noChilli(row.name || '');
+		const qty = row.qty || 1;
+		const lineTotal = (row.unitPrice || 0) * qty;
+		lines.push(`${qty} × ${cleanName} ${pound}${lineTotal.toFixed(2)}`);
+
+		const extras = [];
+		if (Array.isArray(row.mods) && row.mods.length) {
+		  extras.push(row.mods.map(m => m.name).join(', '));
+		}
+		if (typeof row.spice === 'number') {
+		  const spiceText =
+			row.spice === 0 ? 'None' :
+			row.spice === 1 ? 'Mild' :
+			row.spice === 2 ? 'Medium' : 'Hot';
+		  extras.push(`Spice: ${spiceText}`);
+		}
+		if (extras.length) lines.push(`• ${extras.join(' • ')}`);
+	  });
+
+	  lines.push('');
+	  lines.push('Thank you for ordering with Rung\'s Thai Kitchen!');
+
+	  // make .txt UTF-8
+	  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+	  const url = URL.createObjectURL(blob);
+	  const a = document.createElement('a');
+	  a.href = url;
+	  a.download = (summary?.ref || 'receipt') + '.txt';
+	  document.body.appendChild(a);
+	  a.click();
+	  document.body.removeChild(a);
+	  URL.revokeObjectURL(url);
+	};
+
+
+  // 3) wire the button on the success popup (if present)
+  const btn = document.getElementById('order-success-download');
+  if (btn) {
+    btn.addEventListener('click', function () {
+      if (!window._lastOrderSummary) {
+        alert('No order to download yet.');
+        return;
+      }
+      window.downloadReceipt(
+        window._lastOrderSummary,
+        window._lastOrderItems,
+        window._lastOrderPreferredTime
+      );
+    });
+  }
+})();
+</script>
+<script>
+// final, plain-text, no-chilli, Windows-friendly version
+window.downloadReceiptPlain = function (summary, items, preferredTimeStr) {
+  // helper: strip chilli emojis
+  const stripSpice = (s = '') =>
+    s.replace(/🌶️/g, '')
+     .replace(/🌶/g, '')
+     .replace(/\s{2,}/g, ' ')
+     .trim();
+
+  const lines = [];
+  lines.push("Rung's Thai Kitchen");
+  lines.push('----------------------------------------');
+  lines.push(`Order ref: ${summary?.ref || 'RTK-???'}`);
+
+  const totalNum = Number(summary?.total || 0);
+  const totalText = (typeof window.formatCurrency === 'function')
+    ? window.formatCurrency(totalNum)
+    : '£' + totalNum.toFixed(2);
+  lines.push(`Total: ${totalText}`);
+
+  if (summary?.orderType) {
+    lines.push(`Type: ${summary.orderType}`);
+  }
+  if (preferredTimeStr) {
+    lines.push(`Preferred time: ${preferredTimeStr}`);
+  }
+
+  lines.push('');
+  lines.push('Items');
+
+  (items || []).forEach(row => {
+    const name = stripSpice(row.name || '');
+    const qty  = row.qty || 1;
+    const lineTotal = Number(qty) * Number(row.unitPrice || 0);
+    const linePrice = (typeof window.formatCurrency === 'function')
+      ? window.formatCurrency(lineTotal)
+      : '£' + lineTotal.toFixed(2);
+
+    // main line
+    lines.push(`${qty} × ${name} ${linePrice}`);
+
+    // extras line
+    const extras = [];
+    if (Array.isArray(row.mods) && row.mods.length) {
+      extras.push(row.mods.map(m => m.name).join(', '));
+    }
+    if (typeof row.spice === 'number') {
+      const spiceText =
+        row.spice === 0 ? 'None' :
+        row.spice === 1 ? 'Mild' :
+        row.spice === 2 ? 'Medium' : 'Hot';
+      extras.push(`Spice: ${spiceText}`);
+    }
+    if (extras.length) {
+      lines.push('• ' + extras.join(' • '));
+    }
+  });
+
+  lines.push('');
+  lines.push('Thank you!');
+
+  // 👇 add a BOM so Windows/Notepad knows it's UTF-8
+  const BOM = '\uFEFF';
+  const blob = new Blob([BOM + lines.join('\n')], {
+    type: 'text/plain;charset=utf-8'
+  });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (summary?.ref || 'receipt') + '.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+</script>
+
+<script>
+(function setupReceiptDownload() {
+  const btn = document.getElementById('order-success-pdf');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    const payload = window.__lastOrderForPdf;
+    if (!payload) {
+      alert('No order data to export yet.');
+      return;
+    }
+
+    const { summary, items, preferredTimeStr } = payload;
+
+    // this should already be defined in your Supabase / checkout script
+    if (typeof window.downloadReceipt === 'function') {
+      window.downloadReceipt(summary, items, preferredTimeStr);
+    } else {
+      alert('Order: ' + (summary?.ref || 'RTK-???'));
+    }
+  });
+})();
+</script>
+
+
 </body>
 </html>
