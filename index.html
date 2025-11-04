@@ -870,56 +870,67 @@ setHeaderOffsetVar();
 		
 		
 		// Accordion behavior
-		header.addEventListener('click', () => {
-		  // close others
+				header.addEventListener('click', () => {
+		  const opening = !body.classList.contains('open');
+
+		  // 1) Close others
 		  document.querySelectorAll('.category-body.open').forEach(b => {
 			if (b !== body) {
 			  b.classList.remove('open');
 			  b.style.maxHeight = '0px';
-			  const cOther = b.previousElementSibling?.querySelector('.caret');
-			  if (cOther) cOther.textContent = '▶';
+			  const ct = b.previousElementSibling?.querySelector('.caret');
+			  if (ct) ct.textContent = '▶';
 			}
 		  });
 
-		  const wasOpen = body.classList.contains('open');
-
-		  if (wasOpen) {
-			// collapse this one
+		  if (!opening) {
+			// 2) Collapse this one and stop
 			body.classList.remove('open');
 			body.style.maxHeight = '0px';
-			const c = header.querySelector('.caret'); if (c) c.textContent = '▶';
+			const ct = header.querySelector('.caret'); if (ct) ct.textContent = '▶';
 			return;
 		  }
 
-		  // open this one
+		  // 3) Open this one
 		  body.classList.add('open');
 		  body.style.maxHeight = body.scrollHeight + 'px';
-		  const c = header.querySelector('.caret'); if (c) c.textContent = '▼';
+		  const ct = header.querySelector('.caret'); if (ct) ct.textContent = '▼';
 
-		  // smooth scroll AFTER layout has updated a tick
-		  // smoother + iOS-safe scroll after open animation
-		setTimeout(() => {
-		  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		  
-		  // detect if we're on iOS Safari
+		  // 4) iOS-safe, sticky-header aware scroll
 		  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+		  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-		  if (isIOS) {
-			// Use manual offset scroll for reliability on iOS
-			const headerEl = document.querySelector('header');
-			const offset = (headerEl ? headerEl.getBoundingClientRect().height : 0) + 12;
-			const y = header.getBoundingClientRect().top + window.scrollY - offset;
-			window.scrollTo({ top: y, behavior: prefersReduced ? 'auto' : 'smooth' });
-		  } else {
-			// Standard browsers – simpler, works fine
-			header.scrollIntoView({
-			  block: 'start',
-			  behavior: prefersReduced ? 'auto' : 'smooth'
+		  // Use the category header as the anchor; it’s more reliable than the body
+		  const targetEl = header;
+
+		  // You already have a header offset helper; if not, this fallback works:
+		  const getHeaderOffset = () => {
+			const h = document.querySelector('.site-header') || document.querySelector('header');
+			return (h ? Math.round(h.getBoundingClientRect().height) : 0) + 12; // breathing room
+		  };
+
+		  // Wait for layout to settle:
+		  requestAnimationFrame(() => {
+			// force a reflow to make sure maxHeight is applied (Safari quirk)
+			void body.offsetHeight;
+
+			requestAnimationFrame(() => {
+			  const offset = getHeaderOffset();
+			  const target = targetEl.getBoundingClientRect().top + window.pageYOffset - offset;
+
+			  // clamp to page bounds (prevents jumping to footer on short pages)
+			  const maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+			  const safeTop = Math.max(0, Math.min(target, maxTop));
+
+			  // iOS Safari has bugs with smooth scroll after layout changes → use auto
+			  window.scrollTo({
+				top: safeTop,
+				behavior: (isIOS || prefersReduced) ? 'auto' : 'smooth'
+			  });
 			});
-		  }
-		}, 250); // small delay for animation
-
+		  });
 		});
+
 
 		// keep these AFTER the handler
 		catEl.appendChild(header);
