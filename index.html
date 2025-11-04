@@ -345,13 +345,26 @@ footer {
 }
 
 /* This helps anchors or programmatic scrolls land below the sticky header */
-:root { --header-offset: 120px; } /* fallback; JS will set the exact value */
+:root {
+  --header-offset: 160px; /* fallback; JS will set the precise value */
+}
+
 html {
   scroll-padding-top: var(--header-offset);
-  scroll-behavior: smooth;
+  scroll-behavior: smooth; /* nice-to-have */
 }
-/* Any of these can be scrolled-to with the same top margin */
-.category, .category-header, .category-body { scroll-margin-top: var(--header-offset); }
+
+/* Anything we might scroll to */
+.category,
+.category-header,
+.category-body {
+  scroll-margin-top: var(--header-offset);
+}
+
+
+/*.card-spacer { margin-bottom: 180px; }
+.card { margin-bottom: 0; } */
+
 
 <script>
 console.info('Console levels forced');
@@ -395,7 +408,8 @@ console.log = console.info = console.debug = console.warn = console.error = cons
       <!-- Left column -->
       <section>
         <!-- About -->
-        <div class="card" id="about" style="margin-top:8px">
+        <!--<div class="card-spacer">-->
+		<div class="card" id="about" style="margin-top:8px">
           <h2>About Rung's Thai Kitchen</h2>
           <p class="muted">
             Welcome to Rung's Thai Kitchen, where I take pride in delivering authentic Thai takeaway food right to your doorstep in Leeds.</p>
@@ -403,9 +417,11 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 			<p class="muted">Whether you're craving a comforting curry or a refreshing salad, I've got you covered.
           </p>
         </div>
+		<!--</div>-->
 
         <!-- Our Food -->
-        <div class="card" id="our-food" style="margin-top:8px">
+        <!--<div class="card-spacer">-->
+		<div class="card" id="our-food" style="margin-top:8px">
           <h2>Our Food</h2>
           <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
             <div style="flex:1 1 320px;min-width:240px">
@@ -429,9 +445,11 @@ console.log = console.info = console.debug = console.warn = console.error = cons
             </div>
           </div>
         </div>
+		<!--</div>-->
 
         <!-- Allergens -->
-        <div class="card" id="allergens" style="margin-top:14px">
+        <!--<div class="card-spacer">-->
+		<div class="card" id="allergens" style="margin-top:14px">
           <h2 style="margin-bottom:10px">Allergens & Ingredients</h2>
           <p class="muted">
             We take food allergies seriously. Many of our dishes can be prepared without certain allergens — please
@@ -455,12 +473,15 @@ console.log = console.info = console.debug = console.warn = console.error = cons
             <div><span class="allergen-icon">🌶️</span> Spice Level (heat indicator)</div>
           </div>
         </div>
+		<!--</div>-->
 
         <!-- Menu -->
-        <div class="card" id="menu" style="margin-top:14px">
+        <!--<div class="card-spacer">-->
+		<div class="card" id="menu" style="margin-top:14px">
           <h2 style="margin-bottom:10px">Menu</h2>
           <div class="menu-section" id="menu-list"><!-- built by JS --></div>
         </div>
+		<!--</div>-->
       </section>
 
       <!-- Right column: Order -->
@@ -786,84 +807,22 @@ console.log = console.info = console.debug = console.warn = console.error = cons
     function roundToTwo(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
     function chilliIcons(n){ return '🌶️'.repeat(Math.max(0, Math.min(3, n||0))); }
 	
+	
 	// ---- Sticky header offset (single source of truth) ----
-		function getHeaderOffset() {
-		  const h = document.querySelector('.site-header') || document.querySelector('header');
-		  // +12px breathing room
-		  return (h ? Math.round(h.getBoundingClientRect().height) : 0) + 12;
-		}
+function computeHeaderOffset() {
+  const h = document.querySelector('.site-header') || document.querySelector('header');
+  return (h ? h.getBoundingClientRect().height : 0) + 12; // breathing room
+}
 
-		function applyHeaderOffset() {
-		  document.documentElement.style.setProperty('--header-offset', getHeaderOffset() + 'px');
-		}
+function setHeaderOffsetVar() {
+  document.documentElement.style.setProperty('--header-offset', computeHeaderOffset() + 'px');
+}
 
-		window.addEventListener('load', applyHeaderOffset);
-		window.addEventListener('resize', applyHeaderOffset);
-		applyHeaderOffset();
+window.addEventListener('load', setHeaderOffsetVar, { passive: true });
+window.addEventListener('resize', setHeaderOffsetVar, { passive: true });
+window.addEventListener('orientationchange', setHeaderOffsetVar, { passive: true });
+setHeaderOffsetVar();
 
-
-	
-	
-		function headerOffsetPx() {
-		  const h = document.querySelector('header');
-		  return (h ? h.getBoundingClientRect().height : 0) + 8; // add a little gap
-		}
-
-		function CategoryIntoView(bodyEl) {
-		  const y = bodyEl.getBoundingClientRect().top + window.pageYOffset - headerOffsetPx();
-		  window.scrollTo({ top: y, behavior: 'smooth' });
-		}
-
-		function attachAccordion(header, body) {
-		  header.addEventListener('click', () => {
-			const opening = !body.classList.contains('open');
-
-			// Close all others first
-			document.querySelectorAll('.category-body.open').forEach(b => {
-			  if (b !== body) {
-				b.classList.remove('open');
-				b.style.maxHeight = '0px';
-				const ct = b.previousElementSibling?.querySelector('.caret');
-				if (ct) ct.textContent = '▶';
-			  }
-			});
-
-			if (opening) {
-			  // Open this one
-			  body.classList.add('open');
-			  body.style.maxHeight = body.scrollHeight + 'px';
-			  const ct = header.querySelector('.caret');
-			  if (ct) ct.textContent = '▼';
-
-			  // Wait for layout to settle, then scroll accurately
-			  requestAnimationFrame(() => {
-				requestAnimationFrame(() => scrollCategoryIntoView(body));
-			  });
-
-			} else {
-			  // Close this one
-			  body.classList.remove('open');
-			  body.style.maxHeight = '0px';
-			  const ct = header.querySelector('.caret');
-			  if (ct) ct.textContent = '▶';
-			}
-		  });
-		}
-
-			function scrollPreciselyTo(el) {
-		  if (!el) return;
-		  const y = el.getBoundingClientRect().top + window.scrollY - getHeaderOffset();
-		  window.scrollTo({ top: y, behavior: 'smooth' });
-		}
-
-		function updateHeaderOffsetVar() {
-		  const header = document.querySelector('header');
-		  const offset = (header ? header.getBoundingClientRect().height : 0) + 8; // breathing room
-		  document.documentElement.style.setProperty('--header-offset', offset + 'px');
-		}
-		window.addEventListener('load', updateHeaderOffsetVar);
-		window.addEventListener('resize', updateHeaderOffsetVar);
-		updateHeaderOffsetVar();
 
 
     // ---------- Build menu (accordion categories) ----------
@@ -911,8 +870,9 @@ console.log = console.info = console.debug = console.warn = console.error = cons
         });
 
         // Accordion behavior
-        header.addEventListener('click', () => {
-  // close others
+        // Accordion behavior
+header.addEventListener('click', () => {
+  // Close others
   document.querySelectorAll('.category-body.open').forEach(b => {
     if (b !== body) {
       b.classList.remove('open');
@@ -937,20 +897,14 @@ console.log = console.info = console.debug = console.warn = console.error = cons
   body.style.maxHeight = body.scrollHeight + 'px';
   const c = header.querySelector('.caret'); if (c) c.textContent = '▼';
 
-    // after opening the body and setting maxHeight...
-requestAnimationFrame(() => {
+  // Let layout settle, then scroll so the header lands under the sticky header.
+  // We call it a couple times to handle font/image/height changes.
   requestAnimationFrame(() => {
-    const firstItem = body.querySelector('.menu-item') || body;
-    // compute target and cap to max scroll inside scrollPreciselyTo
-    scrollPreciselyTo(firstItem);
+    header.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    setTimeout(() => header.scrollIntoView({ block: 'start' }), 320); // after transition
+    setTimeout(() => header.scrollIntoView({ block: 'start' }), 650); // after lazy content
   });
 });
-
-
-	});
-
-
-
 
         catEl.appendChild(header);
         catEl.appendChild(body);
