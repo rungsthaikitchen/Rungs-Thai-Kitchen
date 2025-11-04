@@ -122,12 +122,11 @@
     .btn-ghost{background:transparent;border:1px solid #eee}
     .btn[disabled]{opacity:.55;cursor:not-allowed;filter:grayscale(10%)}
 	
-	<!--body {
-	background: #16205B;-->
+	/* body { background: #16205B; } */
+/* #menu h2::after { ... } */
 
-	.category { scroll-margin-top: var(--header-offset, 96px); }
 
-	header {
+		header {
 	  background: rgba(255,255,255);
 	  backdrop-filter: blur(8px);
 	}
@@ -151,9 +150,9 @@
 	  align-items:center;
 	  gap:6px;
 	}
-	<!--#menu h2::after {
-	  content:'🍜';
-	} -->
+	/* body { background: #16205B; } */
+/* #menu h2::after { ... } */
+
 
 
     /* Menu categories (accordion) */
@@ -346,50 +345,27 @@ footer {
 }
 
 /* This helps anchors or programmatic scrolls land below the sticky header */
+:root {
+  /* Fallback; JS updates this dynamically */
+  --header-offset: 96px;
+}
+
+/* Browser will keep this much space at top when scrolling to anything */
+html {
+  scroll-padding-top: var(--header-offset);
+  scroll-behavior: smooth; /* optional */
+}
+
+/* Any of these elements will land below the sticky header when scrolled to */
+.category,
+.category-header,
+.category-body {
+  scroll-margin-top: var(--header-offset);
+}
+
 .category { scroll-margin-top: 72px; } /* adjust if your header is taller on mobile */
 
-/* How far below the sticky header an opened category should land */
-:root { --header-offset: 88px; }   /* fallback; JS will update this */
 
-.category,
-.category-header {
-  scroll-margin-top: var(--header-offset);
-}
-
-:root {
-  --header-offset: 400px;   /* safe default; JS will overwrite */
-}
-
-/* browser will automatically keep this much space at the top when scrolling */
-html {
-  scroll-padding-top: var(--header-offset);
-  scroll-behavior: smooth; /* optional but nice */
-}
-
-/* any of these can be scrolled-to with the same top margin */
-.category,
-.category-header,
-.category-body {
-  scroll-margin-top: var(--header-offset);
-}
-:root {
-  --header-offset: 180px; /* fallback value, JS overrides dynamically */
-}
-
-html {
-  scroll-padding-top: var(--header-offset);
-  scroll-behavior: smooth; /* optional but nice for all scrolls */
-}
-
-.category,
-.category-header,
-.category-body {
-  scroll-margin-top: var(--header-offset);
-}
-
-:root { --header-offset: 160px; } /* a fallback; JS does the precise work */
-html { scroll-padding-top: var(--header-offset); }
-.category, .category-header, .category-body { scroll-margin-top: var(--header-offset); }
 
 
 <script>
@@ -831,7 +807,7 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 		  return (h ? h.getBoundingClientRect().height : 0) + 8; // add a little gap
 		}
 
-		function scrollCategoryIntoView(bodyEl) {
+		function CategoryIntoView(bodyEl) {
 		  const y = bodyEl.getBoundingClientRect().top + window.pageYOffset - headerOffsetPx();
 		  window.scrollTo({ top: y, behavior: 'smooth' });
 		}
@@ -872,10 +848,11 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 		  });
 		}
 
-		function getHeaderOffset() {
-		  const h = document.querySelector('header');
-		  return (h ? h.getBoundingClientRect().height : 0) + 8; // a little breathing room
+		function getHeaderOffset(){
+		  const h = document.querySelector('.site-header') || document.querySelector('header');
+		  return (h ? Math.round(h.getBoundingClientRect().height) : 0) + 12; // breathing room
 		}
+
 
 		function scrollPreciselyTo(el) {
 		  if (!el) return;
