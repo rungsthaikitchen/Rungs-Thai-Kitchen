@@ -350,15 +350,14 @@ footer {
 }
 
 html {
-  scroll-padding-top: var(--header-offset);
-  scroll-behavior: smooth; /* nice-to-have */
+  scroll-behavior: smooth;                 /* native smooth scroll */
+  scroll-padding-top: var(--header-offset);/* space for sticky header */
 }
 
-/* Anything we might scroll to */
-.category,
-.category-header,
 .category-body {
-  scroll-margin-top: var(--header-offset);
+  transition: max-height .25s ease;        /* a touch shorter & snappier */
+  will-change: max-height;                 /* hint for smoother anim */
+  overflow: hidden;
 }
 
 
@@ -899,12 +898,18 @@ header.addEventListener('click', () => {
 
   // Let layout settle, then scroll so the header lands under the sticky header.
   // We call it a couple times to handle font/image/height changes.
-  requestAnimationFrame(() => {
-    header.scrollIntoView({ block: 'start', behavior: 'smooth' });
-    setTimeout(() => header.scrollIntoView({ block: 'start' }), 320); // after transition
-    setTimeout(() => header.scrollIntoView({ block: 'start' }), 650); // after lazy content
+  // Smooth scroll after open animation has mostly finished
+const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+setTimeout(() => {
+  header.scrollIntoView({ 
+    block: 'start', 
+    behavior: prefersReduced ? 'auto' : 'smooth' 
   });
-});
+}, 220);
+
+
+	});
 
         catEl.appendChild(header);
         catEl.appendChild(body);
