@@ -897,13 +897,28 @@ setHeaderOffsetVar();
 		  const c = header.querySelector('.caret'); if (c) c.textContent = '▼';
 
 		  // smooth scroll AFTER layout has updated a tick
+		  // smoother + iOS-safe scroll after open animation
+		setTimeout(() => {
 		  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		  setTimeout(() => {
+		  
+		  // detect if we're on iOS Safari
+		  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+		  if (isIOS) {
+			// Use manual offset scroll for reliability on iOS
+			const headerEl = document.querySelector('header');
+			const offset = (headerEl ? headerEl.getBoundingClientRect().height : 0) + 12;
+			const y = header.getBoundingClientRect().top + window.scrollY - offset;
+			window.scrollTo({ top: y, behavior: prefersReduced ? 'auto' : 'smooth' });
+		  } else {
+			// Standard browsers – simpler, works fine
 			header.scrollIntoView({
 			  block: 'start',
 			  behavior: prefersReduced ? 'auto' : 'smooth'
 			});
-		  }, 220);
+		  }
+		}, 250); // small delay for animation
+
 		});
 
 		// keep these AFTER the handler
