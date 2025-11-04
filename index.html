@@ -867,53 +867,50 @@ setHeaderOffsetVar();
           `;
           body.appendChild(el);
         });
+		
+		
+		// Accordion behavior
+		header.addEventListener('click', () => {
+		  // close others
+		  document.querySelectorAll('.category-body.open').forEach(b => {
+			if (b !== body) {
+			  b.classList.remove('open');
+			  b.style.maxHeight = '0px';
+			  const cOther = b.previousElementSibling?.querySelector('.caret');
+			  if (cOther) cOther.textContent = '▶';
+			}
+		  });
 
-        // Accordion behavior
-        // Accordion behavior
-header.addEventListener('click', () => {
-  // Close others
-  document.querySelectorAll('.category-body.open').forEach(b => {
-    if (b !== body) {
-      b.classList.remove('open');
-      b.style.maxHeight = '0px';
-      const c = b.previousElementSibling?.querySelector('.caret');
-      if (c) c.textContent = '▶';
-    }
-  });
+		  const wasOpen = body.classList.contains('open');
 
-  const wasOpen = body.classList.contains('open');
+		  if (wasOpen) {
+			// collapse this one
+			body.classList.remove('open');
+			body.style.maxHeight = '0px';
+			const c = header.querySelector('.caret'); if (c) c.textContent = '▶';
+			return;
+		  }
 
-  if (wasOpen) {
-    // collapse this one
-    body.classList.remove('open');
-    body.style.maxHeight = '0px';
-    const c = header.querySelector('.caret'); if (c) c.textContent = '▶';
-    return;
-  }
+		  // open this one
+		  body.classList.add('open');
+		  body.style.maxHeight = body.scrollHeight + 'px';
+		  const c = header.querySelector('.caret'); if (c) c.textContent = '▼';
 
-  // open this one
-  body.classList.add('open');
-  body.style.maxHeight = body.scrollHeight + 'px';
-  const c = header.querySelector('.caret'); if (c) c.textContent = '▼';
+		  // smooth scroll AFTER layout has updated a tick
+		  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		  setTimeout(() => {
+			header.scrollIntoView({
+			  block: 'start',
+			  behavior: prefersReduced ? 'auto' : 'smooth'
+			});
+		  }, 220);
+		});
 
-  // Let layout settle, then scroll so the header lands under the sticky header.
-  // We call it a couple times to handle font/image/height changes.
-  // Smooth scroll after open animation has mostly finished
-const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		// keep these AFTER the handler
+		catEl.appendChild(header);
+		catEl.appendChild(body);
+		container.appendChild(catEl);
 
-setTimeout(() => {
-  header.scrollIntoView({ 
-    block: 'start', 
-    behavior: prefersReduced ? 'auto' : 'smooth' 
-  });
-}, 220);
-
-
-	});
-
-        catEl.appendChild(header);
-        catEl.appendChild(body);
-        container.appendChild(catEl);
       });
     }
 
