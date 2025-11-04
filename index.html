@@ -345,28 +345,13 @@ footer {
 }
 
 /* This helps anchors or programmatic scrolls land below the sticky header */
-:root {
-  /* Fallback; JS updates this dynamically */
-  --header-offset: 96px;
-}
-
-/* Browser will keep this much space at top when scrolling to anything */
+:root { --header-offset: 120px; } /* fallback; JS will set the exact value */
 html {
   scroll-padding-top: var(--header-offset);
-  scroll-behavior: smooth; /* optional */
+  scroll-behavior: smooth;
 }
-
-/* Any of these elements will land below the sticky header when scrolled to */
-.category,
-.category-header,
-.category-body {
-  scroll-margin-top: var(--header-offset);
-}
-
-.category { scroll-margin-top: 72px; } /* adjust if your header is taller on mobile */
-
-
-
+/* Any of these can be scrolled-to with the same top margin */
+.category, .category-header, .category-body { scroll-margin-top: var(--header-offset); }
 
 <script>
 console.info('Console levels forced');
@@ -801,6 +786,23 @@ console.log = console.info = console.debug = console.warn = console.error = cons
     function roundToTwo(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
     function chilliIcons(n){ return '🌶️'.repeat(Math.max(0, Math.min(3, n||0))); }
 	
+	// ---- Sticky header offset (single source of truth) ----
+		function getHeaderOffset() {
+		  const h = document.querySelector('.site-header') || document.querySelector('header');
+		  // +12px breathing room
+		  return (h ? Math.round(h.getBoundingClientRect().height) : 0) + 12;
+		}
+
+		function applyHeaderOffset() {
+		  document.documentElement.style.setProperty('--header-offset', getHeaderOffset() + 'px');
+		}
+
+		window.addEventListener('load', applyHeaderOffset);
+		window.addEventListener('resize', applyHeaderOffset);
+		applyHeaderOffset();
+
+
+	
 	
 		function headerOffsetPx() {
 		  const h = document.querySelector('header');
@@ -848,13 +850,7 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 		  });
 		}
 
-		function getHeaderOffset(){
-		  const h = document.querySelector('.site-header') || document.querySelector('header');
-		  return (h ? Math.round(h.getBoundingClientRect().height) : 0) + 12; // breathing room
-		}
-
-
-		function scrollPreciselyTo(el) {
+			function scrollPreciselyTo(el) {
 		  if (!el) return;
 		  const y = el.getBoundingClientRect().top + window.scrollY - getHeaderOffset();
 		  window.scrollTo({ top: y, behavior: 'smooth' });
@@ -941,17 +937,15 @@ console.log = console.info = console.debug = console.warn = console.error = cons
   body.style.maxHeight = body.scrollHeight + 'px';
   const c = header.querySelector('.caret'); if (c) c.textContent = '▼';
 
-    // IMPORTANT: scroll AFTER layout has updated so we know exact height
-		requestAnimationFrame(() => {
-		  // Smoothly align the whole category under the sticky header.
-		  // (scroll-margin-top on .category does the offset math for us)
-		  catEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // after opening the body and setting maxHeight...
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    const firstItem = body.querySelector('.menu-item') || body;
+    // compute target and cap to max scroll inside scrollPreciselyTo
+    scrollPreciselyTo(firstItem);
+  });
+});
 
-		  // Safety net: if images load and change height, nudge again shortly after.
-		  setTimeout(() => {
-			catEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-		  }, 150);
-		});
 
 	});
 
