@@ -125,6 +125,7 @@
 	<!--body {
 	background: #16205B;-->
 
+	.category { scroll-margin-top: var(--header-offset, 96px); }
 
 	header {
 	  background: rgba(255,255,255);
@@ -347,7 +348,48 @@ footer {
 /* This helps anchors or programmatic scrolls land below the sticky header */
 .category { scroll-margin-top: 72px; } /* adjust if your header is taller on mobile */
 
+/* How far below the sticky header an opened category should land */
+:root { --header-offset: 88px; }   /* fallback; JS will update this */
 
+.category,
+.category-header {
+  scroll-margin-top: var(--header-offset);
+}
+
+:root {
+  --header-offset: 400px;   /* safe default; JS will overwrite */
+}
+
+/* browser will automatically keep this much space at the top when scrolling */
+html {
+  scroll-padding-top: var(--header-offset);
+  scroll-behavior: smooth; /* optional but nice */
+}
+
+/* any of these can be scrolled-to with the same top margin */
+.category,
+.category-header,
+.category-body {
+  scroll-margin-top: var(--header-offset);
+}
+:root {
+  --header-offset: 180px; /* fallback value, JS overrides dynamically */
+}
+
+html {
+  scroll-padding-top: var(--header-offset);
+  scroll-behavior: smooth; /* optional but nice for all scrolls */
+}
+
+.category,
+.category-header,
+.category-body {
+  scroll-margin-top: var(--header-offset);
+}
+
+:root { --header-offset: 160px; } /* a fallback; JS does the precise work */
+html { scroll-padding-top: var(--header-offset); }
+.category, .category-header, .category-body { scroll-margin-top: var(--header-offset); }
 
 
 <script>
@@ -392,9 +434,9 @@ console.log = console.info = console.debug = console.warn = console.error = cons
       <!-- Left column -->
       <section>
         <!-- About -->
-        <div class="card" id="about">
-          <h1>About Rung's Thai Kitchen</h1>
-          <p class="muted" style="margin-top:8px">
+        <div class="card" id="about" style="margin-top:8px">
+          <h2>About Rung's Thai Kitchen</h2>
+          <p class="muted">
             Welcome to Rung's Thai Kitchen, where I take pride in delivering authentic Thai takeaway food right to your doorstep in Leeds.</p>
 			<p class="muted"> My culinary journey began with a passion for traditional Thai recipes handed down through generations. I believe that the secret to great Thai cuisine lies in using fresh, high-quality ingredients and a careful balance of flavours. Each dish is crafted with love and dedication, ensuring that you experience the vibrant and aromatic taste of Thailand in every bite.</p>
 			<p class="muted">Whether you're craving a comforting curry or a refreshing salad, I've got you covered.
@@ -402,8 +444,8 @@ console.log = console.info = console.debug = console.warn = console.error = cons
         </div>
 
         <!-- Our Food -->
-        <div class="card" id="our-food" style="margin-top:14px">
-          <h2 style="margin-bottom:10px">Our Food</h2>
+        <div class="card" id="our-food" style="margin-top:8px">
+          <h2>Our Food</h2>
           <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
             <div style="flex:1 1 320px;min-width:240px">
               <p class="muted">
@@ -783,27 +825,72 @@ console.log = console.info = console.debug = console.warn = console.error = cons
     function roundToTwo(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
     function chilliIcons(n){ return '🌶️'.repeat(Math.max(0, Math.min(3, n||0))); }
 	
-	// Put these helpers near your other utilities
-	function getHeaderHeight() {
-	  const h = document.querySelector('header');
-	  return h ? h.getBoundingClientRect().height : 0;
-	}
-	function scrollCategoryIntoView(categoryBodyEl) {
-	  // scroll so the TOP of the category body sits just below the sticky header
-	  const headerH = getHeaderHeight();
-	  const y = categoryBodyEl.getBoundingClientRect().top + window.scrollY - headerH - 8; // 8px breathing room
-	  window.scrollTo({ top: y, behavior: 'smooth' });
-	  function setScrollMarginFromHeader() {
-  const h = getHeaderHeight();
-  document.querySelectorAll('.category').forEach(c => {
-    c.style.scrollMarginTop = (h + 8) + 'px';
-	  });
-	}
-	window.addEventListener('resize', setScrollMarginFromHeader);
-	window.addEventListener('load', setScrollMarginFromHeader);
-	setScrollMarginFromHeader();
+	
+		function headerOffsetPx() {
+		  const h = document.querySelector('header');
+		  return (h ? h.getBoundingClientRect().height : 0) + 8; // add a little gap
+		}
 
-	}
+		function scrollCategoryIntoView(bodyEl) {
+		  const y = bodyEl.getBoundingClientRect().top + window.pageYOffset - headerOffsetPx();
+		  window.scrollTo({ top: y, behavior: 'smooth' });
+		}
+
+		function attachAccordion(header, body) {
+		  header.addEventListener('click', () => {
+			const opening = !body.classList.contains('open');
+
+			// Close all others first
+			document.querySelectorAll('.category-body.open').forEach(b => {
+			  if (b !== body) {
+				b.classList.remove('open');
+				b.style.maxHeight = '0px';
+				const ct = b.previousElementSibling?.querySelector('.caret');
+				if (ct) ct.textContent = '▶';
+			  }
+			});
+
+			if (opening) {
+			  // Open this one
+			  body.classList.add('open');
+			  body.style.maxHeight = body.scrollHeight + 'px';
+			  const ct = header.querySelector('.caret');
+			  if (ct) ct.textContent = '▼';
+
+			  // Wait for layout to settle, then scroll accurately
+			  requestAnimationFrame(() => {
+				requestAnimationFrame(() => scrollCategoryIntoView(body));
+			  });
+
+			} else {
+			  // Close this one
+			  body.classList.remove('open');
+			  body.style.maxHeight = '0px';
+			  const ct = header.querySelector('.caret');
+			  if (ct) ct.textContent = '▶';
+			}
+		  });
+		}
+
+		function getHeaderOffset() {
+		  const h = document.querySelector('header');
+		  return (h ? h.getBoundingClientRect().height : 0) + 8; // a little breathing room
+		}
+
+		function scrollPreciselyTo(el) {
+		  if (!el) return;
+		  const y = el.getBoundingClientRect().top + window.scrollY - getHeaderOffset();
+		  window.scrollTo({ top: y, behavior: 'smooth' });
+		}
+
+		function updateHeaderOffsetVar() {
+		  const header = document.querySelector('header');
+		  const offset = (header ? header.getBoundingClientRect().height : 0) + 8; // breathing room
+		  document.documentElement.style.setProperty('--header-offset', offset + 'px');
+		}
+		window.addEventListener('load', updateHeaderOffsetVar);
+		window.addEventListener('resize', updateHeaderOffsetVar);
+		updateHeaderOffsetVar();
 
 
     // ---------- Build menu (accordion categories) ----------
@@ -816,6 +903,7 @@ console.log = console.info = console.debug = console.warn = console.error = cons
         const header = document.createElement('div'); header.className = 'category-header';
         header.innerHTML = `<h3>${cat.title}</h3><div class="caret">▶</div>`;
         const body = document.createElement('div'); body.className = 'category-body';
+		
 
         cat.items.forEach(item => {
           ITEMS_BY_ID.set(item.id, item);
@@ -851,36 +939,46 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 
         // Accordion behavior
         header.addEventListener('click', () => {
-		  // 1) Close all other categories
-		  document.querySelectorAll('.category-body').forEach(b => {
-			if (b !== body) {
-			  b.classList.remove('open');
-			  b.style.maxHeight = '0px';
-			  const caret = b.previousElementSibling?.querySelector('.caret');
-			  if (caret) caret.textContent = '▶';
-			}
-		  });
+  // close others
+  document.querySelectorAll('.category-body.open').forEach(b => {
+    if (b !== body) {
+      b.classList.remove('open');
+      b.style.maxHeight = '0px';
+      const c = b.previousElementSibling?.querySelector('.caret');
+      if (c) c.textContent = '▶';
+    }
+  });
 
-		  // 2) Toggle this one
-		  const wasOpen = body.classList.contains('open');
-		  if (!wasOpen) {
-			body.classList.add('open');
-			body.style.maxHeight = body.scrollHeight + 'px';
-			const caret = header.querySelector('.caret');
-			if (caret) caret.textContent = '▼';
+  const wasOpen = body.classList.contains('open');
 
-			// 3) After the expand paints, scroll it under the sticky header
-			requestAnimationFrame(() => {
-			  // if content inside loads images and grows, wait a tick more
-			  setTimeout(() => scrollCategoryIntoView(body), 50);
-			});
-		  } else {
-			body.classList.remove('open');
-			body.style.maxHeight = '0px';
-			const caret = header.querySelector('.caret');
-			if (caret) caret.textContent = '▶';
-		  }
+  if (wasOpen) {
+    // collapse this one
+    body.classList.remove('open');
+    body.style.maxHeight = '0px';
+    const c = header.querySelector('.caret'); if (c) c.textContent = '▶';
+    return;
+  }
+
+  // open this one
+  body.classList.add('open');
+  body.style.maxHeight = body.scrollHeight + 'px';
+  const c = header.querySelector('.caret'); if (c) c.textContent = '▼';
+
+    // IMPORTANT: scroll AFTER layout has updated so we know exact height
+		requestAnimationFrame(() => {
+		  // Smoothly align the whole category under the sticky header.
+		  // (scroll-margin-top on .category does the offset math for us)
+		  catEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+		  // Safety net: if images load and change height, nudge again shortly after.
+		  setTimeout(() => {
+			catEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		  }, 150);
 		});
+
+	});
+
+
 
 
         catEl.appendChild(header);
