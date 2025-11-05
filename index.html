@@ -166,6 +166,12 @@
       padding:0 12px;
     }
     .category-body.open{ padding:12px; }
+	
+	/* keep anchors landing below sticky header */
+	:root { --header-offset: 120px; }  /* JS will overwrite precisely */
+	.category, .category-header, .category-body { scroll-margin-top: var(--header-offset); }
+	html { scroll-padding-top: var(--header-offset); }
+	
     .menu-item{display:flex;justify-content:space-between;align-items:flex-start;padding:10px;border-radius:8px;border:1px solid #f7efee;margin-bottom:8px}
     .menu-item .meta{max-width:72%}
     .menu-item .meta .title{font-weight:700}
@@ -363,6 +369,8 @@ html {
 
 /*.card-spacer { margin-bottom: 180px; }
 .card { margin-bottom: 0; } */
+
+getComputedStyle(document.documentElement).getPropertyValue('--header-offset')
 
 
 <script>
@@ -807,20 +815,32 @@ console.log = console.info = console.debug = console.warn = console.error = cons
     function chilliIcons(n){ return '🌶️'.repeat(Math.max(0, Math.min(3, n||0))); }
 	
 	
+	
 	// ---- Sticky header offset (single source of truth) ----
-function computeHeaderOffset() {
-  const h = document.querySelector('.site-header') || document.querySelector('header');
-  return (h ? h.getBoundingClientRect().height : 0) + 12; // breathing room
-}
+	function computeHeaderOffset(){
+	  const h = document.querySelector('.site-header') || document.querySelector('header');
+	  return (h ? Math.round(h.getBoundingClientRect().height) : 0) + 12; // breathing room
+	}
+	function applyHeaderOffset(){
+	  document.documentElement.style.setProperty('--header-offset', computeHeaderOffset() + 'px');
+	}
+	window.addEventListener('load', applyHeaderOffset, { passive:true });
+	window.addEventListener('resize', applyHeaderOffset, { passive:true });
+	window.addEventListener('orientationchange', applyHeaderOffset, { passive:true });
+	applyHeaderOffset();
 
-function setHeaderOffsetVar() {
-  document.documentElement.style.setProperty('--header-offset', computeHeaderOffset() + 'px');
-}
+	// robust smooth scroll that clamps to page bounds (prevents “footer snaps”)
+	function smoothScrollToElTop(el){
+	  if (!el) return;
+	  const offset = computeHeaderOffset();
+	  const target = el.getBoundingClientRect().top + window.scrollY - offset;
+	  const maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+	  const top = Math.max(0, Math.min(target, maxTop));
 
-window.addEventListener('load', setHeaderOffsetVar, { passive: true });
-window.addEventListener('resize', setHeaderOffsetVar, { passive: true });
-window.addEventListener('orientationchange', setHeaderOffsetVar, { passive: true });
-setHeaderOffsetVar();
+	  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+	  window.scrollTo({ top, behavior: (isIOS || prefersReduced) ? 'auto' : 'smooth' });
+	}
 
 
 
@@ -869,67 +889,46 @@ setHeaderOffsetVar();
         });
 		
 		
-		// Accordion behavior
-				header.addEventListener('click', () => {
+		// Accordion behavior (one open at a time, reliable scroll)
+		header.addEventListener('click', () => {
 		  const opening = !body.classList.contains('open');
 
-		  // 1) Close others
+		  // close all others
 		  document.querySelectorAll('.category-body.open').forEach(b => {
 			if (b !== body) {
 			  b.classList.remove('open');
 			  b.style.maxHeight = '0px';
-			  const ct = b.previousElementSibling?.querySelector('.caret');
-			  if (ct) ct.textContent = '▶';
+			  const c = b.previousElementSibling?.querySelector('.caret');
+			  if (c) c.textContent = '▶';
 			}
 		  });
 
 		  if (!opening) {
-			// 2) Collapse this one and stop
+			// collapse this one
 			body.classList.remove('open');
 			body.style.maxHeight = '0px';
-			const ct = header.querySelector('.caret'); if (ct) ct.textContent = '▶';
+			const c = header.querySelector('.caret'); if (c) c.textContent = '▶';
 			return;
 		  }
 
-		  // 3) Open this one
+		  // open this one
 		  body.classList.add('open');
 		  body.style.maxHeight = body.scrollHeight + 'px';
-		  const ct = header.querySelector('.caret'); if (ct) ct.textContent = '▼';
+		  const c = header.querySelector('.caret'); if (c) c.textContent = '▼';
 
-		  // 4) iOS-safe, sticky-header aware scroll
-		  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-		  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-		  // Use the category header as the anchor; it’s more reliable than the body
-		  const targetEl = header;
-
-		  // You already have a header offset helper; if not, this fallback works:
-		  const getHeaderOffset = () => {
-			const h = document.querySelector('.site-header') || document.querySelector('header');
-			return (h ? Math.round(h.getBoundingClientRect().height) : 0) + 12; // breathing room
-		  };
-
-		  // Wait for layout to settle:
+		  // iOS-safe, header-aware scroll after layout settles
 		  requestAnimationFrame(() => {
-			// force a reflow to make sure maxHeight is applied (Safari quirk)
+			// force reflow so Safari knows the new height
 			void body.offsetHeight;
-
 			requestAnimationFrame(() => {
-			  const offset = getHeaderOffset();
-			  const target = targetEl.getBoundingClientRect().top + window.pageYOffset - offset;
-
-			  // clamp to page bounds (prevents jumping to footer on short pages)
-			  const maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-			  const safeTop = Math.max(0, Math.min(target, maxTop));
-
-			  // iOS Safari has bugs with smooth scroll after layout changes → use auto
-			  window.scrollTo({
-				top: safeTop,
-				behavior: (isIOS || prefersReduced) ? 'auto' : 'smooth'
-			  });
+			  // scroll to the HEADER of the category (more reliable than body)
+			  smoothScrollToElTop(header);
 			});
 		  });
 		});
+
+
+
 
 
 		// keep these AFTER the handler
