@@ -169,6 +169,7 @@
 	
 	/* keep anchors landing below sticky header */
 	:root { --header-offset: 120px; }  /* JS will overwrite precisely */
+	html { scroll-behavior: smooth; }
 	.category, .category-header, .category-body { scroll-margin-top: var(--header-offset); }
 	html { scroll-padding-top: var(--header-offset); }
 	
@@ -957,11 +958,6 @@ header.addEventListener('click', () => {
     });
   });
 });
-
-
-
-
-
 
 		// keep these AFTER the handler
 		catEl.appendChild(header);
