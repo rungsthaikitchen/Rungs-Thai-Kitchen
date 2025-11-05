@@ -892,72 +892,62 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 		
 		
 		// Accordion behavior (REPLACE your existing header.addEventListener handler with this)
+// Accordion behavior (REPLACE your existing handler with this)
 header.addEventListener('click', () => {
   const opening = !body.classList.contains('open');
 
-  // 1) Close any other open categories
+  // 1) Close all other categories
   document.querySelectorAll('.category-body.open').forEach(b => {
     if (b !== body) {
       b.classList.remove('open');
       b.style.maxHeight = '0px';
-      const ct = b.previousElementSibling ? b.previousElementSibling.querySelector('.caret') : null;
+      const ct = b.previousElementSibling?.querySelector('.caret');
       if (ct) ct.textContent = '▶';
     }
   });
 
+  // 2) If we’re collapsing this one, do it and stop
   if (!opening) {
-    // 2) Collapse this one and stop
     body.classList.remove('open');
     body.style.maxHeight = '0px';
-    const ct = header.querySelector('.caret');
-    if (ct) ct.textContent = '▶';
+    const ct = header.querySelector('.caret'); if (ct) ct.textContent = '▶';
     return;
   }
 
-  // 3) Open this one
+  // 3) Open this category and set max-height for the transition
   body.classList.add('open');
   body.style.maxHeight = body.scrollHeight + 'px';
-  const ct = header.querySelector('.caret');
-  if (ct) ct.textContent = '▼';
+  const ct = header.querySelector('.caret'); if (ct) ct.textContent = '▼';
 
-  // 4) Two-step, iOS-safe scroll that accounts for the sticky header
+  // --- Sticky-header-aware scroll with double correction ---
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const behavior = (isIOS || prefersReduced) ? 'auto' : 'smooth';
 
+  // Helper to compute safe top position
+  const getOffsetTop = el => {
+    const h = document.querySelector('.site-header') || document.querySelector('header');
+    const headerH = (h ? Math.round(h.getBoundingClientRect().height) : 0) + 12; // breathing room
+    const target = el.getBoundingClientRect().top + window.pageYOffset - headerH;
+    const maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    return Math.max(0, Math.min(target, maxTop));
+  };
+
+  // Phase 1: after layout applies, scroll to the header of the category
   requestAnimationFrame(() => {
-    // force layout so Safari applies the new height before scrolling
+    // Force reflow so Safari registers the new height before we scroll
     void body.offsetHeight;
 
-    requestAnimationFrame(() => {
-      // Step A: native anchor scroll to the category header
-      header.scrollIntoView({
-        block: 'start',
-        behavior: (isIOS || prefersReduced) ? 'auto' : 'smooth'
-      });
+    window.scrollTo({ top: getOffsetTop(header), behavior });
 
-      // Step B: precise correction so the header sits just below the sticky header
-		const offsetPx = computeHeaderOffset();
-
-		// helper: measure & nudge so headerTop === offsetPx
-		function correctOnce() {
-		  const currentTop = Math.round(header.getBoundingClientRect().top);
-		  const delta = currentTop - offsetPx;
-		  if (Math.abs(delta) > 2) {
-			// move exactly by the error amount
-			window.scrollBy({ top: delta, left: 0, behavior: 'auto' });
-		  }
-		}
-
-		// run once shortly after the smooth scroll, then once more after layout settles
-		const firstDelay  = (isIOS || prefersReduced) ? 80  : 220;
-		const secondDelay = (isIOS || prefersReduced) ? 180 : 420;
-
-		setTimeout(correctOnce, firstDelay);
-		setTimeout(correctOnce, secondDelay);
-
-    });
+    // Phase 2: after the CSS transition (~280ms), correct the position again
+    // If you changed the transition duration in CSS, adjust 300 accordingly.
+    setTimeout(() => {
+      window.scrollTo({ top: getOffsetTop(header), behavior: 'auto' });
+    }, 300);
   });
 });
+
 
 		// keep these AFTER the handler
 		catEl.appendChild(header);
