@@ -42,6 +42,75 @@
   text-align: center;
 }
 
+/* Ticker sits below header, above page, but below any modal */
+#status-ticker {
+  position: sticky;      /* or 'fixed' if you prefer */
+  top: 0;
+  z-index: 700;          /* lower than modals */
+}
+
+html { scroll-padding-top: calc(var(--header-offset, 0px) + var(--ticker-height, 0px)); }
+
+
+/* Ensure modals always sit above the ticker */
+.modal-backdrop {
+  position: fixed;       /* ensure it covers everything */
+  inset: 0;
+  z-index: 1600;         /* higher than ticker */
+}
+
+/* If you also have the success modal separately, keep it above too */
+#order-success.modal-backdrop {
+  z-index: 1700;
+}
+
+
+/* Checkout status banner */
+.checkout-banner {
+  display:none;
+  margin:10px 0 6px;
+  padding:10px 12px;
+  border-radius:8px;
+  font-size:13px;
+  line-height:1.35;
+}
+.checkout-banner--closed       { background:#fff3f3; color:#8a1f1f; border:1px solid #f2d3d3; }
+.checkout-banner--fullybooked  { background:#fff8e6; color:#7a4d00; border:1px solid #f1dfb3; }
+.checkout-banner .x {
+  float:right; border:none; background:transparent; font-weight:800; cursor:pointer;
+}
+
+
+/* --- Holiday / status ticker --- */
+#status-ticker {
+  background: linear-gradient(90deg, #b02a2a, #d9464a);
+  color: #fff;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  padding: 8px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 2000;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+#status-ticker.hidden { display: none; }
+
+#status-ticker .ticker-inner {
+  white-space: nowrap;
+  animation: ticker-move 18s linear infinite;
+}
+
+@keyframes ticker-move {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+
+
 .brand-block {
   display: flex;
   flex-direction: column;
@@ -214,6 +283,92 @@
     .allergen-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #eee;border-radius:999px;background:#fff;font-size:12px}
 
     footer{margin-top:18px;text-align:center;padding:18px;border-radius:10px;background:rgba(204,12,26,0.35);color:white; padding-bottom:max(18px, env(safe-area-inset-bottom));}
+	footer {
+  margin-top: 30px;
+  text-align: center;
+  padding: 24px 16px;
+  border-radius: 12px;
+  background: rgba(204,12,26,0.35);
+  color: #fff;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+}
+
+footer {
+  margin-top: 30px;
+  text-align: center;
+  padding: 24px 16px;
+  border-radius: 12px;
+  background: rgba(204,12,26,0.35);
+  color: #fff;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+}
+
+.footer-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+}
+
+.footer-section h3 {
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: #fff;
+}
+
+.footer-section .muted {
+  color: rgba(255,255,255,0.85);
+  margin: 0 0 10px;
+}
+
+.footer-section a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.footer-section a:hover { opacity: 0.9; }
+
+.footer-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(255,255,255,0.2);
+  margin: 4px 0;
+}
+
+.footer-legal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.footer-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-links a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.footer-links a:hover { opacity: 0.9; }
+
+.footer-links .dot {
+  opacity: 0.8;
+  margin: 0 6px;
+}
+
+@media (max-width: 640px) {
+  footer { font-size: 0.9rem; }
+  .footer-section, .footer-legal { text-align: center; }
+}
+
+
 
     /* Checkout form layout/styling */
     #checkout-form > div { margin-top: 10px; }
@@ -410,6 +565,11 @@ console.log = console.info = console.debug = console.warn = console.error = cons
     </nav>
   </div>
 </header>
+<div id="status-ticker" class="hidden">
+  <div class="ticker-inner">
+    <span id="ticker-text">We’re closed for Songkran Festival, reopening 18 April 🎉</span>
+  </div>
+</div>
 
 
     <main>
@@ -509,15 +669,36 @@ console.log = console.info = console.debug = console.warn = console.error = cons
       </aside>
     </main>
 
-    <!-- Footer -->
-    <footer id="contact">
-      <div style="max-width:700px;margin:0 auto">
-        <div style="font-weight:800">Contact Us</div>
-        <div class="muted" style="margin-top:6px">Phone: 0113 3447431 &nbsp; • &nbsp; Email: hello@rungsthaikitchen.co.uk</div>
-        <div style="margin-top:10px;font-weight:700">Opening Hours</div>
-        <div class="muted">Wed–Sun: 17:00 – 21:00</div>
+   <footer id="contact">
+  <div class="footer-inner">
+    <div class="footer-section">
+      <h3>Contact Us</h3>
+      <p class="muted">
+        📞 <a href="tel:01133447431">0113 3447431</a> &nbsp; • &nbsp;
+        ✉️ <a href="mailto:hello@rungsthaikitchen.co.uk">hello@rungsthaikitchen.co.uk</a>
+      </p>
+
+      <h3>Opening Hours</h3>
+      <p class="muted">🕒 Wed–Sun: 17:00 – 21:00</p>
+    </div>
+
+    <div class="footer-divider"></div>
+
+    <div class="footer-legal">
+      <div class="footer-copy">
+        © <span id="year"></span> Rung’s Thai Kitchen. All rights reserved.
       </div>
-    </footer>
+      <nav class="footer-links" aria-label="Legal">
+        <a href="privacypolicy.html" target="_blank" rel="noopener">Privacy Policy</a>
+        <span class="dot">•</span>
+        <a href="cookiepolicy.html" target="_blank" rel="noopener">Cookie Policy</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+
+
   </div>
 
   <!-- customise Modal -->
@@ -583,29 +764,31 @@ console.log = console.info = console.debug = console.warn = console.error = cons
         </div>
         <button id="checkout-close" class="btn btn-ghost">Close</button>
       </div>
+		<div id="checkout-banner" class="checkout-banner" role="status" aria-live="polite"></div>
 
       <form id="checkout-form" class="form-grid">
         <div class="field">
           <label for="cust-name">Full name</label>
-          <input id="cust-name" name="name" type="text" autocomplete="name" required class="input auto-fit">
+          <input id="cust-name" name="name" type="text" autocomplete="name" required class="input auto-fit" required>
         </div>
 
         <div class="row-2">
           <div class="field">
             <label for="cust-email">Email</label>
-            <input id="cust-email" name="email" type="email" inputmode="email" autocomplete="email" class="input auto-fit">
+            <input id="cust-email" name="email" type="email" inputmode="email" autocomplete="email" class="input auto-fit" required>
           </div>
           <div class="field">
             <label for="cust-phone">Phone</label>
-            <input id="cust-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required class="input auto-fit">
+            <input id="cust-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required class="input auto-fit" required>
           </div>
         </div>
 
         <div class="field">
-          <label for="cust-address">Address (flat/house number, street name & post code please)</label>
+          <label for="cust-address">Address (flat/house number, street name & post code please)<span id="addr-required-hint" class="muted small">(required for delivery)</span></label>
           <input id="cust-address" name="address" type="text" autocomplete="street-address"
                  inputmode="text" class="input auto-fit" placeholder="House no., street, town, postcode">
         </div>
+		
 
         <div class="field">
           <label>Order type</label>
@@ -621,7 +804,7 @@ console.log = console.info = console.debug = console.warn = console.error = cons
         <!-- Preferred time -->
         <div class="field">
           <label for="cust-preferred-time">Preferred collection/delivery time</label>
-          <input id="cust-preferred-time" name="preferred_time" type="datetime-local" class="input">
+          <input id="cust-preferred-time" name="preferred_time" type="datetime-local" class="input" step="300">
           <div class="muted small">We’ll do our best to meet this time. We’ll contact you to confirm.</div>
         </div>
 
@@ -843,6 +1026,34 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 	  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 	  window.scrollTo({ top, behavior: (isIOS || prefersReduced) ? 'auto' : 'smooth' });
 	}
+	
+	// ---- Holiday / fully-booked ticker ----
+		const tickerEl = document.getElementById('status-ticker');
+		const tickerText = document.getElementById('ticker-text');
+
+		// Simple config object (edit this anytime)
+		const siteStatus = {
+		  active: true,  // turn off when not needed
+		  message: "We’re not open yet as we're making final equipment and ingredient preparations to ensure you have an amazing at home Thai dining experience! We hope to open by 3rd December 🎉"
+		};
+
+		if (siteStatus.active && tickerEl && tickerText) {
+		  tickerText.textContent = siteStatus.message;
+		  tickerEl.classList.remove('hidden');
+		}
+
+		(function adjustForTicker(){
+		  const bar = document.getElementById('status-ticker');
+		  if (!bar) return;
+		  const set = () => {
+			const h = bar.offsetHeight || 0;
+			document.documentElement.style.setProperty('--ticker-height', h + 'px');
+		  };
+		  new ResizeObserver(set).observe(bar);
+		  window.addEventListener('load', set, { passive:true });
+		  window.addEventListener('resize', set, { passive:true });
+		  set();
+		})();
 
 
 
@@ -1471,6 +1682,132 @@ header.addEventListener('click', () => {
     const SUPABASE_URL = 'https://ubyjrrsvbbqomitpaidb.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVieWpycnN2YmJxb21pdHBhaWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NTYyNjMsImV4cCI6MjA3NjUzMjI2M30.WTllxO5KnaMI0i1d4VHNBhjLuRMfu4_Xx5arqZmYevw';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+	
+
+/* ------------------------------
+   Blackout windows (from Supabase)
+---------------------------------*/
+
+// In-memory windows (filled by Supabase)
+let CLOSED_RANGES = [];      // [{start:Date, end:Date, message?:string}]
+let FULLY_BOOKED  = [];      // same shape
+
+// Load active windows that intersect “now → +60 days” (tweak as needed)
+async function loadBlackouts() {
+  const now = new Date();
+  const horizon = new Date();
+  horizon.setDate(horizon.getDate() + 60);
+
+  const { data, error } = await supabase
+    .from('booking_blackouts')
+    .select('kind,start_at,end_at,message,active')
+    .eq('active', true)
+    // overlap test (start < horizon && end > now)
+    .lt('start_at', horizon.toISOString())
+    .gt('end_at',  now.toISOString());
+
+  if (error) {
+    console.warn('[blackouts] fetch failed', error);
+    return;
+  }
+
+  CLOSED_RANGES = [];
+  FULLY_BOOKED  = [];
+
+  (data || []).forEach(row => {
+    const win = {
+      start: new Date(row.start_at),
+      end:   new Date(row.end_at),
+      message: row.message || ''
+    };
+    if (row.kind === 'closed')       CLOSED_RANGES.push(win);
+    if (row.kind === 'fully_booked') FULLY_BOOKED.push(win);
+  });
+}
+
+// Helpers
+function inAnyWindow(dt, windows) {
+  const t = +dt;
+  return windows.find(w => t >= +w.start && t <= +w.end) || null;
+}
+
+// Banner helpers
+function showCheckoutBanner(kind, msg) {
+  const el = document.getElementById('checkout-banner');
+  if (!el) return;
+  el.className = 'checkout-banner ' + (kind === 'closed'
+    ? 'checkout-banner--closed'
+    : 'checkout-banner--fullybooked');
+
+  el.innerHTML = `
+    <button class="x" aria-label="Dismiss" onclick="this.parentElement.style.display='none'">×</button>
+    ${msg}
+  `;
+  el.style.display = 'block';
+}
+function hideCheckoutBanner() {
+  const el = document.getElementById('checkout-banner');
+  if (el) { el.style.display = 'none'; el.textContent = ''; el.className = 'checkout-banner'; }
+}
+
+/* ------------------------------
+   Wire into your existing flow
+---------------------------------*/
+
+// 1) Load blackouts early (don’t block UI)
+loadBlackouts();
+
+// 2) When opening checkout, keep your existing min (+30m) and step=300
+//    Just add an input change listener to live-validate the chosen time.
+const preferredTimeInput = document.getElementById('cust-preferred-time');
+if (preferredTimeInput) {
+  preferredTimeInput.addEventListener('change', () => {
+    hideCheckoutBanner();
+    const raw = preferredTimeInput.value; // 'YYYY-MM-DDTHH:mm'
+    if (!raw) return;
+
+    const chosen = new Date(raw);
+    const isClosed = inAnyWindow(chosen, CLOSED_RANGES);
+    const isFull   = inAnyWindow(chosen, FULLY_BOOKED);
+
+    const submitBtn = document.getElementById('checkout-submit');
+    if (isClosed) {
+      showCheckoutBanner('closed', isClosed.message || 'We’re closed at the selected time.');
+      if (submitBtn) submitBtn.disabled = true;
+      return;
+    }
+    if (isFull) {
+      showCheckoutBanner('fully_booked', isFull.message || 'We’re fully booked at the selected time.');
+      if (submitBtn) submitBtn.disabled = true;
+      return;
+    }
+    if (submitBtn) submitBtn.disabled = false;
+  });
+}
+
+// 3) Guard your submit handler (fail fast if invalid)
+//    In your existing `checkoutForm.addEventListener('submit', async (e) => { ... })`,
+//    add these lines near the top, right after you read `preferredTimeRaw`:
+
+/*
+  // inside your submit handler, after:
+  // const preferredTimeRaw = document.getElementById('cust-preferred-time').value;
+  hideCheckoutBanner();
+  const chosenDt = preferredTimeRaw ? new Date(preferredTimeRaw) : null;
+  const isClosedNow = chosenDt && inAnyWindow(chosenDt, CLOSED_RANGES);
+  const isFullNow   = chosenDt && inAnyWindow(chosenDt, FULLY_BOOKED);
+
+  if (isClosedNow) {
+    showCheckoutBanner('closed', isClosedNow.message || 'We’re closed at the selected time.');
+    return; // stop submit
+  }
+  if (isFullNow) {
+    showCheckoutBanner('fully_booked', isFullNow.message || 'We’re fully booked at the selected time.');
+    return; // stop submit
+  }
+*/
+
+
 
     // Checkout modal helpers
     const checkoutModal = document.getElementById('checkout-modal');
@@ -1502,22 +1839,260 @@ header.addEventListener('click', () => {
       checkoutTotalEl.textContent = formatCurrency(total);
     }
     orderTypeRadios.forEach(r => r.addEventListener('change', recomputeCheckoutTotals));
+	
+	// ---- Address required only for delivery ----
+	function updateAddressRequirement() {
+	  const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+	  const addr = document.getElementById('cust-address');
+	  const hint = document.getElementById('addr-required-hint');
+
+	  const isDelivery = (orderType === 'delivery');
+
+	  if (addr) {
+		// Toggle HTML5 required attribute
+		addr.required = isDelivery;
+
+		// Optional: visual cue
+		if (hint) hint.style.opacity = isDelivery ? '1' : '0.6';
+
+		// Optional: show/hide the whole field for collection
+		// (comment out if you prefer to always show it)
+		// addr.closest('.field').style.display = isDelivery ? '' : '';
+	  }
+	}
+
+	// run when radios change
+	orderTypeRadios.forEach(r => r.addEventListener('change', () => {
+	  recomputeCheckoutTotals();        // you already have this
+	  updateAddressRequirement();       // add this
+	}));
+
+	
+// ====== CONFIG YOU CAN EDIT ======
+const OPEN_DAYS = [0,3,4,5,6]; // Sun=0, Mon=1, Tue=2, Wed=3, Thu=4, Fri=5, Sat=6  (open Wed–Sun)
+const OPEN_WINDOW = { start: "17:00", end: "21:00" }; // local time, 24h
+
+// Specific closed dates (all day)
+const CLOSED_DATES = [
+ "2025-12-25", "2025-12-26"
+];
+
+// Closed ranges (start/end local)
+//const CLOSED_RANGES = [
+  // { start:"2025-11-08T00:00", end:"2025-11-11T23:59" }
+//];
+
+// Fully booked windows by date: { "YYYY-MM-DD": [ ["HH:MM","HH:MM"], ... ] }
+//const FULLY_BOOKED = {
+  // "2025-11-05": [["17:00","18:30"], ["20:00","21:00"]]
+//};
+
+// ====== HELPERS ======
+function toYMD(d){
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function parseHm(dateRef, hm){ // "HH:MM" -> Date on same Y/M/D
+  const [h,m] = hm.split(':').map(Number);
+  const d = new Date(dateRef);
+  d.setHours(h, m, 0, 0);
+  return d;
+}
+function isBetween(d, start, end){ return d >= start && d <= end; }
+function roundTo5Min(d){
+  const ms = 5 * 60 * 1000;
+  return new Date(Math.ceil(d.getTime() / ms) * ms);
+}
+function withinOpenHours(d){
+  // day
+  if (!OPEN_DAYS.includes(d.getDay())) return false;
+  // time
+  const start = parseHm(d, OPEN_WINDOW.start);
+  const end   = parseHm(d, OPEN_WINDOW.end);
+  return d >= start && d <= end;
+}
+function isClosedDate(d){
+  const ymd = toYMD(d);
+  if (CLOSED_DATES.includes(ymd)) return true;
+  for (const r of CLOSED_RANGES){
+    const rs = new Date(r.start);
+    const re = new Date(r.end);
+    if (isBetween(d, rs, re)) return true;
+  }
+  return false;
+}
+function isFullyBooked(d){
+  const ymd = toYMD(d);
+  const slots = FULLY_BOOKED[ymd];
+  if (!slots) return false;
+  return slots.some(([a,b]) => {
+    const s = parseHm(d, a);
+    const e = parseHm(d, b);
+    return isBetween(d, s, e);
+  });
+}
+function isAllowed(dt){
+  return withinOpenHours(dt) && !isClosedDate(dt) && !isFullyBooked(dt);
+}
+function nextAllowed(from){
+  // walk forward in 5-minute steps until we find an allowed slot (cap at +30 days)
+  const cap = new Date(from); cap.setDate(cap.getDate() + 30);
+  let t = new Date(from);
+  t = roundTo5Min(t);
+  while (t <= cap){
+    if (isAllowed(t)) return t;
+    t = new Date(t.getTime() + 5*60*1000);
+  }
+  return null;
+}
+
+
+	
+	// run on checkout open (after you set the default radio)
+	function openCheckout(subtotal){
+  checkoutBaseSubtotal = Math.round(subtotal*100)/100;
+  checkoutMsg.textContent = '';
+  document.querySelector('input[name="order-type"][value="collection"]').checked = true;
+  recomputeCheckoutTotals();
+
+  const t = document.getElementById('cust-preferred-time');
+  if (t){
+    // force native 5-min increments
+    t.setAttribute('step', '300');
+
+    // compute "now + 30m" minimum, then snap to next *allowed* 5-min slot
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 30);
+    const minCandidate = roundTo5Min(now);
+    const firstAllowed = nextAllowed(minCandidate) || minCandidate;
+
+    const pad = n => String(n).padStart(2,'0');
+    const toLocalInput = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+    // Set min and prefill the field to the first allowed slot
+    t.min = toLocalInput(firstAllowed);
+    t.value = toLocalInput(firstAllowed);
+
+    // Live validation + snapping on change
+    const onChoose = () => {
+      if (!t.value) return;
+      const chosen = new Date(t.value);
+      const rounded = roundTo5Min(chosen);
+      if (!isAllowed(rounded)){
+        const n = nextAllowed(rounded);
+        if (n){
+          t.value = toLocalInput(n);
+          checkoutMsg.style.color = '#b02a2a';
+          checkoutMsg.textContent = 'That time is unavailable; we’ve moved you to the next available slot.';
+        } else {
+          checkoutMsg.style.color = '#b02a2a';
+          checkoutMsg.textContent = 'No available time slots found. Please choose a different day.';
+        }
+      } else {
+        checkoutMsg.textContent = '';
+      }
+    };
+    t.removeEventListener('change', onChoose); // avoid double-binding on repeated opens
+    t.addEventListener('change', onChoose);
+    t.addEventListener('input', onChoose);
+  }
+
+  checkoutModal.style.display = 'flex';
+}
+
+
+	
+// ---- Preferred Time: any date + 5-minute steps + opening hours ----
+(function preferredTimeHelper(){
+  // Config
+  const STEP_SECONDS   = 300;  // 5 minutes
+  const LEAD_MINUTES   = 30;   // prep time when picking "today"
+  const OPEN_H = 17, OPEN_M = 0;    // 17:00
+  const CLOSE_H = 21, CLOSE_M = 30; // 21:30
+
+  // Utils
+  const pad = n => String(n).padStart(2,'0');
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+  function roundUpTo5(d){
+    const ms = 5 * 60 * 1000;
+    return new Date(Math.ceil(d.getTime() / ms) * ms);
+  }
+  function sameYMD(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+  function windowFor(date){
+    const open  = new Date(date);  open.setHours(OPEN_H,  OPEN_M,  0, 0);
+    const close = new Date(date); close.setHours(CLOSE_H, CLOSE_M, 0, 0);
+    return { open, close };
+  }
+
+  // Normalize a datetime-local input's value to 5m grid and within open/close
+  function normalizePreferredTime(input){
+    if (!input) return;
+
+    // If user hasn't picked anything yet, keep current value or set default below.
+    let val = input.value ? new Date(input.value) : new Date();
+
+    // Build open/close window for the *selected date*
+    const pickedDay = input.value ? new Date(val) : new Date();
+    const { open, close } = windowFor(pickedDay);
+
+    // If the selected date is today, enforce lead time (now + LEAD_MINUTES)
+    const now = new Date();
+    const minToday = roundUpTo5(new Date(now.getTime() + LEAD_MINUTES*60000));
+
+    let proposed = roundUpTo5(val);
+
+    if (sameYMD(open, now)) {
+      // date is today
+      if (proposed < minToday) proposed = minToday;
+    }
+
+    // Clamp into opening window
+    if (proposed < open)  proposed = open;
+    if (proposed > close) proposed = close;
+
+    input.value = fmt(proposed);
+  }
+
+  // Public init to be called when opening checkout
+  window.setPreferredTimeConstraints = function setPreferredTimeConstraints(){
+    const input = document.getElementById('cust-preferred-time');
+    if (!input) return;
+
+    // Allow any date; just enforce 5-minute stepping
+    input.step = STEP_SECONDS;
+
+    // Default suggestion when modal opens:
+    const now = new Date();
+    const base = roundUpTo5(new Date(now.getTime() + LEAD_MINUTES*60000));
+    const { open, close } = windowFor(now);
+
+    let first = base;
+    if (first < open)  first = open;
+    if (first > close) first = open; // if too late today, suggest today's open; user can change date
+
+    input.value = fmt(first);
+
+    // Whenever user changes date/time, snap to grid & window of that day
+    input.addEventListener('change', () => normalizePreferredTime(input));
+    input.addEventListener('blur',   () => normalizePreferredTime(input));
+  };
+})();
+
+
 
     function openCheckout(subtotal){
-      checkoutBaseSubtotal = Math.round(subtotal*100)/100;
-      checkoutMsg.textContent = '';
-      document.querySelector('input[name="order-type"][value="collection"]').checked = true;
-      recomputeCheckoutTotals();
-      // min for preferred time (now + 30 mins)
-      const t = document.getElementById('cust-preferred-time');
-      if (t){
-        const now = new Date();
-        now.setMinutes(now.getMinutes() + 30);
-        const pad = n => String(n).padStart(2,'0');
-        t.min = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
-      }
-      checkoutModal.style.display = 'flex';
-    }
+	  checkoutBaseSubtotal = Math.round(subtotal*100)/100;
+	  checkoutMsg.textContent = '';
+	  document.querySelector('input[name="order-type"][value="collection"]').checked = true;
+	  recomputeCheckoutTotals();
+
+	  // ✅ set 5-minute step and opening hours
+	  setPreferredTimeConstraints();
+
+	  checkoutModal.style.display = 'flex';
+	}
+
 			function closeCheckout(){
 		  if (checkoutModal) checkoutModal.style.display = 'none';
 		}
@@ -1646,17 +2221,33 @@ header.addEventListener('click', () => {
       e.preventDefault();
       checkoutMsg.style.color = ''; checkoutMsg.textContent = 'Placing order…';
 
-      const name = document.getElementById('cust-name').value.trim();
-      const email = document.getElementById('cust-email').value.trim() || null;
-      const phone = document.getElementById('cust-phone').value.trim() || null;
-      const address = document.getElementById('cust-address').value.trim() || null;
-      const notes = document.getElementById('cust-notes').value.trim() || null;
-      const preferredTimeRaw = document.getElementById('cust-preferred-time').value; // '' or 'YYYY-MM-DDTHH:mm'
+      const name    = document.getElementById('cust-name').value.trim();
+	  const email   = document.getElementById('cust-email').value.trim();
+	  const phone   = document.getElementById('cust-phone').value.trim();
+	  const address = document.getElementById('cust-address').value.trim();
+	  const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+	  const notes = document.getElementById('cust-notes').value.trim() || null;
+      const preferredTimeRaw = document.getElementById('cust-preferred-time').value;
+	  const selectedLocal = preferredTimeRaw ? new Date(preferredTimeRaw) : null;
       const preferredTimeISO = preferredTimeRaw ? new Date(preferredTimeRaw).toISOString() : null;
 
-      if(!name){ checkoutMsg.style.color = '#b02a2a'; checkoutMsg.textContent = 'Please enter your name.'; return; }
+      if (!name){  checkoutMsg.style.color='#b02a2a'; checkoutMsg.textContent='Please enter your full name.';  return; }
+	  if (!email){ checkoutMsg.style.color='#b02a2a'; checkoutMsg.textContent='Please enter your email.';      return; }
+	  if (!phone){ checkoutMsg.style.color='#b02a2a'; checkoutMsg.textContent='Please enter your phone number.'; return; }
+	  // only enforce address for delivery
+	  if (orderType === 'delivery' && !address){
+    checkoutMsg.style.color='#b02a2a';
+    checkoutMsg.textContent='Please enter your delivery address.';
+    document.getElementById('cust-address').focus();
+    return;
+  }
+  if (!selectedLocal || !isAllowed(roundTo5Min(selectedLocal))) {
+  checkoutMsg.style.color = '#b02a2a';
+  checkoutMsg.textContent = 'Please choose an available date/time during our opening hours.';
+  return;
+}
 
-      const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+      
       const itemsSnapshot = basket.map(i => ({ ...i }));
       const subtotal = itemsSnapshot.reduce((s,i)=> s + i.unitPrice * i.qty, 0);
       const deliveryFee = (orderType === 'delivery' && subtotal < 20) ? 3.00 : 0.00;
@@ -2127,6 +2718,8 @@ window.downloadReceiptPlain = function (summary, items, preferredTimeStr) {
 })();
 </script>
 
-
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
