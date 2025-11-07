@@ -134,7 +134,7 @@ html { scroll-padding-top: calc(var(--header-offset, 0px) + var(--ticker-height,
   position: sticky;
   top: 0;
   z-index: 2000;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.);
   overflow: hidden;
 }
 
@@ -823,6 +823,34 @@ console.log = console.info = console.debug = console.warn = console.error = cons
     justify-self: start;
     margin-top: 6px;
   }
+}
+/* --- Center-align informational cards --- */
+.about-section,
+.food-section,
+.allergens-section,
+#about,
+#our-food,
+#allergens,
+.card {
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+/* If your .card uses flexbox internally, ensure it can center its contents */
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Optional: constrain width for readability */
+.about-section .card,
+.food-section .card,
+.allergens-section .card {
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 
