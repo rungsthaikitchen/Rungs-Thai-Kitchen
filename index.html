@@ -723,11 +723,135 @@ main{ display:block !important; }
 
 #ticker-ghost, .ticker-spacer { display:none !important; }
 
+/* --- Order summary: mobile-friendly layout & wrapping --- */
+.order-row {
+  display: grid;
+  grid-template-columns: 68px 1fr auto; /* thumb | name | price */
+  align-items: center;
+  gap: 12px;
+}
+
+.order-row .item-thumb {
+  width: 68px;
+  height: 68px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.order-row .meta {
+  min-width: 0;                 /* allow text to take available space */
+}
+
+.order-row .meta .title {
+  white-space: normal;          /* allow multi-line names */
+  word-break: keep-all;         /* don't break inside words */
+  overflow-wrap: break-word;    /* but wrap long words if needed */
+  line-height: 1.25;
+}
+
+.order-row .price {
+  justify-self: end;            /* keep prices neatly aligned right */
+}
+
+/* Very narrow phones: put controls on the next line, keep price aligned */
+@media (max-width: 420px) {
+  .order-row {
+    grid-template-columns: 56px 1fr;   /* drop the dedicated price column */
+  }
+  .order-row .price {
+    grid-column: 2; justify-self: end; /* price sits in the name column row */
+  }
+  .order-row .qty-controls,
+  .order-row .remove {
+    grid-column: 2;                    /* controls flow beneath the name */
+  }
+}
+/* Override older width limits for order summary text */
+.order-row .meta {
+  max-width: none !important;
+}
+
 
 <script>
 console.info('Console levels forced');
 console.log = console.info = console.debug = console.warn = console.error = console.log.bind(console);
 </script>
+/* --- Order summary layout: mobile fix (portrait) --- */
+@media (max-width: 520px) {
+  /* 3-column grid: [thumb] [flex text] [fixed price] */
+  .order-row {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) 84px; /* tweak 84px if needed */
+    column-gap: 12px;
+    align-items: start;
+  }
+
+  .order-row .item-thumb {
+    grid-column: 1 / 2;
+    width: 64px; height: 64px;
+    flex: none;
+  }
+
+  /* text/meta column grows and can actually shrink (min-width:0 is key in grid) */
+  .order-row .meta {
+    grid-column: 2 / 3;
+    min-width: 0 !important;
+    max-width: none !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: anywhere;
+  }
+  .order-row .meta .title {
+    min-width: 0 !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: anywhere;
+  }
+
+  /* fixed price column stays right-aligned and on one line */
+  .order-row .price {
+    grid-column: 3 / 4;
+    justify-self: end;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* controls & remove sit under the text, not under price */
+  .order-row .qty-controls,
+  .order-row .remove-link {
+    grid-column: 2 / 3;
+    justify-self: start;
+    margin-top: 6px;
+  }
+}
+/* --- Center-align informational cards --- 
+.about-section,
+.food-section,
+.allergens-section,
+#about,
+#our-food,
+#allergens,
+.card {
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}*/
+
+/* If your .card uses flexbox internally, ensure it can center its contents 
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}*/
+
+/* Optional: constrain width for readability 
+.about-section .card,
+.food-section .card,
+.allergens-section .card {
+  max-width: 800px;
+  margin: 0 auto;
+}*/
 
 
   </style>
