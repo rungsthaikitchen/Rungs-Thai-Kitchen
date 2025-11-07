@@ -723,6 +723,50 @@ main{ display:block !important; }
 
 #ticker-ghost, .ticker-spacer { display:none !important; }
 
+/* --- Order summary: mobile-friendly layout & wrapping --- */
+.order-row {
+  display: grid;
+  grid-template-columns: 68px 1fr auto; /* thumb | name | price */
+  align-items: center;
+  gap: 12px;
+}
+
+.order-row .item-thumb {
+  width: 68px;
+  height: 68px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.order-row .meta {
+  min-width: 0;                 /* allow text to take available space */
+}
+
+.order-row .meta .title {
+  white-space: normal;          /* allow multi-line names */
+  word-break: keep-all;         /* don't break inside words */
+  overflow-wrap: break-word;    /* but wrap long words if needed */
+  line-height: 1.25;
+}
+
+.order-row .price {
+  justify-self: end;            /* keep prices neatly aligned right */
+}
+
+/* Very narrow phones: put controls on the next line, keep price aligned */
+@media (max-width: 420px) {
+  .order-row {
+    grid-template-columns: 56px 1fr;   /* drop the dedicated price column */
+  }
+  .order-row .price {
+    grid-column: 2; justify-self: end; /* price sits in the name column row */
+  }
+  .order-row .qty-controls,
+  .order-row .remove {
+    grid-column: 2;                    /* controls flow beneath the name */
+  }
+}
+
 
 <script>
 console.info('Console levels forced');
