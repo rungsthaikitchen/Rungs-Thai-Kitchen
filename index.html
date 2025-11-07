@@ -527,6 +527,46 @@ html {
 .card { margin-bottom: 0; } */
 
 getComputedStyle(document.documentElement).getPropertyValue('--header-offset')
+/* === Checkout modal alignment fixes === */
+#checkout-modal .totals{
+  display:grid;
+  grid-template-columns: 1fr auto; /* label on left, amount on right */
+  gap:12px;
+  align-items:center;
+}
+#checkout-modal .totals .muted{ white-space:nowrap; }
+
+#checkout-subtotal,
+#checkout-delivery,
+#checkout-total{
+  min-width:6ch;     /* avoids clipping like £9.50 */
+  text-align:right;  /* right-align prices */
+}
+
+/* Inputs layout */
+#checkout-form .form-grid{ display:grid; gap:12px; }
+#checkout-form .row-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+@media (max-width:560px){
+  #checkout-form .row-2{ grid-template-columns:1fr; }
+}
+
+/* Modal padding & actions bar */
+#checkout-modal .modal{ padding:16px 18px; }
+#checkout-modal .checkout-actions{
+  position:sticky;
+  bottom:0;
+  background:#fff;
+  padding-top:8px;
+  margin-top:6px;
+}
+
+/* Ensure modal sits above ticker */
+#checkout-modal{ z-index:1400; }
+#status-ticker{ z-index:900; }
 
 
 <script>
@@ -910,7 +950,7 @@ console.log = console.info = console.debug = console.warn = console.error = cons
                </span>`;
       }).join('');
     }
-
+	
     // ---------- Data ----------
     const MENU_CATEGORIES = [
       { id: 'starters', title: 'Starter', items: [
@@ -1635,7 +1675,7 @@ header.addEventListener('click', () => {
     renderOrder();
 	// expose helpers that the second script uses
 	window.formatCurrency = formatCurrency;
-	window.openCheckout = openCheckout;
+	/*window.openCheckout = openCheckout;*/
 	window.orderMsg = document.getElementById('order-msg');
 	window.basket = basket;
 	window.renderOrder = renderOrder;
@@ -1646,6 +1686,7 @@ header.addEventListener('click', () => {
 
 	}); // end DOMContentLoaded
 </script>
+
 	<script>
 	  if (typeof window.formatCurrency !== 'function') {
 		window.formatCurrency = n => '£' + Number(n || 0).toFixed(2);
@@ -1749,6 +1790,98 @@ function hideCheckoutBanner() {
   const el = document.getElementById('checkout-banner');
   if (el) { el.style.display = 'none'; el.textContent = ''; el.className = 'checkout-banner'; }
 }
+
+// === Customer helper: find-or-create with phone/email uniqueness ===
+async function getOrCreateCustomer({ name, email, phone, address }) {
+  const normEmail = email ? email.trim().toLowerCase() : null;
+  const normPhone = phone ? phone.trim() : null;
+
+  if (normEmail) {
+    // A) by email
+    const { data: existingByEmail, error: findEmailErr } = await supabase
+      .from('customers')
+      .select('id, phone')
+      .eq('email', normEmail)
+      .maybeSingle();
+    if (findEmailErr) throw findEmailErr;
+
+    if (existingByEmail) {
+      const updatePayload = { full_name: name, address };
+      if (!existingByEmail.phone && normPhone) updatePayload.phone = normPhone;
+
+      const { data: updated, error: updErr } = await supabase
+        .from('customers')
+        .update(updatePayload)
+        .eq('id', existingByEmail.id)
+        .select('id')
+        .single();
+      if (updErr) throw updErr;
+      return updated;
+    }
+
+    // No email row yet → try insert (may collide on phone)
+    const baseInsert = { full_name: name, email: normEmail, address };
+    if (normPhone) baseInsert.phone = normPhone;
+
+    let { data: inserted, error: insErr } = await supabase
+      .from('customers')
+      .insert([baseInsert])
+      .select('id')
+      .single();
+
+    if (insErr && insErr.code === '23505') {
+      // duplicate phone → retry without phone
+      const { data: inserted2, error: insErr2 } = await supabase
+        .from('customers')
+        .insert([{ full_name: name, email: normEmail, address }])
+        .select('id')
+        .single();
+      if (insErr2) throw insErr2;
+      return inserted2;
+    }
+    if (insErr) throw insErr;
+    return inserted;
+  }
+
+  if (normPhone) {
+    // B) no email → by phone
+    const { data: existingByPhone, error: findPhoneErr } = await supabase
+      .from('customers')
+      .select('id')
+      .eq('phone', normPhone)
+      .maybeSingle();
+    if (findPhoneErr) throw findPhoneErr;
+
+    if (existingByPhone) {
+      const { data: updated, error: updErr } = await supabase
+        .from('customers')
+        .update({ full_name: name, address })
+        .eq('id', existingByPhone.id)
+        .select('id')
+        .single();
+      if (updErr) throw updErr;
+      return updated;
+    }
+
+    const { data: inserted, error: insErr } = await supabase
+      .from('customers')
+      .insert([{ full_name: name, phone: normPhone, address }])
+      .select('id')
+      .single();
+    if (insErr) throw insErr;
+    return inserted;
+  }
+
+  // C) bare minimum
+  const { data: bare, error: bareErr } = await supabase
+    .from('customers')
+    .insert([{ full_name: name, address }])
+    .select('id')
+    .single();
+  if (bareErr) throw bareErr;
+  return bare;
+}
+
 
 /* ------------------------------
    Wire into your existing flow
@@ -2000,7 +2133,8 @@ function nextAllowed(from){
   checkoutModal.style.display = 'flex';
 }
 
-
+// make sure others can see it even if they run earlier
+window.openCheckout = openCheckout;
 	
 // ---- Preferred Time: any date + 5-minute steps + opening hours ----
 (function preferredTimeHelper(){
@@ -2126,7 +2260,7 @@ function nextAllowed(from){
 		  });
 		}
 
-
+	
 		// ---------- Helpers to call Supabase RPC & REST ----------
     async function getNextOrderRef(){
       // Calls public.get_next_order_number() and returns "RTK-###"
@@ -2215,309 +2349,241 @@ function nextAllowed(from){
 		  wrap.style.display = 'flex';
 		};
 
+	async function getOrCreateCustomer({ name, email, phone, address }) {
+  const payload = {
+    full_name: name,
+    email: email || null,
+    phone: phone || null,
+    address: address || null
+  };
 
-    // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
-    checkoutForm.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      checkoutMsg.style.color = ''; checkoutMsg.textContent = 'Placing order…';
+  async function tryOnce() {
+    // Prefer email as the stable key if present
+    if (email) {
+      const { data, error } = await supabase
+        .from('customers')
+        .upsert([payload], { onConflict: 'email' })
+        .select('id')
+        .maybeSingle();
 
-      const name    = document.getElementById('cust-name').value.trim();
-	  const email   = document.getElementById('cust-email').value.trim();
-	  const phone   = document.getElementById('cust-phone').value.trim();
-	  const address = document.getElementById('cust-address').value.trim();
-	  const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
-	  const notes = document.getElementById('cust-notes').value.trim() || null;
-      const preferredTimeRaw = document.getElementById('cust-preferred-time').value;
-	  const selectedLocal = preferredTimeRaw ? new Date(preferredTimeRaw) : null;
-      const preferredTimeISO = preferredTimeRaw ? new Date(preferredTimeRaw).toISOString() : null;
+      // If unique violation fired on phone, just fetch existing row
+      if (error && error.code === '23505') {
+        const { data: d2 } = await supabase
+          .from('customers')
+          .select('id')
+          .eq('email', email)
+          .maybeSingle();
+        return d2;
+      }
+      if (error) throw error;
+      return data;
+    }
 
-      if (!name){  checkoutMsg.style.color='#b02a2a'; checkoutMsg.textContent='Please enter your full name.';  return; }
-	  if (!email){ checkoutMsg.style.color='#b02a2a'; checkoutMsg.textContent='Please enter your email.';      return; }
-	  if (!phone){ checkoutMsg.style.color='#b02a2a'; checkoutMsg.textContent='Please enter your phone number.'; return; }
-	  // only enforce address for delivery
-	  if (orderType === 'delivery' && !address){
-    checkoutMsg.style.color='#b02a2a';
-    checkoutMsg.textContent='Please enter your delivery address.';
-    document.getElementById('cust-address').focus();
-    return;
+    // Else use phone as the key
+    if (phone) {
+      const { data, error } = await supabase
+        .from('customers')
+        .upsert([payload], { onConflict: 'phone' })
+        .select('id')
+        .maybeSingle();
+
+      if (error && error.code === '23505') {
+        const { data: d2 } = await supabase
+          .from('customers')
+          .select('id')
+          .eq('phone', phone)
+          .maybeSingle();
+        return d2;
+      }
+      if (error) throw error;
+      return data;
+    }
+
+    // No email/phone → insert a bare record
+    const { data, error } = await supabase
+      .from('customers')
+      .insert([{ full_name: name, address: address || null }])
+      .select('id')
+      .single();
+    if (error) throw error;
+    return data;
   }
-  if (!selectedLocal || !isAllowed(roundTo5Min(selectedLocal))) {
-  checkoutMsg.style.color = '#b02a2a';
-  checkoutMsg.textContent = 'Please choose an available date/time during our opening hours.';
-  return;
+
+  try {
+    return await tryOnce();
+  } catch (e) {
+    // brief backoff & retry once (handles flaky mobile “Load failed”)
+    await new Promise(r => setTimeout(r, 450));
+    return await tryOnce();
+  }
 }
 
-      
-      const itemsSnapshot = basket.map(i => ({ ...i }));
-      const subtotal = itemsSnapshot.reduce((s,i)=> s + i.unitPrice * i.qty, 0);
-      const deliveryFee = (orderType === 'delivery' && subtotal < 20) ? 3.00 : 0.00;
-      const total = subtotal + deliveryFee;
+   // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
+checkoutForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  checkoutMsg.style.color = '';
+  checkoutMsg.textContent = 'Placing order…';
 
-      function fail(step, err){
-        console.error(`[Checkout] ${step} failed:`, err);
-        checkoutMsg.style.color = '#b02a2a';
-        checkoutMsg.textContent = `${step} failed: ${err?.message || err?.hint || 'Unknown error'}`;
-      }
+  try {
+    const name    = document.getElementById('cust-name').value.trim();
+    const email   = document.getElementById('cust-email').value.trim();
+    const phone   = document.getElementById('cust-phone').value.trim();
+    const address = document.getElementById('cust-address').value.trim();
+    const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+    const notes   = document.getElementById('cust-notes').value.trim() || null;
 
-      try {
-				// 1) get or create customer
-		let customerId = null;
+    const preferredTimeRaw = document.getElementById('cust-preferred-time').value;
+    const selectedLocal    = preferredTimeRaw ? new Date(preferredTimeRaw) : null;
+    const preferredTimeISO = preferredTimeRaw ? new Date(preferredTimeRaw).toISOString() : null;
 
-		// normalise
-		const normEmail = email ? email.trim().toLowerCase() : null;
-		const normPhone = phone ? phone.trim() : null;
+    if (!name){  checkoutMsg.style.color='#b02a2a'; checkoutMsg.textContent='Please enter your full name.';  return; }
+    if (!email){ checkoutMsg.style.color='#b02a2a'; checkoutMsg.textContent='Please enter your email.';      return; }
+    if (!phone){ checkoutMsg.style.color='#b02a2a'; checkoutMsg.textContent='Please enter your phone number.'; return; }
+    if (orderType === 'delivery' && !address){
+      checkoutMsg.style.color='#b02a2a';
+      checkoutMsg.textContent='Please enter your delivery address.';
+      document.getElementById('cust-address').focus();
+      return;
+    }
+    if (!selectedLocal || !isAllowed(roundTo5Min(selectedLocal))) {
+      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.textContent = 'Please choose an available date/time during our opening hours.';
+      return;
+    }
 
-		if (normEmail) {
-		  // 1A. is there already a customer with this email?
-		  const { data: existingByEmail, error: findEmailErr } = await supabase
-			.from('customers')
-			.select('id, phone')
-			.eq('email', normEmail)
-			.maybeSingle();
+    const itemsSnapshot = basket.map(i => ({ ...i }));
+    const subtotal = itemsSnapshot.reduce((s,i)=> s + i.unitPrice * i.qty, 0);
+    const deliveryFee = (orderType === 'delivery' && subtotal < 20) ? 3.00 : 0.00;
 
-		  if (findEmailErr) return fail('Find customer (email)', findEmailErr);
+    function fail(step, err){
+      console.error(`[Checkout] ${step} failed:`, err);
+      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.textContent = `${step} failed: ${err?.message || err?.hint || 'Unknown error'}`;
+    }
 
-		  if (existingByEmail) {
-			// update that customer – but only set phone if it's empty on that row
-			const updatePayload = {
-			  full_name: name,
-			  address
-			};
-			if (!existingByEmail.phone && normPhone) {
-			  // safe to set phone
-			  updatePayload.phone = normPhone;
-			}
-
-			const { data: updated, error: updErr } = await supabase
-			  .from('customers')
-			  .update(updatePayload)
-			  .eq('id', existingByEmail.id)
-			  .select('id')
-			  .single();
-
-			if (updErr) return fail('Update customer (email)', updErr);
-			customerId = updated.id;
-
-		  } else {
-			// 1B. no email yet → try to insert
-			// but phone might already exist on someone else, so we'll try with phone first,
-			// and if that fails with duplicate phone, we retry without phone
-			const baseInsert = {
-			  full_name: name,
-			  email: normEmail,
-			  address
-			};
-			if (normPhone) baseInsert.phone = normPhone;
-
-			let { data: inserted, error: insErr } = await supabase
-			  .from('customers')
-			  .insert([baseInsert])
-			  .select('id')
-			  .single();
-
-			// if phone is duplicate, try again without phone
-			if (insErr && insErr.code === '23505') {
-			  // duplicate key → try again without phone
-			  const { data: inserted2, error: insErr2 } = await supabase
-				.from('customers')
-				.insert([{
-				  full_name: name,
-				  email: normEmail,
-				  address
-				}])
-				.select('id')
-				.single();
-
-			  if (insErr2) return fail('Insert customer (email, no phone)', insErr2);
-			  customerId = inserted2.id;
-			} else if (insErr) {
-			  return fail('Insert customer (email)', insErr);
-			} else {
-			  customerId = inserted.id;
-			}
-		  }
-
-		} else if (normPhone) {
-		  // no email, but we do have a phone → find by phone
-		  const { data: existingByPhone, error: findPhoneErr } = await supabase
-			.from('customers')
-			.select('id')
-			.eq('phone', normPhone)
-			.maybeSingle();
-
-		  if (findPhoneErr) return fail('Find customer (phone)', findPhoneErr);
-
-		  if (existingByPhone) {
-			customerId = existingByPhone.id;
-			// optionally update name/address
-			await supabase
-			  .from('customers')
-			  .update({ full_name: name, address })
-			  .eq('id', customerId);
-		  } else {
-			// create new with phone
-			const { data: inserted, error: insErr } = await supabase
-			  .from('customers')
-			  .insert([{ full_name: name, phone: normPhone, address }])
-			  .select('id')
-			  .single();
-			if (insErr) return fail('Insert customer (phone)', insErr);
-			customerId = inserted.id;
-		  }
-
-		} else {
-		  // no email, no phone → just insert bare customer
-		  const { data: inserted, error: insErr } = await supabase
-			.from('customers')
-			.insert([{ full_name: name, address }])
-			.select('id')
-			.single();
-		  if (insErr) return fail('Insert customer (bare)', insErr);
-		  customerId = inserted.id;
-		}
-
-
-        // 2) Get global sequential order ref
-        let orderRef = 'RTK-???';
-        try {
-          orderRef = await getNextOrderRef();
-        } catch (err) {
-          console.warn('Falling back to timestamp-based ref');
-          orderRef = 'RTK-' + Date.now();
-        }
-
-        // 3) Create order (attempt with preferred_time; if column missing, retry without)
-        let orderId = null;
-        const baseOrderPayload = {
-          customer_id: customerId,
-          subtotal: Number(subtotal.toFixed(2)),
-          delivery_fee: Number(deliveryFee.toFixed(2)),
-          order_type: orderType,
-          notes,
-          order_ref: orderRef
-        };
-        let { data: order, error: orderErr } = await supabase
-          .from('orders')
-          .insert([ { ...baseOrderPayload, preferred_time: preferredTimeISO } ])
-          .select('id')
-          .single();
-
-        if (orderErr && orderErr.code === '42703') {
-          // Column preferred_time missing → retry without it
-          const retry = await supabase.from('orders').insert([ baseOrderPayload ]).select('id').single();
-          if (retry.error) return fail('Create order', retry.error);
-          order = retry.data;
-        } else if (orderErr) {
-          return fail('Create order', orderErr);
-        }
-        orderId = order.id;
-
-        // 4) Items
-        const rows = itemsSnapshot.map(line => ({
-          order_id: orderId,
-          item_id: line.itemId,
-          name: line.name,
-          unit_price: Number(line.unitPrice.toFixed(2)),
-          qty: line.qty,
-          modifiers: (line.mods ?? []).map(m => ({ id: m.id, name: m.name, delta: m.delta })),
-          spice: (typeof line.spice === 'number') ? line.spice : null,
-          img: line.img || null
-        }));
-        const { error: itemsErr } = await supabase.from('order_items').insert(rows);
-        if (itemsErr) return fail('Add order items', itemsErr);
-		
-		// after order + order_items succeed:
-		try {
-		  await fetch('https://YOUR-FUNCTION-URL/send-order-confirmation', {
-			method: 'POST',
-			headers: { 'Content-Type':'application/json' },
-			body: JSON.stringify({
-			  order_id: orderId,
-			  order_ref: orderRef,
-			  name,
-			  email,
-			  phone,
-			  order_type: orderType,
-			  preferred_time: preferredTimeRaw,
-			  total
-			})
-		  });
-		} catch (err) {
-		  console.warn('[Order] Confirmation hook failed (non-blocking)', err);
-		}
-
-
-       // --- SUCCESS UI (step 2) ---
-		checkoutMsg.textContent = '';
-		closeCheckout?.(); // safe close if the function exists
-
-		// snapshot BEFORE clearing
-		const basketSnapshot = itemsSnapshot; // we already copied basket above
-
-		// clear your UI basket and re-render
-		basket.length = 0;
-		renderOrder();
-
-		// Pretty preferred time string (local)
-		const prefPretty = preferredTimeRaw
-		  ? new Date(preferredTimeRaw).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })
-		  : null;
-
-		/* ---- FIX 1: make sure ref is a string like "RTK-012" ---- */
-		let refText;
-		if (orderRef && typeof orderRef === 'object') {
-		  // e.g. RPC returned { assigned: 12 }
-		  const num = Number(orderRef.assigned || orderRef.id || orderRef.value || 0);
-		  refText = 'RTK-' + String(num).padStart(3, '0');
-		} else {
-		  // e.g. we already got "RTK-012" or "RTK-1730392039"
-		  refText = String(orderRef);
-		}
-
-		/* ---- FIX 2: make sure total is numeric ---- */
-		const subtotalNum = Number(subtotal) || 0;
-		const deliveryNum = Number(deliveryFee) || 0;
-		const grandTotal = subtotalNum + deliveryNum;
-
-		showOrderSuccess(orderRef, itemsSnapshot, total, orderType, prefPretty);
-
-      } catch (err){
-        fail('Unexpected error', err);
-      }
-    });
-
-    // Auto-fit inputs
-    (function setupAutoFitInputs(){
-      const form = document.getElementById('checkout-form');
-      if(!form) return;
-      const measurer = document.createElement('span');
-      measurer.className = 'input-measure';
-      document.body.appendChild(measurer);
-
-      function fit(el){
-        const text = el.value || el.placeholder || '';
-        const cs = getComputedStyle(el);
-        measurer.style.font = cs.font;
-        measurer.style.padding = cs.padding;
-        measurer.textContent = text + ' ';
-        const px = measurer.getBoundingClientRect().width;
-        const maxW = el.parentElement.getBoundingClientRect().width;
-        el.style.width = Math.min(px + 4, maxW) + 'px';
-      }
-      function init(el){
-        fit(el);
-        ['input','change'].forEach(evt => el.addEventListener(evt, () => fit(el)));
-        window.addEventListener('resize', () => fit(el));
-      }
-      form.querySelectorAll('input.auto-fit').forEach(init);
-    })();
-
-    // Recalculate open sections on resize (accordion)
-    window.addEventListener('resize', () => {
-      document.querySelectorAll('.category-body.open').forEach(b => {
-        b.style.maxHeight = b.scrollHeight + 'px';
+    // --- get or create the customer (with 1 retry) ---
+    let customerId = null;
+    try {
+      const row = await getOrCreateCustomer({
+        name,
+        email: email?.trim().toLowerCase() || null,
+        phone: phone?.trim() || null,
+        address
       });
-    });
+      customerId = row?.id;
+    } catch (err) {
+      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.textContent = 'Saving your details had a hiccup — trying again…';
+      const row = await getOrCreateCustomer({
+        name,
+        email: email?.trim().toLowerCase() || null,
+        phone: phone?.trim() || null,
+        address
+      });
+      customerId = row?.id;
+    }
+    if (!customerId) {
+      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.textContent = 'Sorry — we could not save your details.';
+      return;
+    }
+
+    // 2) Get global sequential order ref
+    let orderRef = 'RTK-???';
+    try {
+      orderRef = await getNextOrderRef();
+    } catch (err) {
+      console.warn('Falling back to timestamp-based ref');
+      orderRef = 'RTK-' + Date.now();
+    }
+
+    // 3) Create order (attempt with preferred_time; if column missing, retry without)
+    let orderId = null;
+    const baseOrderPayload = {
+      customer_id: customerId,
+      subtotal: Number(subtotal.toFixed(2)),
+      delivery_fee: Number(deliveryFee.toFixed(2)),
+      order_type: orderType,
+      notes,
+      order_ref: orderRef,
+    };
+    let { data: order, error: orderErr } = await supabase
+      .from('orders')
+      .insert([{ ...baseOrderPayload, preferred_time: preferredTimeISO }])
+      .select('id')
+      .single();
+
+    if (orderErr && orderErr.code === '42703') {
+      const retry = await supabase.from('orders').insert([ baseOrderPayload ]).select('id').single();
+      if (retry.error) return fail('Create order', retry.error);
+      order = retry.data;
+    } else if (orderErr) {
+      return fail('Create order', orderErr);
+    }
+    orderId = order.id;
+
+    // 4) Items
+    const rows = itemsSnapshot.map(line => ({
+      order_id: orderId,
+      item_id: line.itemId,
+      name: line.name,
+      unit_price: Number(line.unitPrice.toFixed(2)),
+      qty: line.qty,
+      modifiers: (line.mods ?? []).map(m => ({ id: m.id, name: m.name, delta: m.delta })),
+      spice: (typeof line.spice === 'number') ? line.spice : null,
+      img: line.img || null
+    }));
+    const { error: itemsErr } = await supabase.from('order_items').insert(rows);
+    if (itemsErr) return fail('Add order items', itemsErr);
+
+    // (optional) confirmation hook — non-blocking
+    try {
+      await fetch('https://YOUR-FUNCTION-URL/send-order-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({
+          order_id: orderId,
+          order_ref: orderRef,
+          name,
+          email,
+          phone,
+          order_type: orderType,
+          preferred_time: preferredTimeRaw,
+          total: subtotal + deliveryFee
+        })
+      });
+    } catch (err) {
+      console.warn('[Order] Confirmation hook failed (non-blocking)', err);
+    }
+
+    // --- SUCCESS UI ---
+    checkoutMsg.textContent = '';
+    checkoutModal.style.display = 'none';
+
+    // clear basket + re-render
+    basket.length = 0;
+    renderOrder();
+
+    // pretty time string
+    const prefPretty = preferredTimeRaw
+      ? new Date(preferredTimeRaw).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })
+      : null;
+
+    // ensure ref is a string like RTK-012
+    const refText = (orderRef && typeof orderRef === 'object')
+      ? ('RTK-' + String(Number(orderRef.assigned ?? orderRef.id ?? orderRef.value ?? 0)).padStart(3,'0'))
+      : String(orderRef);
+
+    // numeric total
+    const grandTotal = (Number(subtotal) || 0) + (Number(deliveryFee) || 0);
+
+    showOrderSuccess(refText, itemsSnapshot, grandTotal, orderType, prefPretty);
+
+  } catch (err) {
+    fail('Unexpected error', err);
+  }
+});
+
   </script>
   
 <script>
