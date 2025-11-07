@@ -776,67 +776,6 @@ main{ display:block !important; }
 console.info('Console levels forced');
 console.log = console.info = console.debug = console.warn = console.error = console.log.bind(console);
 </script>
-/* ----- Order summary: mobile-friendly layout & text width fixes ----- */
-@media (max-width: 520px) {
-  /* Make each row a 3-column grid: [thumb] [text grows] [price] */
-  .order-row {
-    display: grid;
-    grid-template-columns: 64px 1fr auto;
-    align-items: start;
-    column-gap: 12px;
-  }
-
-  .order-row .item-thumb {
-    grid-column: 1 / 2;
-    width: 64px;
-    height: 64px;
-  }
-
-  /* The text/meta column should take all remaining space */
-  .order-row .meta {
-    grid-column: 2 / 3;
-    max-width: none !important;
-    width: auto !important;
-    white-space: normal !important;
-    word-break: normal !important;
-    overflow-wrap: anywhere;     /* allow long words to wrap */
-    hyphens: auto;
-  }
-
-  /* If your title has its own rules, unlock those too */
-  .order-row .meta .title {
-    max-width: none !important;
-    width: auto !important;
-    white-space: normal !important;
-    word-break: normal !important;
-    overflow-wrap: anywhere;
-    hyphens: auto;
-  }
-
-  /* Price pinned to the right */
-  .order-row .price {
-    grid-column: 3 / 4;
-    justify-self: end;
-  }
-
-  /* Controls / remove link sit below the text on small screens */
-  .order-row .qty-controls,
-  .order-row .remove-link {
-    grid-column: 2 / 4;
-    justify-self: start;
-    margin-top: 6px;
-  }
-}
-
-/* Catch-all override if any earlier rule was limiting widths */
-.order-row .meta,
-.order-row .meta .title {
-  max-width: none !important;
-  width: auto !important;
-  white-space: normal !important;
-  word-break: normal !important;
-  overflow-wrap: anywhere;
-}
 
 
   </style>
