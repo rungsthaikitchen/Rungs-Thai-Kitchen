@@ -672,6 +672,13 @@ getComputedStyle(document.documentElement).getPropertyValue('--header-offset')
   #order-panel .order-row .meta{ flex-basis: 260px; min-width: 200px; }
 }
 
+/* --- force one-column layout everywhere --- */
+main{ display:block !important; }
+#order-panel{
+  position:static !important;
+  width:100% !important;
+  margin-top:20px !important;
+}
 
 
 <script>
@@ -715,6 +722,23 @@ console.log = console.info = console.debug = console.warn = console.error = cons
     <span id="ticker-text">We’re closed for Songkran Festival, reopening 18 April 🎉</span>
   </div>
 </div>
+<script>
+(function(){
+  const el = document.getElementById('ticker-text');
+  if(!el) return;
+
+  // pixels per second → smaller = slower
+  const pxPerSec = 40;
+
+  // measure after layout
+  requestAnimationFrame(() => {
+    const w = el.getBoundingClientRect().width || 0;
+    // ensure a minimum duration
+    const seconds = Math.max(15, Math.ceil(w / pxPerSec));
+    el.style.animationDuration = seconds + 's';
+  });
+})();
+</script>
 
 
     <main>
