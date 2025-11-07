@@ -568,6 +568,48 @@ getComputedStyle(document.documentElement).getPropertyValue('--header-offset')
 #checkout-modal{ z-index:1400; }
 #status-ticker{ z-index:900; }
 
+/* === Order summary row layout (mobile-safe, no clipping) === */
+#order-panel .order-list { overflow: visible; }
+
+#order-panel .order-row{
+  /* switch from flex to a simple 3-column grid */
+  display: grid;
+  grid-template-columns: 56px 1fr auto; /* thumb | details | £ */
+  align-items: center;
+  gap: 12px;
+  overflow: visible;
+}
+
+/* thumbnail stays fixed width */
+#order-panel .order-row .item-thumb{
+  width: 56px; height: 56px; object-fit: cover; border-radius: 8px;
+}
+
+/* text column can shrink; enable ellipsis instead of pushing the price off-screen */
+#order-panel .order-row .meta{
+  min-width: 0;           /* allow shrinking */
+}
+#order-panel .order-row .meta .title{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* price column: never wrap, always right-aligned and visible */
+#order-panel .order-row .price,
+#order-panel .order-row .order-price{
+  white-space: nowrap;
+  text-align: right;
+  min-width: 6ch;   /* enough room for “£99.99” */
+  justify-self: end;
+}
+
+/* quantity controls and “Remove” live in the middle column; keep them from wrapping oddly */
+#order-panel .order-row .qty-controls,
+#order-panel .order-row .remove{
+  flex-wrap: nowrap;
+}
+
 
 <script>
 console.info('Console levels forced');
