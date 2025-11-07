@@ -3021,5 +3021,19 @@ window.downloadReceiptPlain = function (summary, items, preferredTimeStr) {
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
 </script>
+<!-- other small scripts -->
+<script>
+(function removeTickerGhost(){
+  const t = document.getElementById('status-ticker');
+  if (!t) return;
+  const next = t.nextElementSibling;
+  if (!next) return;
+  const txt = (next.textContent || '').replace(/\u00A0/g,' ').trim();
+  if (txt === '...' || txt === '') {
+    next.remove();
+  }
+})();
+</script>
+
 </body>
 </html>
