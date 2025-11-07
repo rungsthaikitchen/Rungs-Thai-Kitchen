@@ -101,7 +101,7 @@ html { scroll-padding-top: calc(var(--header-offset, 0px) + var(--ticker-height,
 
 #status-ticker .ticker-inner {
   white-space: nowrap;
-  animation: ticker-move 18s linear infinite;
+  animation: ticker-move 25s linear infinite;
 }
 
 @keyframes ticker-move {
@@ -179,7 +179,17 @@ html { scroll-padding-top: calc(var(--header-offset, 0px) + var(--ticker-height,
     nav a{color:#111;text-decoration:none;font-weight:700;font-size:14px}
 
     /* Layout */
-    main{display:grid;grid-template-columns:1fr 360px;gap:18px}
+    /* --- Simplified layout: order panel always below menu --- */
+main {
+  display: block;
+}
+
+#order-panel {
+  position: static;
+  width: 100%;
+  margin-top: 40px;
+}
+
     .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:var(--shadow)}
     h1,h2,h3{margin:0}
     h1{font-size:20px}
@@ -426,7 +436,7 @@ footer {
   }
 
   /* main layout: single column, order summary below menu */
-  main {
+ /* main {
     display: block;
   }
 
@@ -434,7 +444,7 @@ footer {
     position: static;
     width: 100%;
     margin-top: 20px;
-  }
+  }*/
 
 	  #order-success .order-line {
 	  display:flex;
@@ -568,44 +578,33 @@ getComputedStyle(document.documentElement).getPropertyValue('--header-offset')
 #checkout-modal{ z-index:1400; }
 #status-ticker{ z-index:900; }
 
-/* === Order summary row layout (mobile-safe, improved name width) === */
+/* === Order summary row layout (desktop & mobile) === */
 #order-panel .order-list { overflow: visible; }
 
 #order-panel .order-row {
   display: grid;
-  /* make the middle column (dish name/details) take more space */
-  grid-template-columns: 54px minmax(0, 1.5fr) auto;
+  /* image | wide name/details | price */
+  grid-template-columns: 64px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
-  overflow: visible;
+  gap: 12px;
 }
 
-/* thumbnail stays fixed width */
 #order-panel .order-row .item-thumb {
-  width: 54px;
-  height: 54px;
-  object-fit: cover;
-  border-radius: 8px;
+  width: 64px; height: 64px; object-fit: cover; border-radius: 8px;
 }
 
-/* widen the text area */
-#order-panel .order-row .meta {
-  min-width: 0;           /* allow shrinking gracefully */
-  max-width: 100%;
-  overflow: hidden;
-}
+/* let the middle column actually grow */
+#order-panel .order-row .meta { min-width: 0; max-width: 100%; overflow: hidden; }
 
-/* allow one wrap before ellipsis (for longer dish names) */
+/* DESKTOP/TABLET: single-line with ellipsis */
 #order-panel .order-row .meta .title {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;      /* allow 2 lines before truncating */
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  word-break: break-word;
+  font-weight: 700;
 }
 
-/* price column */
+/* price column stays tight and aligned right */
 #order-panel .order-row .price,
 #order-panel .order-row .order-price {
   white-space: nowrap;
@@ -614,12 +613,63 @@ getComputedStyle(document.documentElement).getPropertyValue('--header-offset')
   justify-self: end;
 }
 
-/* tweak spacing for very small screens */
-@media (max-width: 480px) {
+/* MOBILE: allow two lines for long names */
+@media (max-width: 768px) {
   #order-panel .order-row {
-    grid-template-columns: 50px minmax(0, 2fr) auto;
-    gap: 8px;
+    grid-template-columns: 54px minmax(0, 2fr) auto;
+    gap: 10px;
   }
+  #order-panel .order-row .meta .title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;       /* up to 2 lines on mobile */
+    -webkit-box-orient: vertical;
+    white-space: normal;
+  }
+}
+/* --- Order rows: flex layout, name gets the space --- */
+#order-panel .order-list .order-row{
+  display: flex !important;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* thumbnail stays fixed */
+#order-panel .order-row .item-thumb{
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+}
+
+/* NAME / meta column should grow and be wide enough */
+#order-panel .order-row .meta{
+  flex: 1 1 520px;       /* <-- give it most of the width */
+  min-width: 320px;      /* prevent crazy narrow column on desktop */
+  max-width: 100%;
+}
+
+/* keep price / qty / remove tight and on the right */
+#order-panel .order-row .price,
+#order-panel .order-row .qty-controls,
+#order-panel .order-row a[href*="remove"],
+#order-panel .order-row .remove{
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* push the price to the far right; others will sit before it */
+#order-panel .order-row .price{ margin-left: auto; }
+
+/* stop titles from breaking letter-by-letter */
+#order-panel .order-row .meta .title{
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;   /* wrap at word boundaries when needed */
+}
+
+/* mobile tweak */
+@media (max-width: 640px){
+  #order-panel .order-row .item-thumb{ flex-basis: 54px; width: 54px; height: 54px; }
+  #order-panel .order-row .meta{ flex-basis: 260px; min-width: 200px; }
 }
 
 
@@ -1057,7 +1107,7 @@ console.log = console.info = console.debug = console.warn = console.error = cons
         { id: 'jasmine-rice', name: 'Jasmine Rice (Khao Suay)', desc: 'Fragrant, long-grain rice.', price: 2.00, allergens: [] },
         { id: 'egg-rice', name: 'Egg Fried Rice (Khao Pad Khai)', desc: 'Rice with egg, simple & comforting.', price: 2.50, allergens: ['egg','soya'] },
         { id: 'sticky-rice', name: 'Sticky Rice (Khao Neow)', desc: 'Perfect sticky jasmine rice.', price: 2.50, allergens: [] },
-        { id: 'coconut-ricee', name: 'Coconut Rice (Khao Man)', desc: 'Jasmine rice simmered in coconut milk.', price: 0.50, allergens: ['dairy'] }
+        { id: 'coconut-ricee', name: 'Coconut Rice (Khao Man)', desc: 'Jasmine rice simmered in coconut milk.', price: 3.00, allergens: ['dairy'] }
       ]}
     ];
 
