@@ -776,6 +776,54 @@ main{ display:block !important; }
 console.info('Console levels forced');
 console.log = console.info = console.debug = console.warn = console.error = console.log.bind(console);
 </script>
+/* --- Order summary layout: mobile fix (portrait) --- */
+@media (max-width: 520px) {
+  /* 3-column grid: [thumb] [flex text] [fixed price] */
+  .order-row {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) 84px; /* tweak 84px if needed */
+    column-gap: 12px;
+    align-items: start;
+  }
+
+  .order-row .item-thumb {
+    grid-column: 1 / 2;
+    width: 64px; height: 64px;
+    flex: none;
+  }
+
+  /* text/meta column grows and can actually shrink (min-width:0 is key in grid) */
+  .order-row .meta {
+    grid-column: 2 / 3;
+    min-width: 0 !important;
+    max-width: none !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: anywhere;
+  }
+  .order-row .meta .title {
+    min-width: 0 !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: anywhere;
+  }
+
+  /* fixed price column stays right-aligned and on one line */
+  .order-row .price {
+    grid-column: 3 / 4;
+    justify-self: end;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* controls & remove sit under the text, not under price */
+  .order-row .qty-controls,
+  .order-row .remove-link {
+    grid-column: 2 / 3;
+    justify-self: start;
+    margin-top: 6px;
+  }
+}
 
 
   </style>
