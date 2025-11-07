@@ -568,47 +568,60 @@ getComputedStyle(document.documentElement).getPropertyValue('--header-offset')
 #checkout-modal{ z-index:1400; }
 #status-ticker{ z-index:900; }
 
-/* === Order summary row layout (mobile-safe, no clipping) === */
+/* === Order summary row layout (mobile-safe, improved name width) === */
 #order-panel .order-list { overflow: visible; }
 
-#order-panel .order-row{
-  /* switch from flex to a simple 3-column grid */
+#order-panel .order-row {
   display: grid;
-  grid-template-columns: 56px 1fr auto; /* thumb | details | £ */
+  /* make the middle column (dish name/details) take more space */
+  grid-template-columns: 54px minmax(0, 1.5fr) auto;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   overflow: visible;
 }
 
 /* thumbnail stays fixed width */
-#order-panel .order-row .item-thumb{
-  width: 56px; height: 56px; object-fit: cover; border-radius: 8px;
+#order-panel .order-row .item-thumb {
+  width: 54px;
+  height: 54px;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
-/* text column can shrink; enable ellipsis instead of pushing the price off-screen */
-#order-panel .order-row .meta{
-  min-width: 0;           /* allow shrinking */
+/* widen the text area */
+#order-panel .order-row .meta {
+  min-width: 0;           /* allow shrinking gracefully */
+  max-width: 100%;
+  overflow: hidden;
 }
-#order-panel .order-row .meta .title{
+
+/* allow one wrap before ellipsis (for longer dish names) */
+#order-panel .order-row .meta .title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;      /* allow 2 lines before truncating */
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: break-word;
 }
 
-/* price column: never wrap, always right-aligned and visible */
+/* price column */
 #order-panel .order-row .price,
-#order-panel .order-row .order-price{
+#order-panel .order-row .order-price {
   white-space: nowrap;
   text-align: right;
-  min-width: 6ch;   /* enough room for “£99.99” */
+  min-width: 6ch;
   justify-self: end;
 }
 
-/* quantity controls and “Remove” live in the middle column; keep them from wrapping oddly */
-#order-panel .order-row .qty-controls,
-#order-panel .order-row .remove{
-  flex-wrap: nowrap;
+/* tweak spacing for very small screens */
+@media (max-width: 480px) {
+  #order-panel .order-row {
+    grid-template-columns: 50px minmax(0, 2fr) auto;
+    gap: 8px;
+  }
 }
+
 
 
 <script>
