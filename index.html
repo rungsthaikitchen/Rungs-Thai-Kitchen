@@ -160,8 +160,9 @@ html { scroll-padding-top: calc(var(--header-offset, 0px) + var(--ticker-height,
 }
 
 .brand-logo {
-  height: 120px;
+  height: 240px;
   width: auto;
+  background: transparent;
   display: block;
 }
 
@@ -853,6 +854,75 @@ console.log = console.info = console.debug = console.warn = console.error = cons
   margin: 0 auto;
 }*/
 
+/* Compact the header */
+.site-header{
+  padding: 8px 20px 10px !important;  /* was adding lots of white space */
+  margin: 0 0 12px !important;
+}
+
+/* Centered layout, minimal gaps */
+.header-inner.centered{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px !important;                /* tighter gap between logo / tagline / nav */
+}
+
+/* Logo block */
+.brand-block{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px !important;                /* reduce space between logo and “Authentic Thai…” */
+  padding: 0 !important;
+}
+
+/* The logo itself */
+.brand-logo{
+  height: 150px;                      /* keep your larger logo */
+  width: auto;
+  display: block;
+  margin: 0 auto;
+  padding: 0 !important;
+}
+
+/* Tagline just under the logo */
+.brand-title{
+  margin: 2px 0 0 !important;         /* very small gap */
+  line-height: 1.15;
+}
+
+/* Nav sits a little closer to the tagline */
+.main-nav{ margin-top: 6px !important; }
+
+/* Optional: slightly smaller logo on small screens */
+@media (max-width: 480px){
+  .brand-logo{ height: 220px; }
+}
+
+/* Make the white header background slightly transparent */
+.site-header {
+  background-color: rgba(255, 255, 255, 0.8); /* 0.9 = 80% opaque */
+  backdrop-filter: blur(6px);                 /* softens background behind it */
+  -webkit-backdrop-filter: blur(6px);         /* Safari support */
+  border-radius: 0 0 16px 16px;               /* optional rounded bottom corners */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);     /* gentle shadow to separate from bg */
+}
+
+/* Make all main content cards slightly transparent */
+.card,
+
+.content-section {
+  background-color: rgba(255, 255, 255, 0.8) !important; /* 0.9 = 90% opaque */
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Add breathing space below the header */
+.site-header {
+  margin-bottom: 200px !important; /* adjust this value as needed */
+}
+
 
   </style>
 </head>
@@ -871,15 +941,11 @@ console.log = console.info = console.debug = console.warn = console.error = cons
   </div>
 </div>
 
-
-<!-- Then your header -->
-<header class="site-header"> ... </header>
-
     <!-- Header -->
     <header class="site-header">
   <div class="header-inner centered">
-    <div class="brand-block">
-      <img src="images/RTKWhite1.png" alt="Rung's Thai Kitchen Logo" class="brand-logo">
+    <div class="brand-block" style="margin-top: 1px">
+      <img src="images/logotransparent1.png" alt="Rung's Thai Kitchen Logo" class="brand-logo">
       <!--<div class="brand-title">Rung's Thai Kitchen</div>-->
       <div class="brand-title">Authentic Thai Takeaway</div>
     </div>
