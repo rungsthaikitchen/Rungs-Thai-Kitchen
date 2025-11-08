@@ -722,6 +722,46 @@ main{ display:block !important; }
   margin-top:20px !important;
 }
 
+/* Divider (already added earlier, keeping for context) */
+.order-row:not(:last-child),
+.order-item:not(:last-child){
+  border-bottom: 1px dashed rgba(217,70,74,0.35);
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  transition: border-color .35s ease, opacity .25s ease;
+}
+
+/* Appear fade for newly-rendered rows */
+.order-row.will-appear { opacity: 0; }
+.order-row.appear      { opacity: 1; }
+
+/* Gentle highlight “pulse” when qty changes */
+.order-row.flash {
+  animation: rtkFlash 600ms ease-out;
+}
+
+/* Motion safety */
+@media (prefers-reduced-motion: reduce) {
+  .order-row { transition: none !important; }
+  .order-row.flash { animation: none !important; }
+}
+
+/* Keyframes for the pulse */
+@keyframes rtkFlash {
+  0%   { background: rgba(217,70,74,.10); }
+  100% { background: transparent; }
+}
+
+/* Slightly tighter spacing on small screens */
+@media (max-width:640px){
+  .order-row:not(:last-child),
+  .order-item:not(:last-child){
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+  }
+}
+
+
 #ticker-ghost, .ticker-spacer { display:none !important; }
 
 /* --- Order summary: mobile-friendly layout & wrapping --- */
@@ -837,7 +877,9 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 /* Optional: lighter feel for dark backgrounds */
 body.dark-mode .order-row:not(:last-child),
 body.dark-mode .order-item:not(:last-child) {
-  border-bottom-color: rgba(255, 255, 255, 0.25);
+  border-bottom: 1px dashed; rgba(17, 70, 74, 0.35); /* soft accent red */);
+    padding-bottom: 10px;
+  margin-bottom: 10px;
 }
 /* Space before totals and checkout button */
 .order-summary-totals,
@@ -1007,6 +1049,27 @@ footer {
 .order-item .meta {
   margin-left: 0 !important;
 }
+
+footer {
+  background-color: rgba(204, 12, 26, 0.4); /* #16205b @ 80% opacity */
+  color: white;                            /* good contrast */
+  padding: 20px 0;
+  text-align: center;
+  border-radius: 10px 10px 0 0;            /* optional soft top corners */
+  backdrop-filter: blur(4px);              /* frosted effect for consistency */
+}
+
+/* Optional: make footer links match your site’s accent */
+footer a {
+  color: #ffb3b3;
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
 
 
   </style>
