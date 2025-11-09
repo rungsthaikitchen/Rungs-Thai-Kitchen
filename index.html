@@ -63,7 +63,7 @@
   align-items: center;
   gap: 48px;                 /* space between the two copies */
   will-change: transform;
-  animation: tickerMove var(--ticker-speed, 28s) linear infinite;
+  animation: tickerMove var(--ticker-speed, 12s) linear infinite;
 }
 
 #status-ticker span { font-weight: 700; font-size: 1rem; padding: 0 10px; }
@@ -160,7 +160,7 @@ html { scroll-padding-top: calc(var(--header-offset, 0px) + var(--ticker-height,
 }
 
 .brand-logo {
-  height: 240px;
+  height: 100px;
   width: auto;
   background: transparent;
   display: block;
@@ -205,7 +205,7 @@ html { scroll-padding-top: calc(var(--header-offset, 0px) + var(--ticker-height,
 /* mobile tweaks */
 @media (max-width: 640px) {
   .brand-logo {
-    height: 90px;
+    height: 25px;
   }
   .main-nav ul {
     gap: 10px;
@@ -360,19 +360,19 @@ footer {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 4px;
   align-items: center;
 }
 
 .footer-section h3 {
   font-weight: 800;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
   color: #fff;
 }
 
 .footer-section .muted {
   color: rgba(255,255,255,0.85);
-  margin: 0 0 10px;
+  margin: 0 0 2px;
 }
 
 .footer-section a {
@@ -947,7 +947,7 @@ body.dark-mode .order-item:not(:last-child) {
 
 /* The logo itself */
 .brand-logo{
-  height: 150px;                      /* keep your larger logo */
+  height: 100px;                      /* keep your larger logo */
   width: auto;
   display: block;
   margin: 0 auto;
@@ -965,7 +965,7 @@ body.dark-mode .order-item:not(:last-child) {
 
 /* Optional: slightly smaller logo on small screens */
 @media (max-width: 480px){
-  .brand-logo{ height: 220px; }
+  .brand-logo{ height: 100px; }
 }
 
 /* Make the white header background slightly transparent */
@@ -1070,6 +1070,45 @@ footer a:hover {
   text-decoration: underline;
 }
 
+/* Normal (sticky) */
+.site-header {
+  position: sticky;
+  top: 12px;
+  z-index: 1100;
+}
+
+/* When unpinned past allergens */
+.header-unpinned .site-header {
+  position: static;  /* header will scroll away */
+}
+
+:root {
+  /* updated dynamically in JS */
+  --header-h: 0px;
+}
+
+/* Animate header in/out */
+.site-header {
+  transition: transform .22s ease, opacity .22s ease;
+  will-change: transform, opacity;
+}
+
+/* When “slid up”, move header out of view */
+.header-slid-up .site-header {
+  transform: translateY(calc(-1 * var(--header-h) - 12px));
+  opacity: 0;
+}
+
+/* Spacer takes the header’s place so content doesn’t jump */
+#header-spacer {
+  height: 0;
+  transition: height .22s ease;
+  will-change: height;
+}
+.header-slid-up #header-spacer {
+  height: var(--header-h);
+}
+
 
 
   </style>
@@ -1090,7 +1129,7 @@ footer a:hover {
 </div>
 
 <img
-  src="./images/LogoTransparent1.PNG?v=3"
+  src="./images/LogoTransparent1.PNG?v=4"
   alt="Rung's Thai Kitchen Logo"
   class="brand-logo"
   width="520" height="260"
@@ -1119,6 +1158,7 @@ footer a:hover {
     </nav>
   </div>
 </header>
+<div id="header-spacer" aria-hidden="true"></div>
 <div id="status-ticker" class="hidden">
   <div class="ticker-inner">
     <span id="ticker-text">We’re closed for Songkran Festival, reopening 18 April 🎉</span>
@@ -1492,7 +1532,7 @@ footer a:hover {
         { id: 'chicken-spring-rolls', name: 'Chicken Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of meat, glass noodles, and vegetables, served with a sweet chilli sauce.', price: 5.00, allergens: ['gluten'] },
         { id: 'fried-tofu', name: 'Deep Fried Tofu', desc: 'Crispy Thai Fried Tofu with a sweet-spicy Thai peanut sauce!', price: 3.50, allergens: ['soya','peanuts','sesame'] },
         { id: 'fish-cakes', name: 'Thai Fish Cakes', desc: 'Flavourful, bite-sized fritters with a blend of savoury, spicy, and tangy flavours.', price: 5.00, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','egg','soya'] },
-        { id: 'porkprawn-dumplings', name: 'Pork & Prawn Steamed Dumplings', desc: ' Steamed dumplings filled with a savoury combination of tender pork and juicy prawns.', price: 4.50, allergens: ['gluten','shellfish'] },
+        { id: 'porkprawn-dumplings', name: 'Pork & Prawn Steamed Dumplings', desc: 'Steamed dumplings filled with a savoury combination of tender pork and juicy prawns.', price: 4.50, allergens: ['gluten','shellfish'] },
         { id: 'fried-prawns', name: 'Deep Fried Tiger Prawns (x4)', desc: 'Tiger Prawns cooked in a crispy tempura batter served with authentic Thai sweet Chilli Sauce.', price: 6.00, allergens: ['shellfish','gluten','egg'] },
         { id: 'thai-sausage', name: 'Thai Pork Sausage', desc: 'A traditional fermented Thai sausage made with ground pork, sticky rice, and fragrant seasonings. Served with fresh sliced ginger, whole peanuts and slices of cucumber.', price: 5.00, allergens: [] }
       ]},
@@ -1608,7 +1648,7 @@ footer a:hover {
 		// Simple config object (edit this anytime)
 		const siteStatus = {
 		  active: true,  // turn off when not needed
-		  message: "We’re not open yet as we're making final equipment and ingredient preparations to ensure you have an amazing at home Thai dining experience! We hope to open by 3rd December 🎉"
+		  message: "We’re not open yet as we're making final preparations to ensure you have an amazing at home Thai dining experience! We hope to open by 3rd December 🎉"
 		};
 
 		if (siteStatus.active && tickerEl && tickerText) {
@@ -2220,6 +2260,60 @@ header.addEventListener('click', () => {
 
 	}); // end DOMContentLoaded
 </script>
+
+<script>
+(function() {
+  const root      = document.documentElement;
+  const header    = document.querySelector('.site-header');
+  const spacer    = document.getElementById('header-spacer');
+  const allergens = document.querySelector('#allergens');
+  if (!header || !spacer || !allergens) return;
+
+  function setHeaderVar() {
+    // measure real header height and expose as a CSS var
+    const h = Math.round(header.getBoundingClientRect().height);
+    root.style.setProperty('--header-h', h + 'px');
+  }
+
+  function triggerY() {
+    // top of allergens minus header height minus a small buffer
+    const top = window.scrollY + allergens.getBoundingClientRect().top;
+    const h   = parseInt(getComputedStyle(root).getPropertyValue('--header-h')) || 0;
+    return top - h - 4;
+  }
+
+  let currentTrigger = 0;
+
+  function updateTrigger() {
+    setHeaderVar();
+    currentTrigger = triggerY();
+    onScroll(); // apply immediately
+  }
+
+  function onScroll() {
+    // slide up once we reach allergens; slide back down above it
+    if (window.scrollY >= currentTrigger) {
+      root.classList.add('header-slid-up');
+    } else {
+      root.classList.remove('header-slid-up');
+    }
+  }
+
+  // init
+  updateTrigger();
+
+  // listeners
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', updateTrigger, { passive: true });
+  window.addEventListener('orientationchange', updateTrigger, { passive: true });
+
+  // if your fonts/images change header height after load, re-measure soon after
+  setTimeout(updateTrigger, 300);
+})();
+</script>
+
+
+
 
 	<script>
 	  if (typeof window.formatCurrency !== 'function') {
