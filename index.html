@@ -1070,6 +1070,19 @@ footer a:hover {
   text-decoration: underline;
 }
 
+/* Normal (sticky) */
+.site-header {
+  position: sticky;
+  top: 12px;
+  z-index: 1100;
+}
+
+/* When unpinned past allergens */
+.header-unpinned .site-header {
+  position: static;  /* header will scroll away */
+}
+
+
 
 
   </style>
@@ -1090,7 +1103,7 @@ footer a:hover {
 </div>
 
 <img
-  src="./images/LogoTransparent1.PNG?v=3"
+  src="./images/LogoTransparent1.PNG?v=4"
   alt="Rung's Thai Kitchen Logo"
   class="brand-logo"
   width="520" height="260"
@@ -2220,6 +2233,48 @@ header.addEventListener('click', () => {
 
 	}); // end DOMContentLoaded
 </script>
+
+<script>
+(function() {
+  const root = document.documentElement;
+  const header = document.querySelector('.site-header');
+  const allergens = document.querySelector('#allergens');
+  if (!header || !allergens) return;
+
+  function headerH() {
+    return Math.round(header.getBoundingClientRect().height);
+  }
+
+  function computeTriggerY() {
+    // top of allergens, minus header height, minus a tiny buffer
+    const top = window.scrollY + allergens.getBoundingClientRect().top;
+    return top - headerH() - 4;
+  }
+
+  let triggerY = 0;
+
+  function updateTrigger() {
+    triggerY = computeTriggerY();
+    onScroll(); // apply immediately
+  }
+
+  function onScroll() {
+    if (window.scrollY >= triggerY) {
+      root.classList.add('header-unpinned');   // unpin for the rest
+    } else {
+      root.classList.remove('header-unpinned'); // sticky above allergens
+    }
+  }
+
+  // init + listeners
+  updateTrigger();
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', updateTrigger, { passive: true });
+  window.addEventListener('orientationchange', updateTrigger, { passive: true });
+})();
+</script>
+
+
 
 	<script>
 	  if (typeof window.formatCurrency !== 'function') {
