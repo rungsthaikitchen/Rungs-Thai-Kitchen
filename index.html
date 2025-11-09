@@ -84,7 +84,7 @@
 /* Slow it a touch more on small screens */
 @media (max-width: 640px) {
   #status-ticker .ticker-track {
-    animation-duration: var(--ticker-speed-mobile, 28s);
+    animation-duration: var(--ticker-speed-mobile, 36s);
   }
 }
 
@@ -360,19 +360,19 @@ footer {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 4px;
   align-items: center;
 }
 
 .footer-section h3 {
   font-weight: 800;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
   color: #fff;
 }
 
 .footer-section .muted {
   color: rgba(255,255,255,0.85);
-  margin: 0 0 10px;
+  margin: 0 0 2px;
 }
 
 .footer-section a {
@@ -1082,6 +1082,32 @@ footer a:hover {
   position: static;  /* header will scroll away */
 }
 
+:root {
+  /* updated dynamically in JS */
+  --header-h: 0px;
+}
+
+/* Animate header in/out */
+.site-header {
+  transition: transform .22s ease, opacity .22s ease;
+  will-change: transform, opacity;
+}
+
+/* When “slid up”, move header out of view */
+.header-slid-up .site-header {
+  transform: translateY(calc(-1 * var(--header-h) - 12px));
+  opacity: 0;
+}
+
+/* Spacer takes the header’s place so content doesn’t jump */
+#header-spacer {
+  height: 0;
+  transition: height .22s ease;
+  will-change: height;
+}
+.header-slid-up #header-spacer {
+  height: var(--header-h);
+}
 
 
 
@@ -1132,6 +1158,7 @@ footer a:hover {
     </nav>
   </div>
 </header>
+<div id="header-spacer" aria-hidden="true"></div>
 <div id="status-ticker" class="hidden">
   <div class="ticker-inner">
     <span id="ticker-text">We’re closed for Songkran Festival, reopening 18 April 🎉</span>
@@ -1621,7 +1648,7 @@ footer a:hover {
 		// Simple config object (edit this anytime)
 		const siteStatus = {
 		  active: true,  // turn off when not needed
-		  message: "We’re not open yet as we're making final equipment and ingredient preparations to ensure you have an amazing at home Thai dining experience! We hope to open by 3rd December 🎉"
+		  message: "We’re not open yet as we're making final preparations to ensure you have an amazing at home Thai dining experience! We hope to open by 3rd December 🎉"
 		};
 
 		if (siteStatus.active && tickerEl && tickerText) {
@@ -2236,43 +2263,55 @@ header.addEventListener('click', () => {
 
 <script>
 (function() {
-  const root = document.documentElement;
-  const header = document.querySelector('.site-header');
+  const root      = document.documentElement;
+  const header    = document.querySelector('.site-header');
+  const spacer    = document.getElementById('header-spacer');
   const allergens = document.querySelector('#allergens');
-  if (!header || !allergens) return;
+  if (!header || !spacer || !allergens) return;
 
-  function headerH() {
-    return Math.round(header.getBoundingClientRect().height);
+  function setHeaderVar() {
+    // measure real header height and expose as a CSS var
+    const h = Math.round(header.getBoundingClientRect().height);
+    root.style.setProperty('--header-h', h + 'px');
   }
 
-  function computeTriggerY() {
-    // top of allergens, minus header height, minus a tiny buffer
+  function triggerY() {
+    // top of allergens minus header height minus a small buffer
     const top = window.scrollY + allergens.getBoundingClientRect().top;
-    return top - headerH() - 4;
+    const h   = parseInt(getComputedStyle(root).getPropertyValue('--header-h')) || 0;
+    return top - h - 4;
   }
 
-  let triggerY = 0;
+  let currentTrigger = 0;
 
   function updateTrigger() {
-    triggerY = computeTriggerY();
+    setHeaderVar();
+    currentTrigger = triggerY();
     onScroll(); // apply immediately
   }
 
   function onScroll() {
-    if (window.scrollY >= triggerY) {
-      root.classList.add('header-unpinned');   // unpin for the rest
+    // slide up once we reach allergens; slide back down above it
+    if (window.scrollY >= currentTrigger) {
+      root.classList.add('header-slid-up');
     } else {
-      root.classList.remove('header-unpinned'); // sticky above allergens
+      root.classList.remove('header-slid-up');
     }
   }
 
-  // init + listeners
+  // init
   updateTrigger();
+
+  // listeners
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', updateTrigger, { passive: true });
   window.addEventListener('orientationchange', updateTrigger, { passive: true });
+
+  // if your fonts/images change header height after load, re-measure soon after
+  setTimeout(updateTrigger, 300);
 })();
 </script>
+
 
 
 
