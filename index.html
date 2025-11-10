@@ -29,7 +29,6 @@
   border-radius: 12px;
   margin-bottom: 20px;
   padding: 14px 20px 16px;
-  position: sticky;
   top: 12px;
   z-index: 1100;
 }
@@ -76,7 +75,6 @@
 
 /* Header sticks BELOW the ticker */
 .site-header {
-  position: sticky;
   top: var(--ticker-offset, 12px);
   z-index: 1100;
 }
@@ -1072,42 +1070,39 @@ footer a:hover {
 
 /* Normal (sticky) */
 .site-header {
-  position: sticky;
   top: 12px;
   z-index: 1100;
 }
 
-/* When unpinned past allergens */
-.header-unpinned .site-header {
-  position: static;  /* header will scroll away */
-}
+
 
 :root {
-  /* updated dynamically in JS */
   --header-h: 0px;
 }
 
-/* Animate header in/out */
-.site-header {
-  transition: transform .22s ease, opacity .22s ease;
-  will-change: transform, opacity;
-}
-
-/* When “slid up”, move header out of view */
-.header-slid-up .site-header {
-  transform: translateY(calc(-1 * var(--header-h) - 12px));
-  opacity: 0;
-}
-
-/* Spacer takes the header’s place so content doesn’t jump */
+/* Spacer reserves header height by default */
 #header-spacer {
-  height: 0;
+  height: var(--header-h);
   transition: height .22s ease;
   will-change: height;
 }
+
+/* When header slides up, collapse spacer so content moves up */
 .header-slid-up #header-spacer {
-  height: var(--header-h);
+  height: 0;
 }
+
+/* Ticker sits just below the spacer */
+#status-ticker {
+  position: sticky;
+  top: 0;                   /* just below spacer */
+  z-index: 1050;            /* below header (e.g., 1100), above content */
+  background: rgba(204,12,26,0.);
+  color: #fff;
+  padding: 8px 12px;
+  overflow: hidden;
+}
+
 
 
 
@@ -1158,12 +1153,17 @@ footer a:hover {
     </nav>
   </div>
 </header>
-<div id="header-spacer" aria-hidden="true"></div>
+
+
+<!-- spacer must be immediately after the header -->
+<div id="header-spacer"></div>
 <div id="status-ticker" class="hidden">
   <div class="ticker-inner">
     <span id="ticker-text">We’re closed for Songkran Festival, reopening 18 April 🎉</span>
   </div>
 </div>
+<!-- then your main content -->
+
 <script>
 (function(){
   const el = document.getElementById('ticker-text');
@@ -2260,7 +2260,6 @@ header.addEventListener('click', () => {
 
 	}); // end DOMContentLoaded
 </script>
-
 <script>
 (function() {
   const root      = document.documentElement;
@@ -2269,48 +2268,43 @@ header.addEventListener('click', () => {
   const allergens = document.querySelector('#allergens');
   if (!header || !spacer || !allergens) return;
 
-  function setHeaderVar() {
-    // measure real header height and expose as a CSS var
+  // Measure and expose header height
+  function updateHeaderVar() {
     const h = Math.round(header.getBoundingClientRect().height);
     root.style.setProperty('--header-h', h + 'px');
+    spacer.style.height = h + 'px';
   }
 
-  function triggerY() {
-    // top of allergens minus header height minus a small buffer
+  function getTriggerY() {
     const top = window.scrollY + allergens.getBoundingClientRect().top;
-    const h   = parseInt(getComputedStyle(root).getPropertyValue('--header-h')) || 0;
-    return top - h - 4;
+    const h = parseInt(getComputedStyle(root).getPropertyValue('--header-h')) || 0;
+    return top - h;
   }
 
-  let currentTrigger = 0;
+  let triggerY = 0;
 
   function updateTrigger() {
-    setHeaderVar();
-    currentTrigger = triggerY();
-    onScroll(); // apply immediately
+    updateHeaderVar();
+    triggerY = getTriggerY();
+    handleScroll();
   }
 
-  function onScroll() {
-    // slide up once we reach allergens; slide back down above it
-    if (window.scrollY >= currentTrigger) {
+  function handleScroll() {
+    if (window.scrollY >= triggerY) {
       root.classList.add('header-slid-up');
     } else {
       root.classList.remove('header-slid-up');
     }
   }
 
-  // init
   updateTrigger();
-
-  // listeners
-  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('scroll', handleScroll, { passive: true });
   window.addEventListener('resize', updateTrigger, { passive: true });
   window.addEventListener('orientationchange', updateTrigger, { passive: true });
-
-  // if your fonts/images change header height after load, re-measure soon after
-  setTimeout(updateTrigger, 300);
+  setTimeout(updateTrigger, 300); // recalc once after load
 })();
 </script>
+
 
 
 
