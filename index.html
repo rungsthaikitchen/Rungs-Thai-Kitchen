@@ -15,6 +15,7 @@
       --card:#fff;
       --shadow: 0 8px 24px rgba(15,23,42,0.06);
 	  --crimson:#CC0C1A;
+	  --blue:#16205B;
       font-family: 'Nunito', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
     *{box-sizing:border-box}
@@ -41,66 +42,12 @@
   text-align: center;
 }
 
-/* Ticker container sits above the header, stays visible */
-#status-ticker {
-  position: sticky;
-  top: 0;
-  z-index: 3000;
-  background: #d9464a;
-  color: #fff;
-  padding: 6px 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,.15);
-  overflow: hidden;
-  white-space: nowrap;
-  border-radius: 10px;      /* matches your cards */
-  margin: 12px 12px 8px;    /* same insets as your header/card look */
-}
-
-/* Scrolling track */
-#status-ticker .ticker-track {
-  display: inline-flex;
-  align-items: center;
-  gap: 48px;                 /* space between the two copies */
-  will-change: transform;
-  animation: tickerMove var(--ticker-speed, 12s) linear infinite;
-}
-
-#status-ticker span { font-weight: 700; font-size: 1rem; padding: 0 10px; }
-
-/* Marquee keyframes */
-@keyframes tickerMove {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); } /* one full copy width */
-}
-
-/* Header sticks BELOW the ticker */
-.site-header {
-  top: var(--ticker-offset, 12px);
-  z-index: 1100;
-}
-
-/* Slow it a touch more on small screens */
-@media (max-width: 640px) {
-  #status-ticker .ticker-track {
-    animation-duration: var(--ticker-speed-mobile, 36s);
-  }
-}
-
-
-
 html { scroll-padding-top: calc(var(--header-offset, 0px) + var(--ticker-height, 0px)); }
 
 
-/* Ensure modals always sit above the ticker */
-.modal-backdrop {
-  position: fixed;       /* ensure it covers everything */
-  inset: 0;
-  z-index: 1600;         /* higher than ticker */
-}
-
 /* If you also have the success modal separately, keep it above too */
 #order-success.modal-backdrop {
-  z-index: 1700;
+  z-index: 3000;
 }
 
 
@@ -120,8 +67,10 @@ html { scroll-padding-top: calc(var(--header-offset, 0px) + var(--ticker-height,
 }
 
 
-/* --- Holiday / status ticker --- */
+/* --- Single, clean ticker style --- */
 #status-ticker {
+  position: relative;             /* simple: just sits above the header */
+  z-index: 1100;
   background: linear-gradient(90deg, #b02a2a, #d9464a);
   color: #fff;
   text-align: center;
@@ -129,16 +78,17 @@ html { scroll-padding-top: calc(var(--header-offset, 0px) + var(--ticker-height,
   font-size: 0.95rem;
   letter-spacing: 0.02em;
   padding: 8px 12px;
-  position: sticky;
-  top: 0;
-  z-index: 2000;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin: 0 12px 10px;
+  border-radius: 10px;
   overflow: hidden;
 }
 
-#status-ticker.hidden { display: none; }
+#status-ticker.hidden {
+  display: none;
+}
 
 #status-ticker .ticker-inner {
+  display: inline-block;
   white-space: nowrap;
   animation: ticker-move 25s linear infinite;
 }
@@ -147,6 +97,14 @@ html { scroll-padding-top: calc(var(--header-offset, 0px) + var(--ticker-height,
   0%   { transform: translateX(100%); }
   100% { transform: translateX(-100%); }
 }
+
+/* a bit slower on mobile so long messages can be read */
+@media (max-width: 640px) {
+  #status-ticker .ticker-inner {
+    animation-duration: 35s;
+  }
+}
+
 
 
 
@@ -260,7 +218,7 @@ main {
 	}
 
 	.btn-accent {
-	  background: linear-gradient(135deg, #d9464a 0%, #b02a2a 100%);
+	  background: linear-gradient(135deg, #16205B 0%, #b02a2a 100%);
 	  box-shadow: 0 6px 16px rgba(217,70,74,0.35);
 	}
 
@@ -287,10 +245,10 @@ main {
     .category-body.open{ padding:12px; }
 	
 	/* keep anchors landing below sticky header */
-	:root { --header-offset: 120px; }  /* JS will overwrite precisely */
-	html { scroll-behavior: smooth; }
-	.category, .category-header, .category-body { scroll-margin-top: var(--header-offset); }
-	/*html { scroll-padding-top: var(--header-offset); }*/
+	:root { --header-offset: 140x; } /* fallback */
+html { 	scroll-behavior: smooth;
+		scroll-padding-top: var(--header-offset); }
+.category, .category-header, .category-body { scroll-margin-top: var(--header-offset); }
 	
     .menu-item{display:flex;justify-content:space-between;align-items:flex-start;padding:10px;border-radius:8px;border:1px solid #f7efee;margin-bottom:8px}
     .menu-item .meta{max-width:72%}
@@ -308,11 +266,49 @@ main {
     .food-grid img{width:100%;height:140px;object-fit:cover;border-radius:8px;box-shadow:0 6px 16px rgba(15,23,42,0.06);cursor:pointer}
     .food-grid img:hover{transform:translateY(-4px);transition:transform .18s ease,box-shadow .18s ease}
 
-    /* Modal (customise & checkout & success) */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:1200; overflow:auto; -webkit-overflow-scrolling:touch}
-    .modal{width:100%;max-width:720px;background:var(--card);border-radius:12px;padding:16px;box-shadow:0 12px 40px rgba(0,0,0,0.25); max-height:90vh; overflow:auto}
-    .mods{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-    .chip{padding:8px 10px;border-radius:999px;border:1px solid #eee;cursor:pointer;font-size:13px;background:#fff; min-height:44px; touch-action:manipulation}
+    /* Customise / checkout modal backdrop */
+		.modal-backdrop {
+		  position: fixed;
+		  inset: 0;
+		  background: rgba(0,0,0,0.45);
+		  display: none;
+		  align-items: center;
+		  justify-content: center;
+		  padding: 18px;
+		  z-index: 3000;        /* ABOVE menu overlay */
+		  overflow: auto;
+		  -webkit-overflow-scrolling: touch;
+		}
+	
+    /* Inner modal card */
+		.modal {
+		  width: 100%;
+		  max-width: 720px;
+		  background: var(--card);
+		  border-radius: 12px;
+		  padding: 16px;
+		  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+		  max-height: 90vh;
+		  overflow: auto;
+		  z-index: 3001;        /* just in case */
+		}
+    .mods{
+	display:flex;
+	flex-wrap:wrap;
+	gap:8px;
+	margin-top:8px
+	}
+	
+    .chip{
+	padding:8px 10px;
+	border-radius:999px;
+	border:1px solid #eee;
+	cursor:pointer;
+	font-size:13px;
+	background:#fff; 
+	min-height:44px; 
+	touch-action:manipulation
+	}
     .chip.selected{background:#fff4f3;border-color:var(--accent)}
     input[type=number]{width:72px;padding:8px;border-radius:8px;border:1px solid #e7e3e3}
     .qty-controls{display:flex;align-items:center;gap:8px}
@@ -510,675 +506,925 @@ footer {
     gap: 8px;
   }
 }
-/* === Parallax background layer === */
-.bg-parallax {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  overflow: hidden;
-  background:
-    /* top image */
-    url("./images/bg-top6.JPG?v=2") center top / cover no-repeat,
-    /* bottom image */
-    url("images/bg-bottom.jpg") center 120vh / cover no-repeat,
-    /* fallback colour under both */
-    #0b1120;
-  background-attachment: fixed, fixed, scroll;
-  /* dim it a bit so text stays readable */
-  filter: brightness(.55);
+		/* === Parallax background layer === */
+		.bg-parallax {
+		  position: fixed;
+		  inset: 0;
+		  z-index: -1;
+		  pointer-events: none;
+		  overflow: hidden;
+		  background:
+			/* top image */
+			url("./images/bg-top6.JPG?v=2") center top / cover no-repeat,
+			/* bottom image */
+			url("images/bg-bottom.jpg") center 120vh / cover no-repeat,
+			/* fallback colour under both */
+			#0b1120;
+		  background-attachment: fixed, fixed, scroll;
+		  /* dim it a bit so text stays readable */
+		  filter: brightness(.55);
+		}
+
+		/* extra spacing between sections so we *see* the background */
+		.card {
+		  margin-bottom: 175px;   /* was 14–18px in places */
+		}
+
+		/* give main a bit more vertical rhythm */
+		main > section > .card + .card {
+		  margin-top: 250px;
+		}
+
+		/* keep footer off the bottom a little so background shows */
+		footer {
+		  margin-top: 30px;
+		}
+
+		/* mobile fallback: iOS hates background-attachment:fixed */
+		@media (max-width: 768px) {
+		  .bg-parallax {
+			background-attachment: scroll, scroll, scroll;
+			background-size: cover, cover, auto;
+		  }
+		}
+		.card {
+		  background: rgba(255,255,255,0.9);
+		  backdrop-filter: blur(2px);
+		}
+
+		/* This helps anchors or programmatic scrolls land below the sticky header */
+		:root {
+		  --header-offset: 160px; /* fallback; JS will set the precise value */
+		}
+
+		html {
+		  scroll-behavior: smooth;                 /* native smooth scroll */
+		  scroll-padding-top: var(--header-offset);/* space for sticky header */
+		}
+
+		.category-body {
+		  transition: max-height .25s ease;        /* a touch shorter & snappier */
+		  will-change: max-height;                 /* hint for smoother anim */
+		  overflow: hidden;
+		}
+
+
+		/*.card-spacer { margin-bottom: 180px; }
+		.card { margin-bottom: 0; } */
+
+		getComputedStyle(document.documentElement).getPropertyValue('--header-offset')
+		/* === Checkout modal alignment fixes === */
+		#checkout-modal .totals{
+		  display:grid;
+		  grid-template-columns: 1fr auto; /* label on left, amount on right */
+		  gap:12px;
+		  align-items:center;
+		}
+		#checkout-modal .totals .muted{ white-space:nowrap; }
+
+		#checkout-subtotal,
+		#checkout-delivery,
+		#checkout-total{
+		  min-width:6ch;     /* avoids clipping like £9.50 */
+		  text-align:right;  /* right-align prices */
+		}
+
+		/* Inputs layout */
+		#checkout-form .form-grid{ display:grid; gap:12px; }
+		#checkout-form .row-2{
+		  display:grid;
+		  grid-template-columns:1fr 1fr;
+		  gap:12px;
+		}
+		@media (max-width:560px){
+		  #checkout-form .row-2{ grid-template-columns:1fr; }
+		}
+
+		/* Modal padding & actions bar */
+		#checkout-modal .modal{ padding:16px 18px; }
+		#checkout-modal .checkout-actions{
+		  position:sticky;
+		  bottom:0;
+		  background:#fff;
+		  padding-top:8px;
+		  margin-top:6px;
+		}
+
+		/* Ensure modal sits above ticker */
+		#checkout-modal{ z-index:1400; }
+
+		/* === Order summary row layout (desktop & mobile) === */
+		#order-panel .order-list { overflow: visible; }
+
+		#order-panel .order-row {
+		  display: grid;
+		  /* image | wide name/details | price */
+		  grid-template-columns: 64px minmax(0, 1fr) auto;
+		  align-items: center;
+		  gap: 12px;
+		}
+
+		#order-panel .order-row .item-thumb {
+		  width: 64px; height: 64px; object-fit: cover; border-radius: 8px;
+		}
+
+		/* let the middle column actually grow */
+		#order-panel .order-row .meta { min-width: 0; max-width: 100%; overflow: hidden; }
+
+		/* DESKTOP/TABLET: single-line with ellipsis */
+		#order-panel .order-row .meta .title {
+		  white-space: nowrap;
+		  overflow: hidden;
+		  text-overflow: ellipsis;
+		  font-weight: 700;
+		}
+
+		/* price column stays tight and aligned right */
+		#order-panel .order-row .price,
+		#order-panel .order-row .order-price {
+		  white-space: nowrap;
+		  text-align: right;
+		  min-width: 6ch;
+		  justify-self: end;
+		}
+
+		/* MOBILE: allow two lines for long names */
+		@media (max-width: 768px) {
+		  #order-panel .order-row {
+			grid-template-columns: 54px minmax(0, 2fr) auto;
+			gap: 10px;
+		  }
+		  #order-panel .order-row .meta .title {
+			display: -webkit-box;
+			-webkit-line-clamp: 2;       /* up to 2 lines on mobile */
+			-webkit-box-orient: vertical;
+			white-space: normal;
+		  }
+		}
+		/* --- Order rows: flex layout, name gets the space --- */
+		#order-panel .order-list .order-row{
+		  display: flex !important;
+		  align-items: flex-start;
+		  gap: 12px;
+		}
+
+		/* thumbnail stays fixed */
+		#order-panel .order-row .item-thumb{
+		  flex: 0 0 64px;
+		  width: 64px;
+		  height: 64px;
+		}
+
+		/* NAME / meta column should grow and be wide enough */
+		#order-panel .order-row .meta{
+		  flex: 1 1 520px;       /* <-- give it most of the width */
+		  min-width: 320px;      /* prevent crazy narrow column on desktop */
+		  max-width: 100%;
+		}
+
+		/* keep price / qty / remove tight and on the right */
+		#order-panel .order-row .price,
+		#order-panel .order-row .qty-controls,
+		#order-panel .order-row a[href*="remove"],
+		#order-panel .order-row .remove{
+		  flex: 0 0 auto;
+		  white-space: nowrap;
+		}
+
+		/* push the price to the far right; others will sit before it */
+		#order-panel .order-row .price{ margin-left: auto; }
+
+		/* stop titles from breaking letter-by-letter */
+		#order-panel .order-row .meta .title{
+		  white-space: normal;
+		  word-break: normal;
+		  overflow-wrap: anywhere;   /* wrap at word boundaries when needed */
+		}
+
+		/* mobile tweak */
+		@media (max-width: 640px){
+		  #order-panel .order-row .item-thumb{ flex-basis: 54px; width: 54px; height: 54px; }
+		  #order-panel .order-row .meta{ flex-basis: 260px; min-width: 200px; }
+		}
+
+		/* --- force one-column layout everywhere --- */
+		main{ display:block !important; }
+		#order-panel{
+		  position:static !important;
+		  width:100% !important;
+		  margin-top:20px !important;
+		}
+
+		/* Divider (already added earlier, keeping for context) */
+		.order-row:not(:last-child),
+		.order-item:not(:last-child){
+		  border-bottom: 1px dashed rgba(217,70,74,0.35);
+		  padding-bottom: 10px;
+		  margin-bottom: 10px;
+		  transition: border-color .35s ease, opacity .25s ease;
+		}
+
+		/* Appear fade for newly-rendered rows */
+		.order-row.will-appear { opacity: 0; }
+		.order-row.appear      { opacity: 1; }
+
+		/* Gentle highlight “pulse” when qty changes */
+		.order-row.flash {
+		  animation: rtkFlash 600ms ease-out;
+		}
+
+		/* Motion safety */
+		@media (prefers-reduced-motion: reduce) {
+		  .order-row { transition: none !important; }
+		  .order-row.flash { animation: none !important; }
+		}
+
+		/* Keyframes for the pulse */
+		@keyframes rtkFlash {
+		  0%   { background: rgba(217,70,74,.10); }
+		  100% { background: transparent; }
+		}
+
+		/* Slightly tighter spacing on small screens */
+		@media (max-width:640px){
+		  .order-row:not(:last-child),
+		  .order-item:not(:last-child){
+			padding-bottom: 6px;
+			margin-bottom: 6px;
+		  }
+		}
+
+
+		#ticker-ghost, .ticker-spacer { display:none !important; }
+
+		/* --- Order summary: mobile-friendly layout & wrapping --- */
+		.order-row {
+		  display: grid;
+		  grid-template-columns: 68px 1fr auto; /* thumb | name | price */
+		  align-items: center;
+		  gap: 12px;
+		}
+
+		.order-row .item-thumb {
+		  width: 68px;
+		  height: 68px;
+		  border-radius: 8px;
+		  object-fit: cover;
+		}
+
+		.order-row .meta {
+		  min-width: 0;                 /* allow text to take available space */
+		}
+
+		.order-row .meta .title {
+		  white-space: normal;          /* allow multi-line names */
+		  word-break: keep-all;         /* don't break inside words */
+		  overflow-wrap: break-word;    /* but wrap long words if needed */
+		  line-height: 1.25;
+		}
+
+		.order-row .price {
+		  justify-self: end;            /* keep prices neatly aligned right */
+		}
+
+		/* Very narrow phones: put controls on the next line, keep price aligned */
+		@media (max-width: 420px) {
+		  .order-row {
+			grid-template-columns: 56px 1fr;   /* drop the dedicated price column */
+		  }
+		  .order-row .price {
+			grid-column: 2; justify-self: end; /* price sits in the name column row */
+		  }
+		  .order-row .qty-controls,
+		  .order-row .remove {
+			grid-column: 2;                    /* controls flow beneath the name */
+		  }
+		}
+		/* Override older width limits for order summary text */
+		.order-row .meta {
+		  max-width: none !important;
+		}
+
+
+		<script>
+		console.info('Console levels forced');
+		console.log = console.info = console.debug = console.warn = console.error = console.log.bind(console);
+		</script>
+		/* --- Order summary layout: mobile fix (portrait) --- */
+		@media (max-width: 520px) {
+		  /* 3-column grid: [thumb] [flex text] [fixed price] */
+		  .order-row {
+			display: grid;
+			grid-template-columns: 64px minmax(0, 1fr) 84px; /* tweak 84px if needed */
+			column-gap: 12px;
+			align-items: start;
+		  }
+
+		  .order-row .item-thumb {
+			grid-column: 1 / 2;
+			width: 64px; height: 64px;
+			flex: none;
+		  }
+
+		  /* text/meta column grows and can actually shrink (min-width:0 is key in grid) */
+		  .order-row .meta {
+			grid-column: 2 / 3;
+			min-width: 0 !important;
+			max-width: none !important;
+			white-space: normal !important;
+			word-break: normal !important;
+			overflow-wrap: anywhere;
+		  }
+		  .order-row .meta .title {
+			min-width: 0 !important;
+			white-space: normal !important;
+			word-break: normal !important;
+			overflow-wrap: anywhere;
+		  }
+
+		  /* fixed price column stays right-aligned and on one line */
+		  .order-row .price {
+			grid-column: 3 / 4;
+			justify-self: end;
+			text-align: right;
+			white-space: nowrap;
+		  }
+
+		  /* controls & remove sit under the text, not under price */
+		  .order-row .qty-controls,
+		  .order-row .remove-link {
+			grid-column: 2 / 3;
+			justify-self: start;
+			margin-top: 6px;
+		  }
+		}
+
+		/* Subtle dividers between order items */
+		.order-row:not(:last-child),
+		.order-item:not(:last-child) {
+		  border-bottom: 1px dashed rgba(0, 0, 0, 0.15);
+		  padding-bottom: 10px;
+		  margin-bottom: 10px;
+		}
+
+		/* Optional: lighter feel for dark backgrounds */
+		body.dark-mode .order-row:not(:last-child),
+		body.dark-mode .order-item:not(:last-child) {
+		  border-bottom: 1px dashed; rgba(17, 70, 74, 0.35); /* soft accent red */);
+			padding-bottom: 10px;
+		  margin-bottom: 10px;
+		}
+		/* Space before totals and checkout button */
+		.order-summary-totals,
+		#checkout-button {
+		  margin-top: 1rem;
+		}
+		.order-row:hover,
+		.order-item:hover {
+		  background: rgba(255,255,255,0.4);
+		  border-radius: 8px;
+		  transition: background 0.2s ease;
+		}
+
+		/* --- Center-align informational cards --- 
+		.about-section,
+		.food-section,
+		.allergens-section,
+		#about,
+		#our-food,
+		#allergens,
+		.card {
+		  text-align: center;
+		  justify-content: center;
+		  align-items: center;
+		}*/
+
+		/* If your .card uses flexbox internally, ensure it can center its contents 
+		.card {
+		  display: flex;
+		  flex-direction: column;
+		  justify-content: center;
+		  align-items: center;
+		}*/
+
+		/* Optional: constrain width for readability 
+		.about-section .card,
+		.food-section .card,
+		.allergens-section .card {
+		  max-width: 800px;
+		  margin: 0 auto;
+		}*/
+
+		/* Compact the header */
+		.site-header{
+		  padding: 8px 20px 10px !important;  /* was adding lots of white space */
+		  margin: 0 0 12px !important;
+		}
+
+		/* Centered layout, minimal gaps */
+		.header-inner.centered{
+		  display: flex;
+		  flex-direction: column;
+		  align-items: center;
+		  gap: 6px !important;                /* tighter gap between logo / tagline / nav */
+		}
+
+		/* Logo block */
+		.brand-block{
+		  display: flex;
+		  flex-direction: column;
+		  align-items: center;
+		  gap: 6px !important;                /* reduce space between logo and “Authentic Thai…” */
+		  padding: 0 !important;
+		}
+
+		/* The logo itself */
+		.brand-logo{
+		  height: 100px;                      /* keep your larger logo */
+		  width: auto;
+		  display: block;
+		  margin: 0 auto;
+		  padding: 0 !important;
+		}
+
+		/* Tagline just under the logo */
+		.brand-title{
+		  margin: 2px 0 0 !important;         /* very small gap */
+		  line-height: 1.15;
+		}
+
+		/* Nav sits a little closer to the tagline */
+		.main-nav{ margin-top: 6px !important; }
+
+		/* Optional: slightly smaller logo on small screens */
+		@media (max-width: 480px){
+		  .brand-logo{ height: 100px; }
+		}
+
+		/* Make the white header background slightly transparent */
+		.site-header {
+		  background-color: rgba(255, 255, 255, 0.8); /* 0.9 = 80% opaque */
+		  backdrop-filter: blur(6px);                 /* softens background behind it */
+		  -webkit-backdrop-filter: blur(6px);         /* Safari support */
+		  border-radius: 0 0 16px 16px;               /* optional rounded bottom corners */
+		  box-shadow: 0 2px 10px rgba(0,0,0,0.1);     /* gentle shadow to separate from bg */
+		}
+
+		/* Make all main content cards slightly transparent */
+		.card,
+
+		.content-section {
+		  background-color: rgba(255, 255, 255, 0.8) !important; /* 0.9 = 90% opaque */
+		  backdrop-filter: blur(4px);
+		  -webkit-backdrop-filter: blur(4px);
+		}
+
+		/* Add breathing space below the header */
+		.site-header {
+		  margin-bottom: 200px !important; /* adjust this value as needed */
+		}
+
+		/* Glass look for major cards */
+		.card,
+		.content-section {
+		  background-color: rgba(255, 255, 255, 0.9);
+		  backdrop-filter: blur(4px);
+		  -webkit-backdrop-filter: blur(4px);
+		}
+
+		/* Checkout modal + sheet */
+		.modal,
+		#checkout-modal .modal,
+		#order-success .modal {
+		  background-color: rgba(255, 255, 255, 0.92);
+		  backdrop-filter: blur(6px);
+		  -webkit-backdrop-filter: blur(6px);
+		}
+
+		/* Footer glass + spacing */
+		footer {
+		  background-color: rgba(255, 255, 255, 0.9);
+		  backdrop-filter: blur(4px);
+		  -webkit-backdrop-filter: blur(4px);
+		  border-radius: 12px;
+		  padding: 18px;
+		}
+
+		/* Extra breathing room below the header */
+		.site-header { margin-bottom: 40px; }
+
+		/* Keep price column aligned in order summary on all sizes */
+		.order-row {
+		  align-items: start;
+		}
+		.order-row .price {
+		  margin-left: auto;
+		  text-align: right;
+		  min-width: 4.5ch;
+		}
+
+		/* Hide thumbnails in order summary */
+		.order-row img,
+		.order-item img,
+		.menu-item img {
+		  display: none !important;
+		}
+
+		/* Adjust padding/margins to reclaim space */
+		.order-row,
+		.order-item {
+		  grid-template-columns: 1fr auto;
+		  align-items: center;
+		  padding: 8px 0;
+		}
+
+		.order-row .meta,
+		.order-item .meta {
+		  margin-left: 0 !important;
+		}
+
+		footer {
+		  background-color: rgba(204, 12, 26, 0.4); /* #16205b @ 80% opacity */
+		  color: white;                            /* good contrast */
+		  padding: 20px 0;
+		  text-align: center;
+		  border-radius: 10px 10px 0 0;            /* optional soft top corners */
+		  backdrop-filter: blur(4px);              /* frosted effect for consistency */
+		}
+
+		/* Optional: make footer links match your site’s accent */
+		footer a {
+		  color: #ffb3b3;
+		  text-decoration: none;
+		}
+
+		footer a:hover {
+		  color: #ffffff;
+		  text-decoration: underline;
+		}
+
+		/* Normal (sticky) */
+		.site-header {
+		  top: 12px;
+		  z-index: 1100;
+		}
+
+
+
+		:root {
+		  --header-h: 0px;
+		}
+
+		/* Spacer reserves header height by default */
+		#header-spacer {
+		  height: var(--header-h);
+		  transition: height .22s ease;
+		  will-change: height;
+		}
+
+		/* When header slides up, collapse spacer so content moves up */
+		.header-slid-up #header-spacer {
+		  height: 0;
+		}
+
+		/* tighten the space under the header */
+		.site-header { margin-bottom: 8px; padding-bottom: 10px; }
+
+		/* make sure the spacer doesn't reserve space unless sliding */
+		#header-spacer { height: 0 !important; }
+
+		/* no accidental top margin on the very first content card */
+		main > section:first-of-type .card { margin-top: 0; }
+
+		/* (optional) if you still see a gap, remove top margin on the first section entirely */
+		main > section:first-of-type { margin-top: 0; }
+
+		/* --- Back to Top Button --- */
+		#backToTop {
+		  position: fixed;
+		  bottom: 24px;
+		  right: 24px;
+		  background: #16205b;             /* same deep blue as your footer */
+		  color: white;
+		  border: none;
+		  border-radius: 50%;
+		  width: 46px;
+		  height: 46px;
+		  font-size: 22px;
+		  font-weight: bold;
+		  cursor: pointer;
+		  opacity: 0;
+		  visibility: hidden;
+		  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+		  z-index: 9999;
+		}
+
+		#backToTop:hover {
+		  background: #e63946;             /* your accent red */
+		  transform: scale(1.1);
+		}
+
+		/* when visible */
+		#backToTop.show {
+		  opacity: 0.9;
+		  visibility: visible;
+		}
+
+		/* === Customise modal image: fit without zoom === */
+		/* Customise modal image: show full photo, not zoomed */
+		#modal-img{
+		  display:block;
+		  width:100%;
+		  max-height:180px;   /* tweak 160–220px to taste */
+		  object-fit:contain; /* show whole image (no crop/zoom) */
+		  border-radius:8px;
+		  margin:8px 0 10px;
+		}
+
+		/* Optionally smaller on mobile */
+		@media (max-width: 480px) {
+		  #modal-img { max-height: 180px; }
+		}
+		
+		/* The overall popul list - just stacks categories vertically */
+		#menu-list {
+		display: block;
+		}
+
+		/* Full-screen menu overlay (under modals) */
+		.menu-overlay {
+		  position: fixed;
+		  inset: 0;
+		  background: rgba(0,0,0,0.6);
+		  display: none;
+		  align-items: center;
+		  justify-content: center;
+		  padding: 16px;
+		  z-index: 1500;        /* BELOW modal backdrop */
+		}
+		
+	
+		.menu-overlay.show {
+		  display: flex;
+		}
+
+		.menu-overlay-inner {
+		  width: 100%;
+		  max-width: 1100px;
+		  max-height: 90vh;
+		  overflow-y: auto;
+		}
+
+		/* header row inside popup */
+		.menu-overlay-header {
+		  display: flex;
+		  align-items: center;
+		  justify-content: space-between;
+		  gap: 12px;
+		  margin-bottom: 12px;
+		}
+
+		.menu-overlay-close {
+		  border: none;
+		  background: transparent;
+		  font-size: 1.4rem;
+		  cursor: pointer;
+		}
+
+		/* grid of categories */
+		.menu-grid {
+		  display: grid;
+		  grid-template-columns: repeat(2, minmax(0, 1fr));
+		  gap: 16px;
+		}
+		
+		/* Category block inside popup */
+		.popup-category {
+		  margin-bottom: 28px;
+		}
+
+		.popup-category-title {
+		  margin: 0 0 8px;
+		  font-size: 1.5rem;
+		  font-weight: 800;
+		  color: #16205B;
+		}
+
+		/* Two-column grid per category */
+		.popup-items-grid {
+		  display: grid;
+		  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		  gap: 16px;
+		}
+
+		/* Stack on small screens */
+		@media (max-width: 768px) {
+		  .popup-items-grid {
+			grid-template-columns: 1fr;
+		  }
+		}
+
+		/* Item card layout */
+		.menu-item-card {
+		  display: flex;
+		  min-height: 150px; /*tweak to taste: 140-180px */
+		  gap: 10px;
+		  align-items: stretch;
+		  padding: 10px;
+		  border-radius: 10px;
+		  border: 3px solid #16205b;
+		  background: rgba(255, 255, 255, 0.92);
+		}
+
+		/* Thumbnail */
+		.menu-card-thumb-wrap img {
+		  width: 78px;
+		  height: 78px;
+		  border-radius: 8px;
+		  object-fit: cover;
+		  display: block;
+		}
+
+		/* Text part */
+		.menu-card-main {
+		  flex: 1;
+		  min-width: 0;
+		  display: flex;
+		  flex-direction: column;
+		}
+
+		.menu-card-title {
+		  font-weight: 700;
+		  margin-bottom: 2px;
+		}
+
+		.menu-card-desc {
+		  margin-bottom: 4px;
+		}
+
+		/* Price + button row */
+		.menu-card-bottom {
+		  display: flex;
+		  justify-content: space-between;
+		  align-items: center;
+		  gap: 8px;
+		  margin-top: auto;
+		}
+
+
+		/* on small screens → single column */
+		@media (max-width: 768px) {
+		  .menu-grid {
+			grid-template-columns: 1fr;
+		  }
+		}
+
+		/* tweak category card a little for popup */
+		.menu-grid .category {
+		  border-radius: 10px;
+		  border: 1px solid #f3e7e6;
+		  overflow: hidden;
+		  background: rgba(255,255,255,0.92);
+		}
+
+		.menu-grid .category-header {
+		  background:#fff4f3;
+		  padding:10px 12px;
+		}
+
+		.menu-grid .category-header h3 {
+		  margin: 0
+		  font-size: 16px;
+		}
+
+		/* always-open bodies inside popup */
+		.menu-grid .category-body {
+		  padding: 10px 12px 12px;
+		  max-height: none;
+		  overflow: visible;
+		}
+
+		/* make whole menu item clickable */
+		.menu-grid .menu-item {
+		  cursor: pointer;
+		  transition: transform .12s ease, box-shadow .12s ease;
+		}
+
+		.menu-grid .menu-item:hover {
+		  transform: translateY(-1px);
+		  box-shadow: 0 2px 10px rgba(15,23,42,0.08);
+		}
+		
+		.menu-sheet {
+  background: rgba(255,255,255,0.96);
+  border-radius: 16px;
+  max-width: 960px;
+  width: 100%;
+  max-height: 90vh;
+  padding: 16px 18px 18px;
+  box-shadow: 0 18px 45px rgba(15,23,42,0.45);
+  overflow: auto;
 }
 
-/* extra spacing between sections so we *see* the background */
-.card {
-  margin-bottom: 175px;   /* was 14–18px in places */
-}
-
-/* give main a bit more vertical rhythm */
-main > section > .card + .card {
-  margin-top: 250px;
-}
-
-/* keep footer off the bottom a little so background shows */
-footer {
-  margin-top: 30px;
-}
-
-/* mobile fallback: iOS hates background-attachment:fixed */
-@media (max-width: 768px) {
-  .bg-parallax {
-    background-attachment: scroll, scroll, scroll;
-    background-size: cover, cover, auto;
-  }
-}
-.card {
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(2px);
-}
-
-/* This helps anchors or programmatic scrolls land below the sticky header */
-:root {
-  --header-offset: 160px; /* fallback; JS will set the precise value */
-}
-
-html {
-  scroll-behavior: smooth;                 /* native smooth scroll */
-  scroll-padding-top: var(--header-offset);/* space for sticky header */
-}
-
-.category-body {
-  transition: max-height .25s ease;        /* a touch shorter & snappier */
-  will-change: max-height;                 /* hint for smoother anim */
-  overflow: hidden;
-}
-
-
-/*.card-spacer { margin-bottom: 180px; }
-.card { margin-bottom: 0; } */
-
-getComputedStyle(document.documentElement).getPropertyValue('--header-offset')
-/* === Checkout modal alignment fixes === */
-#checkout-modal .totals{
-  display:grid;
-  grid-template-columns: 1fr auto; /* label on left, amount on right */
-  gap:12px;
-  align-items:center;
-}
-#checkout-modal .totals .muted{ white-space:nowrap; }
-
-#checkout-subtotal,
-#checkout-delivery,
-#checkout-total{
-  min-width:6ch;     /* avoids clipping like £9.50 */
-  text-align:right;  /* right-align prices */
-}
-
-/* Inputs layout */
-#checkout-form .form-grid{ display:grid; gap:12px; }
-#checkout-form .row-2{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-@media (max-width:560px){
-  #checkout-form .row-2{ grid-template-columns:1fr; }
-}
-
-/* Modal padding & actions bar */
-#checkout-modal .modal{ padding:16px 18px; }
-#checkout-modal .checkout-actions{
-  position:sticky;
-  bottom:0;
-  background:#fff;
-  padding-top:8px;
-  margin-top:6px;
-}
-
-/* Ensure modal sits above ticker */
-#checkout-modal{ z-index:1400; }
-#status-ticker{ z-index:900; }
-
-/* === Order summary row layout (desktop & mobile) === */
-#order-panel .order-list { overflow: visible; }
-
-#order-panel .order-row {
+/* two-column layout for categories on bigger screens */
+.menu-grid {
   display: grid;
-  /* image | wide name/details | price */
-  grid-template-columns: 64px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
-#order-panel .order-row .item-thumb {
-  width: 64px; height: 64px; object-fit: cover; border-radius: 8px;
-}
-
-/* let the middle column actually grow */
-#order-panel .order-row .meta { min-width: 0; max-width: 100%; overflow: hidden; }
-
-/* DESKTOP/TABLET: single-line with ellipsis */
-#order-panel .order-row .meta .title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 700;
-}
-
-/* price column stays tight and aligned right */
-#order-panel .order-row .price,
-#order-panel .order-row .order-price {
-  white-space: nowrap;
-  text-align: right;
-  min-width: 6ch;
-  justify-self: end;
-}
-
-/* MOBILE: allow two lines for long names */
-@media (max-width: 768px) {
-  #order-panel .order-row {
-    grid-template-columns: 54px minmax(0, 2fr) auto;
-    gap: 10px;
-  }
-  #order-panel .order-row .meta .title {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;       /* up to 2 lines on mobile */
-    -webkit-box-orient: vertical;
-    white-space: normal;
-  }
-}
-/* --- Order rows: flex layout, name gets the space --- */
-#order-panel .order-list .order-row{
-  display: flex !important;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-/* thumbnail stays fixed */
-#order-panel .order-row .item-thumb{
-  flex: 0 0 64px;
-  width: 64px;
-  height: 64px;
-}
-
-/* NAME / meta column should grow and be wide enough */
-#order-panel .order-row .meta{
-  flex: 1 1 520px;       /* <-- give it most of the width */
-  min-width: 320px;      /* prevent crazy narrow column on desktop */
-  max-width: 100%;
-}
-
-/* keep price / qty / remove tight and on the right */
-#order-panel .order-row .price,
-#order-panel .order-row .qty-controls,
-#order-panel .order-row a[href*="remove"],
-#order-panel .order-row .remove{
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
-
-/* push the price to the far right; others will sit before it */
-#order-panel .order-row .price{ margin-left: auto; }
-
-/* stop titles from breaking letter-by-letter */
-#order-panel .order-row .meta .title{
-  white-space: normal;
-  word-break: normal;
-  overflow-wrap: anywhere;   /* wrap at word boundaries when needed */
-}
-
-/* mobile tweak */
-@media (max-width: 640px){
-  #order-panel .order-row .item-thumb{ flex-basis: 54px; width: 54px; height: 54px; }
-  #order-panel .order-row .meta{ flex-basis: 260px; min-width: 200px; }
-}
-
-/* --- force one-column layout everywhere --- */
-main{ display:block !important; }
-#order-panel{
-  position:static !important;
-  width:100% !important;
-  margin-top:20px !important;
-}
-
-/* Divider (already added earlier, keeping for context) */
-.order-row:not(:last-child),
-.order-item:not(:last-child){
-  border-bottom: 1px dashed rgba(217,70,74,0.35);
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-  transition: border-color .35s ease, opacity .25s ease;
-}
-
-/* Appear fade for newly-rendered rows */
-.order-row.will-appear { opacity: 0; }
-.order-row.appear      { opacity: 1; }
-
-/* Gentle highlight “pulse” when qty changes */
-.order-row.flash {
-  animation: rtkFlash 600ms ease-out;
-}
-
-/* Motion safety */
-@media (prefers-reduced-motion: reduce) {
-  .order-row { transition: none !important; }
-  .order-row.flash { animation: none !important; }
-}
-
-/* Keyframes for the pulse */
-@keyframes rtkFlash {
-  0%   { background: rgba(217,70,74,.10); }
-  100% { background: transparent; }
-}
-
-/* Slightly tighter spacing on small screens */
-@media (max-width:640px){
-  .order-row:not(:last-child),
-  .order-item:not(:last-child){
-    padding-bottom: 6px;
-    margin-bottom: 6px;
+@media (min-width: 800px) {
+  .menu-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: flex-start;
   }
 }
 
-
-#ticker-ghost, .ticker-spacer { display:none !important; }
-
-/* --- Order summary: mobile-friendly layout & wrapping --- */
-.order-row {
-  display: grid;
-  grid-template-columns: 68px 1fr auto; /* thumb | name | price */
-  align-items: center;
-  gap: 12px;
-}
-
-.order-row .item-thumb {
-  width: 68px;
-  height: 68px;
-  border-radius: 8px;
-  object-fit: cover;
-}
-
-.order-row .meta {
-  min-width: 0;                 /* allow text to take available space */
-}
-
-.order-row .meta .title {
-  white-space: normal;          /* allow multi-line names */
-  word-break: keep-all;         /* don't break inside words */
-  overflow-wrap: break-word;    /* but wrap long words if needed */
-  line-height: 1.25;
-}
-
-.order-row .price {
-  justify-self: end;            /* keep prices neatly aligned right */
-}
-
-/* Very narrow phones: put controls on the next line, keep price aligned */
-@media (max-width: 420px) {
-  .order-row {
-    grid-template-columns: 56px 1fr;   /* drop the dedicated price column */
-  }
-  .order-row .price {
-    grid-column: 2; justify-self: end; /* price sits in the name column row */
-  }
-  .order-row .qty-controls,
-  .order-row .remove {
-    grid-column: 2;                    /* controls flow beneath the name */
-  }
-}
-/* Override older width limits for order summary text */
-.order-row .meta {
-  max-width: none !important;
-}
-
-
-<script>
-console.info('Console levels forced');
-console.log = console.info = console.debug = console.warn = console.error = console.log.bind(console);
-</script>
-/* --- Order summary layout: mobile fix (portrait) --- */
-@media (max-width: 520px) {
-  /* 3-column grid: [thumb] [flex text] [fixed price] */
-  .order-row {
-    display: grid;
-    grid-template-columns: 64px minmax(0, 1fr) 84px; /* tweak 84px if needed */
-    column-gap: 12px;
-    align-items: start;
-  }
-
-  .order-row .item-thumb {
-    grid-column: 1 / 2;
-    width: 64px; height: 64px;
-    flex: none;
-  }
-
-  /* text/meta column grows and can actually shrink (min-width:0 is key in grid) */
-  .order-row .meta {
-    grid-column: 2 / 3;
-    min-width: 0 !important;
-    max-width: none !important;
-    white-space: normal !important;
-    word-break: normal !important;
-    overflow-wrap: anywhere;
-  }
-  .order-row .meta .title {
-    min-width: 0 !important;
-    white-space: normal !important;
-    word-break: normal !important;
-    overflow-wrap: anywhere;
-  }
-
-  /* fixed price column stays right-aligned and on one line */
-  .order-row .price {
-    grid-column: 3 / 4;
-    justify-self: end;
-    text-align: right;
-    white-space: nowrap;
-  }
-
-  /* controls & remove sit under the text, not under price */
-  .order-row .qty-controls,
-  .order-row .remove-link {
-    grid-column: 2 / 3;
-    justify-self: start;
-    margin-top: 6px;
-  }
-}
-
-/* Subtle dividers between order items */
-.order-row:not(:last-child),
-.order-item:not(:last-child) {
-  border-bottom: 1px dashed rgba(0, 0, 0, 0.15);
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-}
-
-/* Optional: lighter feel for dark backgrounds */
-body.dark-mode .order-row:not(:last-child),
-body.dark-mode .order-item:not(:last-child) {
-  border-bottom: 1px dashed; rgba(17, 70, 74, 0.35); /* soft accent red */);
-    padding-bottom: 10px;
-  margin-bottom: 10px;
-}
-/* Space before totals and checkout button */
-.order-summary-totals,
-#checkout-button {
-  margin-top: 1rem;
-}
-.order-row:hover,
-.order-item:hover {
-  background: rgba(255,255,255,0.4);
-  border-radius: 8px;
-  transition: background 0.2s ease;
-}
-
-/* --- Center-align informational cards --- 
-.about-section,
-.food-section,
-.allergens-section,
-#about,
-#our-food,
-#allergens,
-.card {
-  text-align: center;
-  justify-content: center;
-  align-items: center;
-}*/
-
-/* If your .card uses flexbox internally, ensure it can center its contents 
-.card {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}*/
-
-/* Optional: constrain width for readability 
-.about-section .card,
-.food-section .card,
-.allergens-section .card {
-  max-width: 800px;
-  margin: 0 auto;
-}*/
-
-/* Compact the header */
-.site-header{
-  padding: 8px 20px 10px !important;  /* was adding lots of white space */
-  margin: 0 0 12px !important;
-}
-
-/* Centered layout, minimal gaps */
-.header-inner.centered{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px !important;                /* tighter gap between logo / tagline / nav */
-}
-
-/* Logo block */
-.brand-block{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px !important;                /* reduce space between logo and “Authentic Thai…” */
-  padding: 0 !important;
-}
-
-/* The logo itself */
-.brand-logo{
-  height: 100px;                      /* keep your larger logo */
-  width: auto;
-  display: block;
-  margin: 0 auto;
-  padding: 0 !important;
-}
-
-/* Tagline just under the logo */
-.brand-title{
-  margin: 2px 0 0 !important;         /* very small gap */
-  line-height: 1.15;
-}
-
-/* Nav sits a little closer to the tagline */
-.main-nav{ margin-top: 6px !important; }
-
-/* Optional: slightly smaller logo on small screens */
-@media (max-width: 480px){
-  .brand-logo{ height: 100px; }
-}
-
-/* Make the white header background slightly transparent */
-.site-header {
-  background-color: rgba(255, 255, 255, 0.8); /* 0.9 = 80% opaque */
-  backdrop-filter: blur(6px);                 /* softens background behind it */
-  -webkit-backdrop-filter: blur(6px);         /* Safari support */
-  border-radius: 0 0 16px 16px;               /* optional rounded bottom corners */
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);     /* gentle shadow to separate from bg */
-}
-
-/* Make all main content cards slightly transparent */
-.card,
-
-.content-section {
-  background-color: rgba(255, 255, 255, 0.8) !important; /* 0.9 = 90% opaque */
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
-/* Add breathing space below the header */
-.site-header {
-  margin-bottom: 200px !important; /* adjust this value as needed */
-}
-
-/* Glass look for major cards */
-.card,
-.content-section {
-  background-color: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
-/* Checkout modal + sheet */
-.modal,
-#checkout-modal .modal,
-#order-success .modal {
-  background-color: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-
-/* Footer glass + spacing */
-footer {
-  background-color: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border-radius: 12px;
-  padding: 18px;
-}
-
-/* Extra breathing room below the header */
-.site-header { margin-bottom: 40px; }
-
-/* Keep price column aligned in order summary on all sizes */
-.order-row {
-  align-items: start;
-}
-.order-row .price {
-  margin-left: auto;
-  text-align: right;
-  min-width: 4.5ch;
-}
-
-/* Hide thumbnails in order summary */
-.order-row img,
-.order-item img,
-.menu-item img {
-  display: none !important;
-}
-
-/* Adjust padding/margins to reclaim space */
-.order-row,
-.order-item {
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  padding: 8px 0;
-}
-
-.order-row .meta,
-.order-item .meta {
-  margin-left: 0 !important;
-}
-
-footer {
-  background-color: rgba(204, 12, 26, 0.4); /* #16205b @ 80% opacity */
-  color: white;                            /* good contrast */
-  padding: 20px 0;
-  text-align: center;
-  border-radius: 10px 10px 0 0;            /* optional soft top corners */
-  backdrop-filter: blur(4px);              /* frosted effect for consistency */
-}
-
-/* Optional: make footer links match your site’s accent */
-footer a {
-  color: #ffb3b3;
-  text-decoration: none;
-}
-
-footer a:hover {
-  color: #ffffff;
-  text-decoration: underline;
-}
-
-/* Normal (sticky) */
-.site-header {
-  top: 12px;
-  z-index: 1100;
-}
-
-
-
-:root {
-  --header-h: 0px;
-}
-
-/* Spacer reserves header height by default */
-#header-spacer {
-  height: var(--header-h);
-  transition: height .22s ease;
-  will-change: height;
-}
-
-/* When header slides up, collapse spacer so content moves up */
-.header-slid-up #header-spacer {
-  height: 0;
-}
-
-/* Ticker sits just below the spacer */
-#status-ticker {
+/* close button in the top-right of the sheet */
+.menu-close {
   position: sticky;
-  top: 0;                   /* just below spacer */
-  z-index: 1050;            /* below header (e.g., 1100), above content */
-  background: rgba(204,12,26,0.);
-  color: #fff;
-  padding: 8px 12px;
-  overflow: hidden;
-}
-
-/* tighten the space under the header */
-.site-header { margin-bottom: 8px; padding-bottom: 10px; }
-
-/* make sure the spacer doesn't reserve space unless sliding */
-#header-spacer { height: 0 !important; }
-
-/* no accidental top margin on the very first content card */
-main > section:first-of-type .card { margin-top: 0; }
-
-/* (optional) if you still see a gap, remove top margin on the first section entirely */
-main > section:first-of-type { margin-top: 0; }
-
-/* --- Back to Top Button --- */
-#backToTop {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  background: #16205b;             /* same deep blue as your footer */
-  color: white;
+  top: 0;
+  margin-left: auto;
   border: none;
-  border-radius: 50%;
-  width: 46px;
-  height: 46px;
-  font-size: 22px;
-  font-weight: bold;
+  background: transparent;
+  font-size: 1.6rem;
+  line-height: 1;
   cursor: pointer;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
-  z-index: 9999;
 }
 
-#backToTop:hover {
-  background: #e63946;             /* your accent red */
-  transform: scale(1.1);
+/* The sheet / card inside the overlay */
+.menu-sheet {
+  position: relative;
+  max-width: 1000px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px 16px 72px; /* extra bottom padding for the floating button */
 }
 
-/* when visible */
-#backToTop.show {
-  opacity: 0.9;
-  visibility: visible;
+/* Two-column menu grid (if not already styled) */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* On mobile, just stack */
+@media (max-width: 768px) {
+  .menu-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Floating checkout button inside the sheet */
+.menu-checkout-btn {
+  position: sticky;
+  bottom: 10px;          /* sticks near bottom of sheet viewport */
+  margin-left: auto;
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  font-weight: 700;
+  border-radius: 999px;
 }
 
 
-  </style>
-</head>
-<body>
-<body>
-  <div class="bg-parallax" aria-hidden="true"></div>
-  <div class="container">
-    <!-- your existing header / main / etc -->
 
-  <div class="container">
-<!-- Status Ticker -->
+
+		  </style>
+		</head>
+		<body>
+		<body>
+		  <div class="bg-parallax" aria-hidden="true"></div>
+		  <div class="container">
+			<!-- your existing header / main / etc -->
+
+		  <div class="container">
+
+
+		
+
+		<body>
+
+		  <!-- Status ticker (keep ONE of these) -->
 <div id="status-ticker" class="hidden" role="status" aria-live="polite">
-  <div class="ticker-track">
-    <span id="ticker-text">We’re closed this Sunday for a private event — thank you!</span>
-    <span class="ticker-dup" aria-hidden="true"></span>
+  <div class="ticker-inner">
+    <span id="ticker-text">
+      We’re not open yet as we're making final preparations to ensure you have an amazing at home Thai dining experience! We hope to open by 3rd December 🎉
+    </span>
   </div>
 </div>
 
-<img
-  src="./images/LogoTransparent1.PNG?v=4"
-  alt="Rung's Thai Kitchen Logo"
-  class="brand-logo"
-  width="520" height="260"
-  onerror="this.onerror=null; this.src='./images/logo_fallback.png';"
-/>
-
-
-    <!-- Header -->
-    <header class="site-header">
+<!-- Header -->
+<header class="site-header">
   <div class="header-inner centered">
     <div class="brand-block" style="margin-top: 1px">
-      <img src="images/LogoTransparent1.PNG?v=3" alt="Rung's Thai Kitchen Logo" class="brand-logo">
-      <!--<div class="brand-title">Rung's Thai Kitchen</div>-->
+      <img src="images/LogoTransparent1.PNG?v=3"
+           alt="Rung's Thai Kitchen Logo"
+           class="brand-logo">
       <div class="brand-title">Authentic Thai Takeaway</div>
     </div>
 
@@ -1187,23 +1433,16 @@ main > section:first-of-type { margin-top: 0; }
         <li><a href="#about">About</a></li>
         <li><a href="#our-food">Our Food</a></li>
         <li><a href="#allergens">Allergens</a></li>
-        <li><a href="#menu">Menu</a></li>
-        <!--<li><a href="#order">Order</a></li>-->
+        <!-- IMPORTANT: id="menu-link" for the popup JS -->
+        <li><a href="#menu" id="menu-link">Menu</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
     </nav>
   </div>
 </header>
 
-
-<!-- spacer must be immediately after the header -->
+<!-- Header spacer (for sticky header script, if you’re still using it) -->
 <div id="header-spacer"></div>
-<div id="status-ticker" class="hidden">
-  <div class="ticker-inner">
-    <span id="ticker-text">We’re closed for Songkran Festival, reopening 18 April 🎉</span>
-  </div>
-</div>
-<!-- then your main content -->
 
 <script>
 (function(){
@@ -1298,15 +1537,7 @@ main > section:first-of-type { margin-top: 0; }
             <div><span class="allergen-icon">🌶️</span> Spice Level (heat indicator)</div>
           </div>
         </div>
-		<!--</div>-->
 
-        <!-- Menu -->
-        <!--<div class="card-spacer">-->
-		<div class="card" id="menu" style="margin-top:14px">
-          <h2 style="margin-bottom:10px">Menu</h2>
-          <div class="menu-section" id="menu-list"><!-- built by JS --></div>
-        </div>
-		<!--</div>-->
       </section>
 
       <!-- Right column: Order -->
@@ -1369,7 +1600,7 @@ main > section:first-of-type { margin-top: 0; }
         <button id="modal-close" class="btn btn-ghost">Close</button>
       </div>
 
-      <img id="modal-img" alt="" style="margin-top:10px;width:100%;max-height:220px;object-fit:cover;border-radius:10px;display:none">
+      <img id="modal-img" alt="" style="margin-top:10px;width:100%;max-height:200px;object-fit:contain;border-radius:10px;display:none">
 
       <div style="display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px">
         <div>
@@ -1388,6 +1619,13 @@ main > section:first-of-type { margin-top: 0; }
         <div id="mod-required-note" class="mod-required-note">Please choose at least one option to continue.</div>
         <div id="mod-limit-note" class="mod-limit-note"></div>
       </div>
+	  
+	  <!-- Add EXTRAS section (paid add-ons) -->
+<div id="extras-wrap" style="margin-top:12px; display:none">
+  <div class="small">Add extras (priced per dish)</div>
+  <div id="extras" class="mods"></div>
+</div>
+
 
       <div id="modal-allergens-wrap" style="margin-top:10px;display:none">
         <div class="small">Allergens in this dish</div>
@@ -1520,11 +1758,39 @@ main > section:first-of-type { margin-top: 0; }
 
   </div>
 </div>
+		<!-- Full-screen menu overlay -->
+		<div id="menu-overlay" class="menu-overlay" aria-hidden="true">
+		  <div class="menu-sheet">
+			<button
+			  id="menu-overlay-close"
+			  class="menu-close"
+			  type="button"
+			  aria-label="Close menu"
+			>
+			  ×
+			</button>
+
+			<h2 style="margin-top: 0; margin-bottom: 12px;">Our menu</h2>
+
+			<!-- two-column menu grid -->
+			<div id="menu-list"></div>
+
+			<!-- ✅ Floating checkout button -->
+			<button
+			  id="menu-checkout-btn"
+			  type="button"
+			  class="btn btn-accent menu-checkout-btn"
+			>
+			  Proceed to checkout
+			</button>
+		  </div>
+		</div>
 
 
   <script>
+
 	document.addEventListener('DOMContentLoaded', () => {
-  // ---------- Allergen registry ----------
+	// ---------- Allergen registry ----------
   const ALLERGENS = {
 
       peanuts:   { icon:'🥜',        label:'Peanuts' },
@@ -1568,11 +1834,22 @@ main > section:first-of-type { margin-top: 0; }
       }).join('');
     }
 	
+	// Paid EXTRAS (per dish)
+const EXTRAS = [
+  { id:'extra-chicken', name:'Extra Chicken', delta: 0.50 },
+  { id:'extra-beef',    name:'Extra Beef',    delta: 1.00 },
+  { id:'extra-pork',    name:'Extra Pork',    delta: 1.00 },
+  { id:'extra-prawn',   name:'Extra Prawn',   delta: 1.50 },
+  { id:'extra-tofu',    name:'Extra Tofu',    delta: 1.00 },
+  { id:'extra-veg',     name:'Extra Vegetable', delta: 0.50 },
+];
+
+	
     // ---------- Data ----------
     const MENU_CATEGORIES = [
-      { id: 'starters', title: 'Starter', items: [
+      { id:'starters', title:'Starter', allowExtras:false, items:[
         { id: 'veg-spring-rolls', name: 'Vegetable Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of glass noodles and vegetables, served with a sweet chilli sauce.', price: 4.50, img: 'images/SpringRoll.jpg',  allergens: ['gluten'] },
-        { id: 'chicken-satay', name: 'Chicken Satay', desc: 'Tender chicken pieces marinated in a fragrant blend of turmeric, lemongrass, and spices. Served with a peanut sauce.', price: 5.00, img: 'images/Satay.jpg', allergens: ['peanuts','soya','sesame'] },
+        { id: 'chicken-satay', name: 'Chicken Satay', desc: 'Tender chicken pieces marinated in a fragrant blend of turmeric, lemongrass, and spices. Served with a peanut sauce.', price: 6.50, img: 'images/Satay.jpg', allergens: ['peanuts','soya','mustard'] },
         { id: 'prawn-crackers', name: 'Prawn Crackers', desc: 'A light and crispy snack made from tapioca flour, shrimp, and seasonings. Served with sweet chilli sauce.', price: 2.50, img: 'images/PrawnCrackers.jpg', allergens: ['shellfish','gluten'] },
         { id: 'moo-ping', name: 'Pork Skewer (Moo Ping)', desc: 'Thai grilled pork skewers marinated in a sweet and savoury sauce.', price: 5.00, img: 'images/mooping.jpg', allergens: [] },
         { id: 'chicken-spring-rolls', name: 'Chicken Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of meat, glass noodles, and vegetables, served with a sweet chilli sauce.', price: 5.00, img: 'images/SpringRoll.jpg',  allergens: ['gluten'] },
@@ -1583,47 +1860,47 @@ main > section:first-of-type { margin-top: 0; }
         { id: 'thai-sausage', name: 'Thai Pork Sausage', desc: 'A traditional fermented Thai sausage made with ground pork, sticky rice, and fragrant seasonings. Served with fresh sliced ginger, whole peanuts and slices of cucumber.', price: 5.00, img: 'images/sausage.jpg', allergens: [] },
 		{ id: 'spare-ribs', name: 'Thai Spare Ribs (Sii Khrong Moo Yang)', desc: 'Tender ribs with a sweet, salty and savoury flavour. Served with a sticky carmelised glaze.', price: 7.50, img: 'images/spareribs.jpg', allergens: ['sesame'] }
       ]},
-      { id: 'soup', title: 'Soup', items: [
+      { id:'soup', title:'Soup', allowExtras:true, items:[
         { id: 'tom-yum', name: 'Tom Yum Soup 🌶️🌶️', desc: 'A vibrant and aromatic Thai classic featuring a hot and sour clear broth infused with lemongrass, galangal, and kaffir lime leaves.', price: 6.50, img: 'images/TomYum.jpg', allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'] },
         { id: 'tom-kha', name: 'Tom Kha🌶️', desc: 'A creamy and aromatic Thai coconut soup featuring fragrant galangal, lemongrass, and kaffir lime leaves.', price: 5.50, img: 'images/TomKha.jpg', allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','dairy'] },
         { id: 'dumpling-broth', name: 'Chicken Steamed Dumplings Broth (Gaew Naam)', desc: 'A savoury and flavourful broth with fragrant chicken-stuffed wontons.', price: 5.50, img: 'images/GaewNam.jpg', allergens: ['gluten','egg','soya'] }
       ]},
-      { id: 'salad', title: 'Salad', items: [
-        { id: 'papaya-salad', name: 'Green Papaya Salad (Som Tam)🌶️🌶️🌶️', desc: 'A spicy, savoury, and sweet Thai salad made primarily of shredded green papaya.', price: 7.00, img: 'images/somtam.jpg', spiceEnabled: true, spiceDefault: 3, allergens: ['peanuts','fish','soya'] },
-        { id: 'beef-salad', name: 'Spicy Beef Salad (Yum Nuea)🌶️🌶️', desc: 'A classic Thai salad with juicy grilled steak, tossed with crisp vegetables, fresh mint, coriander, and a tangy lime-fish sauce dressing.', price: 9.00, img: 'images/ymbeef.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'] },
-        { id: 'pork-salad', name: 'Grilled Pork Salad (Nam Tok)🌶️', desc: 'This classic North-eastern Thai salad features smoky, charred grilled pork slices tossed with a fiery dressing of lime, fish sauce, and chili flakes.', price: 8.50, img: 'images/porksalad.jpg', spiceEnabled: true, spiceDefault: 1, allergens: ['fish'] },
-        { id: 'laab', name: 'Laab🌶️🌶️', desc: 'A vibrant and flavourful meat salad known for its harmony of spicy, sour, salty, and savoury flavours.', price: 8.00, img: 'images/Larb.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish'] }
+      { id:'salad',    title:'Salad',   allowExtras:true,  items:[
+        { id: 'papaya-salad', name: 'Green Papaya Salad (Som Tam)🌶️🌶️🌶️', desc: 'A spicy, savoury, and sweet Thai salad made primarily of shredded green papaya.', price: 7.00, img: 'images/somtam.jpg', spiceEnabled: true, spiceDefault: 3, allergens: ['peanuts','fish','soya'], allowedExtras: ['prawn'] },
+        { id: 'beef-salad', name: 'Spicy Beef Salad (Yum Nuea)🌶️🌶️', desc: 'A classic Thai salad with juicy grilled steak, tossed with crisp vegetables, fresh mint, coriander, and a tangy lime-fish sauce dressing.', price: 9.00, img: 'images/ymbeef.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'], allowedExtras: ['beef'] },
+        { id: 'pork-salad', name: 'Grilled Pork Salad (Nam Tok)🌶️', desc: 'This classic North-eastern Thai salad features smoky, charred grilled pork slices tossed with a fiery dressing of lime, fish sauce, and chili flakes.', price: 8.50, img: 'images/porksalad.jpg', spiceEnabled: true, spiceDefault: 1, allergens: ['fish'], allowedExtras: ['pork'] },
+        { id: 'laab', name: 'Laab🌶️🌶️', desc: 'A vibrant and flavourful meat salad known for its harmony of spicy, sour, salty, and savoury flavours.', price: 8.00, img: 'images/Larb.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish'], allowedExtras: ['chicken','pork'] }
       ]},
-      { id: 'curry', title: 'Curry', items: [
+      { id:'curry',    title:'Curry',   allowExtras:true,  items:[
         { id: 'rung-curry', name: 'Chefs Special Rainbow Curry🌶️', desc: 'Chef Rungs special curry. Rich and mildly spiced curry, this is a real crowd pleaser!', price: 9.50, img: 'images/rainbowcurry.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','soya'] },
         { id: 'green-curry', name: 'Green Curry🌶️🌶️', desc: 'A vibrant green curry sauce with creamy coconut milk, peppers, courgette,green beans and fresh Thai basil.', price: 9.50, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2, img: 'images/greencurry.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'] },
         { id: 'red-curry', name: 'Red Curry🌶️', desc: 'A medium-spiced, savoury, and creamy Thai dish featuring a rich red chili-based paste in coconut milk.', price: 9.50, img: 'images/redcurry.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','soya'] },
         { id: 'massaman-curry', name: 'Massaman Curry', desc: 'Made with a unique blend of spices like cinnamon and cardamom, combined with coconut milk, potatoes, and peanuts.', price: 9.50, img: 'images/massaman.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2,spiceEnabled: true, spiceDefault: 0, allergens: ['peanuts','fish','soya'] },
         { id: 'panang-curry', name: 'Paneng Curry🌶️', desc: 'Flavored with a fragrant curry paste that includes lemongrass, galangal, and kaffir lime leaves, this is a rich and creamy curry!', price: 9.50, img: 'images/paneng.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2,spiceEnabled: true, spiceDefault: 1, allergens: ['fish','soya'] }
       ]},
-      { id: 'stir-fry', title: 'Stir Fry', items: [
+      { id:'stir-fry', title:'Stir Fry',allowExtras:true,  items:[
         { id: 'stir-basil', name: 'Stir Fried Chilli & Basil (Pad Kra Pao)🌶️🌶️', desc: 'Street food classic, its a spicy, savoury Thai stir-fry of usually minced meat with garlic, chilies, and holy basil, typically served over rice and often topped with a fried egg.', price: 8.50, img: 'images/Kaprow.jpeg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn','fried-egg' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 2, allergens: ['soya'] },
-        { id: 'stir-ginger', name: 'Stir Fried Ginger (Pad Khing)🌶️', desc: 'A stir-fried dish flavoured with fresh ginger, spring onions, onions, mushrooms and chilli.', price: 8.50, allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['soya'] },
-        { id: 'stir-cashew', name: 'Stir Fried Cashew Nuts', desc: 'A vibrant and flavorful stir-fry featuring crisp vegetables tossed in a savoury sauce. Finished with the rich, buttery crunch of toasted cashew nuts', price: 8.50, allowedModifiers: ['batter-chicken','tofu' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['tree_nuts','soya','sesame'] },
-        { id: 'stir-sweetsour', name: 'Sweet & Sour (Pad Priew Wan)', desc: 'Thai sweet and sour stir-fry dish featuring vegetables such as cucumber, tomatoes, onions, and bell peppers in a tangy, sweet, and savoury sauce.', price: 8.50, allowedModifiers: ['batter-chicken','tofu' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 0, allergens: ['soya'] },
-        { id: 'stir-yellow', name: 'Stir Fried Yellow Curry (Pad Pong Karee)', desc: 'Thai stir-fry dish made with a flavourful, savoury sauce of yellow curry powder, coconut milk, and egg, mixed with vegetables such as onions, bell peppers, and green onions', price: 8.50, allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','soya','mustard'] },
-        { id: 'stir-chilli', name: 'Stir Fried Chilli Paste (Pad Nam Prik Pao)🌶️🌶️', desc: 'A medium stir-fry, but dont let the chilli paste alarm you, it is not too spicy!', price: 8.50, allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 2, allergens: ['soya'] },
-        { id: 'stir-pepper', name: 'Stir Fried Black Pepper Sauce', desc: 'A bold and aromatic Thai-style stir-fry featuring crisp vegetables wok-tossed in a black pepper sauce. ', price: 7.50, allowedModifiers: ['batter-chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['soya'] }
+        { id: 'stir-ginger', name: 'Stir Fried Ginger (Pad Khing)🌶️', desc: 'A stir-fried dish flavoured with fresh ginger, spring onions, onions, mushrooms and chilli.', price: 8.50, img: 'images/padkhing.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['soya'] },
+        { id: 'stir-cashew', name: 'Stir Fried Cashew Nuts', desc: 'A vibrant and flavorful stir-fry featuring crisp vegetables tossed in a savoury sauce. Finished with the rich, buttery crunch of toasted cashew nuts', price: 8.50, img: 'images/cashew.jpg', allowedModifiers: ['batter-chicken','tofu' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['tree_nuts','soya','sesame'] },
+        { id: 'stir-sweetsour', name: 'Sweet & Sour (Pad Priew Wan)', desc: 'Thai sweet and sour stir-fry dish featuring vegetables such as cucumber, tomatoes, onions, and bell peppers in a tangy, sweet, and savoury sauce.', price: 8.50, img: 'images/sweetsour.jpg', allowedModifiers: ['batter-chicken','tofu' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 0, allergens: ['soya'] },
+        { id: 'stir-yellow', name: 'Stir Fried Yellow Curry (Pad Pong Karee)', desc: 'Thai stir-fry dish made with a flavourful, savoury sauce of yellow curry powder, coconut milk, and egg, mixed with vegetables such as onions, bell peppers, and green onions', price: 8.50, img: 'images/padpong.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','soya','mustard'] },
+        { id: 'stir-chilli', name: 'Stir Fried Chilli Paste (Pad Nam Prik Pao)🌶️🌶️', desc: 'A medium stir-fry, but dont let the chilli paste alarm you, it is not too spicy!', price: 8.50, img: 'images/padnamprikpao.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 2, allergens: ['soya'] },
+        { id: 'stir-pepper', name: 'Stir Fried Black Pepper Sauce', desc: 'A bold and aromatic Thai-style stir-fry featuring crisp vegetables wok-tossed in a black pepper sauce. ', price: 7.50, img: 'images/blackpepper.jpg', allowedModifiers: ['batter-chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['soya'] }
       ]},
-      { id: 'noodles', title: 'Noodles & Rice', items: [
-        { id: 'pad-thai', name: 'Pad Thai', desc: 'Balanced flavours using tamarind, fish sauce, and palm sugar accompanying bean sprouts, garlic and chives.', price: 8.50, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','fish','soya','peanuts'] },
-		{ id: 'chef-pad-thai', name: 'Chefs Special Pad Thai🌶️', desc: 'Just like the traditional Pad Thai, but with a little extra heat!', price: 8.50, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','fish','soya','peanuts'] },  
-		{ id: 'pad-kee-mao', name: 'Pad Kee Mao🌶️🌶️', desc: 'Drunken Noodles is a spicy and savory Thai stir-fried noodle dish. It is made with wide rice noodles and a variety of vegetables, stir-fried with a flavorful sauce made from soy, oyster, and fish sauces, and heavily flavored with fresh chilies.', price: 8.50, allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 2, allergens: ['soya'] },
-		{ id: 'pad-see-ew', name: 'Thai Stir Fried Noodles (Pad See Ew)', desc: 'Thai stir-fried noodle dish featuring wide, flat rice noodles, Chinese broccoli, and egg, all coated in a savoury, salty-sweet soy sauce', price: 8.50, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya'] },
-        { id: 'fried-rice', name: 'Thai Special Fried Rice (Khao Pad)', desc: 'A classic Thai street food staple. Fragrant jasmine rice wok-fried with egg, onions, and tomatoes, seasoned with fish sauce, soy sauce, and oyster sauce.', price: 7.50, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya'] }
+      { id:'noodles',  title:'Noodles & Rice', allowExtras:true, items:[
+        { id: 'pad-thai', name: 'Pad Thai', desc: 'Balanced flavours using tamarind, fish sauce, and palm sugar accompanying bean sprouts, garlic and chives.', price: 8.50, img: 'images/padthai.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','fish','soya','peanuts'] },
+		{ id: 'chef-pad-thai', name: 'Chefs Special Pad Thai🌶️', desc: 'Just like the traditional Pad Thai, but with a little extra heat!', price: 8.50, img: 'images/spicypadthai.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','fish','soya','peanuts'] },  
+		{ id: 'pad-kee-mao', name: 'Pad Kee Mao🌶️🌶️', desc: 'Drunken Noodles is a spicy and savory Thai stir-fried noodle dish. It is made with wide rice noodles and a variety of vegetables, stir-fried with a flavorful sauce made from soy, oyster, and fish sauces, and heavily flavored with fresh chilies.', price: 8.50, img: 'images/padkeemao.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 2, allergens: ['soya'] },
+		{ id: 'pad-see-ew', name: 'Thai Stir Fried Noodles (Pad See Ew)', desc: 'Thai stir-fried noodle dish featuring wide, flat rice noodles, Chinese broccoli, and egg, all coated in a savoury, salty-sweet soy sauce', price: 8.50, img: 'images/padseeew.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya'] },
+        { id: 'fried-rice', name: 'Thai Special Fried Rice (Khao Pad)', desc: 'A classic Thai street food staple. Fragrant jasmine rice wok-fried with egg, onions, and tomatoes, seasoned with fish sauce, soy sauce, and oyster sauce.', price: 7.50, img: 'images/khaopad.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 2, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya'] }
       ]},
-      { id: 'sides', title: 'Side Dishes', items: [
+      { id:'sides',    title:'Side Dishes', allowExtras:false, items:[
         { id: 'jasmine-rice', name: 'Jasmine Rice (Khao Suay)', desc: 'Fragrant, long-grain rice.', price: 2.00, img: 'images/rice.jpg', allergens: [] },
-        { id: 'egg-rice', name: 'Egg Fried Rice (Khao Pad Khai)', desc: 'Rice with egg, simple & comforting.', price: 2.50, allergens: ['egg','soya'] },
+        { id: 'egg-rice', name: 'Egg Fried Rice (Khao Pad Khai)', desc: 'Rice with egg, simple & comforting.', price: 2.50, img: 'images/eggrice.jpg', allergens: ['egg','soya'] },
         { id: 'sticky-rice', name: 'Sticky Rice (Khao Neow)', desc: 'Perfect sticky jasmine rice.', price: 2.50, img: 'images/stickyrice.jpg', allergens: [] },
-        { id: 'coconut-ricee', name: 'Coconut Rice (Khao Man)', desc: 'Jasmine rice simmered in coconut milk.', price: 3.00, allergens: ['dairy'] },
-		 { id: 'chips', name: 'Chips', desc: 'Deep fried chips. Because sometimes you just need them!', price: 3.00, allergens: ['dairy'] },
-		 { id: 'fried-egg', name: 'Fried egg', desc: 'Thai style fried eggs have crispy whites with a soft yolk. But please let us kmow how you like yours', price: 3.00, allergens: ['dairy'] }
+        { id: 'coconut-ricee', name: 'Coconut Rice (Khao Man)', desc: 'Jasmine rice simmered in coconut milk.', price: 3.00, img: 'images/coconutrice.jpg', allergens: ['dairy'] },
+		 { id: 'chips', name: 'Chips', desc: 'Deep fried chips. Because sometimes you just need them!', price: 3.00, img: 'images/chips.jpg', allergens: ['dairy'] },
+		 { id: 'fried-egg', name: 'Fried egg', desc: 'Thai style fried eggs have crispy whites with a soft yolk. But please let us kmow how you like yours', price: 3.00, img: 'images/egg.jpg', allergens: ['dairy'] }
       ]}
     ];
 
@@ -1641,7 +1918,7 @@ main > section:first-of-type { margin-top: 0; }
     // ---------- State ----------
     let basket = []; // { name, itemId, mods:[{id,name,delta}], unitPrice, qty, img, spice }
 	window.basket = basket;  // expose the array reference to the second script
-    const ITEMS_BY_ID = new Map();
+    //const ITEMS_BY_ID = new Map();
 	
 	// remove chilli emojis that are baked into menu item names
 		const CHILLI_RE = /🌶️+/g;
@@ -1658,23 +1935,30 @@ main > section:first-of-type { margin-top: 0; }
     function formatCurrency(n){ const cents = Math.round((n + Number.EPSILON) * 100); return '£' + (cents/100).toFixed(2); }
     function roundToTwo(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
     function chilliIcons(n){ return '🌶️'.repeat(Math.max(0, Math.min(3, n||0))); }
-	
-	
-	
-	// ---- Sticky header offset (single source of truth) ----
-	function computeHeaderOffset(){
-  const h = document.querySelector('.site-header') || document.querySelector('header');
+
+// Single source of truth for how much space to keep above scrolled content
+// Single source of truth for how much space to keep above targets
+function computeHeaderOffset() {
+  const root = document.documentElement;
+  const headerSlidUp = root.classList.contains('header-slid-up'); // when header is hidden past Allergens
+  if (headerSlidUp) return 12; // tiny gap when header isn’t covering content
+  const h = (document.querySelector('.site-header') || document.querySelector('header'));
   return (h ? Math.round(h.getBoundingClientRect().height) : 0) + 12;
-	}
+}
 
-	function applyHeaderOffset(){
-	  document.documentElement.style.setProperty('--header-offset', computeHeaderOffset() + 'px');
-	}
-	window.addEventListener('load', applyHeaderOffset, { passive:true });
-	window.addEventListener('resize', applyHeaderOffset, { passive:true });
-	window.addEventListener('orientationchange', applyHeaderOffset, { passive:true });
-	applyHeaderOffset();
+function applyHeaderOffset() {
+  document.documentElement.style.setProperty('--header-offset', computeHeaderOffset() + 'px');
+}
 
+window.addEventListener('load', applyHeaderOffset, { passive:true });
+window.addEventListener('resize', applyHeaderOffset, { passive:true });
+window.addEventListener('orientationchange', applyHeaderOffset, { passive:true });
+window.addEventListener('scroll', applyHeaderOffset, { passive:true }); // keep it fresh while you move
+applyHeaderOffset();
+
+
+	
+	
 	// robust smooth scroll that clamps to page bounds (prevents “footer snaps”)
 	function smoothScrollToElTop(el){
 	  if (!el) return;
@@ -1697,6 +1981,13 @@ main > section:first-of-type { margin-top: 0; }
 		  active: true,  // turn off when not needed
 		  message: "We’re not open yet as we're making final preparations to ensure you have an amazing at home Thai dining experience! We hope to open by 3rd December 🎉"
 		};
+		
+		// ✅ Add this line:
+			console.log('TICKER INIT', { 
+			  active: siteStatus.active, 
+			  hasTickerEl: !!tickerEl, 
+			  hasTickerText: !!tickerText 
+			});
 
 		if (siteStatus.active && tickerEl && tickerText) {
 		  tickerText.textContent = siteStatus.message;
@@ -1716,120 +2007,109 @@ main > section:first-of-type { margin-top: 0; }
 		  set();
 		})();
 
+// === Customise globals (place near top, before buildMenu) ===
+const ITEMS_BY_ID = new Map();   // lookup from item.id → item object
+let currentItem = null;          // the item currently being customised
+let selectedMods = new Set();    // your existing modifier selection
+let selectedExtras = [];         // extras (added proteins)
+let currentAllowExtras = false;
 
+// ---------- Build menu (single, clean version) ----------
+/* === Full-screen menu overlay === */
+// ---------- Build menu (for full-screen popup) ----------
+function buildMenu() {
+  const container = document.getElementById('menu-list');
+  if (!container) return;
 
-    // ---------- Build menu (accordion categories) ----------
-    function buildMenu(){
-      const container = document.getElementById('menu-list');
-      container.innerHTML = '';
+  container.innerHTML = '';
 
-      MENU_CATEGORIES.forEach(cat => {
-        const catEl = document.createElement('div'); catEl.className = 'category';
-        const header = document.createElement('div'); header.className = 'category-header';
-        header.innerHTML = `<h3>${cat.title}</h3><div class="caret">▶</div>`;
-        const body = document.createElement('div'); body.className = 'category-body';
-		
+  MENU_CATEGORIES.forEach(cat => {
+    // outer wrapper per category
+    const catSection = document.createElement('section');
+    catSection.className = 'popup-category';
 
-        cat.items.forEach(item => {
-          ITEMS_BY_ID.set(item.id, item);
+    // category heading
+    const h = document.createElement('h3');
+    h.className = 'popup-category-title';
+    h.textContent = cat.title;
+    catSection.appendChild(h);
 
-          const el = document.createElement('div'); el.className = 'menu-item';
-          el.dataset.id = item.id;
-          el.dataset.price = item.price;
-          if (item.allowedModifiers) el.dataset.allowedModifiers = item.allowedModifiers.join(',');
-          if (item.modifierRequired) el.dataset.modifierRequired = 'true';
-          if (item.modifiersMulti) el.dataset.modifiersMulti = 'true';
-          if (item.modifierMax) el.dataset.modifierMax = String(item.modifierMax);
-          if (item.img) el.dataset.img = item.img;
-          if (item.spiceEnabled) el.dataset.spiceEnabled = 'true';
-          if (typeof item.spiceDefault === 'number') el.dataset.spiceDefault = String(item.spiceDefault);
+    // 2-column grid for this category’s items
+    const grid = document.createElement('div');
+    grid.className = 'popup-items-grid';
 
-          const allergenHTML = renderAllergenIconsCompact(item.allergens || []);
+    const categoryAllowExtras = !!cat.allowExtras;
 
-          el.innerHTML = `
-            <div class="meta">
-              <div class="title">${item.name}</div>
-              <div class="muted small">${item.desc || ''}</div>
-              ${allergenHTML}
-            </div>
-            <div style="text-align:right">
-              <div class="price">${formatCurrency(item.price)}</div>
-              <div style="margin-top:8px">
-                <button class="btn btn-accent" data-id="${item.id}">customise</button>
-              </div>
-            </div>
-          `;
-          body.appendChild(el);
-        });
-		
-		
-		// Accordion behavior (REPLACE your existing header.addEventListener handler with this)
-// Accordion behavior (REPLACE your existing handler with this)
-header.addEventListener('click', () => {
-  const opening = !body.classList.contains('open');
-
-  // 1) Close all other categories
-  document.querySelectorAll('.category-body.open').forEach(b => {
-    if (b !== body) {
-      b.classList.remove('open');
-      b.style.maxHeight = '0px';
-      const ct = b.previousElementSibling?.querySelector('.caret');
-      if (ct) ct.textContent = '▶';
-    }
-  });
-
-  // 2) If we’re collapsing this one, do it and stop
-  if (!opening) {
-    body.classList.remove('open');
-    body.style.maxHeight = '0px';
-    const ct = header.querySelector('.caret'); if (ct) ct.textContent = '▶';
-    return;
-  }
-
-  // 3) Open this category and set max-height for the transition
-  body.classList.add('open');
-  body.style.maxHeight = body.scrollHeight + 'px';
-  const ct = header.querySelector('.caret'); if (ct) ct.textContent = '▼';
-
-  // --- Sticky-header-aware scroll with double correction ---
-  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const behavior = (isIOS || prefersReduced) ? 'auto' : 'smooth';
-
-  // Helper to compute safe top position
-  const getOffsetTop = el => {
-    const h = document.querySelector('.site-header') || document.querySelector('header');
-    const headerH = (h ? Math.round(h.getBoundingClientRect().height) : 0) + 12; // breathing room
-    const target = el.getBoundingClientRect().top + window.pageYOffset - headerH;
-    const maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-    return Math.max(0, Math.min(target, maxTop));
-  };
-
-  // Phase 1: after layout applies, scroll to the header of the category
-  requestAnimationFrame(() => {
-    // Force reflow so Safari registers the new height before we scroll
-    void body.offsetHeight;
-
-    window.scrollTo({ top: getOffsetTop(header), behavior });
-
-    // Phase 2: after the CSS transition (~280ms), correct the position again
-    // If you changed the transition duration in CSS, adjust 300 accordingly.
-    setTimeout(() => {
-      window.scrollTo({ top: getOffsetTop(header), behavior: 'auto' });
-    }, 300);
-  });
-});
-
-
-		// keep these AFTER the handler
-		catEl.appendChild(header);
-		catEl.appendChild(body);
-		container.appendChild(catEl);
-
+    cat.items.forEach(item => {
+      // enrich + store for customise logic
+      ITEMS_BY_ID.set(item.id, {
+        ...item,
+        categoryAllowedExtras: categoryAllowExtras
       });
-    }
 
-    // ---------- Order rendering ----------
+      // item card
+      const card = document.createElement('div');
+      card.className = 'menu-item-card';
+      card.dataset.id = item.id;
+      card.dataset.price = item.price;
+      card.dataset.allowExtras = categoryAllowExtras ? '1' : '0';
+
+      if (item.allowedModifiers) card.dataset.allowedModifiers = item.allowedModifiers.join(',');
+      if (item.modifierRequired) card.dataset.modifierRequired = 'true';
+      if (item.modifiersMulti)   card.dataset.modifiersMulti   = 'true';
+      if (item.modifierMax)      card.dataset.modifierMax      = String(item.modifierMax);
+      if (item.img)              card.dataset.img              = item.img;
+      if (item.spiceEnabled)     card.dataset.spiceEnabled     = 'true';
+      if (typeof item.spiceDefault === 'number') {
+        card.dataset.spiceDefault = String(item.spiceDefault);
+      }
+
+      const allergenHTML = renderAllergenIconsCompact(item.allergens || []);
+
+      // small thumbnail if available
+      const thumbHTML = item.img
+        ? `
+          <div class="menu-card-thumb-wrap">
+            <img src="${item.img}" alt="${item.name}">
+          </div>
+        `
+        : '';
+
+      card.innerHTML = `
+        ${thumbHTML}
+        <div class="menu-card-main">
+          <div class="menu-card-title">${item.name}</div>
+          <div class="menu-card-desc muted small">${item.desc || ''}</div>
+          ${allergenHTML}
+          <div class="menu-card-bottom">
+            <div class="price">${formatCurrency(item.price)}</div>
+            <button class="btn btn-accent" type="button" data-id="${item.id}">
+              customise
+            </button>
+          </div>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+
+    catSection.appendChild(grid);
+    container.appendChild(catSection);
+  });
+
+  // ✅ make sure customise buttons still work (one delegated handler)
+  if (!container.dataset.bound) {
+    container.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-id]');
+      if (!btn) return;
+      openCustomise(btn.getAttribute('data-id'));
+    });
+    container.dataset.bound = '1';
+  }
+}
+
+
+    // --------- Order rendering ----------
 			function renderOrder(){
 		  const orderListEl  = document.getElementById('order-list');
 		  const orderTotalEl = document.getElementById('order-total');
@@ -1907,6 +2187,72 @@ header.addEventListener('click', () => {
 		  const total = basket.reduce((s, i) => s + i.unitPrice * i.qty, 0);
 		  orderTotalEl.textContent = formatCurrency(roundToTwo(total));
 		}
+		
+		// ---------- Menu popup open / close ----------
+		const menuOverlay = document.getElementById('menu-overlay');
+		const menuLink    = document.getElementById('menu-link');
+		const menuClose   = document.getElementById('menu-overlay-close');
+		const menuCheckoutBtn = document.getElementById('menu-checkout-btn');
+
+if (menuCheckoutBtn) {
+  menuCheckoutBtn.addEventListener('click', () => {
+    if (!basket || basket.length === 0) {
+      // you can swap this for a nicer inline message if you like
+      alert('Please add at least one dish before proceeding to checkout.');
+      return;
+    }
+
+    // close the menu overlay
+    if (menuOverlay) {
+      menuOverlay.classList.remove('show');
+      menuOverlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    // compute subtotal from basket and open checkout
+    const subtotal = basket.reduce((sum, line) => sum + line.unitPrice * line.qty, 0);
+    openCheckout(subtotal);
+  });
+}
+
+
+		function openMenuOverlay() {
+		  if (!menuOverlay) return;
+		  menuOverlay.classList.add('show');
+		  document.body.style.overflow = 'hidden'; // stop background scroll
+		}
+
+		function closeMenuOverlay() {
+		  if (!menuOverlay) return;
+		  menuOverlay.classList.remove('show');
+		  document.body.style.overflow = '';
+		}
+
+		if (menuLink) {
+		  menuLink.addEventListener('click', (e) => {
+			e.preventDefault();
+			openMenuOverlay();
+		  });
+		}
+
+		if (menuClose) {
+		  menuClose.addEventListener('click', closeMenuOverlay);
+		}
+
+		if (menuOverlay) {
+		  // click outside the inner card closes
+		  menuOverlay.addEventListener('click', (e) => {
+			if (e.target === menuOverlay) closeMenuOverlay();
+		  });
+		}
+
+		// ESC key closes popup too
+		document.addEventListener('keydown', (e) => {
+		  if (e.key === 'Escape' && menuOverlay?.classList.contains('show')) {
+			closeMenuOverlay();
+		  }
+		});
+
 
 
     // ---------- Modal (customise) ----------
@@ -1918,6 +2264,8 @@ header.addEventListener('click', () => {
     const qtyDecr = document.getElementById('qty-decr');
     const modsEl = document.getElementById('mods');
     const unitPriceEl = document.getElementById('unit-price');
+	// if any older code still uses `modalPrice`, point it at #unit-price
+	const modalPrice = unitPriceEl;
     const modalClose = document.getElementById('modal-close');
     const modalCancel = document.getElementById('modal-cancel');
     const modalAdd = document.getElementById('modal-add');
@@ -1928,15 +2276,53 @@ header.addEventListener('click', () => {
     const modalAll = document.getElementById('modal-allergens');
     const spiceWrap = document.getElementById('spice-wrap');
     const spiceButtons = document.getElementById('spice-buttons');
-
-    let currentItem = null;
-    let selectedMods = new Set();
     let currentAllowedMods = null;
     let currentRequires = false;
     let currentMulti = false;
     let currentMax = null;
     let currentSpice = null; // 0..3 or null
+	
 
+// include extras in the price calculation
+function sumExtras() {
+  return selectedExtras.reduce((s, e) => s + (e.delta || 0), 0);
+}
+
+function buildExtraChips(){
+  // If extras aren’t allowed for this item/category, remove the block and exit
+  if (!currentAllowExtras) {
+    modsEl.querySelector('[data-extras-block]')?.remove();
+    return;
+  }
+
+  // Create (or reuse) the extras block
+  let block = modsEl.querySelector('[data-extras-block]');
+  if (!block) {
+    block = document.createElement('div');
+    block.setAttribute('data-extras-block','');
+    block.style.marginTop = '10px';
+    block.innerHTML = `<div class="small" style="margin-bottom:6px">Extras</div>`;
+    modsEl.appendChild(block);
+  }
+
+  // Rebuild chips
+  block.querySelectorAll('.chip').forEach(n => n.remove());
+  EXTRAS.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chip';
+    if (selectedExtras.some(x => x.id === opt.id)) btn.classList.add('selected');
+    btn.textContent = `${opt.name} ${formatCurrency(opt.delta)}`;
+    btn.addEventListener('click', () => {
+      const i = selectedExtras.findIndex(x => x.id === opt.id);
+      if (i >= 0) selectedExtras.splice(i, 1);
+      else selectedExtras.push({ ...opt });
+      buildExtraChips();
+      updateUnitPricePreview();
+    });
+    block.appendChild(btn);
+  });
+}
     function buildModifierChips(allowed, required=false, multi=false, max=null){
       modsEl.innerHTML = '';
       selectedMods.clear();
@@ -1995,6 +2381,58 @@ header.addEventListener('click', () => {
         modsEl.appendChild(btn);
       });
     }
+	
+	function openCustomiseById(itemId) {
+  const item = ITEMS_BY_ID.get(String(itemId));
+  if (!item || !modal) {
+    console.warn('openCustomiseById: item not found', itemId);
+    return;
+  }
+
+  currentItem = item;
+  selectedMods.clear();
+  selectedExtras = [];
+  currentAllowExtras = !!item.categoryAllowedExtras;
+
+  const allowed  = Array.isArray(item.allowedModifiers) ? item.allowedModifiers : null;
+  const requires = !!item.modifierRequired;
+  const isMulti  = !!item.modifierMax || !!item.modifiersMulti;
+  const max      = (typeof item.modifierMax === 'number' && item.modifierMax > 0)
+    ? item.modifierMax
+    : null;
+
+  buildModifierChips(allowed, requires, isMulti, max);
+  buildExtraChips();
+  modalTitle.textContent = `Customise — ${item.name}`;
+  modalBase.dataset.price = item.price;
+  modalBase.textContent   = `Base price: ${formatCurrency(item.price)}`;
+  qtyInput.value = 1;
+  updateUnitPricePreview();
+
+  if (modalImg) {
+    if (item.img) {
+      modalImg.src = item.img;
+      modalImg.style.display = 'block';
+    } else {
+      modalImg.removeAttribute('src');
+      modalImg.style.display = 'none';
+    }
+  }
+
+  if (item.allergens && item.allergens.length) {
+    modalAll.innerHTML = renderAllergenBadges(item.allergens);
+    modalAllWrap.style.display = 'block';
+  } else {
+    modalAll.innerHTML = '';
+    modalAllWrap.style.display = 'none';
+  }
+
+  const defaultSpice = (typeof item.spiceDefault === 'number') ? item.spiceDefault : 0;
+  buildSpiceSelector(!!item.spiceEnabled, defaultSpice);
+
+  modal.style.display = 'flex';
+}
+
 	
 	// ---------- Success popup (matches #order-success in HTML) ----------
 	const orderSuccess      = document.getElementById('order-success');
@@ -2169,53 +2607,94 @@ header.addEventListener('click', () => {
     }
 
     function updateUnitPricePreview(){
-      if(!currentItem) return;
-      const base = Number(modalBase.dataset.price) || 0;
-      let modsTotal = 0;
-      selectedMods.forEach(id => {
-        if(!currentAllowedMods || !currentAllowedMods.includes(id)) return;
-        const m = MODIFIERS.find(x => x.id === id);
-        if(m){ modsTotal += m.delta; }
-      });
-      const unit = roundToTwo(base + modsTotal);
-      unitPriceEl.textContent = formatCurrency(unit);
+  const base = Number(modalBase.dataset.price) || 0;
+
+  // existing modifiers total…
+  let modsTotal = 0;
+  selectedMods.forEach(id => {
+    const m = MODIFIERS.find(x => x.id === id);
+    if (m) modsTotal += m.delta;
+  });
+
+  // extras total (only if allowed)
+  let extrasTotal = 0;
+  if (currentAllowExtras) {
+    extrasTotal = selectedExtras.reduce((s,e)=> s + (e.delta || 0), 0);
+  }
+
+  const total = roundToTwo(base + modsTotal + extrasTotal);
+  unitPriceEl.textContent = formatCurrency(total);
+}
+
+
+// Safe wrapper so old calls still work
+function opencustomise(id){ openCustomize(id); }
+
+
+// Canonical customise opener
+function openCustomise(itemId) {
+  const item = ITEMS_BY_ID.get(String(itemId));
+  if (!item) {
+    console.warn('openCustomise: item not found for id', itemId);
+    return;
+  }
+
+  currentItem = item;
+  selectedMods.clear();
+  selectedExtras = [];
+  currentAllowExtras = !!item.categoryAllowedExtras;  // from buildMenu
+
+  // build modifier chips for this item
+  const allowed = Array.isArray(item.allowedModifiers) ? item.allowedModifiers : null;
+  const requiresModifier = !!item.modifierRequired;
+  const isMulti = !!item.modifierMax || !!item.modifiersMulti;
+  const max = (typeof item.modifierMax === 'number' && item.modifierMax > 0) ? item.modifierMax : null;
+
+  buildModifierChips(allowed, requiresModifier, isMulti, max);
+  buildExtraChips();  // will show/hide depending on currentAllowExtras
+
+  // basic unit price
+  modalTitle.textContent = 'Customise — ' + item.name;
+  modalBase.dataset.price = item.price;
+  modalBase.textContent = 'Base price: ' + formatCurrency(item.price);
+  qtyInput.value = 1;
+  updateUnitPricePreview();
+
+  // image
+  if (modalImg) {
+    if (item.img) {
+      modalImg.src = item.img;
+      modalImg.style.display = 'block';
+    } else {
+      modalImg.removeAttribute('src');
+      modalImg.style.display = 'none';
     }
+  }
 
-    function opencustomise(itemId){
-      const found = ITEMS_BY_ID.get(itemId);
-      if(!found) return;
-      currentItem = found;
+  // allergens
+  if (item.allergens && item.allergens.length) {
+    modalAll.innerHTML = renderAllergenBadges(item.allergens);
+    modalAllWrap.style.display = 'block';
+  } else {
+    modalAll.innerHTML = '';
+    modalAllWrap.style.display = 'none';
+  }
 
-      const allowed = Array.isArray(found.allowedModifiers) ? found.allowedModifiers : null;
-      const requiresModifier = !!found.modifierRequired;
-      const isMulti = !!found.modifierMax || !!found.modifiersMulti;
-      const max = (typeof found.modifierMax === 'number' && found.modifierMax > 0) ? found.modifierMax : null;
+  // spice selector
+  const defaultSpice = (typeof item.spiceDefault === 'number') ? item.spiceDefault : 0;
+  buildSpiceSelector(!!item.spiceEnabled, defaultSpice);
 
-      buildModifierChips(allowed, requiresModifier, isMulti, max);
+  modal.style.display = 'flex';
+}
 
-      modalTitle.textContent = `customise — ${found.name}`;
-      modalBase.dataset.price = found.price;
-      modalBase.textContent = `Base price: ${formatCurrency(found.price)}`;
-      qtyInput.value = 1;
-      updateUnitPricePreview();
+// Optional aliases if other code uses different casing:
+// keep old call sites working
+window.openCustomise  = openCustomise;
+window.openCustomize  = openCustomise;
+window.opencustomise  = openCustomise;
 
-      if (modalImg) {
-        if (found.img) { modalImg.src = found.img; modalImg.style.display = 'block'; }
-        else { modalImg.removeAttribute('src'); modalImg.style.display = 'none'; }
-      }
 
-      if (found.allergens && found.allergens.length) {
-        modalAll.innerHTML = renderAllergenBadges(found.allergens);
-        modalAllWrap.style.display = 'block';
-      } else {
-        modalAll.innerHTML = '';
-        modalAllWrap.style.display = 'none';
-      }
 
-      buildSpiceSelector(!!found.spiceEnabled, typeof found.spiceDefault==='number'?found.spiceDefault:0);
-
-      modal.style.display = 'flex';
-    }
 
     document.getElementById('qty-incr').addEventListener('click', ()=>{ qtyInput.value = Math.max(1, parseInt(qtyInput.value || '1') + 1); });
     document.getElementById('qty-decr').addEventListener('click', ()=>{ qtyInput.value = Math.max(1, parseInt(qtyInput.value || '1') - 1); });
@@ -2224,44 +2703,69 @@ header.addEventListener('click', () => {
     document.getElementById('modal-cancel').addEventListener('click', closeModal);
     modal.addEventListener('click', (ev) => { if(ev.target === modal) closeModal(); });
 
-    document.getElementById('modal-add').addEventListener('click', ()=>{
-      if(!currentItem) return;
+    document.getElementById('modal-add').addEventListener('click', () => {
+  // … your existing checks …
 
-      if(currentItem.modifierRequired && selectedMods.size === 0){
-        modRequiredNote.style.display = 'block';
-        modsEl.scrollIntoView({behavior:'smooth', block:'center'});
-        return;
-      }
-      if(currentMulti && currentMax && selectedMods.size > currentMax){ return; }
+  const base = Number(modalBase.dataset.price) || 0;
 
-      const base = Number(modalBase.dataset.price) || 0;
-      const modsArr = []; let modsTotal = 0;
-      selectedMods.forEach(id => {
-        if(!currentAllowedMods || !currentAllowedMods.includes(id)) return;
-        const m = MODIFIERS.find(x => x.id === id);
-        if(m){ modsTotal += m.delta; modsArr.push(m); }
-      });
-      const unitPrice = roundToTwo(base + modsTotal);
-      const qty = Math.max(1, parseInt(qtyInput.value || '1'));
+  let modsTotal = 0;
+  const modsArr = [];
+  selectedMods.forEach(id => {
+    const m = MODIFIERS.find(x => x.id === id);
+    if (m) { modsTotal += m.delta; modsArr.push(m); }
+  });
 
-      basket.push({
-        name: currentItem.name,
-        itemId: currentItem.id,
-        mods: modsArr,
-        unitPrice,
-        qty,
-        img: currentItem.img || '',
-        spice: currentSpice // 0..3 or null
-      });
-      closeModal();
-      renderOrder();
-    });
+  const extrasArr = currentAllowExtras
+    ? selectedExtras.map(e => ({ id:e.id, name:e.name, delta:e.delta, type:'extra' }))
+    : [];
 
-    document.getElementById('menu-list').addEventListener('click', e => {
-      const btn = e.target.closest('button');
-      if(!btn || !btn.dataset.id) return;
-      opencustomise(btn.dataset.id);
-    });
+  const extrasTotal = currentAllowExtras
+    ? selectedExtras.reduce((s,e)=> s + (e.delta || 0), 0)
+    : 0;
+
+  const unitPrice = roundToTwo(base + modsTotal + extrasTotal);
+  const qty = Math.max(1, parseInt(qtyInput.value || '1'));
+
+  basket.push({
+    name: currentItem.name,
+    itemId: currentItem.id,
+    mods: [...modsArr, ...extrasArr],   // put extras in mods for downstream reuse
+    unitPrice,
+    qty,
+    img: currentItem.img || '',
+    spice: currentSpice ?? null
+  });
+
+  closeModal();
+  renderOrder();
+});
+
+
+
+// One delegated handler for all customise buttons inside the popup
+(function bindCustomiseClicks() {
+  const container = document.getElementById('menu-list');
+  if (!container || container.dataset.customBound) return;
+
+  container.addEventListener('click', (e) => {
+    // works for either a button or the whole card if we later add data-id there
+    const btn = e.target.closest('[data-id]');
+    if (!btn) return;
+
+    const id = btn.getAttribute('data-id');
+    if (!id) return;
+
+    // call our canonical opener
+    if (typeof openCustomise === 'function') {
+      openCustomise(id);
+    } else if (typeof window.openCustomise === 'function') {
+      window.openCustomise(id);
+    }
+  });
+
+  container.dataset.customBound = '1';
+})();
+
     document.getElementById('order-panel').addEventListener('click', e => {
       const btn = e.target.closest('button');
       if(!btn) return;
@@ -2273,65 +2777,141 @@ header.addEventListener('click', () => {
     });
 
     // Lightbox
-    document.querySelectorAll('#food-grid img').forEach(img => {
-      img.addEventListener('click', ()=> {
-        const lb = document.getElementById('lightbox');
-        const lbImg = document.getElementById('lightbox-img');
-        lbImg.src = img.src || '';
-        lb.style.display = 'flex';
-      });
-    });
-    document.getElementById('lightbox').addEventListener('click', (e) => {
-      if(e.target.id === 'lightbox' || e.target.id === 'lightbox-img') e.currentTarget.style.display = 'none';
-    });
+document.querySelectorAll('#food-grid img').forEach(img => {
+  img.addEventListener('click', ()=> {
+    const lb = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lightbox-img');
+    if (!lb || !lbImg) return;
+    lbImg.src = img.src || '';
+    lb.style.display = 'flex';
+  });
+});
+const lbRoot = document.getElementById('lightbox');
+if (lbRoot) {
+  lbRoot.addEventListener('click', (e) => {
+    if(e.target.id === 'lightbox' || e.target.id === 'lightbox-img') lbRoot.style.display = 'none';
+  });
+};
 
     document.addEventListener('keydown', (e) => {
-      if(e.key === 'Escape' && modal.style.display === 'flex') closeModal();
-      if(e.key === 'Escape' && checkoutModal.style.display === 'flex') closeCheckout();
-      if(e.key === 'Escape' && successModal.style.display === 'flex') hideOrderSuccess();
+  if (e.key === 'Escape') {
+    if (typeof closeModal === 'function' && modal?.style.display === 'flex') closeModal();
+    if (typeof closeCheckout === 'function' && checkoutModal?.style.display === 'flex') closeCheckout();
+    if (typeof hideOrderSuccess === 'function') hideOrderSuccess();
+  }
+});
+
+// --- One handler for all "customise" buttons in the popup menu ---
+const menuListEl = document.getElementById('menu-list');
+
+if (menuListEl) {
+  menuListEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-id]');
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+    // just open customise – do NOT close menu
+    openCustomise(id);
+  });
+}
+
+
+
+
+// ---------- Build & first render ----------
+buildMenu();
+renderOrder();
+
+// expose helpers the other script uses
+window.formatCurrency     = formatCurrency;
+window.orderMsg           = document.getElementById('order-msg');
+window.basket             = basket;
+window.renderOrder        = renderOrder;
+window.roundToTwo         = roundToTwo;
+window.chilliIcons        = chilliIcons;
+window.nameWithoutChillies= nameWithoutChillies;
+
+  
+  function openMenuOverlay() {
+    if (!menuOverlay) return;
+    menuOverlay.classList.add('show');
+    document.body.style.overflow = 'hidden'; // stop background scroll
+  }
+
+  function closeMenuOverlay() {
+    if (!menuOverlay) return;
+    menuOverlay.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  if (menuLink) {
+    menuLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      openMenuOverlay();
     });
+  }
 
-    // Build & first render
-    buildMenu();
-    renderOrder();
-	// expose helpers that the second script uses
-	window.formatCurrency = formatCurrency;
-	/*window.openCheckout = openCheckout;*/
-	window.orderMsg = document.getElementById('order-msg');
-	window.basket = basket;
-	window.renderOrder = renderOrder;
-	window.roundToTwo = roundToTwo;
-	window.chilliIcons = chilliIcons;
-	window.nameWithoutChillies = nameWithoutChillies;
-	
+  if (menuClose) {
+    menuClose.addEventListener('click', () => {
+      closeMenuOverlay();
+    });
+  }
 
-	}); // end DOMContentLoaded
+  if (menuOverlay) {
+    // click outside the inner card closes
+    menuOverlay.addEventListener('click', (e) => {
+      if (e.target === menuOverlay) closeMenuOverlay();
+    });
+  }
+
+  // ESC key closes popup too
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menuOverlay?.classList.contains('show')) {
+      closeMenuOverlay();
+    }
+  });
+
+
+// (no extra closers past here)
+}); // end DOMContentLoaded
+
 </script>
+<script>
+// — measures the header and exposes its height in --header-h
+function updateHeaderVar() {
+  const root   = document.documentElement;
+  const header = document.querySelector('.site-header') || document.querySelector('header');
+  const h = header ? Math.round(header.getBoundingClientRect().height) : 0;
+  root.style.setProperty('--header-h', h + 'px');
+}
+</script>
+
+
 <script>
 (function() {
   const root      = document.documentElement;
-  const header    = document.querySelector('.site-header');
+  const header    = document.querySelector('.site-header') || document.querySelector('header');
   const spacer    = document.getElementById('header-spacer');
   const allergens = document.querySelector('#allergens');
   if (!header || !spacer || !allergens) return;
 
-  // Measure and expose header height
-  function updateHeaderVar() {
-    const h = Math.round(header.getBoundingClientRect().height);
-    root.style.setProperty('--header-h', h + 'px');
+  // keep spacer and CSS var in sync with header height
+  function syncSpacer() {
+    updateHeaderVar(); // sets --header-h
+    const h = parseInt(getComputedStyle(root).getPropertyValue('--header-h')) || 0;
     spacer.style.height = h + 'px';
   }
 
   function getTriggerY() {
+    const h   = parseInt(getComputedStyle(root).getPropertyValue('--header-h')) || 0;
     const top = window.scrollY + allergens.getBoundingClientRect().top;
-    const h = parseInt(getComputedStyle(root).getPropertyValue('--header-h')) || 0;
     return top - h;
   }
 
   let triggerY = 0;
 
   function updateTrigger() {
-    updateHeaderVar();
+    syncSpacer();
     triggerY = getTriggerY();
     handleScroll();
   }
@@ -2344,13 +2924,15 @@ header.addEventListener('click', () => {
     }
   }
 
+  // init + listeners
   updateTrigger();
   window.addEventListener('scroll', handleScroll, { passive: true });
   window.addEventListener('resize', updateTrigger, { passive: true });
   window.addEventListener('orientationchange', updateTrigger, { passive: true });
-  setTimeout(updateTrigger, 300); // recalc once after load
+  setTimeout(updateTrigger, 300); // second pass after fonts/images
 })();
 </script>
+
 
 
 
@@ -3507,6 +4089,8 @@ window.downloadReceiptPlain = function (summary, items, preferredTimeStr) {
   document.getElementById('year').textContent = new Date().getFullYear();
 </script>
 <!-- other small scripts -->
+<!-- Back to Top Button -->
+<button id="backToTop" title="Go to top">↑</button>
 <script>
 (function removeTickerGhost(){
   const t = document.getElementById('status-ticker');
@@ -3538,8 +4122,21 @@ backToTopBtn.addEventListener('click', () => {
 });
 
 </script>
-<!-- Back to Top Button -->
-<button id="backToTop" title="Go to top">↑</button>
+<script>
+// --- Lightbox safe listener ---
+const lightboxEl = document.getElementById('lightbox');
+if (lightboxEl) {
+  lightboxEl.addEventListener('click', (e) => {
+    if (e.target.id === 'lightbox' || e.target.id === 'lightbox-img') {
+      e.currentTarget.style.display = 'none';
+    }
+  });
+}
+</script>
+
+</body>
+</html>
+
 
 
 </body>
