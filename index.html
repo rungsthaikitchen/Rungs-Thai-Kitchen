@@ -101,7 +101,8 @@ html { scroll-padding-top: calc(var(--header-offset, 0px) + var(--ticker-height,
 /* a bit slower on mobile so long messages can be read */
 @media (max-width: 640px) {
   #status-ticker .ticker-inner {
-    animation-duration: 25s; animation-delay: 0.3s;
+    animation-duration: 20s;   /* optional: slightly faster on mobile */
+    animation-delay: -8s;      /* ⬅️ start 8 seconds into the animation */
   }
 }
 
