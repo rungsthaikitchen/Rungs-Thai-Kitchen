@@ -90,7 +90,7 @@ html { scroll-padding-top: calc(var(--header-offset, 0px) + var(--ticker-height,
 #status-ticker .ticker-inner {
   display: inline-block;
   white-space: nowrap;
-  animation: ticker-move 25s linear infinite; animation-delay: 2s;
+  animation: ticker-move 25s linear infinite;
 }
 
 @keyframes ticker-move {
@@ -101,7 +101,7 @@ html { scroll-padding-top: calc(var(--header-offset, 0px) + var(--ticker-height,
 /* a bit slower on mobile so long messages can be read */
 @media (max-width: 640px) {
   #status-ticker .ticker-inner {
-    animation-duration: 35s;
+    animation-duration: 25s;
   }
 }
 
