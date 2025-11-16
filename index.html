@@ -966,7 +966,7 @@ footer {
 		  background-color: rgba(255, 255, 255, 0.8); /* 0.9 = 80% opaque */
 		  backdrop-filter: blur(6px);                 /* softens background behind it */
 		  -webkit-backdrop-filter: blur(6px);         /* Safari support */
-		  border-radius: 0 0 16px 16px;               /* optional rounded bottom corners */
+		  border-radius: 16px;               /* optional rounded bottom corners */
 		  box-shadow: 0 2px 10px rgba(0,0,0,0.1);     /* gentle shadow to separate from bg */
 		}
 
@@ -1494,7 +1494,7 @@ footer {
 <header class="site-header">
   <div class="header-inner centered">
     <div class="brand-block" style="margin-top: 1px">
-      <img src="images/logotransparent2.png?v=2"
+      <img src="images/logotransparent2.png?v=3"
            alt="Rung's Thai Kitchen Logo"
            class="brand-logo">
       <div class="brand-title">Authentic Thai Takeaway</div>
@@ -2392,41 +2392,54 @@ function sumExtras() {
   return selectedExtras.reduce((s, e) => s + (e.delta || 0), 0);
 }
 
-function buildExtraChips(){
-  // If extras aren’t allowed for this item/category, remove the block and exit
-  if (!currentAllowExtras) {
-    modsEl.querySelector('[data-extras-block]')?.remove();
+const extrasWrap = document.getElementById('extras-wrap');
+const extrasEl   = document.getElementById('extras');
+
+function buildExtraChips() {
+  // No extras for this item/category → hide the whole block
+  if (!currentAllowExtras || !extrasWrap || !extrasEl) {
+    if (extrasWrap) extrasWrap.style.display = 'none';
     return;
   }
 
-  // Create (or reuse) the extras block
-  let block = modsEl.querySelector('[data-extras-block]');
-  if (!block) {
-    block = document.createElement('div');
-    block.setAttribute('data-extras-block','');
-    block.style.marginTop = '10px';
-    block.innerHTML = `<div class="small" style="margin-bottom:6px">Extras</div>`;
-    modsEl.appendChild(block);
-  }
+  extrasWrap.style.display = 'block';
+  extrasEl.innerHTML = '';
 
-  // Rebuild chips
-  block.querySelectorAll('.chip').forEach(n => n.remove());
   EXTRAS.forEach(opt => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'chip';
-    if (selectedExtras.some(x => x.id === opt.id)) btn.classList.add('selected');
+
+    const isSelected = selectedExtras.some(x => x.id === opt.id);
+    if (isSelected) btn.classList.add('selected');
+
     btn.textContent = `${opt.name} ${formatCurrency(opt.delta)}`;
+
     btn.addEventListener('click', () => {
-      const i = selectedExtras.findIndex(x => x.id === opt.id);
-      if (i >= 0) selectedExtras.splice(i, 1);
-      else selectedExtras.push({ ...opt });
-      buildExtraChips();
-      updateUnitPricePreview();
+      // we’ll handle the "only 1 extra" rule in the next section
+      handleExtraClick(opt);
     });
-    block.appendChild(btn);
+
+    extrasEl.appendChild(btn);
   });
 }
+function handleExtraClick(opt) {
+  // If this extra is already selected → deselect it
+  const already = selectedExtras.findIndex(x => x.id === opt.id);
+
+  if (already >= 0) {
+    // clicking again removes the extra
+    selectedExtras.splice(already, 1);
+  } else {
+    // Only allow ONE extra → replace the array with just this option
+    selectedExtras = [{ ...opt }];
+  }
+
+  // Rebuild UI + refresh price
+  buildExtraChips();
+  updateUnitPricePreview();
+}
+
     function buildModifierChips(allowed, required=false, multi=false, max=null){
       modsEl.innerHTML = '';
       selectedMods.clear();
