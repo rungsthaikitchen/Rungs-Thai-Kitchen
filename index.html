@@ -1506,6 +1506,36 @@ footer {
   overflow: hidden;
 }
 
+/* Custom branded map marker */
+.brand-marker {
+  background: transparent;
+  border: none;
+}
+
+.brand-marker-inner {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #16205B 0%, #b02a2a 100%);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
+  position: relative;
+}
+
+/* Little "pin" point under the circle */
+.brand-marker-inner::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  background: #b02a2a;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+
 /* Optional: make text consistent with rest of site */
 #location-card .muted a {
   color: inherit;
@@ -1547,35 +1577,7 @@ footer#contact .footer-inner {
   background: rgba(176, 42, 42, 0.5); /* your existing footer red */
   border-radius: 22px;
 }
-/* Custom branded map marker */
-.brand-marker {
-  background: transparent;
-  border: none;
-}
 
-.brand-marker-inner {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #16205B 0%, #b02a2a 100%);
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
-  position: relative;
-}
-
-/* Little "pin" point under the circle */
-.brand-marker-inner::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -6px;
-  transform: translateX(-50%);
-  width: 8px;
-  height: 8px;
-  background: #b02a2a;
-  border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
-}
 
 /* Ticker bar at the very top */
 #status-ticker {
@@ -3283,47 +3285,6 @@ window.nameWithoutChillies= nameWithoutChillies;
 
 // end DOMContentLoaded
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-  // Coordinates for your address
-  var lat = 53.744437;
-  var lng = -1.576570;
-
-  // Create the map with closer zoom
-  var map = L.map('delivery-map').setView([lat, lng], 15);
-
-  // 🌙 Night-mode / dark map tiles
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
-  }).addTo(map);
-
-  // 🌶️ Custom branded marker using a DivIcon
-  var brandIcon = L.divIcon({
-    className: 'brand-marker',
-    html: '<div class="brand-marker-inner"></div>',
-    iconSize: [26, 32],   // width, height (includes little "pin")
-    iconAnchor: [13, 32], // bottom center
-    popupAnchor: [0, -30] // popup above marker
-  });
-
-  L.marker([lat, lng], { icon: brandIcon }).addTo(map)
-    .bindPopup("Rung's Thai Kitchen<br>30 Topcliffe Mews<br>Morley, LS27 8UL")
-    .openPopup();
-
-  // 🟠 3-mile delivery radius
-  var radiusMeters = 3 * 1609.34;
-
-  L.circle([lat, lng], {
-    radius: radiusMeters,
-    color: '#ffb347',        // warm accent for dark map
-    fillColor: '#ffb347',
-    fillOpacity: 0.18,
-    weight: 2
-  }).addTo(map);
-});
-</script>
 
 
 
@@ -4585,6 +4546,49 @@ if (lightboxEl) {
   });
 }
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  // Coordinates for your address
+  var lat = 53.744437;
+  var lng = -1.576570;
+
+  // Create the map with closer zoom
+  var map = L.map('delivery-map').setView([lat, lng], 15);
+
+  // 🌙 Night-mode / dark map tiles
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+  }).addTo(map);
+
+  // 🌶️ Custom branded marker using a DivIcon
+  var brandIcon = L.divIcon({
+    className: 'brand-marker',
+    html: '<div class="brand-marker-inner"></div>',
+    iconSize: [26, 32],   // width, height (includes little "pin")
+    iconAnchor: [13, 32], // bottom center
+    popupAnchor: [0, -30] // popup above marker
+  });
+
+  L.marker([lat, lng], { icon: brandIcon }).addTo(map)
+    .bindPopup("Rung's Thai Kitchen<br>30 Topcliffe Mews<br>Morley, LS27 8UL")
+    .openPopup();
+
+  // 🟠 3-mile delivery radius
+  var radiusMeters = 3 * 1609.34;
+
+  L.circle([lat, lng], {
+    radius: radiusMeters,
+    color: '#ffb347',        // warm accent for dark map
+    fillColor: '#ffb347',
+    fillOpacity: 0.18,
+    weight: 2
+  }).addTo(map);
+});
+</script>
+
 
 </body>
 </html>
