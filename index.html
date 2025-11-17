@@ -1577,6 +1577,52 @@ footer#contact .footer-inner {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
 }
 
+/* Ticker bar at the very top */
+#status-ticker {
+  position: relative;
+  z-index: 3000;  /* make sure it's above the header */
+  background: linear-gradient(90deg, #b02a2a, #d9464a);
+  color: #fff;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  padding: 8px 12px;
+  margin: 0 2px 2px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#status-ticker.hidden {
+  display: none;
+}
+
+#status-ticker .ticker-inner {
+  display: inline-block;
+  white-space: nowrap;
+  animation: ticker-move 25s linear infinite;
+}
+
+@keyframes ticker-move {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+/* mobile tweak so it starts already moving */
+@media (max-width: 640px) {
+  #status-ticker .ticker-inner {
+    animation-duration: 20s;
+    animation-delay: -8s;
+  }
+}
+
+/* make sure the header doesn't cover it */
+header {
+  position: relative;
+  z-index: 2000;
+}
+
+
 
 
 
@@ -1597,13 +1643,12 @@ footer#contact .footer-inner {
 		<body>
 
 		  <!-- Status ticker (keep ONE of these) -->
-<div id="status-ticker" class="hidden" role="status" aria-live="polite">
-  <div class="ticker-inner">
-    <span id="ticker-text">
-      We’re not open yet as we're making final preparations to ensure you have an amazing at home Thai dining experience! We hope to open by 3rd December 🎉
-    </span>
+<body>
+  <div id="status-ticker">
+    <div class="ticker-inner">
+      We’re not open yet as we're making final preparations to ensure you have an amazing at home Thai dining experience! We hope to open by 3rd December
+    </div>
   </div>
-</div>
 
 <!-- Header -->
 <header class="site-header">
