@@ -1435,10 +1435,10 @@ footer {
 /* Make the floating menu button a full-width bottom bar */
 .menu-fab {
   position: fixed;
-  left: 122px;               /* stretch from left to right */
+  left: 0;               /* stretch from left to right */
   right: 0;
   bottom: 0;             /* sit across the bottom edge */
-  width: 81%;
+  width: 100%;
   height: 56px;          /* adjust to taste */
   border-radius: 0;      /* remove circle shape */
   padding: 0;
@@ -1450,6 +1450,7 @@ footer {
   color: #fff;
   font-size: 1.2rem;
   box-shadow: 0 -2px 10px rgba(0,0,0,.25);
+  z-index: 5000;
 }
 
 .menu-fab:hover {
@@ -1464,12 +1465,91 @@ footer {
 	}
 
 .social-links .icon {
-  width: 16px !important;
-  height: 16px !important;
+  width: 18px !important;
+  height: 18px !important;
   fill: currentColor;
   opacity: 0.85;
   flex-shrink: 0;
 }
+
+/* Location card above footer */
+#location-card {
+  background: rgba(255,255,255,0.8);             /* tweak to match your theme */
+  color: #000;
+  padding: 24px 16px;
+  border-radius: 10px;
+  margin-bottom: 200px
+}
+
+.location-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* Stack on small screens */
+@media (max-width: 768px) {
+  .location-inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+.location-map-wrapper {
+  width: 100%;
+}
+
+#delivery-map {
+  width: 100%;
+  height: 260px;      /* change height if you want */
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Optional: make text consistent with rest of site */
+#location-card .muted a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* Remove the outer card effect from the footer wrapper */
+footer#contact {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+/* Keep the actual card look on the inner footer block */
+footer#contact .footer-inner {
+  /* if you already have styles here, keep them –
+     these are just examples in case you need them */
+  background: rgba(176, 42, 42, 0.9); /* or your existing footer red */
+  border-radius: 12px;
+  margin-top: 30px;
+}
+
+/* Footer outer wrapper (full-width, no card styling) */
+footer#contact {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Footer card (same width as other cards) */
+footer#contact .footer-inner {
+  max-width: 1100px;  /* adjust to match your other cards (likely ~900–1100px) */
+  margin: 0 auto 24px;
+  padding: 24px 20px;
+
+  background: rgba(176, 42, 42, 0.5); /* your existing footer red */
+  border-radius: 22px;
+}
+
+
+
 
 
 		  </style>
@@ -1634,6 +1714,32 @@ footer {
         </div>
       </aside>
     </main>
+	
+	<section id="location-card">
+  <div class="location-inner">
+    <div class="location-text">
+      <h3>Find Us</h3>
+      <p class="muted">
+        30 Topcliffe Mews<br>
+        Morley<br>
+        West Yorkshire<br>
+        LS27 8UL
+      </p>
+      <p class="muted">
+        We deliver within a 3 mile radius (zoom out to view).
+      </p>
+	  <p class="muted">
+        Tel: 0113 3447431
+      </p>
+    </div>
+
+    <div class="location-map-wrapper">
+      <div id="delivery-map"></div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
 
 <footer id="contact">
   <div class="footer-inner">
@@ -1643,22 +1749,22 @@ footer {
 
       <!-- Contact row all on ONE line -->
       <div class="footer-contact-row">
-        <!--<h3>Contact Us</h3>-->
+        <h3>Contact Us</h3>
         <p class="contact-inline muted">
-          Contact Us: 📞 <a href="tel:01133447431">0113 3447431</a>
+          📞 <a href="tel:01133447431">0113 3447431</a>
           <span class="dot">•</span>
           ✉️ <a href="mailto:hello@rungsthaikitchen.co.uk">hello@rungsthaikitchen.co.uk</a>
         </p>
       </div>
 
       <!-- Opening Hours -->
-      <!--<h3>Opening Hours</h3>-->
+      <h3>Opening Hours</h3>
       <p class="muted">Opening Hours: 🕒 Wed–Sun: 17:00 – 21:00</p>
 
       <!-- New Social Media Section -->
-      <!--<h3>Social Media</h3>-->
+      <h3>Social Media</h3>
 <p class="muted social-links">
-  Social Media: <a href="https://www.facebook.com/RungsThaiKitchenLeeds" target="_blank" class="social-icon">
+  <a href="https://www.facebook.com/RungsThaiKitchenLeeds" target="_blank" class="social-icon">
     <svg viewBox="0 0 24 24" class="icon">
       <path d="M22 12c0-5.522-4.477-10-10-10S2 6.478 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987H7.898v-2.89h2.54V9.845c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.242 0-1.63.771-1.63 1.562v1.875h2.773l-.443 2.89h-2.33v6.987C18.343 21.128 22 16.991 22 12z"/>
     </svg>
@@ -1908,6 +2014,19 @@ footer {
 		</div>
 		<button id="menu-fab" class="menu-fab" type="button" aria-label="Open menu">View Menu & Place Order</button>
 		<button id="menu-fab" class="menu-fab hidden" type="button" aria-label="Open menu">Menu</button>
+		
+		<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""
+>
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
+
 
   <script>
 
@@ -3086,7 +3205,46 @@ window.nameWithoutChillies= nameWithoutChillies;
 
 
 // (no extra closers past here)
-}); // end DOMContentLoaded
+}); 
+
+// end DOMContentLoaded
+
+
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Approximate coordinates for your address – you can refine these
+    var lat = 53.744437;   // replace with more precise coords if you like
+    var lng = -1.576570
+
+    // Create the map
+    var map = L.map('delivery-map').setView([lat, lng], 15);
+
+    // Background tiles (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Marker at your address
+    L.marker([lat, lng]).addTo(map)
+      .bindPopup("Rung's Thai Kitchen<br>30 Topcliffe Mews<br>Morley, LS27 8UL")
+      .openPopup();
+
+    // 3 mile delivery radius (in metres)
+    var radiusMeters = 3 * 1609.34;
+
+   // 3-mile delivery radius (in metres)
+var radiusMeters = 3 * 1609.34;
+
+L.circle([lat, lng], {
+  radius: radiusMeters,
+  color: '#b02a2a',
+  fillColor: '#b02a2a',
+  fillOpacity: 0.20,
+  weight: 2
+}).addTo(map);
+  });
+
 
 </script>
 <script>
