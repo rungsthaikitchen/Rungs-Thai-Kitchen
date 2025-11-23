@@ -37,6 +37,81 @@
     .nowrap{white-space:nowrap}
     .badge{display:inline-flex;gap:6px;align-items:center;padding:4px 8px;border:1px solid #eee;border-radius:999px;background:#fff;font-size:12px}
     .allergens{display:flex;gap:6px;flex-wrap:wrap}
+  
+  /* Everything inside here only affects printing */
+  @media print {
+
+    /* General font sizing for print */
+    body {
+      font-size: 14pt;              /* bump this up or down as you like */
+      line-height: 1.4;
+    }
+
+    /* Limit content width to suit 80mm paper */
+    .order-print-area {
+      max-width: 80mm;
+    }
+
+    /* Hide anything that shouldn't appear on the printout */
+    .no-print,
+    .admin-header,
+    .sidebar,
+    .footer,
+    .buttons-row,
+    .search-bar {
+      display: none !important;
+    }
+
+    /* Optional: remove background colours and images */
+    * {
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    /* Tidy up links (no underlines / URLs) */
+    a {
+      text-decoration: none !important;
+    }
+
+    /* Make key sections clearer / bigger */
+    .order-main-heading {
+      font-size: 18pt;
+      font-weight: bold;
+    }
+
+    .order-items-table {
+      font-size: 13pt;
+    }
+
+    .order-totals {
+      font-size: 14pt;
+      font-weight: bold;
+    }
+  }
+  
+		  /* New order toast */
+		.new-order-toast {
+		  position: fixed;
+		  top: 16px;
+		  right: 16px;
+		  background: #16205b;
+		  color: #fff;
+		  padding: 10px 14px;
+		  border-radius: 8px;
+		  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+		  font-size: 14px;
+		  z-index: 99999;
+		  opacity: 0;
+		  transform: translateY(-8px);
+		  transition: opacity 0.25s ease, transform 0.25s ease;
+		}
+
+		.new-order-toast.show {
+		  opacity: 1;
+		  transform: translateY(0);
+		}
+
+  
   </style>
 </head>
 <body>
@@ -58,7 +133,8 @@
       <table>
         <thead>
           <tr>
-            <th>Order</th>
+			<th>RTK Ref</th>
+            <!--<th>Order</th>-->
             <th>Date</th>
             <th>Customer</th>
             <th>Type</th>
@@ -86,7 +162,45 @@
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ---------- Helpers ----------
+		let lastSeenCreatedAt = null;
+		let firstLoadDone = false;
+
+		function showNewOrderToast(message) {
+		  const toast = document.createElement('div');
+		  toast.className = 'new-order-toast';
+		  toast.textContent = message;
+		  document.body.appendChild(toast);
+
+		  // fade in
+		  requestAnimationFrame(() => toast.classList.add('show'));
+
+		  // remove after 4 seconds
+		  setTimeout(() => {
+			toast.classList.remove('show');
+			setTimeout(() => toast.remove(), 250);
+		  }, 4000);
+		}
+
+		function handleNewOrders(newOrders) {
+		  if (!newOrders.length) return;
+
+		  // Play sound
+		  const audio = document.getElementById('new-order-sound');
+		  if (audio) {
+			audio.play().catch(() => {
+			  // Autoplay might be blocked until the user interacts once.
+			  // We can ignore this silently.
+			});
+		  }
+
+		  // Show one toast (you can make this smarter if you want)
+		  const first = newOrders[0];
+		  const rtkRef = first.order_ref || `RTK-${String(first.id).slice(0, 8)}`;
+		  showNewOrderToast(`New order received: ${rtkRef}`);
+		}
+
+	
+	// ---------- Helpers ----------
     const fmtMoney = v => '£' + (Math.round(Number(v || 0)*100)/100).toFixed(2);
     const sumTotal = (o) => Number(o.subtotal || 0) + Number(o.delivery_fee || 0);
     const fmtDate = iso => {
@@ -106,7 +220,7 @@
       const { data, error } = await supabase
         .from('orders')
         .select(`
-          id, created_at, subtotal, delivery_fee, order_type, notes,
+          id, order_ref, created_at, subtotal, delivery_fee, order_type, notes,
           customers:customers ( full_name, email, phone, address ),
           order_items ( id, name, qty, unit_price, modifiers, spice, img )
         `)
@@ -135,23 +249,29 @@
         const tr = document.createElement('tr'); tr.className = 'row';
         const customer = o.customers || {};
         const total = sumTotal(o);
+				
+		// Fallback if order_ref is null: show first 8 chars of the UUID
+		const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
+
 
         tr.innerHTML = `
-          <td class="mono">#${o.id}</td>
-          <td>${fmtDate(o.created_at)}</td>
-          <td>
-            <div><strong>${customer.full_name || '—'}</strong></div>
-            <div class="small muted">${customer.phone || ''}</div>
-          </td>
-          <td><span class="pill">${(o.order_type || 'collection').toUpperCase()}</span></td>
-          <td class="nowrap">${fmtMoney(o.subtotal)}</td>
-          <td class="nowrap">${fmtMoney(o.delivery_fee)}</td>
-          <td class="nowrap"><strong>${fmtMoney(total)}</strong></td>
-          <td class="actions">
-            <button class="btn" data-action="toggle">Details</button>
-            <button class="btn" data-action="print">Print ticket</button>
-          </td>
-        `;
+		  <td class="mono">${rtkRef}</td>            <!-- RTK Ref -->
+		 <!-- <td class="mono">#${o.id}</td> -->            <!-- Supabase order ID -->
+		  <td>${fmtDate(o.created_at)}</td>          <!-- Date -->
+		  <td>
+			<div><strong>${customer.full_name || '—'}</strong></div>
+			<div class="small muted">${customer.phone || ''}</div>
+		  </td>
+		  <td><span class="pill">${(o.order_type || 'collection').toUpperCase()}</span></td>
+		  <td class="nowrap">${fmtMoney(o.subtotal)}</td>
+		  <td class="nowrap">${fmtMoney(o.delivery_fee)}</td>
+		  <td class="nowrap"><strong>${fmtMoney(total)}</strong></td>
+		  <td class="actions">
+			<button class="btn" data-action="toggle">Details</button>
+			<button class="btn" data-action="print">Print ticket</button>
+		  </td>
+		`;
+
 
         // details row
         const details = document.createElement('div');
@@ -159,7 +279,7 @@
         details.innerHTML = buildDetailsHTML(o);
         const detailsRow = document.createElement('tr');
         const detailsCell = document.createElement('td');
-        detailsCell.colSpan = 8;
+        detailsCell.colSpan = 9;
         detailsCell.appendChild(details);
         detailsRow.appendChild(detailsCell);
 
@@ -176,109 +296,141 @@
       });
     }
 
-    function buildDetailsHTML(o){
-      const c = o.customers || {};
-      const lines = (o.order_items || []).map(item => {
-        const mods = (item.modifiers || []).map(m => m.name).join(', ');
-        const spice = (item.spice == null) ? '' : (' '.repeat(1) + '🌶️'.repeat(Math.max(0, Math.min(3, Number(item.spice)))));
-        const modsFrag = mods ? `<div class="small muted">Mods: ${mods}</div>` : '';
-        const img = item.img ? `<img src="${item.img}" alt="${item.name}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #eee;margin-right:8px">` : '';
-        return `
-          <div class="line">
-            <div style="display:flex;align-items:center;gap:8px">
-              ${img}
-              <div>
-                <div><strong>${item.name}</strong> × ${item.qty}${spice}</div>
-                ${modsFrag}
-              </div>
-            </div>
-            <div><strong>${fmtMoney(Number(item.unit_price)*Number(item.qty))}</strong></div>
-          </div>
-        `;
-      }).join('');
+			function buildDetailsHTML(o){
+		  const c = o.customers || {};
 
-      const addr = [c.address].filter(Boolean).join('<br>');
+		  // ✅ RTK ref: use order_ref if present, else fallback to short UUID
+		  const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
 
-      return `
-        <div class="grid" style="margin-bottom:8px">
-          <div>
-            <div class="muted small">Customer</div>
-            <div><strong>${c.full_name || '—'}</strong></div>
-            <div class="small">${c.phone || ''}</div>
-            <div class="small">${c.email || ''}</div>
-          </div>
-          <div>
-            <div class="muted small">Address</div>
-            <div class="small">${addr || '—'}</div>
-          </div>
-          <div>
-            <div class="muted small">Order</div>
-            <div class="small">Type: <strong>${(o.order_type || 'collection').toUpperCase()}</strong></div>
-            <div class="small">Subtotal: ${fmtMoney(o.subtotal)}</div>
-            <div class="small">Delivery: ${fmtMoney(o.delivery_fee)}</div>
-            <div class="small"><strong>Total: ${fmtMoney(sumTotal(o))}</strong></div>
-          </div>
-        </div>
-        <div class="muted small">Notes: ${o.notes ? o.notes : '—'}</div>
-        <div style="margin-top:10px;border-top:1px dashed #eee;padding-top:10px">${lines || '<div class="muted small">No items.</div>'}</div>
-      `;
-    }
+		  const lines = (o.order_items || []).map(item => {
+			const mods = (item.modifiers || []).map(m => m.name).join(', ');
+			const spice = (item.spice == null)
+			  ? ''
+			  : (' '.repeat(1) + '🌶️'.repeat(Math.max(0, Math.min(3, Number(item.spice)))));
+			const modsFrag = mods ? `<div class="small muted">Mods: ${mods}</div>` : '';
+			const img = item.img
+			  ? `<img src="${item.img}" alt="${item.name}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #eee;margin-right:8px">`
+			  : '';
+
+			return `
+			  <div class="line">
+				<div style="display:flex;align-items:center;gap:8px">
+				  ${img}
+				  <div>
+					<div><strong>${item.name}</strong> × ${item.qty}${spice}</div>
+					${modsFrag}
+				  </div>
+				</div>
+				<div><strong>${fmtMoney(Number(item.unit_price) * Number(item.qty))}</strong></div>
+			  </div>
+			`;
+		  }).join('');
+
+		  const addr = [c.address].filter(Boolean).join('<br>');
+
+		  return `
+			<div class="grid" style="margin-bottom:8px">
+			  <div>
+				<div class="muted small">Customer</div>
+				<div><strong>${c.full_name || '—'}</strong></div>
+				<div class="small">${c.phone || ''}</div>
+				<div class="small">${c.email || ''}</div>
+			  </div>
+			  <div>
+				<div class="muted small">Address</div>
+				<div class="small">${addr || '—'}</div>
+			  </div>
+			  <div>
+				<div class="muted small">Order</div>
+				<div class="small"><strong>RTK Ref:</strong> ${rtkRef}</div>
+				<div class="small">Type: <strong>${(o.order_type || 'collection').toUpperCase()}</strong></div>
+				<div class="small">Subtotal: ${fmtMoney(o.subtotal)}</div>
+				<div class="small">Delivery: ${fmtMoney(o.delivery_fee)}</div>
+				<div class="small"><strong>Total: ${fmtMoney(sumTotal(o))}</strong></div>
+			  </div>
+			</div>
+			<div class="muted small">Notes: ${o.notes ? o.notes : '—'}</div>
+			<div style="margin-top:10px;border-top:1px dashed #eee;padding-top:10px">
+			  ${lines || '<div class="muted small">No items.</div>'}
+			</div>
+		  `;
+		}
+
 
     // ---------- Print ticket ----------
-    function printTicket(o){
-	  const c = o.customers || {};
-	  const w = window.open('', 'PRINT', 'height=700,width=600');
+   function printTicket(order) {
+  const w = window.open('', '_blank', 'width=600,height=800');
+  const c = order.customers || {};
+  const total = sumTotal(order);
 
-	  const lines = (o.order_items || []).map(it => {
-		const mods = (it.modifiers || []).map(m => m.name).join(', ');
-		const spice = (it.spice == null) ? '' : ' ' + '🌶️'.repeat(Math.max(0, Math.min(3, Number(it.spice))));
-		return `
-		  <tr>
-			<td style="padding:6px 0">
-			  <strong>${it.name}</strong> × ${it.qty}${spice}
-			  ${mods ? `<div style="font-size:12px;color:#666">Mods: ${mods}</div>`:''}
-			</td>
-			<td style="padding:6px 0;text-align:right">
-			  £${(Number(it.unit_price)*Number(it.qty)).toFixed(2)}
-			</td>
-		  </tr>
-		`;
-	  }).join('');
+  // ✅ RTK Ref defined BEFORE printing
+  const rtkRef = order.order_ref || `RTK-${String(order.id).slice(0, 8)}`;
 
-	  const html = `
-		<html>
-		<head>
-		  <title>Order #${o.id}</title>
-		  <style>
-			body{font-family:ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto; font-size:14px; margin:24px;}
-			h1{font-size:18px;margin:0}
-			.muted{color:#6b7280}
-			table{width:100%;border-collapse:collapse;margin-top:10px}
-			td{border-bottom:1px dashed #ddd}
-		  </style>
-		</head>
-		<body onload="window.print(); setTimeout(function(){ window.close(); }, 300)">
-		  <h1>Rung’s Thai Kitchen — Ticket</h1>
-		  <div class="muted">Order #${o.id} • ${new Date(o.created_at).toLocaleString()}</div>
-		  <div style="margin-top:8px">
-			<div><strong>${(o.order_type || 'collection').toUpperCase()}</strong></div>
-			<div>${c.full_name || ''} • ${c.phone || ''}</div>
-			<div>${c.address || ''}</div>
-		  </div>
-		  <table>${lines}</table>
-		  <div style="margin-top:10px;border-top:1px dashed #ddd;padding-top:8px">
-			<div>Subtotal: £${Number(o.subtotal||0).toFixed(2)}</div>
-			<div>Delivery: £${Number(o.delivery_fee||0).toFixed(2)}</div>
-			<div><strong>Total: £${(Number(o.subtotal||0)+Number(o.delivery_fee||0)).toFixed(2)}</strong></div>
-		  </div>
-		  <div style="margin-top:8px"><em>Notes:</em> ${o.notes || '—'}</div>
-		</body>
-		</html>
-	  `;
+  w.document.write(`
+    <html>
+      <head>
+        <title>RTK Ticket ${rtkRef}</title>
+        <style>
+		  body {
+			font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+			font-size: 16px;       /* 🔥 bigger main text */
+			margin: 16px;
+		  }
+		  h1 {
+			font-size: 22px;       /* 🔥 bigger heading */
+			margin: 0 0 6px;
+		  }
+		  .muted {
+			color: #666;
+			font-size: 14px;       /* 🔥 increased muted text */
+		  }
+		  .section {
+			margin-top: 14px;
+			font-size: 16px;       /* match body for readability */
+		  }
+		  .items {
+			margin-top: 12px;
+			border-top: 1px dashed #ccc;
+			padding-top: 10px;
+		  }
+		</style>
 
-	  w.document.write(html);
-	  w.document.close();
-	}
+      </head>
+      <body>
+        <h1>Rung's Thai Kitchen</h1>
+        <div class="muted">Kitchen ticket</div>
+
+        <div class="section">
+          <div><strong>RTK Ref:</strong> ${rtkRef}</div>
+          <div><strong>Order ID:</strong> #${order.id}</div>
+          <div><strong>Date:</strong> ${fmtDate(order.created_at)}</div>
+          <div><strong>Type:</strong> ${(order.order_type || 'collection').toUpperCase()}</div>
+        </div>
+
+        <div class="section">
+          <div><strong>Customer:</strong> ${c.full_name || '—'}</div>
+          <div><strong>Phone:</strong> ${c.phone || ''}</div>
+          <div><strong>Address:</strong> ${c.address || '—'}</div>
+          ${order.notes ? `<div><strong>Notes:</strong> ${order.notes}</div>` : ''}
+        </div>
+
+        <div class="section items">
+          ${buildDetailsHTML(order)}
+        </div>
+
+        <div class="section">
+          <strong>Total:</strong> ${fmtMoney(total)}
+        </div>
+      </body>
+    </html>
+  `);
+
+  w.document.close();
+  w.focus();
+  w.print();
+}
+
+
 
 
     // ---------- CSV export ----------
@@ -315,10 +467,58 @@
 
     // ---------- Realtime ----------
     let currentOrders = [];
-    async function loadAndRender(){
-      currentOrders = await fetchOrders();
-      render(currentOrders);
-    }
+		   async function loadAndRender() {
+		  const { data: orders, error } = await supabase
+			.from('orders')
+			.select(`
+			  id,
+			  order_ref,
+			  created_at,
+			  order_type,
+			  subtotal,
+			  delivery_fee,
+			  notes,
+			  customers (
+				full_name,
+				phone,
+				email,
+				address
+			  ),
+			  order_items (
+				*    
+			  )
+			`)
+			.order('created_at', { ascending: false });
+
+		  if (error) {
+			console.error('Error loading orders', error);
+			return;
+		  }
+		  if (!orders) return;
+
+		  // --- detect new orders (keep this part as you already have it) ---
+		  if (firstLoadDone && orders.length) {
+			const newestTime = new Date(orders[0].created_at);
+			const prevTime = lastSeenCreatedAt ? new Date(lastSeenCreatedAt) : null;
+
+			const newOnes = prevTime
+			  ? orders.filter(o => new Date(o.created_at) > prevTime)
+			  : [];
+
+			if (newOnes.length > 0) {
+			  handleNewOrders(newOnes);
+			}
+		  }
+
+		  if (orders.length) {
+			lastSeenCreatedAt = orders[0].created_at;
+		  }
+		  firstLoadDone = true;
+
+		  render(orders);
+		}
+
+
 
     document.getElementById('refresh').addEventListener('click', loadAndRender);
     document.getElementById('export').addEventListener('click', () => exportCSV(currentOrders));
@@ -334,8 +534,14 @@
       })
       .subscribe();
 
-    // initial
-    loadAndRender();
+
+		// Initial load
+		loadAndRender();
+
+		// Poll every 15 seconds (tweak if you like)
+		setInterval(loadAndRender, 15000);
+
   </script>
+  <audio id="new-order-sound" src="Sounds/bell railroad1.wav" preload="auto"></audio>
 </body>
 </html>
