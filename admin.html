@@ -151,7 +151,7 @@
       <div id="empty" class="muted" style="margin-top:12px;display:none">No orders yet.</div>
     </div>
   </main>
-
+  <audio id="new-order-sound" src="Sounds/bell railroad1.wav" preload="auto"></audio>
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -161,6 +161,31 @@
 
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+		let audioUnlocked = false;
+
+			function unlockAudioOnce() {
+			  const audio = document.getElementById('new-order-sound');
+			  if (!audio || audioUnlocked) return;
+
+			  // Try to play once, then immediately pause – this satisfies the
+			  // "user interaction" requirement for future plays.
+			  audio.play().then(() => {
+				audio.pause();
+				audio.currentTime = 0;
+				audioUnlocked = true;
+				document.removeEventListener('click', unlockAudioOnce);
+				document.removeEventListener('keydown', unlockAudioOnce);
+				console.info('New-order sound unlocked');
+			  }).catch(err => {
+				console.warn('Audio unlock failed:', err);
+			  });
+			}
+
+			// Any click or key press on the page will unlock audio once
+			document.addEventListener('click', unlockAudioOnce);
+			document.addEventListener('keydown', unlockAudioOnce);
+
 
 		let lastSeenCreatedAt = null;
 		let firstLoadDone = false;
@@ -184,20 +209,18 @@
 		function handleNewOrders(newOrders) {
 		  if (!newOrders.length) return;
 
-		  // Play sound
 		  const audio = document.getElementById('new-order-sound');
-		  if (audio) {
-			audio.play().catch(() => {
-			  // Autoplay might be blocked until the user interacts once.
-			  // We can ignore this silently.
+		  if (audio && audioUnlocked) {
+			audio.play().catch(err => {
+			  console.warn('New-order sound play failed:', err);
 			});
 		  }
 
-		  // Show one toast (you can make this smarter if you want)
 		  const first = newOrders[0];
 		  const rtkRef = first.order_ref || `RTK-${String(first.id).slice(0, 8)}`;
 		  showNewOrderToast(`New order received: ${rtkRef}`);
 		}
+
 
 	
 	// ---------- Helpers ----------
@@ -542,6 +565,6 @@
 		setInterval(loadAndRender, 15000);
 
   </script>
-  <audio id="new-order-sound" src="Sounds/bell railroad1.wav" preload="auto"></audio>
+
 </body>
 </html>
