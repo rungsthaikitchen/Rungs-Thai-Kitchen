@@ -110,6 +110,38 @@
 		  opacity: 1;
 		  transform: translateY(0);
 		}
+		
+		.new-order-banner {
+		  position: fixed;
+		  bottom: 20px;
+		  right: 20px;
+		  background: #16205b;
+		  color: #fff;
+		  padding: 10px 14px;
+		  border-radius: 10px;
+		  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+		  font-size: 14px;
+		  display: flex;
+		  align-items: center;
+		  gap: 10px;
+		  z-index: 99999;
+		}
+
+		.new-order-banner button {
+		  background: #d9464a;
+		  color: #fff;
+		  border: none;
+		  border-radius: 999px;
+		  padding: 6px 12px;
+		  cursor: pointer;
+		  font-size: 13px;
+		  font-weight: 600;
+		}
+
+		.new-order-banner button:hover {
+		  opacity: 0.9;
+		}
+
 
   
   </style>
@@ -162,407 +194,330 @@
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-		let audioUnlocked = false;
+	// --- AUDIO + NEW-ORDER ALERT STATE ---------------------------------
 
-			function unlockAudioOnce() {
-			  const audio = document.getElementById('new-order-sound');
-			  if (!audio || audioUnlocked) return;
+	let audioUnlocked = false;
+	let firstLoadDone = false;
+	let lastSeenCreatedAt = null;
 
-			  // Try to play once, then immediately pause – this satisfies the
-			  // "user interaction" requirement for future plays.
-			  audio.play().then(() => {
-				audio.pause();
-				audio.currentTime = 0;
-				audioUnlocked = true;
-				document.removeEventListener('click', unlockAudioOnce);
-				document.removeEventListener('keydown', unlockAudioOnce);
-				console.info('New-order sound unlocked');
-			  }).catch(err => {
-				console.warn('Audio unlock failed:', err);
-			  });
-			}
+	// Orders we still haven't acknowledged this session
+	const unacknowledgedOrders = new Map();   // id -> order
+	const acknowledgedOrderIds = new Set();   // ids we've already acknowledged
 
-			// Any click or key press on the page will unlock audio once
-			document.addEventListener('click', unlockAudioOnce);
-			document.addEventListener('keydown', unlockAudioOnce);
+	// Unlock audio on first user interaction (for autoplay policies)
+	function unlockAudioOnce() {
+	  const audio = document.getElementById('new-order-sound');
+	  if (!audio || audioUnlocked) return;
 
+	  audio.play().then(() => {
+		audio.pause();
+		audio.currentTime = 0;
+		audioUnlocked = true;
+		document.removeEventListener('click', unlockAudioOnce);
+		document.removeEventListener('keydown', unlockAudioOnce);
+		console.info('New-order sound unlocked');
+	  }).catch(err => {
+		console.warn('Audio unlock failed:', err);
+	  });
+	}
 
-		let lastSeenCreatedAt = null;
-		let firstLoadDone = false;
+	document.addEventListener('click', unlockAudioOnce);
+	document.addEventListener('keydown', unlockAudioOnce);
 
-		function showNewOrderToast(message) {
-		  const toast = document.createElement('div');
-		  toast.className = 'new-order-toast';
-		  toast.textContent = message;
-		  document.body.appendChild(toast);
+	// Show a banner with Acknowledge button when there are unacknowledged orders
+	function showNewOrderBanner() {
+	  const count = unacknowledgedOrders.size;
+	  if (!count) return;
 
-		  // fade in
-		  requestAnimationFrame(() => toast.classList.add('show'));
+	  let banner = document.getElementById('new-order-banner');
+	  if (!banner) {
+		banner = document.createElement('div');
+		banner.id = 'new-order-banner';
+		banner.className = 'new-order-banner';
+		document.body.appendChild(banner);
+	  }
 
-		  // remove after 4 seconds
-		  setTimeout(() => {
-			toast.classList.remove('show');
-			setTimeout(() => toast.remove(), 250);
-		  }, 4000);
+	  const text = count === 1
+		? '1 new order awaiting acknowledgement'
+		: `${count} new orders awaiting acknowledgement`;
+
+	  banner.innerHTML = `
+		<span>🔔 ${text}</span>
+		<button type="button" id="ack-new-orders-btn">Acknowledge</button>
+	  `;
+
+	  const btn = document.getElementById('ack-new-orders-btn');
+	  if (btn) {
+		btn.onclick = acknowledgeNewOrders;
+	  }
+	}
+
+	function acknowledgeNewOrders() {
+	  // Mark all as acknowledged for this session
+	  unacknowledgedOrders.forEach((order) => {
+		acknowledgedOrderIds.add(order.id);
+	  });
+	  unacknowledgedOrders.clear();
+
+	  const banner = document.getElementById('new-order-banner');
+	  if (banner) banner.remove();
+	}
+
+	// Handle brand new orders + repeat alerts for unacknowledged ones
+	function handleNewOrders(newOrders) {
+	  // 1) Add any *brand new* orders into the unacknowledged set
+	  (newOrders || []).forEach(o => {
+		if (!acknowledgedOrderIds.has(o.id)) {
+		  unacknowledgedOrders.set(o.id, o);
 		}
+	  });
 
-		function handleNewOrders(newOrders) {
-		  if (!newOrders.length) return;
+	  // 2) If there are NO unacknowledged orders, nothing to do
+	  if (unacknowledgedOrders.size === 0) return;
 
-		  const audio = document.getElementById('new-order-sound');
-		  if (audio && audioUnlocked) {
-			audio.play().catch(err => {
-			  console.warn('New-order sound play failed:', err);
-			});
-		  }
+	  // 3) Play sound (if unlocked)
+	  const audio = document.getElementById('new-order-sound');
+	  if (audio && audioUnlocked) {
+		audio.play().catch(err => {
+		  console.warn('New-order sound play failed:', err);
+		});
+	  }
 
-		  const first = newOrders[0];
-		  const rtkRef = first.order_ref || `RTK-${String(first.id).slice(0, 8)}`;
-		  showNewOrderToast(`New order received: ${rtkRef}`);
-		}
+	  // 4) Show / update banner
+	  showNewOrderBanner();
+	}
+	
+	function sumTotal(order) {
+  // Safely sum subtotal + delivery fee
+  const subtotal = Number(order.subtotal || 0);
+  const delivery = Number(order.delivery_fee || 0);
+  return subtotal + delivery;
+}
+
+function fmtDate(value) {
+  if (!value) return '—';
+  try {
+    return new Date(value).toLocaleString('en-GB', {
+      dateStyle: 'short',
+      timeStyle: 'short'
+    });
+  } catch (e) {
+    console.warn('Bad date value:', value, e);
+    return String(value);
+  }
+}
+
+function fmtMoney(value) {
+  const num = Number(value || 0);
+  try {
+    return new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency: 'GBP',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(num);
+  } catch (e) {
+    console.warn('Bad money value:', value, e);
+    return `£${num.toFixed(2)}`;
+  }
+}
+
+function buildDetailsHTML(o){
+  const c = o.customers || {};
+
+  // RTK ref: use order_ref if present, else fallback to short UUID
+  const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
+
+  const lines = (o.order_items || []).map(item => {
+    const mods = (item.modifiers || []).map(m => m.name).join(', ');
+    const spice = (item.spice == null)
+      ? ''
+      : (' '.repeat(1) + '🌶️'.repeat(Math.max(0, Math.min(3, Number(item.spice)))));
+    const modsFrag = mods ? `<div class="small muted">Mods: ${mods}</div>` : '';
+    const img = item.img
+      ? `<img src="${item.img}" alt="${item.name}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #eee;margin-right:8px">`
+      : '';
+
+    return `
+      <div class="line">
+        <div style="display:flex;align-items:center;gap:8px">
+          ${img}
+          <div>
+            <div><strong>${item.name}</strong> × ${item.qty}${spice}</div>
+            ${modsFrag}
+          </div>
+        </div>
+        <div><strong>${fmtMoney(Number(item.unit_price) * Number(item.qty))}</strong></div>
+      </div>
+    `;
+  }).join('');
+
+  const addr = [c.address].filter(Boolean).join('<br>');
+
+  return `
+    <div class="grid" style="margin-bottom:8px">
+      <div>
+        <div class="muted small">Customer</div>
+        <div><strong>${c.full_name || '—'}</strong></div>
+        <div class="small">${c.phone || ''}</div>
+        <div class="small">${c.email || ''}</div>
+      </div>
+      <div>
+        <div class="muted small">Address</div>
+        <div class="small">${addr || '—'}</div>
+      </div>
+      <div>
+        <div class="muted small">Order</div>
+        <div class="small"><strong>RTK Ref:</strong> ${rtkRef}</div>
+        <div class="small">Type: <strong>${(o.order_type || 'collection').toUpperCase()}</strong></div>
+        <div class="small">Subtotal: ${fmtMoney(o.subtotal)}</div>
+        <div class="small">Delivery: ${fmtMoney(o.delivery_fee)}</div>
+        <div class="small"><strong>Total: ${fmtMoney(sumTotal(o))}</strong></div>
+      </div>
+    </div>
+    <div class="muted small">Notes: ${o.notes ? o.notes : '—'}</div>
+    <div style="margin-top:10px;border-top:1px dashed #eee;padding-top:10px">
+      ${lines || '<div class="muted small">No items.</div>'}
+    </div>
+  `;
+}
 
 
 	
-	// ---------- Helpers ----------
-    const fmtMoney = v => '£' + (Math.round(Number(v || 0)*100)/100).toFixed(2);
-    const sumTotal = (o) => Number(o.subtotal || 0) + Number(o.delivery_fee || 0);
-    const fmtDate = iso => {
-      try { const d = new Date(iso); return d.toLocaleString(); } catch { return iso || ''; }
-    };
-    function csvEscape(val){
-      if(val == null) return '';
-      const s = String(val);
-      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
-        return '"' + s.replace(/"/g,'""') + '"';
-      }
-      return s;
-    }
+// ---------- Render ----------
+const tbody = document.getElementById('tbody');
+const empty = document.getElementById('empty');
 
-    // ---------- Fetch ----------
-    async function fetchOrders(){
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          id, order_ref, created_at, subtotal, delivery_fee, order_type, notes,
-          customers:customers ( full_name, email, phone, address ),
-          order_items ( id, name, qty, unit_price, modifiers, spice, img )
-        `)
-        .order('created_at', { ascending:false })
-        .limit(200);
-      if(error){
-        console.error('Fetch orders error', error);
-        return [];
-      }
-      return data || [];
-    }
+function render(orders){
+  tbody.innerHTML = '';
 
-    // ---------- Render ----------
-    const tbody = document.getElementById('tbody');
-    const empty = document.getElementById('empty');
+  if (!orders.length) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
 
-    function render(orders){
-      tbody.innerHTML = '';
-      if(!orders.length){
-        empty.style.display = 'block';
-        return;
-      }
-      empty.style.display = 'none';
+  orders.forEach(o => {
+    const tr = document.createElement('tr');
+    tr.className = 'row';
 
-      orders.forEach(o => {
-        const tr = document.createElement('tr'); tr.className = 'row';
-        const customer = o.customers || {};
-        const total = sumTotal(o);
-				
-		// Fallback if order_ref is null: show first 8 chars of the UUID
-		const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
+    const customer = o.customers || {};
+    const total = sumTotal(o);
 
+    // RTK ref for this order
+    const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
 
-        tr.innerHTML = `
-		  <td class="mono">${rtkRef}</td>            <!-- RTK Ref -->
-		 <!-- <td class="mono">#${o.id}</td> -->            <!-- Supabase order ID -->
-		  <td>${fmtDate(o.created_at)}</td>          <!-- Date -->
-		  <td>
-			<div><strong>${customer.full_name || '—'}</strong></div>
-			<div class="small muted">${customer.phone || ''}</div>
-		  </td>
-		  <td><span class="pill">${(o.order_type || 'collection').toUpperCase()}</span></td>
-		  <td class="nowrap">${fmtMoney(o.subtotal)}</td>
-		  <td class="nowrap">${fmtMoney(o.delivery_fee)}</td>
-		  <td class="nowrap"><strong>${fmtMoney(total)}</strong></td>
-		  <td class="actions">
-			<button class="btn" data-action="toggle">Details</button>
-			<button class="btn" data-action="print">Print ticket</button>
-		  </td>
-		`;
+    tr.innerHTML = `
+      <td class="mono">${rtkRef}</td>
+      <td class="mono">#${o.id}</td>
+      <td>${fmtDate(o.created_at)}</td>
+      <td>
+        <div><strong>${customer.full_name || '—'}</strong></div>
+        <div class="small muted">${customer.phone || ''}</div>
+      </td>
+      <td><span class="pill">${(o.order_type || 'collection').toUpperCase()}</span></td>
+      <td class="nowrap">${fmtMoney(o.subtotal)}</td>
+      <td class="nowrap">${fmtMoney(o.delivery_fee)}</td>
+      <td class="nowrap"><strong>${fmtMoney(total)}</strong></td>
+      <td class="actions">
+        <button class="btn" data-action="toggle">Details</button>
+        <button class="btn" data-action="print">Print ticket</button>
+      </td>
+    `;
 
+    // --- details row (needs its own <tr> and <td>) ---
+    const details = document.createElement('div');
+    details.className = 'details';
+    details.innerHTML = buildDetailsHTML(o);
 
-        // details row
-        const details = document.createElement('div');
-        details.className = 'details';
-        details.innerHTML = buildDetailsHTML(o);
-        const detailsRow = document.createElement('tr');
-        const detailsCell = document.createElement('td');
-        detailsCell.colSpan = 9;
-        detailsCell.appendChild(details);
-        detailsRow.appendChild(detailsCell);
+    const detailsRow = document.createElement('tr');
+    const detailsCell = document.createElement('td');
+    detailsCell.colSpan = 9;              // 9 columns in main row
+    detailsCell.appendChild(details);
+    detailsRow.appendChild(detailsCell);
 
-        // actions
-        tr.querySelector('[data-action="toggle"]').addEventListener('click', () => {
-          details.style.display = (details.style.display === 'block') ? 'none' : 'block';
-        });
-        tr.querySelector('[data-action="print"]').addEventListener('click', () => {
-          printTicket(o);
-        });
+    // --- actions on the main row buttons ---
+    tr.querySelector('[data-action="toggle"]').addEventListener('click', () => {
+      details.style.display = (details.style.display === 'block') ? 'none' : 'block';
+    });
 
-        tbody.appendChild(tr);
-        tbody.appendChild(detailsRow);
-      });
-    }
+    tr.querySelector('[data-action="print"]').addEventListener('click', () => {
+      printTicket(o);
+    });
 
-			function buildDetailsHTML(o){
-		  const c = o.customers || {};
-
-		  // ✅ RTK ref: use order_ref if present, else fallback to short UUID
-		  const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
-
-		  const lines = (o.order_items || []).map(item => {
-			const mods = (item.modifiers || []).map(m => m.name).join(', ');
-			const spice = (item.spice == null)
-			  ? ''
-			  : (' '.repeat(1) + '🌶️'.repeat(Math.max(0, Math.min(3, Number(item.spice)))));
-			const modsFrag = mods ? `<div class="small muted">Mods: ${mods}</div>` : '';
-			const img = item.img
-			  ? `<img src="${item.img}" alt="${item.name}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #eee;margin-right:8px">`
-			  : '';
-
-			return `
-			  <div class="line">
-				<div style="display:flex;align-items:center;gap:8px">
-				  ${img}
-				  <div>
-					<div><strong>${item.name}</strong> × ${item.qty}${spice}</div>
-					${modsFrag}
-				  </div>
-				</div>
-				<div><strong>${fmtMoney(Number(item.unit_price) * Number(item.qty))}</strong></div>
-			  </div>
-			`;
-		  }).join('');
-
-		  const addr = [c.address].filter(Boolean).join('<br>');
-
-		  return `
-			<div class="grid" style="margin-bottom:8px">
-			  <div>
-				<div class="muted small">Customer</div>
-				<div><strong>${c.full_name || '—'}</strong></div>
-				<div class="small">${c.phone || ''}</div>
-				<div class="small">${c.email || ''}</div>
-			  </div>
-			  <div>
-				<div class="muted small">Address</div>
-				<div class="small">${addr || '—'}</div>
-			  </div>
-			  <div>
-				<div class="muted small">Order</div>
-				<div class="small"><strong>RTK Ref:</strong> ${rtkRef}</div>
-				<div class="small">Type: <strong>${(o.order_type || 'collection').toUpperCase()}</strong></div>
-				<div class="small">Subtotal: ${fmtMoney(o.subtotal)}</div>
-				<div class="small">Delivery: ${fmtMoney(o.delivery_fee)}</div>
-				<div class="small"><strong>Total: ${fmtMoney(sumTotal(o))}</strong></div>
-			  </div>
-			</div>
-			<div class="muted small">Notes: ${o.notes ? o.notes : '—'}</div>
-			<div style="margin-top:10px;border-top:1px dashed #eee;padding-top:10px">
-			  ${lines || '<div class="muted small">No items.</div>'}
-			</div>
-		  `;
-		}
-
-
-    // ---------- Print ticket ----------
-   function printTicket(order) {
-  const w = window.open('', '_blank', 'width=600,height=800');
-  const c = order.customers || {};
-  const total = sumTotal(order);
-
-  // ✅ RTK Ref defined BEFORE printing
-  const rtkRef = order.order_ref || `RTK-${String(order.id).slice(0, 8)}`;
-
-  w.document.write(`
-    <html>
-      <head>
-        <title>RTK Ticket ${rtkRef}</title>
-        <style>
-		  body {
-			font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-			font-size: 16px;       /* 🔥 bigger main text */
-			margin: 16px;
-		  }
-		  h1 {
-			font-size: 22px;       /* 🔥 bigger heading */
-			margin: 0 0 6px;
-		  }
-		  .muted {
-			color: #666;
-			font-size: 14px;       /* 🔥 increased muted text */
-		  }
-		  .section {
-			margin-top: 14px;
-			font-size: 16px;       /* match body for readability */
-		  }
-		  .items {
-			margin-top: 12px;
-			border-top: 1px dashed #ccc;
-			padding-top: 10px;
-		  }
-		</style>
-
-      </head>
-      <body>
-        <h1>Rung's Thai Kitchen</h1>
-        <div class="muted">Kitchen ticket</div>
-
-        <div class="section">
-          <div><strong>RTK Ref:</strong> ${rtkRef}</div>
-          <div><strong>Order ID:</strong> #${order.id}</div>
-          <div><strong>Date:</strong> ${fmtDate(order.created_at)}</div>
-          <div><strong>Type:</strong> ${(order.order_type || 'collection').toUpperCase()}</div>
-        </div>
-
-        <div class="section">
-          <div><strong>Customer:</strong> ${c.full_name || '—'}</div>
-          <div><strong>Phone:</strong> ${c.phone || ''}</div>
-          <div><strong>Address:</strong> ${c.address || '—'}</div>
-          ${order.notes ? `<div><strong>Notes:</strong> ${order.notes}</div>` : ''}
-        </div>
-
-        <div class="section items">
-          ${buildDetailsHTML(order)}
-        </div>
-
-        <div class="section">
-          <strong>Total:</strong> ${fmtMoney(total)}
-        </div>
-      </body>
-    </html>
-  `);
-
-  w.document.close();
-  w.focus();
-  w.print();
+    // append both the main row and the details row
+    tbody.appendChild(tr);
+    tbody.appendChild(detailsRow);
+  });
 }
 
 
 
+	// --- LOAD + RENDER WITH NEW-ORDER DETECTION ------------------------
 
-    // ---------- CSV export ----------
-    function exportCSV(current){
-      const headers = [
-        'id','created_at','customer_name','customer_email','customer_phone','address',
-        'order_type','subtotal','delivery_fee','total','notes'
-      ];
-      const rows = current.map(o => {
-        const c = o.customers || {};
-        return [
-          o.id,
-          o.created_at,
-          c.full_name || '',
-          c.email || '',
-          c.phone || '',
-          (c.address || '').replace(/\r?\n/g,' '),
-          o.order_type || 'collection',
-          Number(o.subtotal || 0).toFixed(2),
-          Number(o.delivery_fee || 0).toFixed(2),
-          sumTotal(o).toFixed(2),
-          (o.notes || '').replace(/\r?\n/g,' ')
-        ].map(csvEscape).join(',');
-      });
-      const csv = [headers.join(','), ...rows].join('\n');
-      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `orders_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+	async function loadAndRender() {
+	  const { data: orders, error } = await supabase
+		.from('orders')
+		.select(`
+		  id,
+		  order_ref,
+		  created_at,
+		  order_type,
+		  subtotal,
+		  delivery_fee,
+		  notes,
+		  customers (
+			full_name,
+			phone,
+			email,
+			address
+		  ),
+		  order_items (
+			*
+		  )
+		`)
+		.order('created_at', { ascending: false });
 
-    // ---------- Realtime ----------
-    let currentOrders = [];
-		   async function loadAndRender() {
-		  const { data: orders, error } = await supabase
-			.from('orders')
-			.select(`
-			  id,
-			  order_ref,
-			  created_at,
-			  order_type,
-			  subtotal,
-			  delivery_fee,
-			  notes,
-			  customers (
-				full_name,
-				phone,
-				email,
-				address
-			  ),
-			  order_items (
-				*    
-			  )
-			`)
-			.order('created_at', { ascending: false });
+	  if (error) {
+		console.error('Error loading orders', error);
+		return;
+	  }
+	  if (!orders) return;
 
-		  if (error) {
-			console.error('Error loading orders', error);
-			return;
-		  }
-		  if (!orders) return;
+	  if (!firstLoadDone) {
+		// First load: treat all existing orders as already acknowledged
+		if (orders.length) {
+		  lastSeenCreatedAt = orders[0].created_at;
+		  orders.forEach(o => acknowledgedOrderIds.add(o.id));
+		}
+		firstLoadDone = true;
+	  } else if (orders.length) {
+		const newestTime = new Date(orders[0].created_at);
+		const prevTime = lastSeenCreatedAt ? new Date(lastSeenCreatedAt) : null;
 
-		  // --- detect new orders (keep this part as you already have it) ---
-		  if (firstLoadDone && orders.length) {
-			const newestTime = new Date(orders[0].created_at);
-			const prevTime = lastSeenCreatedAt ? new Date(lastSeenCreatedAt) : null;
-
-			const newOnes = prevTime
-			  ? orders.filter(o => new Date(o.created_at) > prevTime)
-			  : [];
-
-			if (newOnes.length > 0) {
-			  handleNewOrders(newOnes);
-			}
-		  }
-
-		  if (orders.length) {
-			lastSeenCreatedAt = orders[0].created_at;
-		  }
-		  firstLoadDone = true;
-
-		  render(orders);
+		let newOnes = [];
+		if (prevTime) {
+		  newOnes = orders.filter(o => new Date(o.created_at) > prevTime);
 		}
 
+		// Always call, so unacknowledged orders keep triggering alerts
+		handleNewOrders(newOnes);
 
+		if (orders.length) {
+		  lastSeenCreatedAt = orders[0].created_at;
+		}
+	  }
 
-    document.getElementById('refresh').addEventListener('click', loadAndRender);
-    document.getElementById('export').addEventListener('click', () => exportCSV(currentOrders));
+	  // Your existing render function
+	  render(orders);
+	}
 
-    // Listen for new/updated orders & items
-    const channel = supabase.channel('orders-stream')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
-        // Simple strategy: re-fetch on INSERT/UPDATE/DELETE
-        loadAndRender();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, payload => {
-        loadAndRender();
-      })
-      .subscribe();
+	// Initial load
+	loadAndRender();
 
+	// Poll every 15 seconds
+	setInterval(loadAndRender, 15000);
 
-		// Initial load
-		loadAndRender();
-
-		// Poll every 15 seconds (tweak if you like)
-		setInterval(loadAndRender, 15000);
 
   </script>
 
