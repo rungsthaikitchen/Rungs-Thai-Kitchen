@@ -2120,6 +2120,20 @@ body.menu-open .menu-fab {
           <div class="muted small">Total</div>
           <div id="checkout-total" style="font-weight:800">£0.00</div>
         </div>
+		<div class="checkout-section">
+	  <h3>How would you like to pay?</h3>
+	  <div class="payment-preference-options">
+		<label>
+		  <input type="radio" name="paymentPreference" value="in_advance" checked>
+		  Pay in advance (we’ll send you a secure payment link)
+		</label>
+		<label>
+		  <input type="radio" name="paymentPreference" value="on_arrival">
+		  Pay on collection/delivery
+		</label>
+	  </div>
+	</div>
+
 
         <div class="checkout-actions" style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px;position:sticky;bottom:0;background:#fff;padding-top:8px">
           <button type="button" id="checkout-cancel" class="btn btn-ghost">Cancel</button>
@@ -2273,58 +2287,58 @@ const EXTRAS = [
     // ---------- Data ----------
     const MENU_CATEGORIES = [
       { id:'starters', title:'Starter', allowExtras:false, items:[
-        { id: 'veg-spring-rolls', name: 'Vegetable Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of glass noodles and vegetables, served with a sweet chilli sauce.', price: 5.50, img: 'images/SpringRoll.jpg',  allergens: ['gluten'] },
+        { id: 'veg-spring-rolls', name: 'Vegetable Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of glass noodles and vegetables, served with a sweet chilli sauce.', price: 5.50, img: 'images/SpringRoll.jpg',  allergens: ['gluten', 'soya','molluscs','mustard','celery'] },
         { id: 'chicken-satay', name: 'Chicken Satay', desc: 'Tender chicken pieces marinated in a fragrant blend of turmeric, lemongrass, and spices. Served with a peanut sauce.', price: 6.50, img: 'images/Satay.jpg', allergens: ['peanuts','soya','mustard'] },
         { id: 'prawn-crackers', name: 'Prawn Crackers', desc: 'A light and crispy snack made from tapioca flour, shrimp, and seasonings. Served with sweet chilli sauce.', price: 2.50, img: 'images/PrawnCrackers.jpg', allergens: ['shellfish','gluten'] },
-        { id: 'moo-ping', name: 'Pork Skewer (Moo Ping)', desc: 'Thai grilled pork skewers marinated in a sweet and savoury sauce.', price: 6.50, img: 'images/mooping.jpg', allergens: [] },
-        { id: 'chicken-spring-rolls', name: 'Chicken Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of meat, glass noodles, and vegetables, served with a sweet chilli sauce.', price: 6.00, img: 'images/SpringRoll.jpg',  allergens: ['gluten'] },
-        { id: 'fried-tofu', name: 'Deep Fried Tofu', desc: 'Crispy Thai Fried Tofu with a sweet-spicy Thai peanut sauce!', price: 4.50, img: 'images/DeepFriedTofu.jpg', allergens: ['soya','peanuts','sesame'] },
-        { id: 'fish-cakes', name: 'Thai Fish Cakes', desc: 'Flavourful, bite-sized fritters with a blend of savoury, spicy, and tangy flavours.', price: 6.00, img: 'images/thaifishcakesjpg.jpg',spiceEnabled: true, spiceDefault: 1, allergens: ['fish','egg','soya'] },
+        { id: 'moo-ping', name: 'Pork Skewer (Moo Ping)', desc: 'Thai grilled pork skewers marinated in a sweet and savoury sauce.', price: 6.50, img: 'images/mooping.jpg', allergens: ['fish','soya','dairy'] },
+        { id: 'chicken-spring-rolls', name: 'Chicken Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of meat, glass noodles, and vegetables, served with a sweet chilli sauce.', price: 6.00, img: 'images/SpringRoll.jpg',  allergens: ['gluten', 'soya','molluscs','mustard','celery'] },
+        { id: 'fried-tofu', name: 'Deep Fried Tofu', desc: 'Crispy Thai Fried Tofu with a sweet-spicy Thai peanut sauce!', price: 4.50, img: 'images/DeepFriedTofu.jpg', allergens: ['soya','peanuts'] },
+        { id: 'fish-cakes', name: 'Thai Fish Cakes', desc: 'Flavourful, bite-sized fritters with a blend of savoury, spicy, and tangy flavours.', price: 6.00, img: 'images/thaifishcakesjpg.jpg',spiceEnabled: true, spiceDefault: 1, allergens: ['fish','egg'] },
         { id: 'porkprawn-dumplings', name: 'Pork & Prawn Steamed Dumplings', desc: 'Steamed dumplings filled with a savoury combination of tender pork and juicy prawns.', price: 6.00, img: 'images/dumplings.jpg', allergens: ['gluten','shellfish'] },
-        { id: 'fried-prawns', name: 'Deep Fried Tiger Prawns (x4)', desc: 'Tiger Prawns cooked in a crispy tempura batter served with authentic Thai sweet Chilli Sauce.', price: 6.50, img: 'images/Prawns.jpg',  allergens: ['shellfish','gluten','egg'] },
+        { id: 'fried-prawns', name: 'Deep Fried Tiger Prawns (x4)', desc: 'Tiger Prawns cooked in a crispy tempura batter served with authentic Thai sweet Chilli Sauce.', price: 6.50, img: 'images/Prawns.jpg',  allergens: ['shellfish','gluten'] },
         { id: 'thai-sausage', name: 'Thai Pork Sausage', desc: 'A traditional fermented Thai sausage made with ground pork, sticky rice, and fragrant seasonings. Served with fresh sliced ginger, whole peanuts and slices of cucumber.', price: 6.50, img: 'images/sausage.jpg', allergens: [] },
-		{ id: 'spare-ribs', name: 'Thai Spare Ribs (Sii Khrong Moo Yang)', desc: 'Tender ribs with a sweet, salty and savoury flavour. Served with a sticky carmelised glaze.', price: 7.50, img: 'images/spareribs.jpg', allergens: ['sesame'] }
+		{ id: 'spare-ribs', name: 'Thai Spare Ribs (Sii Khrong Moo Yang)', desc: 'Tender ribs with a sweet, salty and savoury flavour. Served with a sticky carmelised glaze.', price: 7.50, img: 'images/spareribs.jpg', allergens: ['soya','gluten','molluscs','sesame'] }
       ]},
       { id:'soup', title:'Soup', allowExtras:true, items:[
         { id: 'tom-yum', name: 'Tom Yum Soup 🌶️🌶️', desc: 'A vibrant and aromatic Thai classic featuring a hot and sour clear broth infused with lemongrass, galangal, and kaffir lime leaves.', price: 5.50, img: 'images/TomYum.jpg', allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'], allowedExtras: ['extra-chicken','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'tom-kha', name: 'Tom Kha🌶️', desc: 'A creamy and aromatic Thai coconut soup featuring fragrant galangal, lemongrass, and kaffir lime leaves.', price: 5.50, img: 'images/TomKha.jpg', allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','dairy'], allowedExtras: ['extra-chicken','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'dumpling-broth', name: 'Chicken Steamed Dumplings Broth (Gaew Naam)', desc: 'A savoury and flavourful broth with fragrant chicken-stuffed wontons.', price: 6.00, img: 'images/GaewNam.jpg', allergens: ['gluten','egg','soya'], allowedExtras: [''] }
+        { id: 'tom-kha', name: 'Tom Kha🌶️', desc: 'A creamy and aromatic Thai coconut soup featuring fragrant galangal, lemongrass, and kaffir lime leaves.', price: 5.50, img: 'images/TomKha.jpg', allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','soya'], allowedExtras: ['extra-chicken','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'dumpling-broth', name: 'Chicken Steamed Dumplings Broth (Gaew Naam)', desc: 'A savoury and flavourful broth with fragrant chicken-stuffed wontons.', price: 6.00, img: 'images/GaewNam.jpg', allergens: ['gluten','soya','celery'], allowedExtras: [''] }
       ]},
       { id:'salad',    title:'Salad',   allowExtras:true,  items:[
-        { id: 'papaya-salad', name: 'Green Papaya Salad (Som Tam)🌶️🌶️🌶️', desc: 'A spicy, savoury, and sweet Thai salad made primarily of shredded green papaya.', price: 7.00, img: 'images/somtam.jpg', spiceEnabled: true, spiceDefault: 3, allergens: ['peanuts','fish','soya'], allowedExtras: ['extra-prawn'] },
-        { id: 'beef-salad', name: 'Spicy Beef Salad (Yum Nuea)🌶️🌶️', desc: 'A classic Thai salad with grilled sirloin steak (cooked mediun - please advise in the checkout comments if you would prefer it cooked differently), tossed with crisp vegetables, fresh mint, coriander, and a tangy lime-fish sauce dressing.', price: 9.50, img: 'images/ymbeef.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'], allowedExtras: ['extra-beef'] },
+        { id: 'papaya-salad', name: 'Green Papaya Salad (Som Tam)🌶️🌶️🌶️', desc: 'A spicy, savoury, and sweet Thai salad made primarily of shredded green papaya.', price: 7.00, img: 'images/somtam.jpg', spiceEnabled: true, spiceDefault: 3, allergens: ['peanuts','fish'], allowedExtras: ['extra-prawn'] },
+        { id: 'beef-salad', name: 'Spicy Beef Salad (Yum Nuea)🌶️🌶️', desc: 'A classic Thai salad with grilled sirloin steak (cooked mediun - please advise in the checkout comments if you would prefer it cooked differently), tossed with crisp vegetables, fresh mint, coriander, and a tangy lime-fish sauce dressing.', price: 9.50, img: 'images/ymbeef.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish','celery','soya'], allowedExtras: ['extra-beef'] },
         { id: 'pork-salad', name: 'Grilled Pork Salad (Nam Tok)🌶️', desc: 'This classic North-eastern Thai salad features smoky, charred grilled pork slices tossed with a fiery dressing of lime, fish sauce, and chili flakes.', price: 8.50, img: 'images/porksalad.jpg', spiceEnabled: true, spiceDefault: 1, allergens: ['fish'], allowedExtras: ['extra-pork'] },
-        { id: 'laab', name: 'Laab🌶️🌶️', desc: 'A vibrant and flavourful meat salad known for its harmony of spicy, sour, salty, and savoury flavours.', price: 7.50, img: 'images/Larb.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish'], allowedExtras: ['extra-pork'] }
+        { id: 'laab', name: 'Laab🌶️🌶️', desc: 'A vibrant and flavourful meat salad known for its harmony of spicy, sour, salty, and savoury flavours.', price: 7.50, img: 'images/Larb.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish',',soya'], allowedExtras: ['extra-pork'] }
       ]},
       { id:'curry',    title:'Curry',   allowExtras:true,  items:[
-        { id: 'rung-curry', name: 'Chefs Special Rainbow Curry🌶️', desc: 'Chef Rungs special curry. Rich and mildly spiced curry, this is a real crowd pleaser!', price: 8.00, img: 'images/rainbowcurry.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','soya'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'green-curry', name: 'Green Curry🌶️🌶️', desc: 'A vibrant green curry sauce with creamy coconut milk, peppers, courgette,green beans and fresh Thai basil.', price: 8.00, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, img: 'images/greencurry.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'red-curry', name: 'Red Curry🌶️', desc: 'A medium-spiced, savoury, and creamy Thai dish featuring a rich red chili-based paste in coconut milk.', price: 8.00, img: 'images/redcurry.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','soya'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'massaman-curry', name: 'Massaman Curry', desc: 'Made with a unique blend of spices like cinnamon and cardamom, combined with coconut milk, potatoes, and peanuts.', price: 8.00, img: 'images/massaman.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1,spiceEnabled: true, spiceDefault: 0, allergens: ['peanuts','fish','soya'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'panang-curry', name: 'Paneng Curry🌶️', desc: 'Flavored with a fragrant curry paste that includes lemongrass, galangal, and kaffir lime leaves, this is a rich and creamy curry!', price: 8.00, img: 'images/paneng.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1,spiceEnabled: true, spiceDefault: 1, allergens: ['fish','soya'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] }
+        { id: 'rung-curry', name: 'Chefs Special Rainbow Curry🌶️', desc: 'Chef Rungs special curry. Rich and mildly spiced curry, this is a real crowd pleaser!', price: 8.00, img: 'images/rainbowcurry.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['gluten','celery','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'green-curry', name: 'Green Curry🌶️🌶️', desc: 'A vibrant green curry sauce with creamy coconut milk, peppers, courgette,green beans and fresh Thai basil.', price: 8.00, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, img: 'images/greencurry.jpg', spiceEnabled: true, spiceDefault: 2, allergens: [], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'red-curry', name: 'Red Curry🌶️', desc: 'A medium-spiced, savoury, and creamy Thai dish featuring a rich red chili-based paste in coconut milk.', price: 8.00, img: 'images/redcurry.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: [], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'massaman-curry', name: 'Massaman Curry', desc: 'Made with a unique blend of spices like cinnamon and cardamom, combined with coconut milk, potatoes, and peanuts.', price: 8.00, img: 'images/massaman.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1,spiceEnabled: true, spiceDefault: 0, allergens: [], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'panang-curry', name: 'Paneng Curry🌶️', desc: 'Flavored with a fragrant curry paste that includes lemongrass, galangal, and kaffir lime leaves, this is a rich and creamy curry!', price: 8.00, img: 'images/paneng.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1,spiceEnabled: true, spiceDefault: 1, allergens: [], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] }
       ]},
       { id:'stir-fry', title:'Stir Fry',allowExtras:true,  items:[
-        { id: 'stir-basil', name: 'Stir Fried Chilli & Basil (Pad Kra Pao)🌶️🌶️', desc: 'Street food classic, its a spicy, savoury Thai stir-fry of usually minced meat with garlic, chilies, and holy basil', price: 8.50, img: 'images/Kaprow.jpeg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-tofu','extra-veg','extra-egg'] },
-        { id: 'stir-ginger', name: 'Stir Fried Ginger (Pad Khing)🌶️', desc: 'A stir-fried dish flavoured with fresh ginger, spring onions, onions, mushrooms and chilli.', price: 8.00, img: 'images/padkhing.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['soya'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'stir-cashew', name: 'Stir Fried Cashew Nuts', desc: 'A vibrant and flavorful stir-fry featuring crisp vegetables tossed in a savoury sauce. Finished with the rich, buttery crunch of toasted cashew nuts', price: 8.50, img: 'images/cashew.jpg', allowedModifiers: ['batter-chicken','tofu','vegetable' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['tree_nuts','soya','sesame'], allowedExtras: ['extra-bchicken','extra-tofu','extra-veg'] },
+        { id: 'stir-basil', name: 'Stir Fried Chilli & Basil (Pad Kra Pao)🌶️🌶️', desc: 'Street food classic, its a spicy, savoury Thai stir-fry of usually minced meat with garlic, chilies, and holy basil', price: 8.50, img: 'images/Kaprow.jpeg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','gluten','molluscs'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-tofu','extra-veg','extra-egg'] },
+        { id: 'stir-ginger', name: 'Stir Fried Ginger (Pad Khing)🌶️', desc: 'A stir-fried dish flavoured with fresh ginger, spring onions, onions, mushrooms and chilli.', price: 8.00, img: 'images/padkhing.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['soya','gluten','celery','mustard','shellfish'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'stir-cashew', name: 'Stir Fried Cashew Nuts', desc: 'A vibrant and flavorful stir-fry featuring crisp vegetables tossed in a savoury sauce. Finished with the rich, buttery crunch of toasted cashew nuts', price: 8.50, img: 'images/cashew.jpg', allowedModifiers: ['batter-chicken','tofu','vegetable' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['tree_nuts','soya','sesame','celery','mustard','shellfish'], allowedExtras: ['extra-bchicken','extra-tofu','extra-veg'] },
         { id: 'stir-sweetsour', name: 'Sweet & Sour (Pad Priew Wan)', desc: 'Thai sweet and sour stir-fry dish featuring vegetables such as cucumber, tomatoes, onions, and bell peppers in a tangy, sweet, and savoury sauce.', price: 8.00, img: 'images/sweetsour.jpg', allowedModifiers: ['batter-chicken','tofu','vegetable' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['soya'], allowedExtras: ['extra-bchicken','extra-tofu','extra-veg'] },
-        { id: 'stir-yellow', name: 'Stir Fried Yellow Curry (Pad Pong Karee)', desc: 'Thai stir-fry dish made with a flavourful, savoury sauce of yellow curry powder, coconut milk, and egg, mixed with vegetables such as onions, bell peppers, and green onions', price: 8.00, img: 'images/padpong.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','soya','mustard','dairy'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'stir-chilli', name: 'Stir Fried Chilli Paste (Pad Nam Prik Pao)🌶️🌶️', desc: 'A medium stir-fry, but dont let the chilli paste alarm you, it is not too spicy!', price: 8.00, img: 'images/padnamprikpao.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'stir-pepper', name: 'Stir Fried Black Pepper Sauce', desc: 'A bold and aromatic Thai-style stir-fry featuring crisp vegetables wok-tossed in a black pepper sauce. ', price: 7.50, img: 'images/blackpepper.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['soya'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] }
+        { id: 'stir-yellow', name: 'Stir Fried Yellow Curry (Pad Pong Karee)', desc: 'Thai stir-fry dish made with a flavourful, savoury sauce of yellow curry powder, coconut milk, and egg, mixed with vegetables such as onions, bell peppers, and green onions', price: 8.00, img: 'images/padpong.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','soya','mustard','dairy','shellfish','celery'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'stir-chilli', name: 'Stir Fried Chilli Paste (Pad Nam Prik Pao)🌶️🌶️', desc: 'A medium stir-fry, but dont let the chilli paste alarm you, it is not too spicy!', price: 8.00, img: 'images/padnamprikpao.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','fish','gluten','mustard','celery'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'stir-pepper', name: 'Stir Fried Black Pepper Sauce', desc: 'A bold and aromatic Thai-style stir-fry featuring crisp vegetables wok-tossed in a black pepper sauce. ', price: 7.50, img: 'images/blackpepper.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['soya','sesame','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] }
       ]},
       { id:'noodles',  title:'Noodles & Rice', allowExtras:true, items:[
-        { id: 'pad-thai', name: 'Pad Thai', desc: 'Balanced flavours using tamarind, fish sauce, and palm sugar accompanying bean sprouts, garlic and chives.', price: 8.00, img: 'images/padthai.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: false, spiceDefault: 0, allergens: ['egg','fish','soya','peanuts'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-		{ id: 'chef-pad-thai', name: 'Chefs Special Pad Thai🌶🌶️', desc: 'Just like the traditional Pad Thai, but with a little extra heat!', price: 8.00, img: 'images/spicypadthai.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','fish','soya','peanuts'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },  
-		{ id: 'pad-kee-mao', name: 'Pad Kee Mao🌶️🌶️', desc: 'Drunken Noodles is a spicy and savory Thai stir-fried noodle dish. It is made with wide rice noodles and a variety of vegetables, stir-fried with a flavorful sauce made from soy, oyster, and fish sauces, and heavily flavored with fresh chilies.', price: 8.00, img: 'images/padkeemao.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-		{ id: 'pad-see-ew', name: 'Thai Stir Fried Noodles (Pad See Ew)', desc: 'Thai stir-fried noodle dish featuring wide, flat rice noodles, Chinese broccoli, and egg, all coated in a savoury, salty-sweet soy sauce', price: 8.00, img: 'images/padseeew.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'fried-rice', name: 'Thai Special Fried Rice (Khao Pad)', desc: 'A classic Thai street food staple. Fragrant jasmine rice wok-fried with egg, onions, and tomatoes, seasoned with fish sauce, soy sauce, and oyster sauce.', price: 7.50, img: 'images/khaopad.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] }
+        { id: 'pad-thai', name: 'Pad Thai', desc: 'Balanced flavours using tamarind, fish sauce, and palm sugar accompanying bean sprouts, garlic and chives.', price: 8.00, img: 'images/padthai.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: false, spiceDefault: 0, allergens: ['egg','fish','peanuts'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+		{ id: 'chef-pad-thai', name: 'Chefs Special Pad Thai🌶🌶️', desc: 'Just like the traditional Pad Thai, but with a little extra heat!', price: 8.00, img: 'images/spicypadthai.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','fish','peanuts'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },  
+		{ id: 'pad-kee-mao', name: 'Pad Kee Mao🌶️🌶️', desc: 'Drunken Noodles is a spicy and savory Thai stir-fried noodle dish. It is made with wide rice noodles and a variety of vegetables, stir-fried with a flavorful sauce made from soy, oyster, and fish sauces, and heavily flavored with fresh chilies.', price: 8.00, img: 'images/padkeemao.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','gluten','shellfish'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+		{ id: 'pad-see-ew', name: 'Thai Stir Fried Noodles (Pad See Ew)', desc: 'Thai stir-fried noodle dish featuring wide, flat rice noodles, Chinese broccoli, and egg, all coated in a savoury, salty-sweet soy sauce', price: 8.00, img: 'images/newpadseeew.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya','gluten','shellfish','celery','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'fried-rice', name: 'Thai Special Fried Rice (Khao Pad)', desc: 'A classic Thai street food staple. Fragrant jasmine rice wok-fried with egg, onions, and tomatoes, seasoned with fish sauce, soy sauce, and oyster sauce.', price: 7.50, img: 'images/khaopad.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya','gluten','shellfish','celery','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] }
       ]},
       { id:'sides',    title:'Side Dishes', allowExtras:false, items:[
         { id: 'jasmine-rice', name: 'Jasmine Rice (Khao Suay)', desc: 'Fragrant, long-grain rice.', price: 2.00, img: 'images/rice.jpg', allergens: [] },
         { id: 'egg-rice', name: 'Egg Fried Rice (Khao Pad Khai)', desc: 'Rice with egg, simple & comforting.', price: 2.50, img: 'images/eggrice.jpg', allergens: ['egg','soya'] },
         { id: 'sticky-rice', name: 'Sticky Rice (Khao Neow)', desc: 'Perfect sticky jasmine rice.', price: 2.50, img: 'images/stickyrice.jpg', allergens: [] },
-        { id: 'coconut-ricee', name: 'Coconut Rice (Khao Man)', desc: 'Jasmine rice simmered in coconut milk.', price: 3.00, img: 'images/coconutrice.jpg', allergens: ['dairy'] },
-		 { id: 'chips', name: 'Chips', desc: 'Deep fried chips. Because sometimes you just need them!', price: 3.00, img: 'images/chips.jpg', allergens: ['dairy'] },
+        { id: 'coconut-ricee', name: 'Coconut Rice (Khao Man)', desc: 'Jasmine rice simmered in coconut milk.', price: 3.00, img: 'images/coconutrice.jpg', allergens: [] },
+		 { id: 'chips', name: 'Chips', desc: 'Deep fried chips. Because sometimes you just need them!', price: 3.00, img: 'images/chips.jpg', allergens: [] },
 		 { id: 'fried-egg', name: 'Fried egg', desc: 'Thai style fried eggs have crispy whites with a soft yolk. But please let us kmow how you like yours', price: 3.00, img: 'images/egg.jpg', allergens: ['egg'] }
       ]}
     ];
@@ -4300,21 +4314,31 @@ checkoutForm.addEventListener('submit', async (e) => {
       orderRef = 'RTK-' + Date.now();
     }
 
-    // 3) Create order (attempt with preferred_time; if column missing, retry without)
-    let orderId = null;
-    const baseOrderPayload = {
-      customer_id: customerId,
-      subtotal: Number(subtotal.toFixed(2)),
-      delivery_fee: Number(deliveryFee.toFixed(2)),
-      order_type: orderType,
-      notes,
-      order_ref: orderRef,
-    };
-    let { data: order, error: orderErr } = await supabase
-      .from('orders')
-      .insert([{ ...baseOrderPayload, preferred_time: preferredTimeISO }])
-      .select('id')
-      .single();
+		   // NEW: Get payment preference from checkout form
+		const paymentPreferenceInput = document.querySelector(
+		  'input[name="paymentPreference"]:checked'
+		);
+		const payment_preference = paymentPreferenceInput
+		  ? paymentPreferenceInput.value
+		  : 'on_arrival';
+
+		// 3) Create order (attempt with preferred_time; if column missing, retry without)
+		let orderId = null;
+		const baseOrderPayload = {
+		  customer_id: customerId,
+		  subtotal: Number(subtotal.toFixed(2)),
+		  delivery_fee: Number(deliveryFee.toFixed(2)),
+		  order_type: orderType,
+		  notes,
+		  order_ref: orderRef,
+		  payment_preference,  // NEW FIELD
+		};
+
+		let { data: order, error: orderErr } = await supabase
+		  .from('orders')
+		  .insert([{ ...baseOrderPayload, preferred_time: preferredTimeISO }])
+		  .select('id')
+		  .single();
 
     if (orderErr && orderErr.code === '42703') {
       const retry = await supabase.from('orders').insert([ baseOrderPayload ]).select('id').single();

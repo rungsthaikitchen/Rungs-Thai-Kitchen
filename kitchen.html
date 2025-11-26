@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kitchen Board – Rung's Thai Kitchen</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0b1120;
+      color: #f9fafb;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      padding: 16px;
+    }
+    .column {
+      background: rgba(15,23,42,0.9);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .column h2 {
+      font-size: 16px;
+      margin: 0 0 8px;
+    }
+    .column h2 span {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+    .order-card {
+      background: rgba(30,64,175,0.16);
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    .order-card strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+    .order-card .meta {
+      font-size: 12px;
+      opacity: 0.85;
+    }
+	
+	/* Drag-over highlight */
+	.column.drop-target {
+	  outline: 2px dashed #fbbf24;
+	  outline-offset: 4px;
+	}
+
+	.order-card.dragging {
+	  opacity: 0.6;
+	}
+	
+	.col-body {
+  min-height: 80px;      /* or whatever feels right */
+}
+
+
+  </style>
+</head>
+<body>
+  <div class="board">
+    <div class="column" data-status="pending">
+      <h2>New <span>(Pending)</span></h2>
+      <div class="col-body"></div>
+    </div>
+    <div class="column" data-status="confirmed">
+      <h2>Confirmed</h2>
+      <div class="col-body"></div>
+    </div>
+    <div class="column" data-status="preparing">
+      <h2>Preparing</h2>
+      <div class="col-body"></div>
+    </div>
+    <div class="column" data-status="completed">
+      <h2>Completed</h2>
+      <div class="col-body"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://ubyjrrsvbbqomitpaidb.supabase.co';
+	const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVieWpycnN2YmJxb21pdHBhaWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NTYyNjMsImV4cCI6MjA3NjUzMjI2M30.WTllxO5KnaMI0i1d4VHNBhjLuRMfu4_Xx5arqZmYevw';
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+	
+	async function updateOrderStatus(orderId, newStatus) {
+  try {
+    const { error } = await supabase
+      .from('orders')
+      .update({ status: newStatus })
+      .eq('id', orderId);
+
+    if (error) {
+      console.error('Kitchen: error updating status', error);
+      return;
+    }
+
+    console.info('Kitchen: status updated', orderId, newStatus);
+  } catch (err) {
+    console.error('Kitchen: unexpected error updating status', err);
+  }
+}
+
+let draggedOrderId = null;
+
+
+function renderBoard(orders) {
+  const columns = document.querySelectorAll('.column');
+
+  columns.forEach(col => {
+    const body = col.querySelector('.col-body');
+    body.innerHTML = '';
+    const colStatus = col.dataset.status; // "pending", "confirmed", etc.
+
+    // Make column body a drop target
+    body.addEventListener('dragover', (e) => {
+      e.preventDefault();              // allow drop
+      col.classList.add('drop-target');
+    });
+
+    body.addEventListener('dragleave', () => {
+      col.classList.remove('drop-target');
+    });
+
+    body.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      col.classList.remove('drop-target');
+      if (!draggedOrderId) return;
+
+      // Update status in Supabase, then reload
+      await updateOrderStatus(draggedOrderId, colStatus);
+      draggedOrderId = null;
+
+      // Re-render (Realtime will also fire, but this makes it snappy)
+      loadOrders();
+    });
+
+    // Filter + sort orders for this column
+    const filtered = (orders || [])
+      .filter(o => (o.status || 'pending').toLowerCase() === colStatus)
+      .sort((a, b) => {
+        // Sort by preferred_time if present, else created_at
+        const ta = new Date(a.preferred_time || a.created_at);
+        const tb = new Date(b.preferred_time || b.created_at);
+        return ta - tb; // oldest/earliest first
+      });
+
+    filtered.forEach(o => {
+      const c = o.customers || {};
+      const ref = o.order_ref || 'RTK-???';
+      const timeStr = new Date(o.created_at).toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      const card = document.createElement('div');
+      card.className = 'order-card';
+      card.draggable = true;
+      card.dataset.orderId = o.id;
+
+      card.innerHTML = `
+        <strong>${ref}</strong>
+        <div class="meta">
+          ${c.full_name || 'Unknown customer'} •
+          ${(o.order_type || 'collection').toUpperCase()} •
+          ${timeStr}
+        </div>
+      `;
+
+      card.addEventListener('dragstart', () => {
+        draggedOrderId = o.id;
+        card.classList.add('dragging');
+      });
+
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+      });
+
+      body.appendChild(card);
+    });
+  });
+}
+
+
+    async function loadOrders() {
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          id,
+          order_ref,
+          created_at,
+          order_type,
+          status,
+          customers ( full_name )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading orders for board', error);
+        return;
+      }
+      renderBoard(data || []);
+    }
+
+    // Initial load
+    loadOrders();
+
+    // Realtime updates
+    supabase
+      .channel('kitchen-orders')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        payload => {
+          console.info('Kitchen board realtime', payload.eventType, payload.new);
+          loadOrders();
+        }
+      )
+      .subscribe();
+  </script>
+</body>
+</html>
