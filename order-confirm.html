@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rung’s Thai Kitchen – Order Confirmation</title>
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card: #fff;
+      --text: #111827;
+      --muted: #6b7280;
+      --accent: #d9464a;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      padding: 24px;
+    }
+    .card {
+      max-width: 480px;
+      margin: 40px auto;
+      background: var(--card);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(15,23,42,0.08);
+    }
+    h1 {
+      font-size: 20px;
+      margin: 0 0 8px;
+    }
+    p {
+      line-height: 1.5;
+      margin: 0 0 8px;
+    }
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .loader {
+      text-align: center;
+      padding: 40px 0;
+      color: var(--muted);
+    }
+    .error {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div id="content">
+      <div class="loader">Checking your order…</div>
+    </div>
+  </div>
+
+  <script>
+    (async function () {
+      const content = document.getElementById("content");
+
+      function render(html) {
+        content.innerHTML = html;
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("token");
+      const decision = params.get("decision");
+
+      if (!token || !decision) {
+        render(`
+          <h1>Link not valid</h1>
+          <p>This confirmation link is missing information or is invalid.</p>
+          <p class="muted">If you believe this is an error, please contact the restaurant directly.</p>
+        `);
+        return;
+      }
+
+      try {
+			const apiBase = "https://ubyjrrsvbbqomitpaidb.functions.supabase.co/order-confirm";
+
+			const apiUrl = apiBase
+			  + "?token=" + encodeURIComponent(token)
+			  + "&decision=" + encodeURIComponent(decision);
+
+
+
+        const res = await fetch(apiUrl, { method: "GET" });
+        let data = {};
+        try {
+          data = await res.json();
+        } catch {
+          data = {};
+        }
+
+        if (!res.ok || !data.success) {
+          render(`
+            <h1>There was a problem</h1>
+            <p class="error">${data.error || "We could not update your order. Please contact the restaurant."}</p>
+            <p class="muted">If you believe this is an error, please contact the restaurant directly.</p>
+          `);
+          return;
+        }
+
+        // Success – use the title/message from the API
+        render(`
+          <h1>${data.title || "Thank you!"}</h1>
+          <p>${data.message || ""}</p>
+          ${data.note ? `<p class="muted">${data.note}</p>` : ""}
+        `);
+      } catch (err) {
+        console.error("order-confirm.html error", err);
+        render(`
+          <h1>There was a problem</h1>
+          <p class="error">We could not process your request. Please contact the restaurant.</p>
+          <p class="muted">Sorry for the inconvenience.</p>
+        `);
+      }
+    })();
+  </script>
+</body>
+</html>
