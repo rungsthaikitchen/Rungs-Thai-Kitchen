@@ -142,6 +142,75 @@
 		  opacity: 0.9;
 		}
 
+		.status-pill {
+		  display: inline-block;
+		  padding: 4px 8px;
+		  border-radius: 999px;
+		  font-size: 11px;
+		  font-weight: 700;
+		  text-transform: uppercase;
+		  letter-spacing: 0.04em;
+		}
+
+		/* Colours per status */
+		.status-pending {
+		  background: #fee2e2;
+		  color: #b91c1c;
+		}
+		.status-confirmed {
+		  background: #fef3c7;
+		  color: #92400e;
+		}
+		.status-preparing {
+		  background: #dbeafe;
+		  color: #1d4ed8;
+		}
+		.status-completed {
+		  background: #dcfce7;
+		  color: #166534;
+		}
+		.status-cancelled {
+		  background: #e5e7eb;
+		  color: #374151;
+		}
+		/* Drag-over highlight */
+		.column.drop-target {
+		  outline: 2px dashed #fbbf24;
+		  outline-offset: 4px;
+		}
+
+		.order-card.dragging {
+		  opacity: 0.6;
+		}
+		td.actions {
+		  white-space: nowrap;
+		}
+
+		.btn-small {
+		  font-size: 0.8rem;
+		  padding: 4px 6px;
+		  margin-left: 4px;
+		}
+
+		.btn-accept {
+		  background: #2e7d32;
+		  color: #fff;
+		}
+
+		.btn-decline {
+		  background: #c62828;
+		  color: #fff;
+		}
+
+		.btn-suggest {
+		  background: #f9a825;
+		  color: #000;
+		}
+
+		.btn-paid {
+		  background: #1565c0;
+		  color: #fff;
+		}
 
   
   </style>
@@ -170,6 +239,7 @@
             <th>Date</th>
             <th>Customer</th>
             <th>Type</th>
+			<th>Status</th>
             <th class="nowrap">Subtotal</th>
             <th class="nowrap">Delivery</th>
             <th class="nowrap">Total</th>
@@ -193,6 +263,27 @@
 
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+	
+		const ordersChannel = supabase
+	  .channel('orders-realtime')
+	  .on(
+		'postgres_changes',
+		{ event: 'INSERT', schema: 'public', table: 'orders' },
+		payload => {
+		  console.info('Realtime: new order', payload.new);
+		  loadAndRender();
+		}
+	  )
+	  .on(
+		'postgres_changes',
+		{ event: 'UPDATE', schema: 'public', table: 'orders' },
+		payload => {
+		  console.info('Realtime: order updated', payload.new);
+		  loadAndRender();
+		}
+	  )
+	  .subscribe();
+
 
 	// --- AUDIO + NEW-ORDER ALERT STATE ---------------------------------
 
@@ -328,6 +419,9 @@ function buildDetailsHTML(o){
   // RTK ref: use order_ref if present, else fallback to short UUID
   const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
 
+  const status = o.status || 'pending';
+  const statusLabel = STATUS_LABELS[status] || status;
+
   const lines = (o.order_items || []).map(item => {
     const mods = (item.modifiers || []).map(m => m.name).join(', ');
     const spice = (item.spice == null)
@@ -370,6 +464,18 @@ function buildDetailsHTML(o){
         <div class="muted small">Order</div>
         <div class="small"><strong>RTK Ref:</strong> ${rtkRef}</div>
         <div class="small">Type: <strong>${(o.order_type || 'collection').toUpperCase()}</strong></div>
+
+        <!-- 🔽 STATUS DROPDOWN LIVES HERE -->
+        <div class="small">Status:
+          <select class="status-select" data-order-id="${o.id}">
+            <option value="pending"   ${status === 'pending'   ? 'selected' : ''}>Pending</option>
+            <option value="confirmed" ${status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+            <option value="preparing" ${status === 'preparing' ? 'selected' : ''}>Preparing</option>
+            <option value="completed" ${status === 'completed' ? 'selected' : ''}>Completed</option>
+            <option value="cancelled" ${status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+          </select>
+        </div>
+
         <div class="small">Subtotal: ${fmtMoney(o.subtotal)}</div>
         <div class="small">Delivery: ${fmtMoney(o.delivery_fee)}</div>
         <div class="small"><strong>Total: ${fmtMoney(sumTotal(o))}</strong></div>
@@ -382,6 +488,70 @@ function buildDetailsHTML(o){
   `;
 }
 
+
+		const STATUS_LABELS = {
+		  pending:   'Pending',
+		  confirmed: 'Confirmed',
+		  preparing: 'Preparing',
+		  completed: 'Completed',
+		  cancelled: 'Cancelled'
+		};
+
+// ---------- Print ticket ----------
+function printTicket(o){
+  const c = o.customers || {};
+  const w = window.open('', 'PRINT', 'height=700,width=600');
+
+  const lines = (o.order_items || []).map(it => {
+    const mods = (it.modifiers || []).map(m => m.name).join(', ');
+    const spice = (it.spice == null) ? '' : ' ' + '🌶️'.repeat(Math.max(0, Math.min(3, Number(it.spice))));
+    return `
+      <tr>
+        <td style="padding:6px 0">
+          <strong>${it.name}</strong> × ${it.qty}${spice}
+          ${mods ? `<div style="font-size:12px;color:#666">Mods: ${mods}</div>`:''}
+        </td>
+        <td style="padding:6px 0;text-align:right">
+          £${(Number(it.unit_price)*Number(it.qty)).toFixed(2)}
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  const html = `
+    <html>
+    <head>
+      <title>Order #${o.id}</title>
+      <style>
+        body{font-family:ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto; font-size:14px; margin:24px;}
+        h1{font-size:18px;margin:0}
+        .muted{color:#6b7280}
+        table{width:100%;border-collapse:collapse;margin-top:10px}
+        td{border-bottom:1px dashed #ddd}
+      </style>
+    </head>
+    <body onload="window.print(); setTimeout(function(){ window.close(); }, 300)">
+      <h1>Rung’s Thai Kitchen — Ticket</h1>
+      <div class="muted">Order #${o.id} • ${new Date(o.created_at).toLocaleString()}</div>
+      <div style="margin-top:8px">
+        <div><strong>${(o.order_type || 'collection').toUpperCase()}</strong></div>
+        <div>${c.full_name || ''} • ${c.phone || ''}</div>
+        <div>${c.address || ''}</div>
+      </div>
+      <table>${lines}</table>
+      <div style="margin-top:10px;border-top:1px dashed #ddd;padding-top:8px">
+        <div>Subtotal: £${Number(o.subtotal||0).toFixed(2)}</div>
+        <div>Delivery: £${Number(o.delivery_fee||0).toFixed(2)}</div>
+        <div><strong>Total: £${(Number(o.subtotal||0)+Number(o.delivery_fee||0)).toFixed(2)}</strong></div>
+      </div>
+      <div style="margin-top:8px"><em>Notes:</em> ${o.notes || '—'}</div>
+    </body>
+    </html>
+  `;
+
+  w.document.write(html);
+  w.document.close();
+}
 
 	
 // ---------- Render ----------
@@ -400,6 +570,7 @@ function render(orders){
   orders.forEach(o => {
     const tr = document.createElement('tr');
     tr.className = 'row';
+	tr.dataset.createdAt = o.created_at;
 
     const customer = o.customers || {};
     const total = sumTotal(o);
@@ -407,48 +578,100 @@ function render(orders){
     // RTK ref for this order
     const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
 
+    const status = o.status || 'pending';
+    const statusLabel = STATUS_LABELS[status] || status;
+
     tr.innerHTML = `
       <td class="mono">${rtkRef}</td>
-      <td class="mono">#${o.id}</td>
       <td>${fmtDate(o.created_at)}</td>
       <td>
         <div><strong>${customer.full_name || '—'}</strong></div>
         <div class="small muted">${customer.phone || ''}</div>
       </td>
       <td><span class="pill">${(o.order_type || 'collection').toUpperCase()}</span></td>
+      <td><span class="status-pill status-${status}">${statusLabel}</span></td>
       <td class="nowrap">${fmtMoney(o.subtotal)}</td>
       <td class="nowrap">${fmtMoney(o.delivery_fee)}</td>
       <td class="nowrap"><strong>${fmtMoney(total)}</strong></td>
-      <td class="actions">
-        <button class="btn" data-action="toggle">Details</button>
-        <button class="btn" data-action="print">Print ticket</button>
-      </td>
+	  <td class="actions" style="text-align:right">
+	  <button class="btn-small" data-action="toggle">Details</button>
+	  <button class="btn-small" data-action="print">Print</button>
+
+	  <div style="display:inline-flex;align-items:center;gap:4px;margin-left:8px">
+		<input type="time"
+			   class="suggest-time-input"
+			   data-order-id="${o.id}"
+			   style="font-size:12px;padding:3px 4px">
+		<button class="btn-small btn-suggest" data-order-id="${o.id}">Suggest</button>
+	  </div>
+
+	  <button class="btn-small btn-accept"  data-order-id="${o.id}">Accept</button>
+	  <button class="btn-small btn-decline" data-order-id="${o.id}">Decline</button>
+	  <button class="btn-small btn-paid"    data-order-id="${o.id}">Mark paid</button>
+	</td>
+
+
     `;
 
-    // --- details row (needs its own <tr> and <td>) ---
+    // --- details row ---
     const details = document.createElement('div');
     details.className = 'details';
     details.innerHTML = buildDetailsHTML(o);
 
+    // --- status change dropdown ---
+    const statusSelect = details.querySelector('.status-select');
+    if (statusSelect) {
+      statusSelect.addEventListener('change', async (e) => {
+        const newStatus = e.target.value;
+        const orderId   = e.target.dataset.orderId;
+
+        await updateOrderStatus(orderId, newStatus);
+        loadAndRender();
+      });
+    }
+
     const detailsRow = document.createElement('tr');
     const detailsCell = document.createElement('td');
-    detailsCell.colSpan = 9;              // 9 columns in main row
+    detailsCell.colSpan = 9;
     detailsCell.appendChild(details);
     detailsRow.appendChild(detailsCell);
 
-    // --- actions on the main row buttons ---
-    tr.querySelector('[data-action="toggle"]').addEventListener('click', () => {
-      details.style.display = (details.style.display === 'block') ? 'none' : 'block';
-    });
+   const toggleBtn = tr.querySelector('[data-action="toggle"]');
+		if (toggleBtn) {
+		  toggleBtn.addEventListener('click', () => {
+			details.style.display = (details.style.display === 'block') ? 'none' : 'block';
+		  });
+		}
 
-    tr.querySelector('[data-action="print"]').addEventListener('click', () => {
-      printTicket(o);
-    });
+		const printBtn = tr.querySelector('[data-action="print"]');
+		if (printBtn) {
+		  printBtn.addEventListener('click', () => {
+			printTicket(o);
+		  });
+		}
 
-    // append both the main row and the details row
-    tbody.appendChild(tr);
-    tbody.appendChild(detailsRow);
+		tbody.appendChild(tr);
+		tbody.appendChild(detailsRow);
+
   });
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+  try {
+    const { error } = await supabase
+      .from('orders')
+      .update({ status: newStatus })
+      .eq('id', orderId);
+
+    if (error) {
+      console.error('Error updating status', error);
+      alert('Could not update status – please try again.');
+      return;
+    }
+  } catch (err) {
+    console.error('Unexpected error updating status', err);
+    alert('Unexpected error updating status');
+  }
 }
 
 
@@ -466,6 +689,7 @@ function render(orders){
 		  subtotal,
 		  delivery_fee,
 		  notes,
+		  status,
 		  customers (
 			full_name,
 			phone,
@@ -520,6 +744,209 @@ function render(orders){
 
 
   </script>
+<script>
+  console.log("Admin actions script loaded");
+
+ // 1) URL of your Supabase Edge Function
+const ORDER_ACTION_API_URL =
+  "https://ubyjrrsvbbqomitpaidb.supabase.co/functions/v1/hyper-worker";
+
+
+
+// 2) Must match ADMIN_SECRET env var in Supabase
+	const ADMIN_SECRET = "f18ea1324e4d6e011f5d3f41ccb9767cf9226d0bd2f8a21";
+
+
+async function callOrderAction(payload) {
+  console.log("Calling order-action with payload:", payload);
+
+  try {
+    const res = await fetch(ORDER_ACTION_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-secret": ADMIN_SECRET
+      },
+      body: JSON.stringify(payload)
+    });
+
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      data = {};
+    }
+
+    console.log("order-action response:", res.status, data);
+
+    if (!res.ok) {
+      alert("Error: " + (data.error || "Unknown error"));
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Network error calling order-action:", err);
+    alert("Network error calling order-action");
+    return null;
+  }
+}
+  
+		  document.addEventListener('click', async (e) => {
+		  const target = e.target;
+		  if (!target || !target.closest) return;
+
+		  const btnAccept  = target.closest('.btn-accept');
+		  const btnDecline = target.closest('.btn-decline');
+		  const btnPaid    = target.closest('.btn-paid');
+		  const btnSuggest = target.closest('.btn-suggest');
+
+		  if (!btnAccept && !btnDecline && !btnPaid && !btnSuggest) return;
+
+		  const btn = btnAccept || btnDecline || btnPaid || btnSuggest;
+		  const orderId = Number(btn.dataset.orderId);
+		  if (!orderId) return;
+
+		  if (btnAccept) {
+			await callOrderAction({ orderId, action: 'accept' });
+			return;
+		  }
+
+		  if (btnDecline) {
+			await callOrderAction({ orderId, action: 'decline' });
+			return;
+		  }
+
+		  if (btnPaid) {
+			await callOrderAction({ orderId, action: 'mark_paid' });
+			return;
+		  }
+
+		  if (btnSuggest) {
+		  const row = btnSuggest.closest("tr");
+		  const input = row ? row.querySelector(".suggest-time-input") : null;
+		  const proposedTime = input ? input.value : "";
+
+		  if (!proposedTime) {
+			alert("Please choose a time first.");
+			return;
+		  }
+
+		  await callOrderAction({ orderId, action: "suggest_time", proposedTime });
+		  return;
+		}
+
+		});
+
+
+		// Single global click handler for all action buttons
+		document.addEventListener("click", async (event) => {
+		  const btn = event.target.closest("button");
+		  if (!btn) return;
+
+		  const orderId = btn.dataset.orderId;
+		  if (!orderId) return;
+
+		  // ACCEPT – no popup
+		  if (btn.classList.contains("btn-accept")) {
+			const result = await callOrderAction({
+			  action: "accept",
+			  orderId
+			});
+
+			if (result?.success) {
+			  alert("Order accepted. Customer notified.");
+			  location.reload();
+			}
+			return;
+		  }
+
+		  // SUGGEST – use the time picker, no prompt
+		  if (btn.classList.contains("btn-suggest")) {
+		  const row = btn.closest("tr");
+		  const input = row ? row.querySelector(".suggest-time-input") : null;
+		  const suggestedTime = input ? input.value : ""; // "19:45"
+
+		  if (!suggestedTime) {
+			alert("Please choose a time first.");
+			return;
+		  }
+
+		  // Get the original order date from the row
+		  const createdAt = row ? row.dataset.createdAt : null;
+
+		  // Build a Date using the order's date + admin-selected time
+		  let proposedIso;
+		  try {
+			const base = createdAt ? new Date(createdAt) : new Date(); // fallback: today
+			const [hh, mm] = suggestedTime.split(":");
+			base.setHours(Number(hh) || 0, Number(mm) || 0, 0, 0);
+			proposedIso = base.toISOString();
+		  } catch (e) {
+			console.error("Failed to build proposedTime ISO:", e);
+			alert("Could not build the proposed time – please try again.");
+			return;
+		  }
+
+		  const payload = {
+			action: "suggest_time",
+			orderId,
+			proposedTime: proposedIso
+		  };
+		  console.log("Suggest payload:", payload);
+
+		  const result = await callOrderAction(payload);
+
+		  if (result?.success) {
+			alert("Suggested time sent to customer.");
+			location.reload();
+		  }
+		  return;
+		}
+
+
+		  // DECLINE – Cancel truly cancels
+		  if (btn.classList.contains("btn-decline")) {
+			const reason = window.prompt("Reason for declining? (optional):");
+			if (reason === null) {
+			  // User pressed Cancel or Esc – do NOT decline
+			  return;
+			}
+
+			const result = await callOrderAction({
+			  action: "decline",
+			  orderId,
+			  reason: reason.trim()
+			});
+
+			if (result?.success) {
+			  alert("Order declined. Customer notified.");
+			  location.reload();
+			}
+			return;
+		  }
+
+		  // MARK PAID – confirm first
+		  if (btn.classList.contains("btn-paid")) {
+			const ok = window.confirm("Mark this order as paid?");
+			if (!ok) return;
+
+			const result = await callOrderAction({
+			  action: "mark_paid",
+			  orderId
+			});
+
+			if (result?.success) {
+			  alert("Order marked as paid.");
+			  location.reload();
+			}
+			return;
+		  }
+		});
+
+
+
+</script>
 
 </body>
 </html>
