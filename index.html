@@ -2072,7 +2072,7 @@ body.menu-open .menu-fab {
             <input id="cust-email" name="email" type="email" inputmode="email" autocomplete="email" class="input auto-fit" required>
           </div>
           <div class="field">
-            <label for="cust-phone">Phone</label>
+            <label for="cust-phone">Mobile</label>
             <input id="cust-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required class="input auto-fit" required>
           </div>
         </div>
@@ -2107,7 +2107,25 @@ body.menu-open .menu-fab {
           <input id="cust-notes" name="notes" type="text" class="input auto-fit"
                  placeholder="Allergies, delivery instructions, etc.">
         </div>
+		<!-- Communication Preference -->
+			<div class="field">
+			  <label>How should we contact you about collection/delivery times?</label>
+			  <div style="display:flex;gap:12px;align-items:center;margin-top:6px">
+				<label>
+				  <input type="radio" name="communication_preference" value="email" checked>
+				  Email
+				</label>
+				<label>
+				  <input type="radio" name="communication_preference" value="sms">
+				  SMS
+				</label>
+			  </div>
+			  <div class="muted small" style="margin-top:4px">
+				If you choose SMS, we’ll text you updates about timing and confirmations.
+			  </div>
+			</div>
 
+		
         <div class="totals">
           <div class="muted small">Subtotal</div>
           <div id="checkout-subtotal" style="font-weight:800">£0.00</div>
@@ -2120,7 +2138,7 @@ body.menu-open .menu-fab {
           <div class="muted small">Total</div>
           <div id="checkout-total" style="font-weight:800">£0.00</div>
         </div>
-		<div class="checkout-section">
+		<!--<div class="checkout-section">
 	  <h3>How would you like to pay?</h3>
 	  <div class="payment-preference-options">
 		<label>
@@ -2132,7 +2150,7 @@ body.menu-open .menu-fab {
 		  Pay on collection/delivery
 		</label>
 	  </div>
-	</div>
+	</div>-->
 
 
         <div class="checkout-actions" style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px;position:sticky;bottom:0;background:#fff;padding-top:8px">
@@ -2306,7 +2324,7 @@ const EXTRAS = [
       ]},
       { id:'salad',    title:'Salad',   allowExtras:true,  items:[
         { id: 'papaya-salad', name: 'Green Papaya Salad (Som Tam)🌶️🌶️🌶️', desc: 'A spicy, savoury, and sweet Thai salad made primarily of shredded green papaya.', price: 7.00, img: 'images/somtam.jpg', spiceEnabled: true, spiceDefault: 3, allergens: ['peanuts','fish'], allowedExtras: ['extra-prawn'] },
-        { id: 'beef-salad', name: 'Spicy Beef Salad (Yum Nuea)🌶️🌶️', desc: 'A classic Thai salad with grilled sirloin steak (cooked mediun - please advise in the checkout comments if you would prefer it cooked differently), tossed with crisp vegetables, fresh mint, coriander, and a tangy lime-fish sauce dressing.', price: 9.50, img: 'images/ymbeef.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish','celery','soya'], allowedExtras: ['extra-beef'] },
+        { id: 'beef-salad', name: 'Spicy Beef Salad (Yum Nuea)🌶️🌶️', desc: 'A classic Thai salad with grilled sirloin steak (cooked medium - please advise in the checkout comments if you would prefer it cooked differently), tossed with crisp vegetables, fresh mint, coriander, and a tangy lime-fish sauce dressing.', price: 9.50, img: 'images/ymbeef.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish','celery','soya'], allowedExtras: ['extra-beef'] },
         { id: 'pork-salad', name: 'Grilled Pork Salad (Nam Tok)🌶️', desc: 'This classic North-eastern Thai salad features smoky, charred grilled pork slices tossed with a fiery dressing of lime, fish sauce, and chili flakes.', price: 8.50, img: 'images/porksalad.jpg', spiceEnabled: true, spiceDefault: 1, allergens: ['fish'], allowedExtras: ['extra-pork'] },
         { id: 'laab', name: 'Laab🌶️🌶️', desc: 'A vibrant and flavourful meat salad known for its harmony of spicy, sour, salty, and savoury flavours.', price: 7.50, img: 'images/Larb.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish',',soya'], allowedExtras: ['extra-pork'] }
       ]},
@@ -2452,6 +2470,8 @@ let currentItem = null;          // the item currently being customised
 let selectedMods = new Set();    // your existing modifier selection
 let selectedExtras = [];         // extras (added proteins)
 let currentAllowExtras = false;
+
+
 
 // ---------- Build menu (single, clean version) ----------
 /* === Full-screen menu overlay === */
@@ -3771,7 +3791,7 @@ if (preferredTimeInput) {
     const deliveryNote = document.getElementById('delivery-note');
     const orderMsg = document.getElementById('order-msg');
     const openCheckoutBtn = document.getElementById('open-checkout');
-
+	
     const orderTypeRadios = document.querySelectorAll('input[name="order-type"]');
     let checkoutBaseSubtotal = 0;
 
@@ -4252,7 +4272,10 @@ checkoutForm.addEventListener('submit', async (e) => {
     const preferredTimeRaw = document.getElementById('cust-preferred-time').value;
     const selectedLocal    = preferredTimeRaw ? new Date(preferredTimeRaw) : null;
     const preferredTimeISO = preferredTimeRaw ? new Date(preferredTimeRaw).toISOString() : null;
+	const commPrefInput = document.querySelector('input[name="communication_preference"]:checked');
+	const communicationPreference = commPrefInput ? commPrefInput.value : 'email';
 
+	
     if (!name){  checkoutMsg.style.color='#b02a2a'; checkoutMsg.textContent='Please enter your full name.';  return; }
     if (!email){ checkoutMsg.style.color='#b02a2a'; checkoutMsg.textContent='Please enter your email.';      return; }
     if (!phone){ checkoutMsg.style.color='#b02a2a'; checkoutMsg.textContent='Please enter your phone number.'; return; }
@@ -4331,8 +4354,10 @@ checkoutForm.addEventListener('submit', async (e) => {
 		  order_type: orderType,
 		  notes,
 		  order_ref: orderRef,
-		  payment_preference,  // NEW FIELD
+		  payment_preference,               // existing
+		  communication_preference: communicationPreference, // ✅ NEW
 		};
+
 
 		let { data: order, error: orderErr } = await supabase
 		  .from('orders')
@@ -4365,20 +4390,23 @@ checkoutForm.addEventListener('submit', async (e) => {
 
     // (optional) confirmation hook — non-blocking
     try {
-      await fetch('https://YOUR-FUNCTION-URL/send-order-confirmation', {
-        method: 'POST',
-        headers: { 'Content-Type':'application/json' },
-        body: JSON.stringify({
-          order_id: orderId,
-          order_ref: orderRef,
-          name,
-          email,
-          phone,
-          order_type: orderType,
-          preferred_time: preferredTimeRaw,
-          total: subtotal + deliveryFee
-        })
-      });
+      await fetch('https://order-backend-production.up.railway.app/send-order-confirmation', {
+		  method: 'POST',
+		  // IMPORTANT: use text/plain to avoid CORS preflight
+		  headers: { 'Content-Type': 'text/plain' },
+		  body: JSON.stringify({
+			order_id: orderId,
+			order_ref: orderRef,
+			name,
+			email,
+			phone,
+			order_type: orderType,
+			preferred_time: preferredTimeRaw,
+			total: subtotal + deliveryFee,
+			communication_preference: communicationPreference
+		  })
+		});
+
     } catch (err) {
       console.warn('[Order] Confirmation hook failed (non-blocking)', err);
     }

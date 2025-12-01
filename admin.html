@@ -211,6 +211,34 @@
 		  background: #1565c0;
 		  color: #fff;
 		}
+		
+		.filter-today {
+		  display: inline-flex;
+		  align-items: center;
+		  gap: 6px;
+		  font-size: 13px;
+		  color: var(--muted);
+		  padding: 6px 10px;
+		  border-radius: 999px;
+		  border: 1px solid #e5e7eb;
+		  background: #f9fafb;
+		  cursor: pointer;
+		}
+		.filter-today input {
+		  margin: 0;
+		}
+		
+		.details a.details-link {
+		  color: var(--accent);
+		  text-decoration: underline;
+		  font-size: 12px;
+		}
+
+		.status-completed {
+		  background: #e5e7eb;
+		  color: #111827;
+		}
+
 
   
   </style>
@@ -223,9 +251,16 @@
         <div class="muted small">Live dashboard (auto-updates)</div>
       </div>
       <div class="controls">
-        <button id="refresh" class="btn">Refresh</button>
-        <button id="export" class="btn">Export CSV</button>
-      </div>
+  <button id="refresh" class="btn">Refresh</button>
+  <button id="export" class="btn">Export CSV</button>
+
+  <label class="filter-today">
+    <input type="checkbox" id="filter-today" />
+    Today only
+  </label>
+</div>
+
+
     </div>
   </header>
 
@@ -236,7 +271,7 @@
           <tr>
 			<th>RTK Ref</th>
             <!--<th>Order</th>-->
-            <th>Date</th>
+            <th>Booking Time</th>
             <th>Customer</th>
             <th>Type</th>
 			<th>Status</th>
@@ -284,6 +319,27 @@
 	  )
 	  .subscribe();
 
+		let currentOrders = [];
+		let showTodayOnly = false;
+
+		function isSameDay(a, b) {
+		  return (
+			a.getFullYear() === b.getFullYear() &&
+			a.getMonth() === b.getMonth() &&
+			a.getDate() === b.getDate()
+		  );
+		}
+
+		function getFilteredOrders() {
+		  if (!showTodayOnly) return currentOrders;
+		  const today = new Date();
+		  return currentOrders.filter((o) => {
+			const dt = new Date(o.created_at);
+			return isSameDay(dt, today);
+		  });
+		}
+
+		
 
 	// --- AUDIO + NEW-ORDER ALERT STATE ---------------------------------
 
@@ -378,115 +434,142 @@
 	  showNewOrderBanner();
 	}
 	
-	function sumTotal(order) {
-  // Safely sum subtotal + delivery fee
-  const subtotal = Number(order.subtotal || 0);
-  const delivery = Number(order.delivery_fee || 0);
-  return subtotal + delivery;
-}
+			function sumTotal(order) {
+		  // Safely sum subtotal + delivery fee
+		  const subtotal = Number(order.subtotal || 0);
+		  const delivery = Number(order.delivery_fee || 0);
+		  return subtotal + delivery;
+		}
 
-function fmtDate(value) {
-  if (!value) return '—';
-  try {
-    return new Date(value).toLocaleString('en-GB', {
-      dateStyle: 'short',
-      timeStyle: 'short'
-    });
-  } catch (e) {
-    console.warn('Bad date value:', value, e);
-    return String(value);
-  }
-}
+		function fmtDate(value) {
+		  if (!value) return '—';
+		  try {
+			return new Date(value).toLocaleString('en-GB', {
+			  dateStyle: 'short',
+			  timeStyle: 'short'
+			});
+		  } catch (e) {
+			console.warn('Bad date value:', value, e);
+			return String(value);
+		  }
+		}
 
-function fmtMoney(value) {
-  const num = Number(value || 0);
-  try {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(num);
-  } catch (e) {
-    console.warn('Bad money value:', value, e);
-    return `£${num.toFixed(2)}`;
-  }
-}
+		function fmtMoney(value) {
+		  const num = Number(value || 0);
+		  try {
+			return new Intl.NumberFormat('en-GB', {
+			  style: 'currency',
+			  currency: 'GBP',
+			  minimumFractionDigits: 2,
+			  maximumFractionDigits: 2
+			}).format(num);
+		  } catch (e) {
+			console.warn('Bad money value:', value, e);
+			return `£${num.toFixed(2)}`;
+		  }
+		}
 
-function buildDetailsHTML(o){
-  const c = o.customers || {};
+				function fmtDisplayTime(order) {
+		  // If status is confirmed and we have a proposed_time, treat that as the confirmed time
+		  let src;
 
-  // RTK ref: use order_ref if present, else fallback to short UUID
-  const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
+		  if (order.status === 'confirmed' && order.proposed_time) {
+			src = order.proposed_time;
+		  } else if (order.proposed_time) {
+			// otherwise show the customer's requested / proposed time
+			src = order.proposed_time;
+		  } else {
+			// fallback to when the order was created
+			src = order.created_at;
+		  }
 
-  const status = o.status || 'pending';
-  const statusLabel = STATUS_LABELS[status] || status;
+		  if (!src) return '';
 
-  const lines = (o.order_items || []).map(item => {
-    const mods = (item.modifiers || []).map(m => m.name).join(', ');
-    const spice = (item.spice == null)
-      ? ''
-      : (' '.repeat(1) + '🌶️'.repeat(Math.max(0, Math.min(3, Number(item.spice)))));
-    const modsFrag = mods ? `<div class="small muted">Mods: ${mods}</div>` : '';
-    const img = item.img
-      ? `<img src="${item.img}" alt="${item.name}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #eee;margin-right:8px">`
-      : '';
+		  try {
+			const d = new Date(src);
+			return d.toLocaleString('en-GB', {
+			  weekday: 'short',
+			  day: '2-digit',
+			  month: 'short',
+			  hour: '2-digit',
+			  minute: '2-digit',
+			});
+		  } catch {
+			return src;
+		  }
+		}
 
-    return `
-      <div class="line">
-        <div style="display:flex;align-items:center;gap:8px">
-          ${img}
-          <div>
-            <div><strong>${item.name}</strong> × ${item.qty}${spice}</div>
-            ${modsFrag}
-          </div>
-        </div>
-        <div><strong>${fmtMoney(Number(item.unit_price) * Number(item.qty))}</strong></div>
-      </div>
-    `;
-  }).join('');
 
-  const addr = [c.address].filter(Boolean).join('<br>');
 
-  return `
-    <div class="grid" style="margin-bottom:8px">
-      <div>
-        <div class="muted small">Customer</div>
-        <div><strong>${c.full_name || '—'}</strong></div>
-        <div class="small">${c.phone || ''}</div>
-        <div class="small">${c.email || ''}</div>
-      </div>
-      <div>
-        <div class="muted small">Address</div>
-        <div class="small">${addr || '—'}</div>
-      </div>
-      <div>
-        <div class="muted small">Order</div>
-        <div class="small"><strong>RTK Ref:</strong> ${rtkRef}</div>
-        <div class="small">Type: <strong>${(o.order_type || 'collection').toUpperCase()}</strong></div>
 
-        <!-- 🔽 STATUS DROPDOWN LIVES HERE -->
-        <div class="small">Status:
-          <select class="status-select" data-order-id="${o.id}">
-            <option value="pending"   ${status === 'pending'   ? 'selected' : ''}>Pending</option>
-            <option value="confirmed" ${status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-            <option value="preparing" ${status === 'preparing' ? 'selected' : ''}>Preparing</option>
-            <option value="completed" ${status === 'completed' ? 'selected' : ''}>Completed</option>
-            <option value="cancelled" ${status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-          </select>
-        </div>
+		function buildDetailsHTML(o) {
+		  const c = o.customers || {};
+		  const lines = (o.order_items || []).map(item => {
+			const mods = (item.modifiers || []).map(m => m.name).join(', ');
+			const spice = (item.spice == null)
+			  ? ''
+			  : (' ' + '🌶️'.repeat(Math.max(0, Math.min(3, Number(item.spice)))));
+			const modsFrag = mods
+			  ? `<div class="small muted">Mods: ${mods}</div>`
+			  : '';
+			const img = item.img
+			  ? `<img src="${item.img}" alt="${item.name}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #eee;margin-right:8px">`
+			  : '';
 
-        <div class="small">Subtotal: ${fmtMoney(o.subtotal)}</div>
-        <div class="small">Delivery: ${fmtMoney(o.delivery_fee)}</div>
-        <div class="small"><strong>Total: ${fmtMoney(sumTotal(o))}</strong></div>
-      </div>
-    </div>
-    <div class="muted small">Notes: ${o.notes ? o.notes : '—'}</div>
-    <div style="margin-top:10px;border-top:1px dashed #eee;padding-top:10px">
-      ${lines || '<div class="muted small">No items.</div>'}
-    </div>
-  `;
-}
+			return `
+			  <div class="line">
+				<div style="display:flex;align-items:center;gap:8px">
+				  ${img}
+				  <div>
+					<div><strong>${item.name}</strong> × ${item.qty}${spice}</div>
+					${modsFrag}
+				  </div>
+				</div>
+				<div><strong>${fmtMoney(Number(item.unit_price) * Number(item.qty))}</strong></div>
+			  </div>
+			`;
+		  }).join('');
+
+		  // Address + "View on map" link
+		  const addr = [c.address].filter(Boolean).join('<br>');
+		  const rawAddress = (c.address || '').replace(/\s+/g, ' ').trim();
+		  const mapUrl = rawAddress
+			? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(rawAddress)}`
+			: '';
+
+		  return `
+			<div class="grid" style="margin-bottom:8px">
+			  <div>
+				<div class="muted small">Customer</div>
+				<div><strong>${c.full_name || '—'}</strong></div>
+				<div class="small">${c.phone || ''}</div>
+				<div class="small">${c.email || ''}</div>
+			  </div>
+			  <div>
+				<div class="muted small">Address</div>
+				<div class="small">
+				  ${addr || '—'}
+				  ${mapUrl
+					? `<div><a href="${mapUrl}" target="_blank" class="small details-link">View on map</a></div>`
+					: ''
+				  }
+				</div>
+			  </div>
+			  <div>
+				<div class="muted small">Order</div>
+				<div class="small">Type: <strong>${(o.order_type || 'collection').toUpperCase()}</strong></div>
+				<div class="small">Subtotal: ${fmtMoney(o.subtotal)}</div>
+				<div class="small">Delivery: ${fmtMoney(o.delivery_fee)}</div>
+				<div class="small"><strong>Total: ${fmtMoney(sumTotal(o))}</strong></div>
+			  </div>
+			</div>
+			<div class="muted small">Notes: ${o.notes ? o.notes : '—'}</div>
+			<div style="margin-top:10px;border-top:1px dashed #eee;padding-top:10px">
+			  ${lines || '<div class="muted small">No items.</div>'}
+			</div>
+		  `;
+		}
+
 
 
 		const STATUS_LABELS = {
@@ -570,7 +653,6 @@ function render(orders){
   orders.forEach(o => {
     const tr = document.createElement('tr');
     tr.className = 'row';
-	tr.dataset.createdAt = o.created_at;
 
     const customer = o.customers || {};
     const total = sumTotal(o);
@@ -581,9 +663,20 @@ function render(orders){
     const status = o.status || 'pending';
     const statusLabel = STATUS_LABELS[status] || status;
 
+    // ----------- REQUIRED data-* attributes for SMS/email backend -----------
+    tr.dataset.orderId = o.id;
+    tr.dataset.orderRef = rtkRef;
+    tr.dataset.name = customer.full_name || "";
+    tr.dataset.email = customer.email || "";
+    tr.dataset.phone = customer.phone || "";
+    tr.dataset.total = total;
+    tr.dataset.communicationPreference = o.communication_preference || "email";
+    tr.dataset.createdAt = o.created_at;
+
+    // ------------------ ROW HTML ------------------
     tr.innerHTML = `
       <td class="mono">${rtkRef}</td>
-      <td>${fmtDate(o.created_at)}</td>
+      <td>${fmtDisplayTime(o)}</td>
       <td>
         <div><strong>${customer.full_name || '—'}</strong></div>
         <div class="small muted">${customer.phone || ''}</div>
@@ -593,24 +686,23 @@ function render(orders){
       <td class="nowrap">${fmtMoney(o.subtotal)}</td>
       <td class="nowrap">${fmtMoney(o.delivery_fee)}</td>
       <td class="nowrap"><strong>${fmtMoney(total)}</strong></td>
-	  <td class="actions" style="text-align:right">
-	  <button class="btn-small" data-action="toggle">Details</button>
-	  <button class="btn-small" data-action="print">Print</button>
+      <td class="actions" style="text-align:right">
+        <button class="btn-small" data-action="toggle">Details</button>
+        <button class="btn-small" data-action="print">Print</button>
 
-	  <div style="display:inline-flex;align-items:center;gap:4px;margin-left:8px">
-		<input type="time"
-			   class="suggest-time-input"
-			   data-order-id="${o.id}"
-			   style="font-size:12px;padding:3px 4px">
-		<button class="btn-small btn-suggest" data-order-id="${o.id}">Suggest</button>
-	  </div>
+        <div style="display:inline-flex;align-items:center;gap:4px;margin-left:8px">
+          <input type="time"
+                 class="suggest-time-input"
+                 data-order-id="${o.id}"
+                 style="font-size:12px;padding:3px 4px">
+          <button class="btn-small btn-suggest" data-order-id="${o.id}">Suggest</button>
+        </div>
 
-	  <button class="btn-small btn-accept"  data-order-id="${o.id}">Accept</button>
-	  <button class="btn-small btn-decline" data-order-id="${o.id}">Decline</button>
-	  <button class="btn-small btn-paid"    data-order-id="${o.id}">Mark paid</button>
-	</td>
-
-
+        <button class="btn-small btn-accept"  data-order-id="${o.id}">Accept</button>
+        <button class="btn-small btn-decline" data-order-id="${o.id}">Decline</button>
+        <button class="btn-small btn-paid"    data-order-id="${o.id}">Mark paid</button>
+        <button class="btn-small btn-complete" data-order-id="${o.id}">Completed</button>
+      </td>
     `;
 
     // --- details row ---
@@ -636,22 +728,22 @@ function render(orders){
     detailsCell.appendChild(details);
     detailsRow.appendChild(detailsCell);
 
-   const toggleBtn = tr.querySelector('[data-action="toggle"]');
-		if (toggleBtn) {
-		  toggleBtn.addEventListener('click', () => {
-			details.style.display = (details.style.display === 'block') ? 'none' : 'block';
-		  });
-		}
+    const toggleBtn = tr.querySelector('[data-action="toggle"]');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        details.style.display = (details.style.display === 'block') ? 'none' : 'block';
+      });
+    }
 
-		const printBtn = tr.querySelector('[data-action="print"]');
-		if (printBtn) {
-		  printBtn.addEventListener('click', () => {
-			printTicket(o);
-		  });
-		}
+    const printBtn = tr.querySelector('[data-action="print"]');
+    if (printBtn) {
+      printBtn.addEventListener('click', () => {
+        printTicket(o);
+      });
+    }
 
-		tbody.appendChild(tr);
-		tbody.appendChild(detailsRow);
+    tbody.appendChild(tr);
+    tbody.appendChild(detailsRow);
 
   });
 }
@@ -676,71 +768,85 @@ async function updateOrderStatus(orderId, newStatus) {
 
 
 
-	// --- LOAD + RENDER WITH NEW-ORDER DETECTION ------------------------
+		// --- LOAD + RENDER WITH NEW-ORDER DETECTION ------------------------
 
-	async function loadAndRender() {
-	  const { data: orders, error } = await supabase
-		.from('orders')
-		.select(`
-		  id,
-		  order_ref,
-		  created_at,
-		  order_type,
-		  subtotal,
-		  delivery_fee,
-		  notes,
-		  status,
-		  customers (
-			full_name,
-			phone,
-			email,
-			address
-		  ),
-		  order_items (
-			*
-		  )
-		`)
-		.order('created_at', { ascending: false });
+			async function loadAndRender() {
+			  const { data: orders, error } = await supabase
+			  .from('orders')
+			  .select(`
+				id,
+				order_ref,
+				created_at,
+				proposed_time,
+				order_type,
+				subtotal,
+				delivery_fee,
+				notes,
+				status,
+				communication_preference,
+				customers (
+				  full_name,
+				  phone,
+				  email,
+				  address
+				),
+				order_items (
+				  *
+				)
+			  `)
+			  .order('created_at', { ascending: false });
 
-	  if (error) {
-		console.error('Error loading orders', error);
-		return;
-	  }
-	  if (!orders) return;
 
-	  if (!firstLoadDone) {
-		// First load: treat all existing orders as already acknowledged
-		if (orders.length) {
-		  lastSeenCreatedAt = orders[0].created_at;
-		  orders.forEach(o => acknowledgedOrderIds.add(o.id));
+		  if (error) {
+			console.error('Error loading orders', error);
+			return;
+		  }
+		  if (!orders) return;
+
+		  // 🔹 keep existing new-order detection
+		  if (!firstLoadDone) {
+			// First load: treat all existing orders as already acknowledged
+			if (orders.length) {
+			  lastSeenCreatedAt = orders[0].created_at;
+			  orders.forEach((o) => acknowledgedOrderIds.add(o.id));
+			}
+			firstLoadDone = true;
+		  } else if (orders.length) {
+			const newestTime = new Date(orders[0].created_at);
+			const prevTime = lastSeenCreatedAt ? new Date(lastSeenCreatedAt) : null;
+
+			let newOnes = [];
+			if (prevTime) {
+			  newOnes = orders.filter((o) => new Date(o.created_at) > prevTime);
+			}
+
+			// always call, so unacknowledged orders keep triggering alerts
+			handleNewOrders(newOnes);
+
+			if (orders.length) {
+			  lastSeenCreatedAt = orders[0].created_at;
+			}
+		  }
+
+		  // 🔹 store the full list
+		  currentOrders = orders;
+
+		  // 🔹 render either today-only or all
+		  render(getFilteredOrders());
 		}
-		firstLoadDone = true;
-	  } else if (orders.length) {
-		const newestTime = new Date(orders[0].created_at);
-		const prevTime = lastSeenCreatedAt ? new Date(lastSeenCreatedAt) : null;
 
-		let newOnes = [];
-		if (prevTime) {
-		  newOnes = orders.filter(o => new Date(o.created_at) > prevTime);
-		}
-
-		// Always call, so unacknowledged orders keep triggering alerts
-		handleNewOrders(newOnes);
-
-		if (orders.length) {
-		  lastSeenCreatedAt = orders[0].created_at;
-		}
-	  }
-
-	  // Your existing render function
-	  render(orders);
-	}
 
 	// Initial load
 	loadAndRender();
 
 	// Poll every 15 seconds
 	setInterval(loadAndRender, 15000);
+	
+			document.getElementById("filter-today").addEventListener("change", (e) => {
+		  showTodayOnly = e.target.checked;
+		  render(getFilteredOrders());
+		});
+
 
 
   </script>
@@ -757,6 +863,9 @@ const ORDER_ACTION_API_URL =
 	const ADMIN_SECRET = "f18ea1324e4d6e011f5d3f41ccb9767cf9226d0bd2f8a21";
 
 
+/*async function ca/* -----------------------------------------------------------
+   ORDER ACTION API CALLER (existing function — unchanged)
+----------------------------------------------------------- */
 async function callOrderAction(payload) {
   console.log("Calling order-action with payload:", payload);
 
@@ -791,158 +900,163 @@ async function callOrderAction(payload) {
     return null;
   }
 }
-  
-		  document.addEventListener('click', async (e) => {
-		  const target = e.target;
-		  if (!target || !target.closest) return;
-
-		  const btnAccept  = target.closest('.btn-accept');
-		  const btnDecline = target.closest('.btn-decline');
-		  const btnPaid    = target.closest('.btn-paid');
-		  const btnSuggest = target.closest('.btn-suggest');
-
-		  if (!btnAccept && !btnDecline && !btnPaid && !btnSuggest) return;
-
-		  const btn = btnAccept || btnDecline || btnPaid || btnSuggest;
-		  const orderId = Number(btn.dataset.orderId);
-		  if (!orderId) return;
-
-		  if (btnAccept) {
-			await callOrderAction({ orderId, action: 'accept' });
-			return;
-		  }
-
-		  if (btnDecline) {
-			await callOrderAction({ orderId, action: 'decline' });
-			return;
-		  }
-
-		  if (btnPaid) {
-			await callOrderAction({ orderId, action: 'mark_paid' });
-			return;
-		  }
-
-		  if (btnSuggest) {
-		  const row = btnSuggest.closest("tr");
-		  const input = row ? row.querySelector(".suggest-time-input") : null;
-		  const proposedTime = input ? input.value : "";
-
-		  if (!proposedTime) {
-			alert("Please choose a time first.");
-			return;
-		  }
-
-		  await callOrderAction({ orderId, action: "suggest_time", proposedTime });
-		  return;
-		}
-
-		});
 
 
-		// Single global click handler for all action buttons
-		document.addEventListener("click", async (event) => {
-		  const btn = event.target.closest("button");
-		  if (!btn) return;
 
-		  const orderId = btn.dataset.orderId;
-		  if (!orderId) return;
+/* -----------------------------------------------------------
+   notifyCustomer() — sends SMS/email via Railway backend
+----------------------------------------------------------- */
+const NOTIFY_API_BASE = "https://order-backend-production.up.railway.app";
 
-		  // ACCEPT – no popup
-		  if (btn.classList.contains("btn-accept")) {
-			const result = await callOrderAction({
-			  action: "accept",
-			  orderId
-			});
-
-			if (result?.success) {
-			  alert("Order accepted. Customer notified.");
-			  location.reload();
-			}
-			return;
-		  }
-
-		  // SUGGEST – use the time picker, no prompt
-		  if (btn.classList.contains("btn-suggest")) {
-		  const row = btn.closest("tr");
-		  const input = row ? row.querySelector(".suggest-time-input") : null;
-		  const suggestedTime = input ? input.value : ""; // "19:45"
-
-		  if (!suggestedTime) {
-			alert("Please choose a time first.");
-			return;
-		  }
-
-		  // Get the original order date from the row
-		  const createdAt = row ? row.dataset.createdAt : null;
-
-		  // Build a Date using the order's date + admin-selected time
-		  let proposedIso;
-		  try {
-			const base = createdAt ? new Date(createdAt) : new Date(); // fallback: today
-			const [hh, mm] = suggestedTime.split(":");
-			base.setHours(Number(hh) || 0, Number(mm) || 0, 0, 0);
-			proposedIso = base.toISOString();
-		  } catch (e) {
-			console.error("Failed to build proposedTime ISO:", e);
-			alert("Could not build the proposed time – please try again.");
+		async function notifyCustomer(mode, row, extra = {}) {
+		  if (!row) {
+			console.warn("notifyCustomer: missing row");
 			return;
 		  }
 
 		  const payload = {
-			action: "suggest_time",
-			orderId,
-			proposedTime: proposedIso
+			order_id: row.dataset.orderId,                 // <-- no Number()
+			order_ref: row.dataset.orderRef,
+			name: row.dataset.name,
+			email: row.dataset.email,
+			phone: row.dataset.phone,
+			total: Number(row.dataset.total || 0),
+			communication_preference: row.dataset.communicationPreference || "email",
+			...extra
 		  };
-		  console.log("Suggest payload:", payload);
 
-		  const result = await callOrderAction(payload);
+		  let url = "";
+		  if (mode === "time_confirmed") url = "/notify-time-confirmed";
+		  if (mode === "time_suggested") url = "/notify-time-suggested";
+		  if (mode === "time_declined")  url = "/notify-time-declined";
 
-		  if (result?.success) {
-			alert("Suggested time sent to customer.");
-			location.reload();
+		  try {
+			const res = await fetch(NOTIFY_API_BASE + url, {
+			  method: "POST",
+			  headers: { "Content-Type": "text/plain" },
+			  body: JSON.stringify(payload)
+			});
+
+			console.log(`[notifyCustomer] ${mode}:`, res.status, payload);
+		  } catch (err) {
+			console.error("notifyCustomer failed:", err);
 		  }
-		  return;
 		}
 
 
-		  // DECLINE – Cancel truly cancels
-		  if (btn.classList.contains("btn-decline")) {
-			const reason = window.prompt("Reason for declining? (optional):");
-			if (reason === null) {
-			  // User pressed Cancel or Esc – do NOT decline
-			  return;
-			}
 
-			const result = await callOrderAction({
-			  action: "decline",
-			  orderId,
-			  reason: reason.trim()
-			});
 
-			if (result?.success) {
-			  alert("Order declined. Customer notified.");
-			  location.reload();
-			}
-			return;
-		  }
+/* -----------------------------------------------------------
+   SINGLE GLOBAL CLICK HANDLER — Accept / Decline / Suggest
+----------------------------------------------------------- */
+document.addEventListener("click", async (event) => {
+  const btn = event.target.closest("button");
+  if (!btn) return;
 
-		  // MARK PAID – confirm first
-		  if (btn.classList.contains("btn-paid")) {
-			const ok = window.confirm("Mark this order as paid?");
-			if (!ok) return;
+  const orderId = btn.dataset.orderId;
+  if (!orderId) return;
 
-			const result = await callOrderAction({
-			  action: "mark_paid",
-			  orderId
-			});
+  const row = btn.closest("tr");
 
-			if (result?.success) {
-			  alert("Order marked as paid.");
-			  location.reload();
-			}
-			return;
-		  }
-		});
+  /* ---------------- ACCEPT ORDER ---------------- */
+	  if (btn.classList.contains("btn-accept")) {
+	  const result = await callOrderAction({ action: "accept", orderId });
+	  if (result?.success) {
+		await notifyCustomer("time_confirmed", row);
+		alert("Order accepted. Customer notified.");
+		location.reload();
+	  }
+	  return;
+	}
+
+
+  /* ---------------- DECLINE ORDER ---------------- */
+  if (btn.classList.contains("btn-decline")) {
+    const reason = window.prompt("Reason for declining? (optional):");
+    if (reason === null) return; // cancel pressed
+
+    const result = await callOrderAction({
+      action: "decline",
+      orderId,
+      reason: reason.trim()
+    });
+
+    if (result?.success) {
+      await notifyCustomer("time_declined", row);
+      alert("Order declined. Customer notified.");
+      location.reload();
+    }
+    return;
+  }
+
+
+  /* ---------------- SUGGEST NEW TIME ---------------- */
+  if (btn.classList.contains("btn-suggest")) {
+    const input = row.querySelector(".suggest-time-input");
+    const timeVal = input?.value || "";
+
+    if (!timeVal) {
+      alert("Please choose a time first.");
+      return;
+    }
+
+    // Build datetime from original order date + selected time
+    const base = new Date(row.dataset.createdAt);
+    const [hh, mm] = timeVal.split(":");
+    base.setHours(Number(hh), Number(mm), 0, 0);
+    const proposedIso = base.toISOString();
+
+    const result = await callOrderAction({
+      action: "suggest_time",
+      orderId,
+      proposedTime: proposedIso
+    });
+
+    if (result?.success) {
+      await notifyCustomer("time_suggested", row, {
+		preferred_time: proposedIso
+      });
+      alert("Suggested time sent to customer.");
+      location.reload();
+    }
+    return;
+  }
+
+
+  /* ---------------- MARK PAID ---------------- */
+  if (btn.classList.contains("btn-paid")) {
+    if (!confirm("Mark this order as paid?")) return;
+
+    const result = await callOrderAction({
+      action: "mark_paid",
+      orderId
+    });
+
+    if (result?.success) {
+      alert("Order marked as paid.");
+      location.reload();
+    }
+    return;
+  }
+
+
+  /* ---------------- MARK COMPLETED / COLLECTED ---------------- */
+  if (btn.classList.contains("btn-complete")) {
+    if (!confirm("Mark this order as completed/collected?")) return;
+
+    const result = await callOrderAction({
+      action: "complete",
+      orderId
+    });
+
+    if (result?.success) {
+      alert("Order marked as completed.");
+      location.reload();
+    }
+    return;
+  }
+});
+
 
 
 
