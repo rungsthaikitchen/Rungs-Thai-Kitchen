@@ -469,35 +469,42 @@
 		  }
 		}
 
-				function fmtDisplayTime(order) {
-		  // If status is confirmed and we have a proposed_time, treat that as the confirmed time
-		  let src;
+				function fmtDisplayTime(o) {
+		  // Use confirmed / requested booking time, never created_at
+		  const preferred = o.preferred_time;
+		  const proposed  = o.proposed_time;
 
-		  if (order.status === 'confirmed' && order.proposed_time) {
-			src = order.proposed_time;
-		  } else if (order.proposed_time) {
-			// otherwise show the customer's requested / proposed time
-			src = order.proposed_time;
-		  } else {
-			// fallback to when the order was created
-			src = order.created_at;
+		  let raw = null;
+		  let suffix = "";
+
+		  if (preferred) {
+			// This is either the original requested time or a confirmed suggested time
+			raw = preferred;
+			suffix = ""; // confirmed, so no label
+		  } else if (proposed) {
+			// We've suggested a time but it's not accepted yet
+			raw = proposed;
+			suffix = " (proposed)";
 		  }
 
-		  if (!src) return '';
-
-		  try {
-			const d = new Date(src);
-			return d.toLocaleString('en-GB', {
-			  weekday: 'short',
-			  day: '2-digit',
-			  month: 'short',
-			  hour: '2-digit',
-			  minute: '2-digit',
-			});
-		  } catch {
-			return src;
+		  if (!raw) {
+			// No booking time at all – show a clear placeholder
+			return "No time set";
 		  }
+
+		  const d = new Date(raw);
+		  if (Number.isNaN(d.getTime())) {
+			return "No time set";
+		  }
+
+		  const formatted = d.toLocaleString([], {
+			dateStyle: "short",
+			timeStyle: "short",
+		  });
+
+		  return formatted + suffix;
 		}
+
 
 
 
@@ -580,61 +587,108 @@
 		  cancelled: 'Cancelled'
 		};
 
-// ---------- Print ticket ----------
-function printTicket(o){
-  const c = o.customers || {};
-  const w = window.open('', 'PRINT', 'height=700,width=600');
+			// ---------- Print ticket ----------
+			function printTicket(o) {
+		  const c = o.customers || {};
+		  const items = o.order_items || [];
 
-  const lines = (o.order_items || []).map(it => {
-    const mods = (it.modifiers || []).map(m => m.name).join(', ');
-    const spice = (it.spice == null) ? '' : ' ' + '🌶️'.repeat(Math.max(0, Math.min(3, Number(it.spice))));
-    return `
-      <tr>
-        <td style="padding:6px 0">
-          <strong>${it.name}</strong> × ${it.qty}${spice}
-          ${mods ? `<div style="font-size:12px;color:#666">Mods: ${mods}</div>`:''}
-        </td>
-        <td style="padding:6px 0;text-align:right">
-          £${(Number(it.unit_price)*Number(it.qty)).toFixed(2)}
-        </td>
-      </tr>
-    `;
-  }).join('');
+		  const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
 
-  const html = `
-    <html>
-    <head>
-      <title>Order #${o.id}</title>
-      <style>
-        body{font-family:ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto; font-size:14px; margin:24px;}
-        h1{font-size:18px;margin:0}
-        .muted{color:#6b7280}
-        table{width:100%;border-collapse:collapse;margin-top:10px}
-        td{border-bottom:1px dashed #ddd}
-      </style>
-    </head>
-    <body onload="window.print(); setTimeout(function(){ window.close(); }, 300)">
-      <h1>Rung’s Thai Kitchen — Ticket</h1>
-      <div class="muted">Order #${o.id} • ${new Date(o.created_at).toLocaleString()}</div>
-      <div style="margin-top:8px">
-        <div><strong>${(o.order_type || 'collection').toUpperCase()}</strong></div>
-        <div>${c.full_name || ''} • ${c.phone || ''}</div>
-        <div>${c.address || ''}</div>
-      </div>
-      <table>${lines}</table>
-      <div style="margin-top:10px;border-top:1px dashed #ddd;padding-top:8px">
-        <div>Subtotal: £${Number(o.subtotal||0).toFixed(2)}</div>
-        <div>Delivery: £${Number(o.delivery_fee||0).toFixed(2)}</div>
-        <div><strong>Total: £${(Number(o.subtotal||0)+Number(o.delivery_fee||0)).toFixed(2)}</strong></div>
-      </div>
-      <div style="margin-top:8px"><em>Notes:</em> ${o.notes || '—'}</div>
-    </body>
-    </html>
-  `;
+		  const rawTime = o.preferred_time || o.proposed_time || null;
+		  const bookingTime = rawTime
+			? new Date(rawTime).toLocaleString([], {
+				dateStyle: "medium",
+				timeStyle: "short",
+			  })
+			: "No time set";
 
-  w.document.write(html);
-  w.document.close();
-}
+		  const orderType = (o.order_type || "collection").toUpperCase();
+		  const subtotal = Number(o.subtotal || 0);
+		  const delivery = Number(o.delivery_fee || 0);
+		  const total = subtotal + delivery;
+
+		  // ESC/POS COMMANDS
+		  const ESC = "\x1B";
+		  const GS  = "\x1D";
+
+		  const BIG = ESC + "!" + "\x38";   // Double height + double width + bold
+		  const LARGE = ESC + "!" + "\x20"; // Double height
+		  const NORMAL = ESC + "!" + "\x00";
+
+		  let text = "";
+
+		  // BIG RTK REF
+		  text += BIG + rtkRef + "\n\n";
+
+		  // Larger customer details
+		  text += LARGE + (c.full_name || "") + "\n";
+		  text += (c.phone || "") + "\n\n";
+
+		  // Order type + time
+		  text += LARGE + `TYPE: ${orderType}\n`;
+		  text += `TIME: ${bookingTime}\n\n`;
+
+		  // Address for delivery
+		  if (orderType === "DELIVERY" && c.address) {
+			text += LARGE + "ADDRESS:\n";
+			text += NORMAL + c.address + "\n\n";
+		  }
+
+		  // Items
+		  text += LARGE + "ITEMS:\n";
+		  text += NORMAL;
+
+		  items.forEach(it => {
+			text += `${it.qty}× ${it.name}\n`;
+
+			if (it.modifiers && it.modifiers.length) {
+			  it.modifiers.forEach(m => {
+				text += `   + ${m.name}\n`;
+			  });
+			}
+
+			text += "\n";
+		  });
+
+		  // Notes
+		  if (o.notes) {
+			text += LARGE + "NOTES:\n";
+			text += NORMAL + o.notes + "\n\n";
+		  }
+
+		  // Total
+		  text += LARGE + `TOTAL: £${total.toFixed(2)}\n\n`;
+
+		  // Cut
+		  text += GS + "V" + "\x00";
+
+		  // ESCAPE FOR HTML
+		  const safeText = text
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;");
+
+		  // PRINT USING A POPUP
+		 const w = window.open("", "PRINT", "height=800,width=600");
+			  w.document.write(`
+				<!doctype html>
+				<html>
+				  <head><title>${rtkRef}</title></head>
+				  <body onload="window.focus(); window.print();">
+					<pre style="
+					  font-family: 'Courier New', monospace;
+					  font-size: 22pt;
+					  line-height: 1.4;
+					  white-space: pre;
+					  margin: 0;
+					">${safeText}</pre>
+				  </body>
+				</html>
+			  `);
+			  w.document.close();
+			}
+
+
 
 	
 // ---------- Render ----------
@@ -778,6 +832,7 @@ async function updateOrderStatus(orderId, newStatus) {
 				order_ref,
 				created_at,
 				proposed_time,
+				preferred_time,
 				order_type,
 				subtotal,
 				delivery_fee,
