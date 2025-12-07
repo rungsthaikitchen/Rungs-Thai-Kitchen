@@ -2097,10 +2097,19 @@ body.menu-open .menu-fab {
 
         <!-- Preferred time -->
         <div class="field">
-          <label for="cust-preferred-time">Preferred collection/delivery time</label>
-          <input id="cust-preferred-time" name="preferred_time" type="datetime-local" class="input" step="300">
-          <div class="muted small">We’ll do our best to meet this time. We’ll contact you to confirm.</div>
-        </div>
+		  <label for="cust-preferred-time">Preferred collection/delivery time</label>
+		  <input id="cust-preferred-time" name="preferred_time" type="datetime-local" class="input" step="300">
+
+		  <label style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+			<input type="checkbox" id="cust-asap" name="asap_requested">
+			As soon as possible
+		  </label>
+
+		  <div class="muted small">
+			Choose a time, or tick “As soon as possible” and we’ll offer you the earliest available time.
+		  </div>
+		</div>
+
 
         <div class="field">
           <label for="cust-notes">Notes (optional)</label>
@@ -2305,7 +2314,7 @@ const EXTRAS = [
     // ---------- Data ----------
     const MENU_CATEGORIES = [
       { id:'starters', title:'Starter', allowExtras:false, items:[
-        { id: 'veg-spring-rolls', name: 'Vegetable Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of glass noodles and vegetables, served with a sweet chilli sauce.', price: 5.50, img: 'images/SpringRoll.jpg',  allergens: ['gluten', 'soya','molluscs','mustard','celery'] },
+       // { id: 'veg-spring-rolls', name: 'Vegetable Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of glass noodles and vegetables, served with a sweet chilli sauce.', price: 5.50, img: 'images/SpringRoll.jpg',  allergens: ['gluten', 'soya','molluscs','mustard','celery'] },
         { id: 'chicken-satay', name: 'Chicken Satay', desc: 'Tender chicken pieces marinated in a fragrant blend of turmeric, lemongrass, and spices. Served with a peanut sauce.', price: 6.50, img: 'images/Satay.jpg', allergens: ['peanuts','soya','mustard'] },
         { id: 'prawn-crackers', name: 'Prawn Crackers', desc: 'A light and crispy snack made from tapioca flour, shrimp, and seasonings. Served with sweet chilli sauce.', price: 2.50, img: 'images/PrawnCrackers.jpg', allergens: ['shellfish','gluten'] },
         { id: 'moo-ping', name: 'Pork Skewer (Moo Ping)', desc: 'Thai grilled pork skewers marinated in a sweet and savoury sauce.', price: 6.50, img: 'images/mooping.jpg', allergens: ['fish','soya','dairy'] },
@@ -2339,7 +2348,7 @@ const EXTRAS = [
       { id:'stir-fry', title:'Stir Fry',allowExtras:true,  items:[
         { id: 'stir-basil', name: 'Stir Fried Chilli & Basil (Pad Kra Pao)🌶️🌶️', desc: 'Street food classic, its a spicy, savoury Thai stir-fry of usually minced meat with garlic, chilies, and holy basil', price: 8.50, img: 'images/Kaprow.jpeg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','gluten','molluscs'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-tofu','extra-veg','extra-egg'] },
         { id: 'stir-ginger', name: 'Stir Fried Ginger (Pad Khing)🌶️', desc: 'A stir-fried dish flavoured with fresh ginger, spring onions, onions, mushrooms and chilli.', price: 8.00, img: 'images/padkhing.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['soya','gluten','celery','mustard','shellfish'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'stir-cashew', name: 'Stir Fried Cashew Nuts', desc: 'A vibrant and flavorful stir-fry featuring crisp vegetables tossed in a savoury sauce. Finished with the rich, buttery crunch of toasted cashew nuts', price: 8.50, img: 'images/cashew.jpg', allowedModifiers: ['batter-chicken','tofu','vegetable' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['tree_nuts','soya','sesame','celery','mustard','shellfish'], allowedExtras: ['extra-bchicken','extra-tofu','extra-veg'] },
+        //{ id: 'stir-cashew', name: 'Stir Fried Cashew Nuts', desc: 'A vibrant and flavorful stir-fry featuring crisp vegetables tossed in a savoury sauce. Finished with the rich, buttery crunch of toasted cashew nuts', price: 8.50, img: 'images/cashew.jpg', allowedModifiers: ['batter-chicken','tofu','vegetable' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['tree_nuts','soya','sesame','celery','mustard','shellfish'], allowedExtras: ['extra-bchicken','extra-tofu','extra-veg'] },
         { id: 'stir-sweetsour', name: 'Sweet & Sour (Pad Priew Wan)', desc: 'Thai sweet and sour stir-fry dish featuring vegetables such as cucumber, tomatoes, onions, and bell peppers in a tangy, sweet, and savoury sauce.', price: 8.00, img: 'images/sweetsour.jpg', allowedModifiers: ['batter-chicken','tofu','vegetable' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['soya'], allowedExtras: ['extra-bchicken','extra-tofu','extra-veg'] },
         { id: 'stir-yellow', name: 'Stir Fried Yellow Curry (Pad Pong Karee)', desc: 'Thai stir-fry dish made with a flavourful, savoury sauce of yellow curry powder, coconut milk, and egg, mixed with vegetables such as onions, bell peppers, and green onions', price: 8.50, img: 'images/padpong.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','soya','mustard','dairy','shellfish','celery'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
         { id: 'stir-chilli', name: 'Stir Fried Chilli Paste (Pad Nam Prik Pao)🌶️🌶️', desc: 'A medium stir-fry, but dont let the chilli paste alarm you, it is not too spicy!', price: 8.00, img: 'images/padnamprikpao.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','fish','gluten','mustard','celery'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
@@ -3466,7 +3475,7 @@ function closeMenuOverlay() {
 // (no extra closers past here)
 }); 
 
-// end DOMContentLoaded
+// end Loaded
 
 
 
@@ -3801,8 +3810,8 @@ if (preferredTimeInput) {
     const deliveryNote = document.getElementById('delivery-note');
     const orderMsg = document.getElementById('order-msg');
     const openCheckoutBtn = document.getElementById('open-checkout');
-	
-    const orderTypeRadios = document.querySelectorAll('input[name="order-type"]');
+
+	const orderTypeRadios = document.querySelectorAll('input[name="order-type"]');
     let checkoutBaseSubtotal = 0;
 
     function calcDeliveryFee(subtotal, orderType){
@@ -3846,8 +3855,8 @@ if (preferredTimeInput) {
 	  recomputeCheckoutTotals();        // you already have this
 	  updateAddressRequirement();       // add this
 	}));
-
 	
+		
 // ====== CONFIG YOU CAN EDIT ======
 const OPEN_DAYS = [0,3,4,5,6]; // Sun=0, Mon=1, Tue=2, Wed=3, Thu=4, Fri=5, Sat=6  (open Wed–Sun)
 const OPEN_WINDOW = { start: "17:00", end: "21:00" }; // local time, 24h
@@ -3926,68 +3935,11 @@ function nextAllowed(from){
   return null;
 }
 
-
-	
-	// run on checkout open (after you set the default radio)
-	function openCheckout(subtotal){
-  checkoutBaseSubtotal = Math.round(subtotal*100)/100;
-  checkoutMsg.textContent = '';
-  document.querySelector('input[name="order-type"][value="collection"]').checked = true;
-  recomputeCheckoutTotals();
-
-  const t = document.getElementById('cust-preferred-time');
-  if (t){
-    // force native 5-min increments
-    t.setAttribute('step', '300');
-
-    // compute "now + 30m" minimum, then snap to next *allowed* 5-min slot
-    const now = new Date();
-    now.setMinutes(now.getMinutes() + 30);
-    const minCandidate = roundTo5Min(now);
-    const firstAllowed = nextAllowed(minCandidate) || minCandidate;
-
-    const pad = n => String(n).padStart(2,'0');
-    const toLocalInput = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-
-    // Set min and prefill the field to the first allowed slot
-    t.min = toLocalInput(firstAllowed);
-    t.value = toLocalInput(firstAllowed);
-
-    // Live validation + snapping on change
-    const onChoose = () => {
-      if (!t.value) return;
-      const chosen = new Date(t.value);
-      const rounded = roundTo5Min(chosen);
-      if (!isAllowed(rounded)){
-        const n = nextAllowed(rounded);
-        if (n){
-          t.value = toLocalInput(n);
-          checkoutMsg.style.color = '#b02a2a';
-          checkoutMsg.textContent = 'That time is unavailable; we’ve moved you to the next available slot.';
-        } else {
-          checkoutMsg.style.color = '#b02a2a';
-          checkoutMsg.textContent = 'No available time slots found. Please choose a different day.';
-        }
-      } else {
-        checkoutMsg.textContent = '';
-      }
-    };
-    t.removeEventListener('change', onChoose); // avoid double-binding on repeated opens
-    t.addEventListener('change', onChoose);
-    t.addEventListener('input', onChoose);
-  }
-
-  checkoutModal.style.display = 'flex';
-}
-
-// make sure others can see it even if they run earlier
-window.openCheckout = openCheckout;
-	
 // ---- Preferred Time: any date + 5-minute steps + opening hours ----
 (function preferredTimeHelper(){
   // Config
   const STEP_SECONDS   = 300;  // 5 minutes
-  const LEAD_MINUTES   = 30;   // prep time when picking "today"
+  const LEAD_MINUTES   = 10;   // prep time when picking "today"
   const OPEN_H = 17, OPEN_M = 0;    // 17:00
   const CLOSE_H = 21, CLOSE_M = 30; // 21:30
 
@@ -3999,7 +3951,13 @@ window.openCheckout = openCheckout;
     const ms = 5 * 60 * 1000;
     return new Date(Math.ceil(d.getTime() / ms) * ms);
   }
-  function sameYMD(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+  function sameYMD(a,b){
+    return (
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth()    === b.getMonth() &&
+      a.getDate()     === b.getDate()
+    );
+  }
   function windowFor(date){
     const open  = new Date(date);  open.setHours(OPEN_H,  OPEN_M,  0, 0);
     const close = new Date(date); close.setHours(CLOSE_H, CLOSE_M, 0, 0);
@@ -4010,14 +3968,11 @@ window.openCheckout = openCheckout;
   function normalizePreferredTime(input){
     if (!input) return;
 
-    // If user hasn't picked anything yet, keep current value or set default below.
     let val = input.value ? new Date(input.value) : new Date();
 
-    // Build open/close window for the *selected date*
     const pickedDay = input.value ? new Date(val) : new Date();
     const { open, close } = windowFor(pickedDay);
 
-    // If the selected date is today, enforce lead time (now + LEAD_MINUTES)
     const now = new Date();
     const minToday = roundUpTo5(new Date(now.getTime() + LEAD_MINUTES*60000));
 
@@ -4060,52 +4015,58 @@ window.openCheckout = openCheckout;
   };
 })();
 
+// Single, clean checkout opener
+function openCheckout(subtotal){
+  checkoutBaseSubtotal = Math.round(subtotal*100)/100;
+  checkoutMsg.textContent = '';
+  checkoutMsg.style.color = '';
+  const orderTypeDefault = document.querySelector('input[name="order-type"][value="collection"]');
+  if (orderTypeDefault) orderTypeDefault.checked = true;
+  recomputeCheckoutTotals();
 
+  // Set 5-minute step and opening hours on the time input
+  if (typeof setPreferredTimeConstraints === 'function') {
+    setPreferredTimeConstraints();
+  }
 
-    function openCheckout(subtotal){
-	  checkoutBaseSubtotal = Math.round(subtotal*100)/100;
-	  checkoutMsg.textContent = '';
-	  document.querySelector('input[name="order-type"][value="collection"]').checked = true;
-	  recomputeCheckoutTotals();
+  checkoutModal.style.display = 'flex';
+}
 
-	  // ✅ set 5-minute step and opening hours
-	  setPreferredTimeConstraints();
+function closeCheckout(){
+  if (checkoutModal) checkoutModal.style.display = 'none';
+}
 
-	  checkoutModal.style.display = 'flex';
-	}
+// safe listeners
+if (checkoutClose) {
+  checkoutClose.addEventListener('click', closeCheckout);
+}
+if (checkoutCancel) {
+  checkoutCancel.addEventListener('click', closeCheckout);
+}
+if (checkoutModal) {
+  checkoutModal.addEventListener('click', (e) => {
+    if (e.target === checkoutModal) closeCheckout();
+  });
+}
 
-			function closeCheckout(){
-		  if (checkoutModal) checkoutModal.style.display = 'none';
-		}
-
-		// safe listeners
-		if (checkoutClose) {
-		  checkoutClose.addEventListener('click', closeCheckout);
-		}
-		if (checkoutCancel) {
-		  checkoutCancel.addEventListener('click', closeCheckout);
-		}
-		if (checkoutModal) {
-		  checkoutModal.addEventListener('click', (e) => {
-			if (e.target === checkoutModal) closeCheckout();
-		  });
-		}
-
-		// Open checkout (safe)
-		if (openCheckoutBtn) {
-		  openCheckoutBtn.addEventListener('click', () => {
-			if (!window.basket || window.basket.length === 0) {
-			  if (orderMsg) {
-				orderMsg.textContent = 'Your basket is empty.';
-				orderMsg.style.color = '#b02a2a';
-			  }
-			  return;
-			}
-			if (orderMsg) orderMsg.textContent = '';
-			const subtotal = window.basket.reduce((s, i) => s + i.unitPrice * i.qty, 0);
-			openCheckout(subtotal);
-		  });
-		}
+// Open checkout (safe)
+if (openCheckoutBtn) {
+  openCheckoutBtn.addEventListener('click', () => {
+    if (!window.basket || window.basket.length === 0) {
+      if (orderMsg) {
+        orderMsg.textContent = 'Your basket is empty.';
+        orderMsg.style.color = '#b02a2a';
+      }
+      return;
+    }
+    if (orderMsg) {
+      orderMsg.textContent = '';
+      orderMsg.style.color = '';
+    }
+    const subtotal = window.basket.reduce((s, i) => s + i.unitPrice * i.qty, 0);
+    openCheckout(subtotal);
+  });
+}
 
 	
 		// ---------- Helpers to call Supabase RPC & REST ----------
@@ -4272,46 +4233,81 @@ checkoutForm.addEventListener('submit', async (e) => {
   checkoutMsg.textContent = 'Placing order…';
 
   try {
-    const name    = document.getElementById('cust-name').value.trim();
-    const email   = document.getElementById('cust-email').value.trim();
-    const phone   = document.getElementById('cust-phone').value.trim();
-    const address = document.getElementById('cust-address').value.trim();
+    const name      = document.getElementById('cust-name').value.trim();
+    const email     = document.getElementById('cust-email').value.trim();
+    const phone     = document.getElementById('cust-phone').value.trim();
+    const address   = document.getElementById('cust-address').value.trim();
     const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
-    const notes   = document.getElementById('cust-notes').value.trim() || null;
+    const notes     = document.getElementById('cust-notes').value.trim() || null;
 
-    const preferredTimeRaw = document.getElementById('cust-preferred-time').value;
+    // ASAP checkbox
+    const asapCheckbox   = document.getElementById('cust-asap');
+    const asapRequested  = !!(asapCheckbox && asapCheckbox.checked);
+
+    // Preferred time input
+    const preferredInput   = document.getElementById('cust-preferred-time');
+    const preferredTimeRaw = preferredInput ? preferredInput.value : "";
     const selectedLocal    = preferredTimeRaw ? new Date(preferredTimeRaw) : null;
-    const preferredTimeISO = preferredTimeRaw ? new Date(preferredTimeRaw).toISOString() : null;
-	const commPrefInput = document.querySelector('input[name="communication_preference"]:checked');
-	const communicationPreference = commPrefInput ? commPrefInput.value : 'email';
 
-	
-    if (!name){  checkoutMsg.style.color='#b02a2a'; checkoutMsg.textContent='Please enter your full name.';  return; }
-    if (!email){ checkoutMsg.style.color='#b02a2a'; checkoutMsg.textContent='Please enter your email.';      return; }
-    if (!phone){ checkoutMsg.style.color='#b02a2a'; checkoutMsg.textContent='Please enter your phone number.'; return; }
+    // Only store a preferred_time in DB if NOT ASAP
+    const preferredTimeISO =
+      (!asapRequested && selectedLocal) ? selectedLocal.toISOString() : null;
+
+    // Communication preference (sms / email)
+    const commPrefInput = document.querySelector(
+      'input[name="communication_preference"]:checked'
+    );
+    const communicationPreference = commPrefInput
+      ? commPrefInput.value
+      : 'email';
+
+    // ---------- Basic validation ----------
+    if (!name){
+      checkoutMsg.style.color='#b02a2a';
+      checkoutMsg.textContent='Please enter your full name.';
+      return;
+    }
+    if (!email){
+      checkoutMsg.style.color='#b02a2a';
+      checkoutMsg.textContent='Please enter your email.';
+      return;
+    }
+    if (!phone){
+      checkoutMsg.style.color='#b02a2a';
+      checkoutMsg.textContent='Please enter your phone number.';
+      return;
+    }
     if (orderType === 'delivery' && !address){
       checkoutMsg.style.color='#b02a2a';
       checkoutMsg.textContent='Please enter your delivery address.';
       document.getElementById('cust-address').focus();
       return;
     }
-    if (!selectedLocal || !isAllowed(roundTo5Min(selectedLocal))) {
-      checkoutMsg.style.color = '#b02a2a';
-      checkoutMsg.textContent = 'Please choose an available date/time during our opening hours.';
-      return;
+
+    // Only enforce time if NOT ASAP
+    if (!asapRequested) {
+      if (!selectedLocal || !isAllowed(roundTo5Min(selectedLocal))) {
+        checkoutMsg.style.color = '#b02a2a';
+        checkoutMsg.textContent =
+          'Please choose an available date/time during our opening hours.';
+        return;
+      }
     }
 
+    // ---------- Basket + totals ----------
     const itemsSnapshot = basket.map(i => ({ ...i }));
     const subtotal = itemsSnapshot.reduce((s,i)=> s + i.unitPrice * i.qty, 0);
-    const deliveryFee = (orderType === 'delivery' && subtotal < 20) ? 3.00 : 0.00;
+    const deliveryFee =
+      (orderType === 'delivery' && subtotal < 20) ? 3.00 : 0.00;
 
     function fail(step, err){
       console.error(`[Checkout] ${step} failed:`, err);
       checkoutMsg.style.color = '#b02a2a';
-      checkoutMsg.textContent = `${step} failed: ${err?.message || err?.hint || 'Unknown error'}`;
+      checkoutMsg.textContent =
+        `${step} failed: ${err?.message || err?.hint || 'Unknown error'}`;
     }
 
-    // --- get or create the customer (with 1 retry) ---
+    // ---------- Get or create customer ----------
     let customerId = null;
     try {
       const row = await getOrCreateCustomer({
@@ -4323,7 +4319,8 @@ checkoutForm.addEventListener('submit', async (e) => {
       customerId = row?.id;
     } catch (err) {
       checkoutMsg.style.color = '#b02a2a';
-      checkoutMsg.textContent = 'Saving your details had a hiccup — trying again…';
+      checkoutMsg.textContent =
+        'Saving your details had a hiccup — trying again…';
       const row = await getOrCreateCustomer({
         name,
         email: email?.trim().toLowerCase() || null,
@@ -4338,7 +4335,7 @@ checkoutForm.addEventListener('submit', async (e) => {
       return;
     }
 
-    // 2) Get global sequential order ref
+    // ---------- Global sequential order ref ----------
     let orderRef = 'RTK-???';
     try {
       orderRef = await getNextOrderRef();
@@ -4347,33 +4344,53 @@ checkoutForm.addEventListener('submit', async (e) => {
       orderRef = 'RTK-' + Date.now();
     }
 
-		   // NEW: Get payment preference from checkout form
-		const paymentPreferenceInput = document.querySelector(
-		  'input[name="paymentPreference"]:checked'
-		);
-		const payment_preference = paymentPreferenceInput
-		  ? paymentPreferenceInput.value
-		  : 'on_arrival';
+    // ---------- Payment preference ----------
+    const paymentPreferenceInput = document.querySelector(
+      'input[name="paymentPreference"]:checked'
+    );
+    const payment_preference = paymentPreferenceInput
+      ? paymentPreferenceInput.value
+      : 'on_arrival';
 
-		// 3) Create order (attempt with preferred_time; if column missing, retry without)
-		let orderId = null;
-		const baseOrderPayload = {
-		  customer_id: customerId,
-		  subtotal: Number(subtotal.toFixed(2)),
-		  delivery_fee: Number(deliveryFee.toFixed(2)),
-		  order_type: orderType,
-		  notes,
-		  order_ref: orderRef,
-		  payment_preference,               // existing
-		  communication_preference: communicationPreference, // ✅ NEW
-		};
+    // ---------- Create order ----------
+    let orderId = null;
+    const baseOrderPayload = {
+      customer_id: customerId,
+      subtotal: Number(subtotal.toFixed(2)),
+      delivery_fee: Number(deliveryFee.toFixed(2)),
+      order_type: orderType,
+      notes,
+      order_ref: orderRef,
+      payment_preference,
+      preferred_time: preferredTimeISO,       // null if ASAP
+      asap_requested: asapRequested,         // bool
+      communication_preference: communicationPreference
+    };
 
+    let { data: order, error: orderErr } = await supabase
+      .from('orders')
+      .insert([ baseOrderPayload ])
+      .select('id')
+      .single();
 
-		let { data: order, error: orderErr } = await supabase
-		  .from('orders')
-		  .insert([{ ...baseOrderPayload, preferred_time: preferredTimeISO }])
-		  .select('id')
-		  .single();
+    // Old fallback for missing columns (kept just in case)
+    if (orderErr && orderErr.code === '42703') {
+      const retry = await supabase
+        .from('orders')
+        .insert([{
+          ...baseOrderPayload,
+          preferred_time: undefined,  // drop unknown column
+        }])
+        .select('id')
+        .single();
+      if (retry.error) return fail('Create order', retry.error);
+      order = retry.data;
+    } else if (orderErr) {
+      return fail('Create order', orderErr);
+    }
+
+    orderId = order.id;
+
 
     if (orderErr && orderErr.code === '42703') {
       const retry = await supabase.from('orders').insert([ baseOrderPayload ]).select('id').single();
@@ -4413,7 +4430,8 @@ checkoutForm.addEventListener('submit', async (e) => {
 			order_type: orderType,
 			preferred_time: preferredTimeRaw,
 			total: subtotal + deliveryFee,
-			communication_preference: communicationPreference
+			communication_preference: communicationPreference,
+			asap_requested: asapRequested 
 		  })
 		});
 
