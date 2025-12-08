@@ -1735,11 +1735,158 @@ body.menu-open .menu-fab {
   z-index: 13001 !important;
 }
 
+<style>
+ html, body {
+  margin: 0;
+  padding: 0;
+}
+
+#kitchen-notice-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;   /* full viewport width */
+  height: 100vh;  /* full viewport height */
+  background-color: rgba(255, 255, 255, 0.8); /* your frosted white */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+/* Optional: prevent scrolling while overlay shown */
+body.overlay-open {
+  overflow: hidden;
+}
+
+  #kitchen-notice-overlay.kitchen-notice-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Card / modal */
+  .kitchen-notice-card {
+    background-color: rgba(255, 255, 255, 0.8);
+    color: #222;
+    max-width: 480px;
+    width: 100%;
+    border-radius: 1.25rem;
+    padding: 2rem 2.25rem;
+	position: relative;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    box-sizing: border-box;
+  }
+
+  /* Brand identity hooks (change to your brand colours) */
+  .kitchen-notice-card h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.6rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--brand-primary, #b22222); /* replace with your primary color */
+  }
+
+  .kitchen-notice-main {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .kitchen-notice-sub {
+    margin: 0 0 1.5rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  /* Optional logo */
+  .kitchen-notice-logo {
+    max-width: 140px;
+    height: auto;
+    margin: 0 auto 1rem;
+    display: block;
+  }
+
+  /* Button styled to match brand (tweak colours/border-radius) */
+  .kitchen-notice-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.65rem 1.75rem;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: var(--brand-primary, #b22222);
+    color: #fff;
+  }
+
+  .kitchen-notice-close:hover,
+  .kitchen-notice-close:focus-visible {
+    filter: brightness(1.05);
+    outline: none;
+  }
+  
+  #splash-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;   /* Always full viewport width */
+  height: 100vh;  /* Always full viewport height */
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999999;
+  margin: 0;
+  padding: 0;
+}
+
+/* Make the inner panel fill the whole overlay */
+.splash-inner {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;           /* remove rounded corners so it looks like a full page */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;    /* keep content centered vertically */
+  padding: 3rem 1.5rem;
+  box-sizing: border-box;
+}
+
+
+</style>
+
+
 		  </style>
 		</head>
 		<body>
-		<body>
+				  <!-- Kitchen notice overlay -->
+				<div id="kitchen-notice-overlay" role="dialog" aria-modal="true" aria-labelledby="kitchen-notice-title">
+				  <div class="kitchen-notice-card">
+					<!-- Optional logo (replace src with your logo and/or remove if not needed) -->
+					<img src="images/logotransparent2.png?v=3" alt="Rung's Thai Kitchen Logo" class="brand-logo">
+
+					<h2 id="kitchen-notice-title">Kitchen Closed Today</h2>
+					<p class="kitchen-notice-main">
+					  Rung's Thai Kitchen is closed today and will re-open at <strong>17:00 on Wednesday</strong>. Please feel free to view the menu and place a pre-order for a day when we are open
+					</p>
+					<button type="button" id="kitchen-notice-close" class="kitchen-notice-close">
+					  Continue to website
+					</button>
+				  </div>
+				</div>
+					<!-- /Kitchen notice overlay -->
 		  <div class="bg-parallax" aria-hidden="true"></div>
+
+			
+
 		  <div class="container">
 			<!-- your existing header / main / etc -->
 
@@ -1748,10 +1895,11 @@ body.menu-open .menu-fab {
 
 		
 
-		<body>
+		
 
 		  <!-- Status ticker (keep ONE of these) -->
-<body>
+
+
   <div id="status-ticker">
     <div class="ticker-inner">
       
@@ -4813,10 +4961,65 @@ console.info('Console levels forced');
 console.log = console.info = console.debug = console.warn = console.error = console.log.bind(console);
 </script>
 
+<script>
+  // Returns true if we are between:
+  // Sunday 21:00  and  Wednesday 12:00 (midday)
+  function isKitchenClosed(now) {
+    var day = now.getDay();    // 0=Sun, 1=Mon, 2=Tue, 3=Wed, ...
+    var hour = now.getHours();
+    var minute = now.getMinutes(); // not strictly needed here, but handy if you adjust times
 
+    // Sunday: from 21:00 onwards
+    if (day === 0 && hour >= 21) {
+      return true;
+    }
 
-</body>
-</html>
+    // Monday & Tuesday: all day
+    if (day === 1 || day === 2) {
+      return true;
+    }
+
+    // Wednesday: until 12:00 (12:00 and later = open)
+    if (day === 3 && hour < 12) {
+      return true;
+    }
+
+    // All other times: kitchen open
+    return false;
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var overlay = document.getElementById('kitchen-notice-overlay');
+    var closeBtn = document.getElementById('kitchen-notice-close');
+
+    if (!overlay || !closeBtn) return;
+
+    // Check schedule using the visitor's local time (browser time)
+    var now = new Date();
+
+    if (!isKitchenClosed(now)) {
+      // Outside the closed window -> remove overlay entirely
+      overlay.remove();
+      return;
+    }
+
+    // Inside the closed window -> show overlay
+    overlay.style.display = 'flex';
+    document.body.classList.add('overlay-open'); // if you're using this to lock scroll
+
+    function hideOverlay() {
+      overlay.remove();
+      document.body.classList.remove('overlay-open');
+    }
+
+    // Allow manual close
+    closeBtn.addEventListener('click', hideOverlay);
+
+    // OPTIONAL: keep or remove this if you still want the 10-second auto-hide
+    setTimeout(hideOverlay, 10000); // 10 seconds
+  });
+</script>
+
 
 
 

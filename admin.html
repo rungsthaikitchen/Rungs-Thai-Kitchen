@@ -1090,6 +1090,17 @@ const NOTIFY_API_BASE = "https://order-backend-production.up.railway.app";
 		  }
 		}
 
+		// We are closed Monday (1) and Tuesday (2). All other days are "working".
+			function nextWorkingDay(date) {
+			  const d = new Date(date);
+			  while (true) {
+				const day = d.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, ...
+				if (day !== 1 && day !== 2) {
+				  return d; // Wed, Thu, Fri, Sat, Sun
+				}
+				d.setDate(d.getDate() + 1);
+			  }
+			}
 
 
 
@@ -1150,39 +1161,62 @@ if (btn.classList.contains("btn-accept")) {
 
 
   /* ---------------- SUGGEST NEW TIME ---------------- */
-  if (btn.classList.contains("btn-suggest")) {
-    const input = row.querySelector(".suggest-time-input");
-    const timeVal = input?.value || "";
+		 if (btn.classList.contains("btn-suggest")) {
+		  const row = btn.closest("tr");
+		  const input = row ? row.querySelector(".suggest-time-input") : null;
+		  const suggestedTime = input ? input.value : ""; // "19:45"
 
-    if (!timeVal) {
-      alert("Please choose a time first.");
-      return;
-    }
+		  if (!suggestedTime) {
+			alert("Please choose a time first.");
+			return;
+		  }
 
-    // Build datetime from original order date + selected time
-    const base = new Date(row.dataset.createdAt);
-    const [hh, mm] = timeVal.split(":");
-    base.setHours(Number(hh), Number(mm), 0, 0);
-    const proposedIso = base.toISOString();
+		  const createdAt = row ? row.dataset.createdAt : null;
+		  const isAsap = row && row.dataset.asapRequested === "true";
 
-    const result = await callOrderAction({
-      action: "suggest_time",
-      orderId,
-      proposedTime: proposedIso
-    });
+		  let proposedIso;
+		  try {
+			let base = createdAt ? new Date(createdAt) : new Date();
 
-		 if (result?.success) {
-		  await notifyCustomer("time_suggested", row, {
-			proposed_time: proposedIso,
-			asap_requested: row.dataset.asapRequested === "true"
-		  });
+			if (isAsap) {
+			  // For ASAP orders, move to the next working day (we're closed Mon/Tue)
+			  base = nextWorkingDay(base);
+			}
 
-		  alert("Suggested time sent to customer.");
-		  location.reload();
+			const [hh, mm] = suggestedTime.split(":");
+			base.setHours(Number(hh) || 0, Number(mm) || 0, 0, 0);
+			proposedIso = base.toISOString();
+		  } catch (e) {
+			console.error("Failed to build proposedTime ISO:", e);
+			alert("Could not build the proposed time – please try again.");
+			return;
+		  }
+
+		  const payload = {
+			action: "suggest_time",
+			orderId,
+			proposedTime: proposedIso
+		  };
+		  console.log("Suggest payload:", payload);
+
+		  const result = await callOrderAction(payload);
+
+		  if (result?.success) {
+			// 🔔 For ASAP orders, send customer SMS directly from admin
+			if (isAsap) {
+			  await notifyCustomer("time_suggested", row, {
+				proposed_time: proposedIso,
+				asap_requested: true
+			  });
+			}
+
+			alert("Suggested time sent to customer.");
+			location.reload();
+		  }
+		  return;
 		}
 
-    return;
-  }
+
 
 
   /* ---------------- MARK PAID ---------------- */
