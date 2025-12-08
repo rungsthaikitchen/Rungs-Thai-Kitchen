@@ -2106,7 +2106,7 @@ body.menu-open .menu-fab {
 		  </label>
 
 		  <div class="muted small">
-			Choose a time, or tick “As soon as possible” and we’ll offer you the earliest available time.
+			Choose a time, or tick “As soon as possible” and we’ll offer you the earliest available time within our opening days (Weds to Sun, 17:00 - 21:00).
 		  </div>
 		</div>
 
@@ -3935,102 +3935,100 @@ function nextAllowed(from){
   return null;
 }
 
-// ---- Preferred Time: any date + 5-minute steps + opening hours ----
-(function preferredTimeHelper(){
-  // Config
-  const STEP_SECONDS   = 300;  // 5 minutes
-  const LEAD_MINUTES   = 10;   // prep time when picking "today"
-  const OPEN_H = 17, OPEN_M = 0;    // 17:00
-  const CLOSE_H = 21, CLOSE_M = 30; // 21:30
+// ---- Preferred time helpers ----
 
-  // Utils
-  const pad = n => String(n).padStart(2,'0');
-  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+// How many minutes from "now" before the earliest slot is allowed
+const LEAD_MINUTES = 10;
 
-  function roundUpTo5(d){
-    const ms = 5 * 60 * 1000;
-    return new Date(Math.ceil(d.getTime() / ms) * ms);
-  }
-  function sameYMD(a,b){
-    return (
-      a.getFullYear() === b.getFullYear() &&
-      a.getMonth()    === b.getMonth() &&
-      a.getDate()     === b.getDate()
-    );
-  }
-  function windowFor(date){
-    const open  = new Date(date);  open.setHours(OPEN_H,  OPEN_M,  0, 0);
-    const close = new Date(date); close.setHours(CLOSE_H, CLOSE_M, 0, 0);
-    return { open, close };
-  }
+/** Convert a Date to the value format of datetime-local input */
+function toLocalInputValue(d) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
+         `T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
-  // Normalize a datetime-local input's value to 5m grid and within open/close
-  function normalizePreferredTime(input){
-    if (!input) return;
+/**
+ * Starting from now + LEAD_MINUTES, find the next allowed slot
+ * using your existing nextAllowed/isAllowed logic.
+ */
+function findNextAllowedFromNow() {
+  const start = new Date();
+  start.setMinutes(start.getMinutes() + LEAD_MINUTES);
+  return nextAllowed(start);  // may return null if nothing within +30 days
+}
 
-    let val = input.value ? new Date(input.value) : new Date();
-
-    const pickedDay = input.value ? new Date(val) : new Date();
-    const { open, close } = windowFor(pickedDay);
-
-    const now = new Date();
-    const minToday = roundUpTo5(new Date(now.getTime() + LEAD_MINUTES*60000));
-
-    let proposed = roundUpTo5(val);
-
-    if (sameYMD(open, now)) {
-      // date is today
-      if (proposed < minToday) proposed = minToday;
-    }
-
-    // Clamp into opening window
-    if (proposed < open)  proposed = open;
-    if (proposed > close) proposed = close;
-
-    input.value = fmt(proposed);
-  }
-
-  // Public init to be called when opening checkout
-  window.setPreferredTimeConstraints = function setPreferredTimeConstraints(){
-    const input = document.getElementById('cust-preferred-time');
-    if (!input) return;
-
-    // Allow any date; just enforce 5-minute stepping
-    input.step = STEP_SECONDS;
-
-    // Default suggestion when modal opens:
-    const now = new Date();
-    const base = roundUpTo5(new Date(now.getTime() + LEAD_MINUTES*60000));
-    const { open, close } = windowFor(now);
-
-    let first = base;
-    if (first < open)  first = open;
-    if (first > close) first = open; // if too late today, suggest today's open; user can change date
-
-    input.value = fmt(first);
-
-    // Whenever user changes date/time, snap to grid & window of that day
-    input.addEventListener('change', () => normalizePreferredTime(input));
-    input.addEventListener('blur',   () => normalizePreferredTime(input));
-  };
-})();
 
 // Single, clean checkout opener
-function openCheckout(subtotal){
-  checkoutBaseSubtotal = Math.round(subtotal*100)/100;
+function openCheckout(subtotal) {
+  // 1. Basic totals housekeeping
+  checkoutBaseSubtotal = Math.round(subtotal * 100) / 100;
   checkoutMsg.textContent = '';
   checkoutMsg.style.color = '';
-  const orderTypeDefault = document.querySelector('input[name="order-type"][value="collection"]');
-  if (orderTypeDefault) orderTypeDefault.checked = true;
+  document.querySelector('input[name="order-type"][value="collection"]').checked = true;
   recomputeCheckoutTotals();
 
-  // Set 5-minute step and opening hours on the time input
-  if (typeof setPreferredTimeConstraints === 'function') {
-    setPreferredTimeConstraints();
+  // 2. Preferred time input setup
+  const t = document.getElementById('cust-preferred-time');
+  if (t) {
+    // enforce 5-minute steps
+    t.step = 300;
+
+    // 👉 Find the first allowed slot starting from now + LEAD_MINUTES
+    const firstAllowed = findNextAllowedFromNow();
+
+    if (!firstAllowed) {
+      // Nothing available in +30 days – very unlikely, but handle gracefully
+      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.textContent = 'No available time slots found. Please choose a different date.';
+      t.value = '';
+      t.min = '';
+    } else {
+      const val = toLocalInputValue(firstAllowed);
+      t.min = val;
+      t.value = val;
+    }
+
+    // Live validation + snapping on change
+    const onChoose = () => {
+      if (!t.value) return;
+      const chosen = new Date(t.value);
+      const rounded = roundTo5Min(chosen);
+
+      if (!isAllowed(rounded)) {
+        const next = nextAllowed(rounded);
+        if (next) {
+          const nv = toLocalInputValue(next);
+          t.value = nv;
+          t.min = nv;
+          checkoutMsg.style.color = '#b02a2a';
+          checkoutMsg.textContent =
+            'That time is unavailable; we’ve moved you to the next available slot.';
+        } else {
+          checkoutMsg.style.color = '#b02a2a';
+          checkoutMsg.textContent =
+            'No available time slots found. Please choose a different day.';
+        }
+      } else {
+        // valid slot picked
+        checkoutMsg.textContent = '';
+        checkoutMsg.style.color = '';
+      }
+    };
+
+    // Avoid double binding if openCheckout runs multiple times
+    t.removeEventListener('change', onChoose);
+    t.removeEventListener('input', onChoose);
+    t.addEventListener('change', onChoose);
+    t.addEventListener('input', onChoose);
   }
 
+  // 3. Show the modal
   checkoutModal.style.display = 'flex';
 }
+
+// Ensure other code can call it
+window.openCheckout = openCheckout;
+
 
 function closeCheckout(){
   if (checkoutModal) checkoutModal.style.display = 'none';
