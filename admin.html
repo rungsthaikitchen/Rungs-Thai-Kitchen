@@ -332,12 +332,23 @@
 
 		function getFilteredOrders() {
 		  if (!showTodayOnly) return currentOrders;
+
 		  const today = new Date();
-		  return currentOrders.filter((o) => {
-			const dt = new Date(o.created_at);
-			return isSameDay(dt, today);
+		  const y = today.getFullYear();
+		  const m = today.getMonth();
+		  const d = today.getDate();
+
+		  return currentOrders.filter(o => {
+			const dt = getBookingDate(o); // booking time (preferred/proposed/created)
+			if (!dt) return false;
+			return (
+			  dt.getFullYear() === y &&
+			  dt.getMonth() === m &&
+			  dt.getDate() === d
+			);
 		  });
 		}
+
 
 		
 
@@ -409,30 +420,99 @@
 	  const banner = document.getElementById('new-order-banner');
 	  if (banner) banner.remove();
 	}
+	
+				// ---- Desktop notification helpers ----
+			async function ensureNotificationPermission() {
+			  try {
+				if (!("Notification" in window)) {
+				  console.warn("Browser does not support notifications.");
+				  return false;
+				}
+				if (Notification.permission === "granted") return true;
+				if (Notification.permission === "denied") return false;
 
-	// Handle brand new orders + repeat alerts for unacknowledged ones
-	function handleNewOrders(newOrders) {
-	  // 1) Add any *brand new* orders into the unacknowledged set
-	  (newOrders || []).forEach(o => {
-		if (!acknowledgedOrderIds.has(o.id)) {
-		  unacknowledgedOrders.set(o.id, o);
+				const perm = await Notification.requestPermission();
+				return perm === "granted";
+			  } catch (e) {
+				console.error("Notification permission error:", e);
+				return false;
+			  }
+			}
+
+			function showNewOrderNotification(order) {
+			  if (!("Notification" in window)) return;
+
+			  const rtkRef = order.order_ref || `RTK-${String(order.id).slice(0, 8)}`;
+			  const orderType = (order.order_type || "collection").toUpperCase();
+
+			  const title = `New order ${rtkRef}`;
+			  const bodyLines = [];
+
+			  bodyLines.push(orderType);
+			  const c = order.customers || {};
+			  if (c.full_name) bodyLines.push(c.full_name);
+			  if (order.preferred_time) {
+				const d = new Date(order.preferred_time);
+				if (!Number.isNaN(d.getTime())) {
+				  bodyLines.push(
+					"Time: " +
+					  d.toLocaleString([], { dateStyle: "short", timeStyle: "short" })
+				  );
+				}
+			  }
+
+			  const body = bodyLines.join("\n");
+
+			  try {
+				const n = new Notification(title, {
+				  body,
+				  // icon: "/some-icon.png", // optional if you add one later
+				});
+
+				// Optional: click brings admin tab to front
+				n.onclick = () => {
+				  window.focus();
+				};
+			  } catch (e) {
+				console.error("Failed to show notification:", e);
+			  }
+			}
+
+			// ask for permission once when admin page loads
+			ensureNotificationPermission();
+
+
+		// Handle brand new orders + repeat alerts for unacknowledged ones
+		function handleNewOrders(newOrders) {
+		  const list = newOrders || [];
+
+		  // 1) Add any *brand new* orders into the unacknowledged set
+		  list.forEach(o => {
+			if (!unacknowledgedOrders.has(o.id)) {
+			  unacknowledgedOrders.set(o.id, o);
+			}
+		  });
+
+		  // 2) If there are NO unacknowledged orders, nothing to do
+		  if (unacknowledgedOrders.size === 0) return;
+
+		  // 3) Play sound (if unlocked)
+		  const audio = document.getElementById('new-order-sound');
+		  if (audio && audioUnlocked) {
+			audio.play().catch(err => {
+			  console.warn('New-order sound play failed:', err);
+			});
+		  }
+
+		  // 4) Show / update banner
+		  showNewOrderBanner();
+
+		  // 5) 🔔 Desktop notifications for these *brand new* ones
+		  list.forEach(o => {
+			showNewOrderNotification(o);
+		  });
 		}
-	  });
 
-	  // 2) If there are NO unacknowledged orders, nothing to do
-	  if (unacknowledgedOrders.size === 0) return;
-
-	  // 3) Play sound (if unlocked)
-	  const audio = document.getElementById('new-order-sound');
-	  if (audio && audioUnlocked) {
-		audio.play().catch(err => {
-		  console.warn('New-order sound play failed:', err);
-		});
-	  }
-
-	  // 4) Show / update banner
-	  showNewOrderBanner();
-	}
 	
 			function sumTotal(order) {
 		  // Safely sum subtotal + delivery fee
@@ -469,42 +549,48 @@
 		  }
 		}
 
-				function fmtDisplayTime(o) {
-		  // Use confirmed / requested booking time, never created_at
-		  const preferred = o.preferred_time;
-		  const proposed  = o.proposed_time;
+			function fmtDisplayTime(o) {
+			  const preferred = o.preferred_time;
+			  const proposed  = o.proposed_time;
+			  const asap      = o.asap_requested;
 
-		  let raw = null;
-		  let suffix = "";
+			  let raw = null;
+			  let suffix = "";
 
-		  if (preferred) {
-			// This is either the original requested time or a confirmed suggested time
-			raw = preferred;
-			suffix = ""; // confirmed, so no label
-		  } else if (proposed) {
-			// We've suggested a time but it's not accepted yet
-			raw = proposed;
-			suffix = " (proposed)";
-		  }
+			  if (preferred) {
+				raw = preferred;
+			  } else if (proposed) {
+				raw = proposed;
+				suffix = " (proposed)";
+			  } else if (asap) {
+				return "ASAP (no time set)";
+			  } else {
+				return "No time set";
+			  }
 
-		  if (!raw) {
-			// No booking time at all – show a clear placeholder
-			return "No time set";
-		  }
+			  const d = new Date(raw);
+			  if (Number.isNaN(d.getTime())) {
+				return "No time set";
+			  }
+
+			  const formatted = d.toLocaleString([], {
+				dateStyle: "short",
+				timeStyle: "short",
+			  });
+
+			  return formatted + suffix;
+			}
+
+
+		function getBookingDate(o) {
+		  // Prefer confirmed/requested time, then proposed, then created_at as a last resort
+		  const raw = o.preferred_time || o.proposed_time || o.created_at;
+		  if (!raw) return null;
 
 		  const d = new Date(raw);
-		  if (Number.isNaN(d.getTime())) {
-			return "No time set";
-		  }
-
-		  const formatted = d.toLocaleString([], {
-			dateStyle: "short",
-			timeStyle: "short",
-		  });
-
-		  return formatted + suffix;
+		  if (Number.isNaN(d.getTime())) return null;
+		  return d;
 		}
-
 
 
 
@@ -724,8 +810,12 @@ function render(orders){
     tr.dataset.email = customer.email || "";
     tr.dataset.phone = customer.phone || "";
     tr.dataset.total = total;
+	tr.dataset.asapRequested = o.asap_requested ? "true" : "false";
     tr.dataset.communicationPreference = o.communication_preference || "email";
     tr.dataset.createdAt = o.created_at;
+	tr.dataset.preferredTime = o.preferred_time || "";
+	tr.dataset.asapRequested = o.asap_requested ? "true" : "false";
+
 
     // ------------------ ROW HTML ------------------
     tr.innerHTML = `
@@ -832,6 +922,7 @@ async function updateOrderStatus(orderId, newStatus) {
 				order_ref,
 				created_at,
 				proposed_time,
+				asap_requested,
 				preferred_time,
 				order_type,
 				subtotal,
@@ -975,6 +1066,7 @@ const NOTIFY_API_BASE = "https://order-backend-production.up.railway.app";
 			name: row.dataset.name,
 			email: row.dataset.email,
 			phone: row.dataset.phone,
+			asap_requested: row.dataset.asapRequested === "true",
 			total: Number(row.dataset.total || 0),
 			communication_preference: row.dataset.communicationPreference || "email",
 			...extra
@@ -998,6 +1090,17 @@ const NOTIFY_API_BASE = "https://order-backend-production.up.railway.app";
 		  }
 		}
 
+		// We are closed Monday (1) and Tuesday (2). All other days are "working".
+			function nextWorkingDay(date) {
+			  const d = new Date(date);
+			  while (true) {
+				const day = d.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, ...
+				if (day !== 1 && day !== 2) {
+				  return d; // Wed, Thu, Fri, Sat, Sun
+				}
+				d.setDate(d.getDate() + 1);
+			  }
+			}
 
 
 
@@ -1013,16 +1116,28 @@ document.addEventListener("click", async (event) => {
 
   const row = btn.closest("tr");
 
-  /* ---------------- ACCEPT ORDER ---------------- */
-	  if (btn.classList.contains("btn-accept")) {
-	  const result = await callOrderAction({ action: "accept", orderId });
-	  if (result?.success) {
-		await notifyCustomer("time_confirmed", row);
-		alert("Order accepted. Customer notified.");
-		location.reload();
-	  }
-	  return;
-	}
+ /* ---------------- ACCEPT ORDER ---------------- */
+if (btn.classList.contains("btn-accept")) {
+  const result = await callOrderAction({ action: "accept", orderId });
+
+  if (result?.success) {
+    // Prefer whatever we already have on the row; fall back to API result
+    const preferredTime =
+      row.dataset.preferredTime ||
+      result.preferred_time ||
+      null;
+
+    await notifyCustomer("time_confirmed", row, {
+      preferred_time: preferredTime,
+      asap_requested: row.dataset.asapRequested === "true"
+    });
+
+    alert("Order accepted. Customer notified.");
+    location.reload();
+  }
+  return;
+}
+
 
 
   /* ---------------- DECLINE ORDER ---------------- */
@@ -1046,36 +1161,62 @@ document.addEventListener("click", async (event) => {
 
 
   /* ---------------- SUGGEST NEW TIME ---------------- */
-  if (btn.classList.contains("btn-suggest")) {
-    const input = row.querySelector(".suggest-time-input");
-    const timeVal = input?.value || "";
+		 if (btn.classList.contains("btn-suggest")) {
+		  const row = btn.closest("tr");
+		  const input = row ? row.querySelector(".suggest-time-input") : null;
+		  const suggestedTime = input ? input.value : ""; // "19:45"
 
-    if (!timeVal) {
-      alert("Please choose a time first.");
-      return;
-    }
+		  if (!suggestedTime) {
+			alert("Please choose a time first.");
+			return;
+		  }
 
-    // Build datetime from original order date + selected time
-    const base = new Date(row.dataset.createdAt);
-    const [hh, mm] = timeVal.split(":");
-    base.setHours(Number(hh), Number(mm), 0, 0);
-    const proposedIso = base.toISOString();
+		  const createdAt = row ? row.dataset.createdAt : null;
+		  const isAsap = row && row.dataset.asapRequested === "true";
 
-    const result = await callOrderAction({
-      action: "suggest_time",
-      orderId,
-      proposedTime: proposedIso
-    });
+		  let proposedIso;
+		  try {
+			let base = createdAt ? new Date(createdAt) : new Date();
 
-    if (result?.success) {
-      await notifyCustomer("time_suggested", row, {
-		preferred_time: proposedIso
-      });
-      alert("Suggested time sent to customer.");
-      location.reload();
-    }
-    return;
-  }
+			if (isAsap) {
+			  // For ASAP orders, move to the next working day (we're closed Mon/Tue)
+			  base = nextWorkingDay(base);
+			}
+
+			const [hh, mm] = suggestedTime.split(":");
+			base.setHours(Number(hh) || 0, Number(mm) || 0, 0, 0);
+			proposedIso = base.toISOString();
+		  } catch (e) {
+			console.error("Failed to build proposedTime ISO:", e);
+			alert("Could not build the proposed time – please try again.");
+			return;
+		  }
+
+		  const payload = {
+			action: "suggest_time",
+			orderId,
+			proposedTime: proposedIso
+		  };
+		  console.log("Suggest payload:", payload);
+
+		  const result = await callOrderAction(payload);
+
+		  if (result?.success) {
+			// 🔔 For ASAP orders, send customer SMS directly from admin
+			if (isAsap) {
+			  await notifyCustomer("time_suggested", row, {
+				proposed_time: proposedIso,
+				asap_requested: true
+			  });
+			}
+
+			alert("Suggested time sent to customer.");
+			location.reload();
+		  }
+		  return;
+		}
+
+
 
 
   /* ---------------- MARK PAID ---------------- */
