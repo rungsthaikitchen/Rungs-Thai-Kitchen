@@ -299,6 +299,95 @@
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 	
+	// ---- Restaurant location (centre point for distance) ----
+// Replace with your real coordinates from Google Maps:
+const RESTAURANT_LAT = 53.74433548441447;  // <--- your real latitude
+const RESTAURANT_LNG = -1.5766076562010034;  // <--- your real longitude
+
+// ---- Haversine distance helper (returns km) ----
+function distanceKmBetween(lat1, lon1, lat2, lon2) {
+  if (
+    lat1 == null || lon1 == null ||
+    lat2 == null || lon2 == null
+  ) {
+    return null;
+  }
+
+  const R = 6371; // Earth radius in km
+  const toRad = (deg) => (deg * Math.PI) / 180;
+
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c; // distance in km
+}
+
+	
+		// ---- Call Edge Function to geocode a single order's address ----
+		async function geocodeOrder(order) {
+		  const type = (order.order_type || "").toLowerCase();
+		  const c = order.customers || {};
+
+		  // Prefer customers.address; fall back to orders.delivery_address
+		  const address = c.address || order.delivery_address;
+
+		  console.log("[geocodeOrder] start", {
+			id: order.id,
+			type,
+			address,
+			customer_lat: order.customer_lat,
+			customer_lng: order.customer_lng,
+		  });
+
+		  // Only for delivery orders
+		  if (type !== "delivery") {
+			console.log("[geocodeOrder] not a delivery order, skipping");
+			return;
+		  }
+
+		  if (!address) {
+			console.warn("[geocodeOrder] No address to geocode for order", order.id);
+			return;
+		  }
+
+		  try {
+			const { data, error } = await supabase.functions.invoke("geocode-order", {
+			  body: {
+				order_id: order.id,
+				customer_address: address,
+			  },
+			});
+
+			console.log("[geocodeOrder] invoke result", { data, error });
+
+			if (error) {
+			  console.error("[geocodeOrder] invoke error", error);
+			  return;
+			}
+
+			if (data) {
+			  console.log(
+				"[geocodeOrder] success, coords saved to DB",
+				data.customer_lat,
+				data.customer_lng
+			  );
+			}
+		  } catch (err) {
+			console.error("[geocodeOrder] Error calling geocode-order:", err);
+		  }
+		}
+
+
+
+	
 		const ordersChannel = supabase
 	  .channel('orders-realtime')
 	  .on(
@@ -629,8 +718,27 @@
 		  const mapUrl = rawAddress
 			? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(rawAddress)}`
 			: '';
+			
+			// ---- Distance text for delivery orders ----
+			  let distanceHTML = '';
+			  if (
+				(o.order_type || '').toLowerCase() === 'delivery' &&
+				o.customer_lat != null &&
+				o.customer_lng != null
+			  ) {
+				const km = distanceKmBetween(
+				  RESTAURANT_LAT,
+				  RESTAURANT_LNG,
+				  o.customer_lat,
+				  o.customer_lng
+				);
 
-		  return `
+				if (km != null && !Number.isNaN(km)) {
+				  distanceHTML = `<div class="small">Approx distance: ${km.toFixed(1)} km</div>`;
+				}
+			  }
+
+		   return `
 			<div class="grid" style="margin-bottom:8px">
 			  <div>
 				<div class="muted small">Customer</div>
@@ -654,6 +762,7 @@
 				<div class="small">Subtotal: ${fmtMoney(o.subtotal)}</div>
 				<div class="small">Delivery: ${fmtMoney(o.delivery_fee)}</div>
 				<div class="small"><strong>Total: ${fmtMoney(sumTotal(o))}</strong></div>
+				${distanceHTML}
 			  </div>
 			</div>
 			<div class="muted small">Notes: ${o.notes ? o.notes : '—'}</div>
@@ -662,6 +771,7 @@
 			</div>
 		  `;
 		}
+
 
 
 
@@ -930,6 +1040,8 @@ async function updateOrderStatus(orderId, newStatus) {
 				notes,
 				status,
 				communication_preference,
+				    customer_lat,
+					customer_lng,
 				customers (
 				  full_name,
 				  phone,
@@ -947,7 +1059,23 @@ async function updateOrderStatus(orderId, newStatus) {
 			console.error('Error loading orders', error);
 			return;
 		  }
-		  if (!orders) return;
+		 if (!orders) return;
+
+		// 🔹 Auto-geocode delivery orders that don't have coords yet
+		for (const o of orders) {
+		  const type = (o.order_type || '').toLowerCase();
+		  console.log('[loadAndRender] order', o.id, 'type=', type, 'lat=', o.customer_lat, 'lng=', o.customer_lng);
+
+		  if (
+			type === 'delivery' &&
+			(o.customer_lat == null || o.customer_lng == null)
+		  ) {
+			console.log('[loadAndRender] -> calling geocodeOrder for', o.id);
+			geocodeOrder(o); // fire-and-forget; function updates DB
+		  }
+		}
+
+
 
 		  // 🔹 keep existing new-order detection
 		  if (!firstLoadDone) {
