@@ -1767,16 +1767,19 @@ body.menu-open .menu-fab {
 
 #kitchen-notice-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;   /* full viewport width */
-  height: 100vh;  /* full viewport height */
-  background-color: rgba(255, 255, 255, 0.8); /* your frosted white */
-  display: flex;
+  inset: 0;
+  z-index: 9999;
+  display: none;                /* hidden by default */
   align-items: center;
   justify-content: center;
-  z-index: 99999;
+  background: rgba(0, 0, 0, 0.65);
 }
+
+/* When JS decides it *should* be shown */
+#kitchen-notice-overlay.is-visible {
+  display: flex;
+}
+
 
 /* Optional: prevent scrolling while overlay shown */
 body.overlay-open {
@@ -1957,7 +1960,11 @@ body.overlay-open {
 		</head>
 		<body>
 				  <!-- Kitchen notice overlay -->
-				<div id="kitchen-notice-overlay" role="dialog" aria-modal="true" aria-labelledby="kitchen-notice-title">
+				  <div id="kitchen-notice-overlay"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="kitchen-notice-title"
+     style="display:none">
 				  <div class="kitchen-notice-card">
 					<!-- Optional logo (replace src with your logo and/or remove if not needed) -->
 					<img src="images/logotransparent2.png?v=3" alt="Rung's Thai Kitchen Logo" class="brand-logo">
@@ -2012,7 +2019,7 @@ body.overlay-open {
         <li><a href="#allergens">Allergens</a></li>
         <!-- IMPORTANT: id="menu-link" for the popup JS -->
         <li><a href="#menu" id="menu-link">Menu</a></li>
-        <li><a href="#payments">Payments</a></li>
+		<li><a href="#payments">Payments</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
     </nav>
@@ -5077,60 +5084,46 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 <script>
   // Returns true if we are between:
   // Sunday 21:00  and  Wednesday 12:00 (midday)
-  function isKitchenClosed(now) {
-    var day = now.getDay();    // 0=Sun, 1=Mon, 2=Tue, 3=Wed, ...
-    var hour = now.getHours();
-    var minute = now.getMinutes(); // not strictly needed here, but handy if you adjust times
+function shouldShowKitchenNotice(now = new Date()) {
+  const day = now.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed...
+  const hour = now.getHours() + now.getMinutes() / 60;
 
-    // Sunday: from 21:00 onwards
-    if (day === 0 && hour >= 21) {
-      return true;
-    }
+  // Closed from Sunday 21:00 onwards...
+  if (day === 0 && hour >= 21) return true;      // Sun after 21:00
+  if (day === 1 || day === 2) return true;       // Mon, Tue
+  if (day === 3 && hour < 12) return true;       // Wed before 12:00
 
-    // Monday & Tuesday: all day
-    if (day === 1 || day === 2) {
-      return true;
-    }
+  // ...otherwise, open
+  return false;
+}
 
-    // Wednesday: until 12:00 (12:00 and later = open)
-    if (day === 3 && hour < 12) {
-      return true;
-    }
+document.addEventListener("DOMContentLoaded", () => {
+  const overlay = document.getElementById("kitchen-notice-overlay");
+  const closeBtn = document.getElementById("kitchen-notice-close");
+  if (!overlay) return;
 
-    // All other times: kitchen open
-    return false;
+  if (!shouldShowKitchenNotice()) {
+    // Stay hidden – don't touch it
+    return;
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
-    var overlay = document.getElementById('kitchen-notice-overlay');
-    var closeBtn = document.getElementById('kitchen-notice-close');
+  // We *are* in the closed window → show overlay
+  overlay.style.display = "";            // remove inline "display:none"
+  overlay.classList.add("is-visible");   // makes it flex via CSS
 
-    if (!overlay || !closeBtn) return;
+  function hideNotice() {
+    overlay.classList.remove("is-visible");
+    overlay.style.display = "none";
+  }
 
-    // Check schedule using the visitor's local time (browser time)
-    var now = new Date();
+  if (closeBtn) {
+    closeBtn.addEventListener("click", hideNotice);
+  }
 
-    if (!isKitchenClosed(now)) {
-      // Outside the closed window -> remove overlay entirely
-      overlay.remove();
-      return;
-    }
+  // Auto-hide after 10 seconds
+  setTimeout(hideNotice, 10000);
+});
 
-    // Inside the closed window -> show overlay
-    overlay.style.display = 'flex';
-    document.body.classList.add('overlay-open'); // if you're using this to lock scroll
-
-    function hideOverlay() {
-      overlay.remove();
-      document.body.classList.remove('overlay-open');
-    }
-
-    // Allow manual close
-    closeBtn.addEventListener('click', hideOverlay);
-
-    // OPTIONAL: keep or remove this if you still want the 10-second auto-hide
-    setTimeout(hideOverlay, 10000); // 10 seconds
-  });
 </script>
 
 
