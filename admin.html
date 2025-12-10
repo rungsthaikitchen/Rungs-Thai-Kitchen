@@ -1120,6 +1120,120 @@ async function updateOrderStatus(orderId, newStatus) {
 		  showTodayOnly = e.target.checked;
 		  render(getFilteredOrders());
 		});
+		
+		// ---------- EXPORT CSV ----------
+			function csvEscape(value) {
+			  if (value == null) return "";
+			  const str = String(value);
+			  // Escape double quotes by doubling them
+			  const escaped = str.replace(/"/g, '""');
+			  // Wrap everything in quotes to be safe with commas/newlines
+			  return `"${escaped}"`;
+			}
+
+			function buildOrderItemsSummary(order) {
+			  const items = order.order_items || [];
+			  if (!items.length) return "";
+			  return items
+				.map((it) => {
+				  const qty = it.qty || 1;
+				  const name = it.name || "";
+				  const mods = (it.modifiers || []).map((m) => m.name).join(", ");
+				  const spice =
+					it.spice == null
+					  ? ""
+					  : " " + "🌶️".repeat(Math.max(0, Math.min(3, Number(it.spice))));
+				  const modsPart = mods ? ` [Mods: ${mods}]` : "";
+				  return `${qty}x ${name}${spice}${modsPart}`;
+				})
+				.join(" | ");
+			}
+
+			function exportOrdersToCSV() {
+			  const orders = getFilteredOrders(); // respects Today Only toggle
+			  if (!orders || !orders.length) {
+				alert("No orders to export.");
+				return;
+			  }
+
+			  // CSV header row
+			  const header = [
+				"RTK Ref",
+				"Booking Time",
+				"Created At",
+				"Customer Name",
+				"Customer Phone",
+				"Customer Email",
+				"Order Type",
+				"Status",
+				"Subtotal",
+				"Delivery Fee",
+				"Total",
+				"Address",
+				"Notes",
+				"Items"
+			  ];
+
+			  const rows = [header];
+
+			  orders.forEach((o) => {
+				const c = o.customers || {};
+				const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
+				const bookingTime = fmtDisplayTime(o);
+				const createdAt = fmtDate(o.created_at);
+				const orderType = (o.order_type || "collection").toUpperCase();
+				const status = o.status || "pending";
+				const subtotal = Number(o.subtotal || 0).toFixed(2);
+				const delivery = Number(o.delivery_fee || 0).toFixed(2);
+				const total = sumTotal(o).toFixed(2);
+				const address = c.address || "";
+				const notes = o.notes || "";
+				const itemsSummary = buildOrderItemsSummary(o);
+
+				rows.push([
+				  rtkRef,
+				  bookingTime,
+				  createdAt,
+				  c.full_name || "",
+				  c.phone || "",
+				  c.email || "",
+				  orderType,
+				  status,
+				  subtotal,
+				  delivery,
+				  total,
+				  address,
+				  notes,
+				  itemsSummary
+				]);
+			  });
+
+			  // Build CSV text
+			  const csvLines = rows.map((row) => row.map(csvEscape).join(","));
+			  const csvContent = csvLines.join("\r\n");
+
+			  // Trigger browser download
+			  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+			  const url = URL.createObjectURL(blob);
+			  const a = document.createElement("a");
+			  a.href = url;
+
+			  const now = new Date();
+			  const isoDate = now.toISOString().slice(0, 10); // YYYY-MM-DD
+			  a.download = `orders-${isoDate}.csv`;
+
+			  document.body.appendChild(a);
+			  a.click();
+			  document.body.removeChild(a);
+			  URL.revokeObjectURL(url);
+			}
+
+			// Hook up the Export button
+			const exportBtn = document.getElementById("export");
+			if (exportBtn) {
+			  exportBtn.addEventListener("click", exportOrdersToCSV);
+			}
+
 
 
 
