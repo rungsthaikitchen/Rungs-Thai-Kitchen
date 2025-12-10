@@ -2471,13 +2471,13 @@ const EXTRAS = [
         { id: 'fish-cakes', name: 'Thai Fish Cakes', desc: 'Flavourful, bite-sized fritters with a blend of savoury, spicy, and tangy flavours.', price: 6.00, img: 'images/thaifishcakesjpg.jpg',spiceEnabled: true, spiceDefault: 1, allergens: ['fish','egg'] },
         { id: 'porkprawn-dumplings', name: 'Pork & Prawn Steamed Dumplings', desc: 'Steamed dumplings filled with a savoury combination of tender pork and juicy prawns.', price: 6.00, img: 'images/dumplings.jpg', allergens: ['gluten','shellfish'] },
         { id: 'fried-prawns', name: 'Deep Fried Tiger Prawns (x4)', desc: 'Tiger Prawns cooked in a crispy tempura batter served with authentic Thai sweet Chilli Sauce.', price: 6.50, img: 'images/Prawns.jpg',  allergens: ['shellfish','gluten'] },
-        { id: 'thai-sausage', name: 'Thai Pork Sausage', desc: 'A traditional fermented Thai sausage made with ground pork, sticky rice, and fragrant seasonings. Served with fresh sliced ginger, whole peanuts and slices of cucumber.', price: 6.50, img: 'images/sausage.jpg', allergens: [] },
+       // { id: 'thai-sausage', name: 'Thai Pork Sausage', desc: 'A traditional fermented Thai sausage made with ground pork, sticky rice, and fragrant seasonings. Served with fresh sliced ginger, whole peanuts and slices of cucumber.', price: 6.50, img: 'images/sausage.jpg', allergens: [] },
 		{ id: 'spare-ribs', name: 'Thai Spare Ribs (Sii Khrong Moo Yang)', desc: 'Tender ribs with a sweet, salty and savoury flavour. Served with a sticky carmelised glaze.', price: 7.50, img: 'images/spareribs.jpg', allergens: ['soya','gluten','molluscs','sesame'] }
       ]},
       { id:'soup', title:'Soup', allowExtras:true, items:[
         { id: 'tom-yum', name: 'Tom Yum Soup 🌶️🌶️', desc: 'A vibrant and aromatic Thai classic featuring a hot and sour clear broth infused with lemongrass, galangal, and kaffir lime leaves.', price: 5.50, img: 'images/TomYum.jpg', allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'], allowedExtras: ['extra-chicken','extra-prawn','extra-tofu','extra-veg'] },
         { id: 'tom-kha', name: 'Tom Kha🌶️', desc: 'A creamy and aromatic Thai coconut soup featuring fragrant galangal, lemongrass, and kaffir lime leaves.', price: 5.50, img: 'images/TomKha.jpg', allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','soya'], allowedExtras: ['extra-chicken','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'dumpling-broth', name: 'Chicken Steamed Dumplings Broth (Gaew Naam)', desc: 'A savoury and flavourful broth with fragrant chicken-stuffed wontons.', price: 6.00, img: 'images/GaewNam.jpg', allergens: ['gluten','soya','celery'], allowedExtras: [''] }
+       // { id: 'dumpling-broth', name: 'Chicken Steamed Dumplings Broth (Gaew Naam)', desc: 'A savoury and flavourful broth with fragrant chicken-stuffed wontons.', price: 6.00, img: 'images/GaewNam.jpg', allergens: ['gluten','soya','celery'], allowedExtras: [''] }
       ]},
       { id:'salad',    title:'Salad',   allowExtras:true,  items:[
         { id: 'papaya-salad', name: 'Green Papaya Salad (Som Tam)🌶️🌶️🌶️', desc: 'A spicy, savoury, and sweet Thai salad made primarily of shredded green papaya.', price: 7.00, img: 'images/somtam.jpg', spiceEnabled: true, spiceDefault: 3, allergens: ['peanuts','fish'], allowedExtras: ['extra-prawn'] },
@@ -5025,6 +5025,7 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 
 </body>
 </html>
+
 
 
 
