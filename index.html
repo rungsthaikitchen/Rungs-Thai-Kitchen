@@ -1951,6 +1951,66 @@ body.overlay-open {
   max-height: 100%;
 }
 
+/* --- Christmas: banner --- */
+.xmas-banner{
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  padding: 10px 14px;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: .2px;
+  color: #ffffff;
+  background: linear-gradient(90deg, #0b6b3a, #b80f1a);
+}
+
+/* --- Christmas: holly corners on the header --- */
+/* Put .xmas-wrap on the element that wraps your header area */
+.xmas-wrap{
+  position: relative;
+  overflow: clip; /* hides any overflow nicely */
+}
+
+/* Inline SVG holly (no external images needed) */
+.xmas-wrap::before,
+.xmas-wrap::after{
+  content:"";
+  position:absolute;
+  top: 10px;
+  width: 90px;
+  height: 90px;
+  pointer-events:none;
+  opacity: .95;
+  background-repeat:no-repeat;
+  background-size:contain;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,.15));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cpath d='M42 66c-16-2-28-13-30-27 16 2 28 13 30 27zm26-24c-4-16 2-32 15-40 4 16-2 32-15 40zm-8 34c-16 8-34 5-46-8 16-8 34-5 46 8zm36-8c12-13 30-16 46-8-12 13-30 16-46 8z' fill='%230b6b3a'/%3E%3Ccircle cx='72' cy='74' r='9' fill='%23b80f1a'/%3E%3Ccircle cx='90' cy='82' r='7' fill='%23d61a2a'/%3E%3Ccircle cx='56' cy='88' r='7' fill='%23d61a2a'/%3E%3C/svg%3E");
+}
+
+.xmas-wrap::before{ left: 10px; transform: rotate(-12deg); }
+.xmas-wrap::after{ right: 10px; transform: scaleX(-1) rotate(-12deg); }
+
+.xmas-snow{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+.xmas-snow-toggle{
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 9999;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 12px;
+  background: rgba(0,0,0,.65);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
 
 
 </style>
@@ -2003,7 +2063,7 @@ body.overlay-open {
   </div>
 
 <!-- Header -->
-<header class="site-header">
+<header class="site-header xmas wrap">
   <div class="header-inner centered">
     <div class="brand-block" style="margin-top: 1px">
       <img src="images/logotransparent2.png?v=3"
@@ -2011,6 +2071,10 @@ body.overlay-open {
            class="brand-logo">
       <div class="brand-title">Authentic Thai Takeaway</div>
     </div>
+	<div class="xmas-banner" role="note" aria-label="Christmas message">
+  🎄 Merry Christmas from Rung’s Thai Kitchen — thank you for supporting us! 🎁
+</div>
+
 
     <nav class="main-nav">
       <ul>
@@ -2517,6 +2581,12 @@ body.overlay-open {
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
   crossorigin=""
 ></script>
+
+<button class="xmas-snow-toggle" type="button" aria-pressed="true">
+  ❄️ Snow: On
+</button>
+<canvas id="xmasSnow" class="xmas-snow" aria-hidden="true"></canvas>
+
 
 
   <script>
@@ -5126,6 +5196,74 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </script>
 
+<script>
+(() => {
+  const canvas = document.getElementById('xmasSnow');
+  const btn = document.querySelector('.xmas-snow-toggle');
+  if (!canvas || !btn) return;
+
+  const ctx = canvas.getContext('2d');
+  let w, h, running = true;
+  let flakes = [];
+
+  function resize(){
+    w = canvas.width = window.innerWidth * devicePixelRatio;
+    h = canvas.height = window.innerHeight * devicePixelRatio;
+  }
+  window.addEventListener('resize', resize, {passive:true});
+  resize();
+
+  const count = Math.min(140, Math.floor(window.innerWidth / 8));
+  flakes = Array.from({length: count}, () => makeFlake());
+
+  function makeFlake(){
+    return {
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: (Math.random() * 2.4 + 0.8) * devicePixelRatio,
+      s: (Math.random() * 1.2 + 0.6) * devicePixelRatio, // speed
+      d: (Math.random() * 0.8 + 0.2) * devicePixelRatio  // drift
+    };
+  }
+
+  function tick(){
+    if (!running) return;
+    ctx.clearRect(0,0,w,h);
+    ctx.globalAlpha = 0.85;
+
+    for (const f of flakes){
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+
+      f.y += f.s;
+      f.x += Math.sin(f.y / (60 * devicePixelRatio)) * f.d;
+
+      if (f.y > h + 10) { f.y = -10; f.x = Math.random() * w; }
+      if (f.x > w + 10) f.x = -10;
+      if (f.x < -10) f.x = w + 10;
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+
+  // Respect reduced motion
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    running = false;
+    canvas.style.display = 'none';
+    btn.style.display = 'none';
+  }
+
+  btn.addEventListener('click', () => {
+    running = !running;
+    btn.setAttribute('aria-pressed', String(running));
+    btn.textContent = running ? '❄️ Snow: On' : '❄️ Snow: Off';
+    canvas.style.display = running ? 'block' : 'none';
+    if (running) requestAnimationFrame(tick);
+  });
+})();
+</script>
 
 
 
