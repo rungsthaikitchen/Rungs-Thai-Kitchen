@@ -2056,11 +2056,11 @@ body.overlay-open {
 		  <!-- Status ticker (keep ONE of these) -->
 
 
-  <div id="status-ticker">
-    <div class="ticker-inner">
-      
-    </div>
+  <div id="status-ticker" class="status-ticker hidden">
+  <div class="ticker-inner">
+    <span id="ticker-text"></span>
   </div>
+</div>
 
 <!-- Header -->
 <header class="site-header xmas wrap">
@@ -2651,8 +2651,16 @@ const EXTRAS = [
 	
     // ---------- Data ----------
     const MENU_CATEGORIES = [
-      { id:'starters', title:'Starter', allowExtras:false, items:[
-       // { id: 'veg-spring-rolls', name: 'Vegetable Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of glass noodles and vegetables, served with a sweet chilli sauce.', price: 5.50, img: 'images/SpringRoll.jpg',  allergens: ['gluten', 'soya','molluscs','mustard','celery'] },
+      
+	  
+	  // { id:'mid-week', title: 'Mid Week Specials (Pre-Order for Wednesday's only)', allowExtras:false, items:[
+	  //  { id:'slow-beef-massaman', name: 'Slow Cooked Beef Massaman & Jasmine Rice', desc: 'Braised beef with a delicious, creamy and comforting Massaman curry sauce. Perfect for a mid-week winter treat.', price: 7.50, img: 'images/beefmassaman.jpg'
+		//]},
+		{ id:'mid-week', title: 'Mid-Week Specials (Wednesday Only)', allowExtras:false, items:[
+        { id: 'slow-beef-massaman', name: 'Slow Cooked Beef Massaman & Jasmine Rice', desc: 'Braised beef with a delicious, creamy and comforting Massaman curry sauce. Perfect for a mid-week winter treat.', price: 7.50, img: 'images/beefmassaman.jpg',  allergens: [] }
+		]},
+	  { id:'starters', title:'Starter', allowExtras:false, items:[
+        { id: 'veg-spring-rolls', name: 'Vegetable Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of glass noodles and vegetables, served with a sweet chilli sauce.', price: 5.50, img: 'images/SpringRoll.jpg',  allergens: ['gluten', 'soya','molluscs','mustard','celery'] },
         { id: 'chicken-satay', name: 'Chicken Satay', desc: 'Tender chicken pieces marinated in a fragrant blend of turmeric, lemongrass, and spices. Served with a peanut sauce.', price: 6.50, img: 'images/Satay.jpg', allergens: ['peanuts','soya','mustard'] },
         { id: 'prawn-crackers', name: 'Prawn Crackers', desc: 'A light and crispy snack made from tapioca flour, shrimp, and seasonings. Served with sweet chilli sauce.', price: 2.50, img: 'images/PrawnCrackers.jpg', allergens: ['shellfish','gluten'] },
         { id: 'moo-ping', name: 'Pork Skewer (Moo Ping)', desc: 'Thai grilled pork skewers marinated in a sweet and savoury sauce.', price: 6.50, img: 'images/mooping.jpg', allergens: ['fish','soya','dairy'] },
@@ -2791,9 +2799,8 @@ applyHeaderOffset();
 		// Simple config object (edit this anytime)
 		const siteStatus = {
 		  active: true,  // turn off when not needed
-		  message: "It's opening day on 3rd December! Our website and menu is now available for you to pre-order your meals for collection/delivery from 17:00 - 21:00, each Wednesday to Sunday.🎉"
-		  
-		  //"We’re not open yet as we're making final preparations to ensure you have an amazing at home Thai dining experience! We hope to open by 3rd December 🎉"
+		  message: "Unfortunately, due to illness, Rung’s Thai Kitchen will be closed today (14th December). We are very sorry for any inconvenience this may cause."
+
 		};
 		
 		// ✅ Add this line:
@@ -2820,6 +2827,17 @@ applyHeaderOffset();
 		  window.addEventListener('resize', set, { passive:true });
 		  set();
 		})();
+		
+		// === Order idempotency ===
+		function getIdempotencyKey() {
+		  const existing = localStorage.getItem("checkout_idempotency_key");
+		  if (existing) return existing;
+
+		  const key = crypto.randomUUID();
+		  localStorage.setItem("checkout_idempotency_key", key);
+		  return key;
+		}
+
 
 // === Customise globals (place near top, before buildMenu) ===
 const ITEMS_BY_ID = new Map();   // lookup from item.id → item object
@@ -2827,6 +2845,8 @@ let currentItem = null;          // the item currently being customised
 let selectedMods = new Set();    // your existing modifier selection
 let selectedExtras = [];         // extras (added proteins)
 let currentAllowExtras = false;
+let isSubmittingOrder = false;   // double submit guard
+
 
 
 
@@ -4562,9 +4582,29 @@ if (openCheckoutBtn) {
   }
 }
 
+		// Prevent accidental double submit in the same session
+		let isSubmittingOrder = false;
+
+		// One key per checkout attempt; reused on retries; cleared on success
+		function getIdempotencyKey() {
+		  const existing = localStorage.getItem("checkout_idempotency_key");
+		  if (existing) return existing;
+
+		  const key = crypto.randomUUID();
+		  localStorage.setItem("checkout_idempotency_key", key);
+		  return key;
+		}
+
+
    // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
 checkoutForm.addEventListener('submit', async (e) => {
   e.preventDefault();
+    if (isSubmittingOrder) return;
+  isSubmittingOrder = true;
+
+  const submitBtn = checkoutForm.querySelector('button[type="submit"], input[type="submit"]');
+  if (submitBtn) submitBtn.disabled = true;
+
   checkoutMsg.style.color = '';
   checkoutMsg.textContent = 'Placing order…';
 
@@ -4688,54 +4728,31 @@ checkoutForm.addEventListener('submit', async (e) => {
       ? paymentPreferenceInput.value
       : 'on_arrival';
 
-    // ---------- Create order ----------
-    let orderId = null;
-    const baseOrderPayload = {
-      customer_id: customerId,
-      subtotal: Number(subtotal.toFixed(2)),
-      delivery_fee: Number(deliveryFee.toFixed(2)),
-      order_type: orderType,
-      notes,
-      order_ref: orderRef,
-      payment_preference,
-      preferred_time: preferredTimeISO,       // null if ASAP
-      asap_requested: asapRequested,         // bool
-      communication_preference: communicationPreference
-    };
+		   // ---------- Create order ----------
+		const baseOrderPayload = {
+		  customer_id: customerId,
+		  subtotal: Number(subtotal.toFixed(2)),
+		  delivery_fee: Number(deliveryFee.toFixed(2)),
+		  order_type: orderType,
+		  notes,
+		  order_ref: orderRef,
+		  payment_preference,
+		  preferred_time: preferredTimeISO,        // null if ASAP
+		  asap_requested: asapRequested,           // bool
+		  communication_preference: communicationPreference,
+		  idempotency_key: getIdempotencyKey(),    // ✅ add this
+		};
 
-    let { data: order, error: orderErr } = await supabase
-      .from('orders')
-      .insert([ baseOrderPayload ])
-      .select('id')
-      .single();
+		const { data: orderRow, error: orderUpsertErr } = await supabase
+		  .from('orders')
+		  .upsert(baseOrderPayload, { onConflict: 'idempotency_key' })
+		  .select('id')
+		  .single();
 
-    // Old fallback for missing columns (kept just in case)
-    if (orderErr && orderErr.code === '42703') {
-      const retry = await supabase
-        .from('orders')
-        .insert([{
-          ...baseOrderPayload,
-          preferred_time: undefined,  // drop unknown column
-        }])
-        .select('id')
-        .single();
-      if (retry.error) return fail('Create order', retry.error);
-      order = retry.data;
-    } else if (orderErr) {
-      return fail('Create order', orderErr);
-    }
+		if (orderUpsertErr) return fail('Create order', orderUpsertErr);
 
-    orderId = order.id;
+		const orderId = orderRow.id;
 
-
-    if (orderErr && orderErr.code === '42703') {
-      const retry = await supabase.from('orders').insert([ baseOrderPayload ]).select('id').single();
-      if (retry.error) return fail('Create order', retry.error);
-      order = retry.data;
-    } else if (orderErr) {
-      return fail('Create order', orderErr);
-    }
-    orderId = order.id;
 
     // 4) Items
     const rows = itemsSnapshot.map(line => ({
