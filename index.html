@@ -2012,6 +2012,10 @@ body.overlay-open {
   backdrop-filter: blur(6px);
 }
 
+.status-ticker:hover .ticker-inner {
+  animation-play-state: paused;
+}
+
 
 </style>
 
@@ -2039,22 +2043,14 @@ body.overlay-open {
 				  </div>
 				</div>
 					<!-- /Kitchen notice overlay -->
-		  <div class="bg-parallax" aria-hidden="true"></div>
-
-			
+		  <div class="bg-parallax" aria-hidden="true"></div>			
 
 		  <div class="container">
 			<!-- your existing header / main / etc -->
 
-		  <div class="container">
-
-
-		
-
-		
+		  <div class="container">	
 
 		  <!-- Status ticker (keep ONE of these) -->
-
 
   <div id="status-ticker" class="status-ticker hidden">
   <div class="ticker-inner">
@@ -2429,9 +2425,8 @@ body.overlay-open {
 		  <label for="cust-preferred-time">Preferred collection/delivery time</label>
 		  <input id="cust-preferred-time" name="preferred_time" type="datetime-local" class="input" step="300">
 
-		  <label style="display:flex;align-items:center;gap:6px;margin-top:4px;">
-<!--Re-enable this line and the next 2 to re-enable the ASAP checkbox-->
-			<!--<input type="checkbox" id="cust-asap" name="asap_requested">
+		 <!-- <label style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+			<input type="checkbox" id="cust-asap" name="asap_requested">
 			As soon as possible
 		  </label>-->
 
@@ -5170,47 +5165,91 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 </script>
 
 <script>
+
+// ---- Temporary closure override (edit when needed) ----
+const tempClosure = {
+  active: true, // ✅ set true when temporarily closed
+  title: "Temporarily closed",
+  message: "Unfortunately, due to illness, Rung’s Thai Kitchen will be closed today (14th December). We are very sorry for any inconvenience this may cause.",
+  // Optional reopen time shown to customers (UK local time)
+  reopenText: "We expect to reopen Wednesday at 17:00.",
+  // Behaviour
+  autoHideMs: null, // null = don't auto-hide; e.g. 10000 to auto-hide
+  blockOrdering: true
+};
+
   // Returns true if we are between:
   // Sunday 21:00  and  Wednesday 12:00 (midday)
 function shouldShowKitchenNotice(now = new Date()) {
+  // Temporary override always wins
+  if (tempClosure.active) return true;
+
   const day = now.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed...
   const hour = now.getHours() + now.getMinutes() / 60;
 
-  // Closed from Sunday 21:00 onwards...
-  if (day === 0 && hour >= 21) return true;      // Sun after 21:00
-  if (day === 1 || day === 2) return true;       // Mon, Tue
-  if (day === 3 && hour < 12) return true;       // Wed before 12:00
+  if (day === 0 && hour >= 21) return true; // Sun after 21:00
+  if (day === 1 || day === 2) return true;  // Mon, Tue
+  if (day === 3 && hour < 12) return true;  // Wed before 12:00
 
-  // ...otherwise, open
   return false;
 }
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const overlay = document.getElementById("kitchen-notice-overlay");
   const closeBtn = document.getElementById("kitchen-notice-close");
+  const titleEl = document.getElementById("kitchen-notice-title");
+  const msgEl = overlay?.querySelector(".kitchen-notice-main");
+
   if (!overlay) return;
 
-  if (!shouldShowKitchenNotice()) {
-    // Stay hidden – don't touch it
-    return;
+  if (!shouldShowKitchenNotice()) return;
+
+  // If temporary closure is active, override the text
+  if (tempClosure.active) {
+    if (titleEl) titleEl.textContent = tempClosure.title;
+
+    if (msgEl) {
+      const reopenLine = tempClosure.reopenText ? `<br><br><strong>${tempClosure.reopenText}</strong>` : "";
+      msgEl.innerHTML = `${tempClosure.message}${reopenLine}`;
+    }
+
+    // Optional: change button label
+    if (closeBtn) closeBtn.textContent = "Continue to website";
+
+    // Optional: block ordering by hiding/disable checkout UI
+    if (tempClosure.blockOrdering) {
+      const checkoutBtn = document.getElementById("checkoutBtn");
+      if (checkoutBtn) checkoutBtn.disabled = true;
+
+      const checkoutForm = document.getElementById("checkoutForm");
+      if (checkoutForm) checkoutForm.style.display = "none";
+    }
   }
 
-  // We *are* in the closed window → show overlay
-  overlay.style.display = "";            // remove inline "display:none"
-  overlay.classList.add("is-visible");   // makes it flex via CSS
+  // Show overlay
+  overlay.style.display = "";
+  overlay.classList.add("is-visible");
 
   function hideNotice() {
     overlay.classList.remove("is-visible");
     overlay.style.display = "none";
   }
 
-  if (closeBtn) {
-    closeBtn.addEventListener("click", hideNotice);
-  }
+  if (closeBtn) closeBtn.addEventListener("click", hideNotice);
 
-  // Auto-hide after 10 seconds
-  setTimeout(hideNotice, 10000);
+  // Auto-hide logic:
+  // - Weekly notice: keep your existing 10s auto-hide
+  // - Temporary closure: controlled by tempClosure.autoHideMs (null = stay up)
+  if (tempClosure.active) {
+    if (typeof tempClosure.autoHideMs === "number") {
+      setTimeout(hideNotice, tempClosure.autoHideMs);
+    }
+  } else {
+    setTimeout(hideNotice, 10000);
+  }
 });
+
 
 </script>
 
