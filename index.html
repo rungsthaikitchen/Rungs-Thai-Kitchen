@@ -2169,6 +2169,27 @@ body.overlay-open {
   z-index: 9999;
   overflow: hidden;
 }
+/* Let the banner text wrap normally */
+.header-banner {
+  overflow: visible;            /* important */
+}
+
+.banner-slide {
+  white-space: normal;          /* important */
+}
+
+/* If you kept this on the link, remove it */
+.banner-link {
+  white-space: normal;
+}
+@media (max-width: 480px) {
+  .banner-slide {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;   /* clamp to 2 lines */
+    overflow: hidden;
+  }
+}
 
 
 
