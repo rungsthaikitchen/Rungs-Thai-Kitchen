@@ -2140,6 +2140,37 @@ body.overlay-open {
   -webkit-overflow-scrolling: touch;
 }
 
+/* CLOSED by default: not in layout at all */
+.modal-overlay,
+.modal {
+  display: none;
+}
+
+/* OPEN state */
+.modal-overlay.is-open {
+  display: block;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 9998;
+}
+
+.modal.is-open {
+  display: block;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(920px, calc(100vw - 24px));
+  height: min(80vh, 720px);
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  z-index: 9999;
+  overflow: hidden;
+}
+
+
 
 
 </style>
