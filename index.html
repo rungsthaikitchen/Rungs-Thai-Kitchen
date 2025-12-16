@@ -5518,28 +5518,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!openBtn || !modal || !overlay || !closeBtn) return;
 
+    let scrollY = 0;
+
     function openModal(e) {
       if (e) e.preventDefault();
+
+      // Save scroll position and lock body (mobile-safe)
+      scrollY = window.scrollY || 0;
+      document.body.classList.add("modal-open");
+      document.body.style.top = `-${scrollY}px`;
+
       modal.classList.add("is-open");
       overlay.classList.add("is-open");
-      document.body.classList.add("modal-open");
       modal.setAttribute("aria-hidden", "false");
       overlay.setAttribute("aria-hidden", "false");
+
       closeBtn.focus();
     }
 
     function closeModal() {
       modal.classList.remove("is-open");
       overlay.classList.remove("is-open");
-      document.body.classList.remove("modal-open");
       modal.setAttribute("aria-hidden", "true");
       overlay.setAttribute("aria-hidden", "true");
+
+      // Unlock body and restore scroll position
+      document.body.classList.remove("modal-open");
+      document.body.style.top = "";
+      window.scrollTo(0, scrollY);
+
       openBtn.focus();
     }
 
     openBtn.addEventListener("click", openModal);
     closeBtn.addEventListener("click", closeModal);
-
     overlay.addEventListener("click", closeModal);
 
     document.addEventListener("keydown", (e) => {
@@ -5549,6 +5561,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   })();
 </script>
+
 
 
 
