@@ -2016,7 +2016,7 @@ body.overlay-open {
   animation-play-state: paused;
 }
 
-/* The banner box */
+/* --- Rotating header banner --- */
 #headerBanner.header-banner {
   display: block;
   position: relative;
@@ -2047,6 +2047,7 @@ body.overlay-open {
   color: #fff;
   text-decoration: underline;
   font-weight: 700;
+  white-space: normal;
 }
 
 #headerBanner .banner-link:hover,
@@ -2055,99 +2056,36 @@ body.overlay-open {
   opacity: 0.9;
 }
 
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 200ms ease;
-  z-index: 9998;
+/* Clamp to 2 lines on small screens so the start of the message is always visible */
+@media (max-width: 480px) {
+  #headerBanner .banner-slide {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
 }
 
-.modal {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%) scale(0.98);
-  width: min(920px, calc(100vw - 24px));
-  height: min(80vh, 720px);
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 200ms ease, transform 200ms ease;
-  z-index: 9999;
-  overflow: hidden;
+/* --- Christmas Hours modal ONLY (scoped so it won't break other modals, e.g. "customise") --- */
+#hoursModalOverlay {
+  display: none; /* fully removed when closed (iOS-friendly) */
 }
 
-.modal.is-open,
-.modal-overlay.is-open {
-  opacity: 1;
-  pointer-events: auto;
+#hoursModal {
+  display: none; /* fully removed when closed */
 }
 
-.modal.is-open {
-  transform: translate(-50%, -50%) scale(1);
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 14px;
-  border-bottom: 1px solid #e5e5e5;
-}
-
-.modal-title {
-  font-weight: 800;
-}
-
-.modal-close {
-  appearance: none;
-  border: none;
-  background: transparent;
-  font-size: 28px;
-  line-height: 1;
-  cursor: pointer;
-  padding: 6px 10px;
-}
-
-.modal-iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-
-.modal-overlay.is-open {
-  touch-action: none;
-}
-
-.modal-body {
-  height: calc(100% - 52px);
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* CLOSED by default: not in layout at all */
-.modal-overlay,
-.modal {
-  display: none;
-}
-
-/* OPEN state */
-.modal-overlay.is-open {
+/* OPEN */
+#hoursModalOverlay.is-open{
   display: block;
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.55);
   z-index: 9998;
+  touch-action: none;
 }
 
-.modal.is-open {
+#hoursModal.is-open{
   display: block;
   position: fixed;
   left: 50%;
@@ -2161,26 +2099,70 @@ body.overlay-open {
   z-index: 9999;
   overflow: hidden;
 }
-/* Let the banner text wrap normally */
-.header-banner {
-  overflow: visible;            /* important */
+
+/* Modal internals (scoped) */
+#hoursModal .modal-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e5e5;
 }
 
-.banner-slide {
-  white-space: normal;          /* important */
+#hoursModal .modal-title{
+  font-weight: 800;
 }
 
-/* If you kept this on the link, remove it */
-.banner-link {
-  white-space: normal;
+#hoursModal .modal-close{
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 6px 10px;
 }
-@media (max-width: 480px) {
-  .banner-slide {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;   /* clamp to 2 lines */
-    overflow: hidden;
-  }
+
+#hoursModal .modal-body{
+  height: calc(100% - 52px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#hoursModal .modal-iframe{
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.menu-item-card.khao-gaeng-special{
+  border: 2px solid #5a1d2f;
+  background: #fff7ef;
+  box-shadow: 0 10px 24px rgba(0,0,0,.14);
+  position: relative;
+}
+
+.menu-item-card.khao-gaeng-special .menu-card-title{
+  font-weight: 800;
+}
+
+.menu-item-card.khao-gaeng-special .special-badge{
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #b02a2a 0%, #16205b 100%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  letter-spacing: .4px;
+  z-index: 2;
+}
+
+.menu-item-card.khao-gaeng-special{
+  padding-top: 42px; /* creates space for the badge */
 }
 
 
@@ -2630,7 +2612,8 @@ body.overlay-open {
 				<label>
 				  <input type="radio" name="communication_preference" value="email" checked>
 				  Email
-				</label>
+			
+			</label>
 				<label>
 				  <input type="radio" name="communication_preference" value="sms">
 				  SMS
@@ -2853,9 +2836,10 @@ const EXTRAS = [
 	  // { id:'mid-week', title: 'Mid Week Specials (Pre-Order for Wednesday's only)', allowExtras:false, items:[
 	  //  { id:'slow-beef-massaman', name: 'Slow Cooked Beef Massaman & Jasmine Rice', desc: 'Braised beef with a delicious, creamy and comforting Massaman curry sauce. Perfect for a mid-week winter treat.', price: 7.50, img: 'images/beefmassaman.jpg'
 		//]},
-		// Activate this line for mis-week special{ id:'mid-week', title: 'Mid-Week Specials (Wednesday Only)', allowExtras:false, items:[
-        // Activate this line for mis-week special{ id: 'slow-beef-massaman', name: 'Slow Cooked Beef Massaman & Jasmine Rice', desc: 'Braised beef with a delicious, creamy and comforting Massaman curry sauce. Perfect for a mid-week winter treat.', price: 7.50, img: 'images/beefmassaman.jpg',  allergens: [] }
-		// Activate this line for mis-week special]},
+		/*{ id:'mid-week', title: 'Mid-Week Specials (Thursday Only)', allowExtras:false, items:[  
+        { id: 'slow-beef-massaman', name: 'Slow Cooked Beef Massaman & Jasmine Rice (Khao Gaeng)', desc: 'Braised beef with a delicious, creamy and comforting Massaman curry sauce. Perfect for a mid-week winter treat.', price: 7.50, img: 'images/beefmassaman.jpg',  allergens: [],special: true,
+		badge: 'MID-WEEK SPECIAL'}
+		]},*/
 	  { id:'starters', title:'Starter', allowExtras:false, items:[
         { id: 'veg-spring-rolls', name: 'Vegetable Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of glass noodles and vegetables, served with a sweet chilli sauce.', price: 5.50, img: 'images/SpringRoll.jpg',  allergens: ['gluten', 'soya','molluscs','mustard','celery'] },
         { id: 'chicken-satay', name: 'Chicken Satay', desc: 'Tender chicken pieces marinated in a fragrant blend of turmeric, lemongrass, and spices. Served with a peanut sauce.', price: 6.50, img: 'images/Satay.jpg', allergens: ['peanuts','soya','mustard'] },
@@ -3107,21 +3091,33 @@ function buildMenu() {
           </div>
         `
         : '';
+		
+		// ⭐ Special / badge handling
+			if (item.special) {
+			  card.classList.add('khao-gaeng-special');
+			}
 
-      card.innerHTML = `
-        ${thumbHTML}
-        <div class="menu-card-main">
-          <div class="menu-card-title">${item.name}</div>
-          <div class="menu-card-desc muted small">${item.desc || ''}</div>
-          ${allergenHTML}
-          <div class="menu-card-bottom">
-            <div class="price">${formatCurrency(item.price)}</div>
-            <button class="btn btn-accent" type="button" data-id="${item.id}">
-              customise
-            </button>
-          </div>
-        </div>
-      `;
+			const badgeHTML = item.badge
+			  ? `<div class="special-badge">${item.badge}</div>`
+			  : '';
+
+
+		  card.innerHTML = `
+			  ${thumbHTML}
+			  ${badgeHTML}
+			  <div class="menu-card-main">
+				<div class="menu-card-title">${item.name}</div>
+				<div class="menu-card-desc muted small">${item.desc || ''}</div>
+				${allergenHTML}
+				<div class="menu-card-bottom">
+				  <div class="price">${formatCurrency(item.price)}</div>
+				  <button class="btn btn-accent" type="button" data-id="${item.id}">
+					customise
+				  </button>
+				</div>
+			  </div>
+			`;
+
 
       grid.appendChild(card);
     });
@@ -4026,6 +4022,15 @@ function closeMenuOverlay() {
     }
   });
 
+function cancelOrder(order, reason, meta = {}) {
+  order.status = 'cancelled';
+  order.cancelReason = reason;            // <- short code/string
+  order.cancelMeta = meta;                // <- optional extra detail
+  order.cancelledAt = new Date().toISOString();
+  console.warn('[ORDER CANCELLED]', reason, meta, order);
+  return order;
+}
+
 
 // (no extra closers past here)
 }); 
@@ -4314,12 +4319,25 @@ if (preferredTimeInput) {
     const isClosed = inAnyWindow(chosen, CLOSED_RANGES);
     const isFull   = inAnyWindow(chosen, FULLY_BOOKED);
 
-    const submitBtn = document.getElementById('checkout-submit');
-    if (isClosed) {
-      showCheckoutBanner('closed', isClosed.message || 'We’re closed at the selected time.');
-      if (submitBtn) submitBtn.disabled = true;
-      return;
-    }
+const submitBtn = document.getElementById('checkout-submit');
+
+if (isClosed) {
+  showCheckoutBanner(
+    'closed',
+    isClosed.message || 'We’re closed at the selected time.'
+  );
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+
+    // 🔁 re-enable after short delay
+    setTimeout(() => {
+      submitBtn.disabled = false;
+    }, 2000);
+  }
+
+  return;
+}
     if (isFull) {
       showCheckoutBanner('fully_booked', isFull.message || 'We’re fully booked at the selected time.');
       if (submitBtn) submitBtn.disabled = true;
@@ -4925,7 +4943,11 @@ checkoutForm.addEventListener('submit', async (e) => {
       ? paymentPreferenceInput.value
       : 'on_arrival';
 
-		   // ---------- Create order ----------
+		// ---------- Create order ----------
+
+		// ✅ NEW: generate a fresh idempotency key for THIS submit
+		const idempotencyKey = crypto.randomUUID();
+
 		const baseOrderPayload = {
 		  customer_id: customerId,
 		  subtotal: Number(subtotal.toFixed(2)),
@@ -4934,11 +4956,14 @@ checkoutForm.addEventListener('submit', async (e) => {
 		  notes,
 		  order_ref: orderRef,
 		  payment_preference,
-		  preferred_time: preferredTimeISO,        // null if ASAP
-		  asap_requested: asapRequested,           // bool
+		  preferred_time: preferredTimeISO,
+		  asap_requested: asapRequested,
 		  communication_preference: communicationPreference,
-		  idempotency_key: getIdempotencyKey(),    // ✅ add this
+
+		  // ✅ CHANGED LINE (see step 2)
+		  idempotency_key: idempotencyKey,
 		};
+
 
 		const { data: orderRow, error: orderUpsertErr } = await supabase
 		  .from('orders')
@@ -5014,6 +5039,9 @@ checkoutForm.addEventListener('submit', async (e) => {
 
   } catch (err) {
     fail('Unexpected error', err);
+  } finally {
+    isSubmittingOrder = false;
+    if (submitBtn) submitBtn.disabled = false;
   }
 });
 
@@ -5450,6 +5478,16 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(hideNotice, 10000);
   }
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('checkout-submit');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    console.log('[DEBUG] checkout submit clicked');
+  });
+});
+
 
 
 </script>
