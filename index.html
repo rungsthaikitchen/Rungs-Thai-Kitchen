@@ -4979,7 +4979,7 @@ checkoutForm.addEventListener('submit', async (e) => {
     // 4) Items
     const rows = itemsSnapshot.map(line => ({
       order_id: orderId,
-      item_id: line.itemId,
+      item_id: line.id,
       name: line.name,
       unit_price: Number(line.unitPrice.toFixed(2)),
       qty: line.qty,
