@@ -2016,6 +2016,157 @@ body.overlay-open {
   animation-play-state: paused;
 }
 
+/* --- Rotating header banner --- */
+#headerBanner.header-banner {
+  display: block;
+  position: relative;
+  overflow: hidden;
+
+  padding: 12px 16px;
+  color: #fff;
+  font-weight: 600;
+  text-align: center;
+
+  background: linear-gradient(90deg, #0a7a3d 0%, #b0151b 100%);
+  border-radius: 2px;
+}
+
+/* Slides: keep in normal flow, just show/hide */
+#headerBanner .banner-slide {
+  display: none;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+#headerBanner .banner-slide.is-active {
+  display: block;
+}
+
+/* Link styling */
+#headerBanner .banner-link {
+  color: #fff;
+  text-decoration: underline;
+  font-weight: 700;
+  white-space: normal;
+}
+
+#headerBanner .banner-link:hover,
+#headerBanner .banner-link:focus {
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+/* Clamp to 2 lines on small screens so the start of the message is always visible */
+@media (max-width: 480px) {
+  #headerBanner .banner-slide {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+}
+
+/* --- Christmas Hours modal ONLY (scoped so it won't break other modals, e.g. "customise") --- */
+#hoursModalOverlay {
+  display: none; /* fully removed when closed (iOS-friendly) */
+}
+
+#hoursModal {
+  display: none; /* fully removed when closed */
+}
+
+/* OPEN */
+#hoursModalOverlay.is-open{
+  display: block;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 9998;
+  touch-action: none;
+}
+
+#hoursModal.is-open{
+  display: block;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(920px, calc(100vw - 24px));
+  height: min(80vh, 720px);
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  z-index: 9999;
+  overflow: hidden;
+}
+
+/* Modal internals (scoped) */
+#hoursModal .modal-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+#hoursModal .modal-title{
+  font-weight: 800;
+}
+
+#hoursModal .modal-close{
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+
+#hoursModal .modal-body{
+  height: calc(100% - 52px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#hoursModal .modal-iframe{
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.menu-item-card.khao-gaeng-special{
+  border: 2px solid #5a1d2f;
+  background: #fff7ef;
+  box-shadow: 0 10px 24px rgba(0,0,0,.14);
+  position: relative;
+}
+
+.menu-item-card.khao-gaeng-special .menu-card-title{
+  font-weight: 800;
+}
+
+.menu-item-card.khao-gaeng-special .special-badge{
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #b02a2a 0%, #16205b 100%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  letter-spacing: .4px;
+  z-index: 2;
+}
+
+.menu-item-card.khao-gaeng-special{
+  padding-top: 42px; /* creates space for the badge */
+}
+
+
+
 
 </style>
 
@@ -2052,11 +2203,11 @@ body.overlay-open {
 
 		  <!-- Status ticker (keep ONE of these) -->
 
-  <div id="status-ticker" class="status-ticker hidden">
+ <!-- <div id="status-ticker" class="status-ticker hidden"> (re-enable if ticker required)
   <div class="ticker-inner">
     <span id="ticker-text"></span>
   </div>
-</div>
+</div>-->
 
 <!-- Header -->
 <header class="site-header xmas wrap">
@@ -2067,9 +2218,22 @@ body.overlay-open {
            class="brand-logo">
       <div class="brand-title">Authentic Thai Takeaway</div>
     </div>
-	<div class="xmas-banner" role="note" aria-label="Christmas message">
-  🎄 Merry Christmas from Rung’s Thai Kitchen — thank you for supporting us! 🎁
+		<div class="header-banner" id="headerBanner" aria-live="polite">
+		  <div class="banner-slide is-active">
+			🎄 <strong>Merry Christmas</strong> from Rung’s Thai Kitchen — thank you for supporting us! 🎁
+		  </div>
+
+		  <div class="banner-slide">
+  🕒 <strong>Christmas & New Year Opening Hours</strong> —
+		<a href="christmas-hours.html" class="banner-link" id="openHoursModal">
+		  View full schedule →
+		</a>
+
+
+  </a>
 </div>
+
+		</div>
 
 
     <nav class="main-nav">
@@ -2448,7 +2612,8 @@ body.overlay-open {
 				<label>
 				  <input type="radio" name="communication_preference" value="email" checked>
 				  Email
-				</label>
+			
+			</label>
 				<label>
 				  <input type="radio" name="communication_preference" value="sms">
 				  SMS
@@ -2583,6 +2748,25 @@ body.overlay-open {
 </button>
 <canvas id="xmasSnow" class="xmas-snow" aria-hidden="true"></canvas>
 
+<div class="modal-overlay" id="hoursModalOverlay" aria-hidden="true"></div>
+
+<div class="modal" id="hoursModal" role="dialog" aria-modal="true" aria-labelledby="hoursModalTitle" aria-hidden="true">
+  <div class="modal-header">
+    <div id="hoursModalTitle" class="modal-title">Christmas & New Year Opening Hours</div>
+    <button type="button" class="modal-close" id="closeHoursModal" aria-label="Close">
+      ×
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <iframe
+      class="modal-iframe"
+      src="christmas-hours.html"
+      title="Christmas & New Year Opening Hours"
+      loading="lazy">
+    </iframe>
+  </div>
+</div>
 
 
   <script>
@@ -2652,9 +2836,10 @@ const EXTRAS = [
 	  // { id:'mid-week', title: 'Mid Week Specials (Pre-Order for Wednesday's only)', allowExtras:false, items:[
 	  //  { id:'slow-beef-massaman', name: 'Slow Cooked Beef Massaman & Jasmine Rice', desc: 'Braised beef with a delicious, creamy and comforting Massaman curry sauce. Perfect for a mid-week winter treat.', price: 7.50, img: 'images/beefmassaman.jpg'
 		//]},
-		// Activate this line for mis-week special{ id:'mid-week', title: 'Mid-Week Specials (Wednesday Only)', allowExtras:false, items:[
-        // Activate this line for mis-week special{ id: 'slow-beef-massaman', name: 'Slow Cooked Beef Massaman & Jasmine Rice', desc: 'Braised beef with a delicious, creamy and comforting Massaman curry sauce. Perfect for a mid-week winter treat.', price: 7.50, img: 'images/beefmassaman.jpg',  allergens: [] }
-		// Activate this line for mis-week special]},
+		/*{ id:'mid-week', title: 'Mid-Week Specials (Thursday Only)', allowExtras:false, items:[  
+        { id: 'slow-beef-massaman', name: 'Slow Cooked Beef Massaman & Jasmine Rice (Khao Gaeng)', desc: 'Braised beef with a delicious, creamy and comforting Massaman curry sauce. Perfect for a mid-week winter treat.', price: 7.50, img: 'images/beefmassaman.jpg',  allergens: [],special: true,
+		badge: 'MID-WEEK SPECIAL'}
+		]},*/
 	  { id:'starters', title:'Starter', allowExtras:false, items:[
         { id: 'veg-spring-rolls', name: 'Vegetable Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of glass noodles and vegetables, served with a sweet chilli sauce.', price: 5.50, img: 'images/SpringRoll.jpg',  allergens: ['gluten', 'soya','molluscs','mustard','celery'] },
         { id: 'chicken-satay', name: 'Chicken Satay', desc: 'Tender chicken pieces marinated in a fragrant blend of turmeric, lemongrass, and spices. Served with a peanut sauce.', price: 6.50, img: 'images/Satay.jpg', allergens: ['peanuts','soya','mustard'] },
@@ -2794,7 +2979,7 @@ applyHeaderOffset();
 
 		// Simple config object (edit this anytime)
 		const siteStatus = {
-		  active: false,  // turn off when not needed
+		  active: true,  // turn off when not needed
 		  message: "Unfortunately, due to illness, Rung’s Thai Kitchen will be closed today (14th December). We are very sorry for any inconvenience this may cause."
 
 		};
@@ -2906,21 +3091,33 @@ function buildMenu() {
           </div>
         `
         : '';
+		
+		// ⭐ Special / badge handling
+			if (item.special) {
+			  card.classList.add('khao-gaeng-special');
+			}
 
-      card.innerHTML = `
-        ${thumbHTML}
-        <div class="menu-card-main">
-          <div class="menu-card-title">${item.name}</div>
-          <div class="menu-card-desc muted small">${item.desc || ''}</div>
-          ${allergenHTML}
-          <div class="menu-card-bottom">
-            <div class="price">${formatCurrency(item.price)}</div>
-            <button class="btn btn-accent" type="button" data-id="${item.id}">
-              customise
-            </button>
-          </div>
-        </div>
-      `;
+			const badgeHTML = item.badge
+			  ? `<div class="special-badge">${item.badge}</div>`
+			  : '';
+
+
+		  card.innerHTML = `
+			  ${thumbHTML}
+			  ${badgeHTML}
+			  <div class="menu-card-main">
+				<div class="menu-card-title">${item.name}</div>
+				<div class="menu-card-desc muted small">${item.desc || ''}</div>
+				${allergenHTML}
+				<div class="menu-card-bottom">
+				  <div class="price">${formatCurrency(item.price)}</div>
+				  <button class="btn btn-accent" type="button" data-id="${item.id}">
+					customise
+				  </button>
+				</div>
+			  </div>
+			`;
+
 
       grid.appendChild(card);
     });
@@ -3825,6 +4022,15 @@ function closeMenuOverlay() {
     }
   });
 
+function cancelOrder(order, reason, meta = {}) {
+  order.status = 'cancelled';
+  order.cancelReason = reason;            // <- short code/string
+  order.cancelMeta = meta;                // <- optional extra detail
+  order.cancelledAt = new Date().toISOString();
+  console.warn('[ORDER CANCELLED]', reason, meta, order);
+  return order;
+}
+
 
 // (no extra closers past here)
 }); 
@@ -4113,12 +4319,25 @@ if (preferredTimeInput) {
     const isClosed = inAnyWindow(chosen, CLOSED_RANGES);
     const isFull   = inAnyWindow(chosen, FULLY_BOOKED);
 
-    const submitBtn = document.getElementById('checkout-submit');
-    if (isClosed) {
-      showCheckoutBanner('closed', isClosed.message || 'We’re closed at the selected time.');
-      if (submitBtn) submitBtn.disabled = true;
-      return;
-    }
+const submitBtn = document.getElementById('checkout-submit');
+
+if (isClosed) {
+  showCheckoutBanner(
+    'closed',
+    isClosed.message || 'We’re closed at the selected time.'
+  );
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+
+    // 🔁 re-enable after short delay
+    setTimeout(() => {
+      submitBtn.disabled = false;
+    }, 2000);
+  }
+
+  return;
+}
     if (isFull) {
       showCheckoutBanner('fully_booked', isFull.message || 'We’re fully booked at the selected time.');
       if (submitBtn) submitBtn.disabled = true;
@@ -4724,7 +4943,11 @@ checkoutForm.addEventListener('submit', async (e) => {
       ? paymentPreferenceInput.value
       : 'on_arrival';
 
-		   // ---------- Create order ----------
+		// ---------- Create order ----------
+
+		// ✅ NEW: generate a fresh idempotency key for THIS submit
+		const idempotencyKey = crypto.randomUUID();
+
 		const baseOrderPayload = {
 		  customer_id: customerId,
 		  subtotal: Number(subtotal.toFixed(2)),
@@ -4733,11 +4956,14 @@ checkoutForm.addEventListener('submit', async (e) => {
 		  notes,
 		  order_ref: orderRef,
 		  payment_preference,
-		  preferred_time: preferredTimeISO,        // null if ASAP
-		  asap_requested: asapRequested,           // bool
+		  preferred_time: preferredTimeISO,
+		  asap_requested: asapRequested,
 		  communication_preference: communicationPreference,
-		  idempotency_key: getIdempotencyKey(),    // ✅ add this
+
+		  // ✅ CHANGED LINE (see step 2)
+		  idempotency_key: idempotencyKey,
 		};
+
 
 		const { data: orderRow, error: orderUpsertErr } = await supabase
 		  .from('orders')
@@ -4753,7 +4979,7 @@ checkoutForm.addEventListener('submit', async (e) => {
     // 4) Items
     const rows = itemsSnapshot.map(line => ({
       order_id: orderId,
-      item_id: line.itemId,
+      item_id: line.id,
       name: line.name,
       unit_price: Number(line.unitPrice.toFixed(2)),
       qty: line.qty,
@@ -4813,6 +5039,9 @@ checkoutForm.addEventListener('submit', async (e) => {
 
   } catch (err) {
     fail('Unexpected error', err);
+  } finally {
+    isSubmittingOrder = false;
+    if (submitBtn) submitBtn.disabled = false;
   }
 });
 
@@ -5250,6 +5479,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('checkout-submit');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    console.log('[DEBUG] checkout submit clicked');
+  });
+});
+
+
 
 </script>
 
@@ -5322,8 +5561,77 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 </script>
 
+<script>
+  (function () {
+    const banner = document.getElementById("headerBanner");
+    if (!banner) return;
+
+    const slides = Array.from(banner.querySelectorAll(".banner-slide"));
+    if (slides.length <= 1) return;
+
+    let index = 0;
+    const intervalMs = 6000; // change to 4000-8000 as you like
+
+    function show(i) {
+      slides.forEach((s, n) => s.classList.toggle("is-active", n === i));
+    }
+
+    // Start
+    show(index);
+
+    // Pause rotation if user hovers (desktop)
+    let timer = setInterval(next, intervalMs);
+    function next() {
+      index = (index + 1) % slides.length;
+      show(index);
+    }
+
+    banner.addEventListener("mouseenter", () => clearInterval(timer));
+    banner.addEventListener("mouseleave", () => (timer = setInterval(next, intervalMs)));
+  })();
+</script>
+
+<script>
+  (function () {
+    const openBtn = document.getElementById("openHoursModal");
+    const modal = document.getElementById("hoursModal");
+    const overlay = document.getElementById("hoursModalOverlay");
+    const closeBtn = document.getElementById("closeHoursModal");
+
+    if (!openBtn || !modal || !overlay || !closeBtn) return;
+
+    function openModal(e) {
+      e.preventDefault();
+      modal.classList.add("is-open");
+      overlay.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+      overlay.setAttribute("aria-hidden", "false");
+      closeBtn.focus();
+    }
+
+    function closeModal() {
+      modal.classList.remove("is-open");
+      overlay.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+      overlay.setAttribute("aria-hidden", "true");
+      openBtn.focus();
+    }
+
+    openBtn.addEventListener("click", openModal);
+    closeBtn.addEventListener("click", closeModal);
+    overlay.addEventListener("click", closeModal);
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.classList.contains("is-open")) {
+        closeModal();
+      }
+    });
+  })();
+</script>
+
+
+
 
 
 </body>
 </html>
-
