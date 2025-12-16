@@ -2016,6 +2016,175 @@ body.overlay-open {
   animation-play-state: paused;
 }
 
+/* The banner box */
+#headerBanner.header-banner {
+  display: block;
+  position: relative;
+  overflow: hidden;
+
+  padding: 12px 16px;
+  color: #fff;
+  font-weight: 600;
+  text-align: center;
+
+  background: linear-gradient(90deg, #0a7a3d 0%, #b0151b 100%);
+  border-radius: 2px;
+}
+
+/* Slides: keep in normal flow, just show/hide */
+#headerBanner .banner-slide {
+  display: none;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+#headerBanner .banner-slide.is-active {
+  display: block;
+}
+
+/* Link styling */
+#headerBanner .banner-link {
+  color: #fff;
+  text-decoration: underline;
+  font-weight: 700;
+}
+
+#headerBanner .banner-link:hover,
+#headerBanner .banner-link:focus {
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+  z-index: 9998;
+}
+
+.modal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.98);
+  width: min(920px, calc(100vw - 24px));
+  height: min(80vh, 720px);
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease, transform 200ms ease;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.modal.is-open,
+.modal-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal.is-open {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.modal-title {
+  font-weight: 800;
+}
+
+.modal-close {
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+
+.modal-iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.modal-overlay.is-open {
+  touch-action: none;
+}
+
+.modal-body {
+  height: calc(100% - 52px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* CLOSED by default: not in layout at all */
+.modal-overlay,
+.modal {
+  display: none;
+}
+
+/* OPEN state */
+.modal-overlay.is-open {
+  display: block;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 9998;
+}
+
+.modal.is-open {
+  display: block;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(920px, calc(100vw - 24px));
+  height: min(80vh, 720px);
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  z-index: 9999;
+  overflow: hidden;
+}
+/* Let the banner text wrap normally */
+.header-banner {
+  overflow: visible;            /* important */
+}
+
+.banner-slide {
+  white-space: normal;          /* important */
+}
+
+/* If you kept this on the link, remove it */
+.banner-link {
+  white-space: normal;
+}
+@media (max-width: 480px) {
+  .banner-slide {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;   /* clamp to 2 lines */
+    overflow: hidden;
+  }
+}
+
+
+
 
 </style>
 
@@ -2052,11 +2221,11 @@ body.overlay-open {
 
 		  <!-- Status ticker (keep ONE of these) -->
 
-  <div id="status-ticker" class="status-ticker hidden">
+ <!-- <div id="status-ticker" class="status-ticker hidden"> (re-enable if ticker required)
   <div class="ticker-inner">
     <span id="ticker-text"></span>
   </div>
-</div>
+</div>-->
 
 <!-- Header -->
 <header class="site-header xmas wrap">
@@ -2067,9 +2236,22 @@ body.overlay-open {
            class="brand-logo">
       <div class="brand-title">Authentic Thai Takeaway</div>
     </div>
-	<div class="xmas-banner" role="note" aria-label="Christmas message">
-  🎄 Merry Christmas from Rung’s Thai Kitchen — thank you for supporting us! 🎁
+		<div class="header-banner" id="headerBanner" aria-live="polite">
+		  <div class="banner-slide is-active">
+			🎄 <strong>Merry Christmas</strong> from Rung’s Thai Kitchen — thank you for supporting us! 🎁
+		  </div>
+
+		  <div class="banner-slide">
+  🕒 <strong>Christmas & New Year Opening Hours</strong> —
+		<a href="christmas-hours.html" class="banner-link" id="openHoursModal">
+		  View full schedule →
+		</a>
+
+
+  </a>
 </div>
+
+		</div>
 
 
     <nav class="main-nav">
@@ -2583,6 +2765,25 @@ body.overlay-open {
 </button>
 <canvas id="xmasSnow" class="xmas-snow" aria-hidden="true"></canvas>
 
+<div class="modal-overlay" id="hoursModalOverlay" aria-hidden="true"></div>
+
+<div class="modal" id="hoursModal" role="dialog" aria-modal="true" aria-labelledby="hoursModalTitle" aria-hidden="true">
+  <div class="modal-header">
+    <div id="hoursModalTitle" class="modal-title">Christmas & New Year Opening Hours</div>
+    <button type="button" class="modal-close" id="closeHoursModal" aria-label="Close">
+      ×
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <iframe
+      class="modal-iframe"
+      src="christmas-hours.html"
+      title="Christmas & New Year Opening Hours"
+      loading="lazy">
+    </iframe>
+  </div>
+</div>
 
 
   <script>
@@ -5321,6 +5522,76 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 })();
 </script>
+
+<script>
+  (function () {
+    const banner = document.getElementById("headerBanner");
+    if (!banner) return;
+
+    const slides = Array.from(banner.querySelectorAll(".banner-slide"));
+    if (slides.length <= 1) return;
+
+    let index = 0;
+    const intervalMs = 6000; // change to 4000-8000 as you like
+
+    function show(i) {
+      slides.forEach((s, n) => s.classList.toggle("is-active", n === i));
+    }
+
+    // Start
+    show(index);
+
+    // Pause rotation if user hovers (desktop)
+    let timer = setInterval(next, intervalMs);
+    function next() {
+      index = (index + 1) % slides.length;
+      show(index);
+    }
+
+    banner.addEventListener("mouseenter", () => clearInterval(timer));
+    banner.addEventListener("mouseleave", () => (timer = setInterval(next, intervalMs)));
+  })();
+</script>
+
+<script>
+  (function () {
+    const openBtn = document.getElementById("openHoursModal");
+    const modal = document.getElementById("hoursModal");
+    const overlay = document.getElementById("hoursModalOverlay");
+    const closeBtn = document.getElementById("closeHoursModal");
+
+    if (!openBtn || !modal || !overlay || !closeBtn) return;
+
+    function openModal(e) {
+      e.preventDefault();
+      modal.classList.add("is-open");
+      overlay.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+      overlay.setAttribute("aria-hidden", "false");
+      closeBtn.focus();
+    }
+
+    function closeModal() {
+      modal.classList.remove("is-open");
+      overlay.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+      overlay.setAttribute("aria-hidden", "true");
+      openBtn.focus();
+    }
+
+    openBtn.addEventListener("click", openModal);
+    closeBtn.addEventListener("click", closeModal);
+    overlay.addEventListener("click", closeModal);
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.classList.contains("is-open")) {
+        closeModal();
+      }
+    });
+  })();
+</script>
+
+
 
 
 
