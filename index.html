@@ -1,48 +1,5759 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Rungs Thai Kitchen – Temporary Maintenance</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rung's Thai Kitchen</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #111;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      text-align: center;
+    :root{
+      --accent:#d9464a;
+      --accent-dark:#b02a2a;
+      --muted:#6b7280;
+      --card:#fff;
+      --shadow: 0 8px 24px rgba(15,23,42,0.06);
+	  --crimson:#CC0C1A;
+	  --blue:#;
+      font-family: 'Nunito', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
-    .box {
-      max-width: 420px;
-      padding: 24px;
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#fff 0%,#fff8f6 100%);color:#111;}
+    .container{max-width:1100px;margin:0 auto;padding:20px;}
+
+    /* Header */
+    /* Header */
+.site-header {
+  background: var(--card);
+  box-shadow: var(--shadow);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  padding: 14px 20px 16px;
+  top: 12px;
+  z-index: 1100;
+}
+
+.header-inner.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+html { scroll-padding-top: calc(var(--header-offset, 0px) + var(--ticker-height, 0px)); }
+
+
+/* If you also have the success modal separately, keep it above too */
+#order-success.modal-backdrop {
+  z-index: 3000;
+}
+
+
+/* Checkout status banner */
+.checkout-banner {
+  display:none;
+  margin:10px 0 6px;
+  padding:10px 12px;
+  border-radius:8px;
+  font-size:13px;
+  line-height:1.35;
+}
+.checkout-banner--closed       { background:#fff3f3; color:#8a1f1f; border:1px solid #f2d3d3; }
+.checkout-banner--fullybooked  { background:#fff8e6; color:#7a4d00; border:1px solid #f1dfb3; }
+.checkout-banner .x {
+  float:right; border:none; background:transparent; font-weight:800; cursor:pointer;
+}
+
+
+/* --- Single, clean ticker style --- */
+#status-ticker {
+  position: relative;             /* simple: just sits above the header */
+  z-index: 1100;
+  background: linear-gradient(90deg, #b02a2a, #d9464a);
+  color: #fff;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  padding: 8px 12px;
+  margin: 0 12px 10px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#status-ticker.hidden {
+  display: none;
+}
+
+#status-ticker .ticker-inner {
+  display: inline-block;
+  white-space: nowrap;
+  animation: ticker-move 25s linear infinite;
+}
+
+@keyframes ticker-move {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+/* a bit slower on mobile so long messages can be read */
+@media (max-width: 640px) {
+  #status-ticker .ticker-inner {
+    animation-duration: 20s;   /* optional: slightly faster on mobile */
+    animation-delay: -8s;      /* ⬅️ start 8 seconds into the animation */
+  }
+}
+
+
+
+
+.brand-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.brand-logo {
+  height: 100px;
+  width: auto;
+  background: transparent;
+  display: block;
+}
+
+.brand-title {
+  color: var(--crimson);
+  font-weight: 800;
+  font-size: 1.3rem;
+}
+
+.brand-tagline {
+  color: var(--muted);
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+}
+
+/* Nav */
+.main-nav ul {
+  display: flex;
+  gap: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.main-nav a {
+  color: #111;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+.main-nav a:hover {
+  background: rgba(217, 70, 74, 0.1);
+}
+
+/* mobile tweaks */
+@media (max-width: 640px) {
+  .brand-logo {
+    height: 25px;
+  }
+  .main-nav ul {
+    gap: 10px;
+  }
+  .main-nav a {
+    font-size: 0.85rem;
+  }
+}
+
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo img {height: 125px; width: auto;}
+    nav ul{display:flex;gap:16px;list-style:none;margin:0;padding:0}
+    nav a{color:#111;text-decoration:none;font-weight:700;font-size:14px}
+
+    /* Layout */
+    /* --- Simplified layout: order panel always below menu --- */
+main {
+  display: block;
+}
+
+#order-panel {
+  position: static;
+  width: 100%;
+  margin-top: 40px;
+}
+
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:var(--shadow)}
+    h1,h2,h3{margin:0}
+    h1{font-size:20px}
+    .muted{color:var(--muted)}
+    .small{font-size:13px}
+    .price{font-weight:800}
+    .btn{display:inline-block;padding:8px 12px;border-radius:8px;text-decoration:none;font-weight:700;cursor:pointer;font-size:13px}
+    .btn-accent{background:var(--accent);color:white;border:none}
+    .btn-ghost{background:transparent;border:1px solid #eee}
+    .btn[disabled]{opacity:.55;cursor:not-allowed;filter:grayscale(10%)}
+	
+	/* body { background: #16205B; } */
+/* #menu h2::after { ... } */
+
+
+		header {
+	  background: rgba(255,255,255);
+	  backdrop-filter: blur(8px);
+	}
+
+	.menu-item {
+	  background: rgba(255,255,255,0.85);
+	  transition: transform .12s ease, box-shadow .12s ease;
+	}
+	.menu-item:hover {
+	  transform: translateY(-2px);
+	  box-shadow: 0 4px 16px rgba(217,70,74,0.08);
+	}
+
+	.btn-accent {
+	  background: linear-gradient(135deg, #16205B 0%, #b02a2a 100%);
+	  box-shadow: 0 6px 16px rgba(217,70,74,0.35);
+	}
+
+	#menu h2 {
+	  display:flex;
+	  align-items:center;
+	  gap:6px;
+	}
+	/* body { background: #16205B; } */
+/* #menu h2::after { ... } */
+
+
+
+    /* Menu categories (accordion) */
+    .menu-section{display:grid;gap:12px}
+    .category{border-radius:10px;border:1px solid #f3e7e6;overflow:hidden}
+    .category-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#fff4f3;cursor:pointer}
+    .category-header h3{margin:0;font-size:16px}
+    .category-body{
+      max-height:0; overflow:hidden;
+      transition:max-height .28s ease, padding .28s ease;
+      padding:0 12px;
     }
-    h1 { margin-bottom: 12px; }
-    p { opacity: 0.9; line-height: 1.5; }
-    .phone {
-      font-size: 1.25rem;
-      margin-top: 16px;
-      font-weight: bold;
+    .category-body.open{ padding:12px; }
+	
+	/* keep anchors landing below sticky header */
+	:root { --header-offset: 140x; } /* fallback */
+html { 	scroll-behavior: smooth;
+		scroll-padding-top: var(--header-offset); }
+.category, .category-header, .category-body { scroll-margin-top: var(--header-offset); }
+	
+    .menu-item{display:flex;justify-content:space-between;align-items:flex-start;padding:10px;border-radius:8px;border:1px solid #f7efee;margin-bottom:8px}
+    .menu-item .meta{max-width:72%}
+    .menu-item .meta .title{font-weight:700}
+
+    /* Order */
+    aside { align-self: start; }
+    #order-panel{ position: sticky; top: 20px; z-index: 1000; width: 100%; }
+    .order-list{display:flex;flex-direction:column;gap:10px}
+    .order-row{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;border:1px dashed #f0e6e5;gap:10px}
+    .item-thumb{width:54px;height:54px;object-fit:cover;border-radius:8px;border:1px solid #eee;background:#f8f8f8}
+
+    /* Our Food gallery */
+    .food-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .food-grid img{width:100%;height:140px;object-fit:cover;border-radius:8px;box-shadow:0 6px 16px rgba(15,23,42,0.06);cursor:pointer}
+    .food-grid img:hover{transform:translateY(-4px);transition:transform .18s ease,box-shadow .18s ease}
+
+    /* Customise / checkout modal backdrop */
+		.customise-modal-backdrop,
+		.checkout-modal-backdrop,
+		.modal-backdrop {
+		  position: fixed;
+		  inset: 0;
+		  background: rgba(0,0,0,0.45);
+		  display: none;
+		  align-items: center;
+		  justify-content: center;
+		  padding: 18px;
+		  z-index: 12000 !important;        /* ABOVE menu overlay */
+		  overflow: auto;
+		  -webkit-overflow-scrolling: touch;
+		}
+	
+    /* Inner modal card */
+		.customise-modal,
+		.checkout-modal,		
+		.modal {
+		position: fixed;
+		  width: 100%;
+		  max-width: 720px;
+		  background: var(--card);
+		  border-radius: 12px;
+		  padding: 16px;
+		  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+		  max-height: 90vh;
+		  overflow: auto;
+		  z-index: 12001 !important;        /* just in case */
+		}
+    .mods{
+	display:flex;
+	flex-wrap:wrap;
+	gap:8px;
+	margin-top:8px
+	}
+	
+    .chip{
+	padding:8px 10px;
+	border-radius:999px;
+	border:1px solid #eee;
+	cursor:pointer;
+	font-size:13px;
+	background:#fff; 
+	min-height:44px; 
+	touch-action:manipulation
+	}
+    .chip.selected{background:#fff4f3;border-color:var(--accent)}
+    input[type=number]{width:72px;padding:8px;border-radius:8px;border:1px solid #e7e3e3}
+    .qty-controls{display:flex;align-items:center;gap:8px}
+    .totals{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+    .mod-required-note{margin-top:8px;font-size:13px;color:#b02a2a;display:none}
+    .mod-limit-note{margin-top:6px;font-size:12px;color:var(--muted);display:none}
+
+    /* Spice selector */
+    .spice-wrap{margin-top:12px}
+    .spice-label{font-size:13px;color:var(--muted)}
+    .spice-buttons{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+    .spice-btn{border:1px solid #eee;background:#fff;border-radius:999px;padding:6px 10px;font-size:13px;cursor:pointer; min-height:44px; touch-action:manipulation}
+    .spice-btn.active{border-color:var(--accent);background:#fff4f3}
+
+    /* Allergens */
+    .allergen-icon{font-size:14px;margin-right:6px}
+    .allergen-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+    .allergen-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #eee;border-radius:999px;background:#fff;font-size:12px}
+
+    footer{margin-top:18px;text-align:center;padding:18px;border-radius:10px;background:rgba(204,12,26,0.35);color:white; padding-bottom:max(18px, env(safe-area-inset-bottom));}
+	footer {
+  margin-top: 30px;
+  text-align: center;
+  padding: 24px 16px;
+  border-radius: 12px;
+  background: rgba(204,12,26,0.35);
+  color: #fff;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+}
+
+footer {
+  margin-top: 30px;
+  text-align: center;
+  padding: 24px 16px;
+  border-radius: 12px;
+  background: rgba(204,12,26,0.35);
+  color: #fff;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+}
+
+.footer-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.footer-section h3 {
+  font-weight: 800;
+  margin-bottom: 2px;
+  color: #fff;
+}
+
+.footer-section .muted {
+  color: rgba(255,255,255,0.85);
+  margin: 0 0 2px;
+}
+
+.footer-section a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.footer-section a:hover { opacity: 0.9; }
+
+.footer-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(255,255,255,0.2);
+  margin: 4px 0;
+}
+
+.footer-legal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.footer-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-links a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.footer-links a:hover { opacity: 0.9; }
+
+.footer-links .dot {
+  opacity: 0.8;
+  margin: 0 6px;
+}
+
+@media (max-width: 640px) {
+  footer { font-size: 0.9rem; }
+  .footer-section, .footer-legal { text-align: center; }
+}
+
+
+
+    /* Checkout form layout/styling */
+    #checkout-form > div { margin-top: 10px; }
+    .form-grid { display:grid; gap:12px; }
+    .form-grid .row-2 { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    @media (max-width:560px){ .form-grid .row-2 { grid-template-columns:1fr; } }
+    .field { display:flex; flex-direction:column; gap:6px; }
+    .field label { font-size:13px; color:var(--muted); }
+    .input, .textarea, .select {
+      font: inherit;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #e7e3e3;
+      background:#fff;
+      outline: none;
+      box-shadow: none;
     }
-  </style>
-</head>
-<body>
-  <div class="box">
-    <h1>We’ll be back shortly</h1>
-    <p>
-      Our online ordering system is currently undergoing maintenance.
-      <br><br>
-      Please call us to place your order.
-    </p>
-    <div class="phone">
-      📞 0113 469 9564
-    </div>
-    <p style="margin-top:16px; font-size:0.9rem;">
-      Sorry for the inconvenience and thank you for your patience.
-    </p>
+    .input:focus, .textarea:focus, .select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(217,70,74,.12);
+    }
+    .input.auto-fit { width:auto; max-width:100%; min-width:18ch; white-space:nowrap; }
+    .input-measure { position:absolute; visibility:hidden; white-space:pre; font:inherit; padding:10px 12px; border:1px solid transparent; }
+	/* ===== mobile / small screens ===== */
+@media (max-width: 900px) {
+  /* header: stack logo above nav, but keep nav links horizontal */
+  header {
+    position: static;
+  }
+  .header-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+  }
+
+  /* nav: horizontal list that wraps nicely */
+  nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 14px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  nav ul li {
+    display: inline-block;
+  }
+
+  nav a {
+    font-size: 0.95rem;
+    padding: 4px 8px;
+  }
+
+  /* main layout: single column, order summary below menu */
+ /* main {
+    display: block;
+  }
+
+  #order-panel {
+    position: static;
+    width: 100%;
+    margin-top: 20px;
+  }*/
+
+	  #order-success .order-line {
+	  display:flex;
+	  justify-content:space-between;
+	  gap:12px;
+	  align-items:flex-start;
+	}
+		#order-success .order-line-left {
+		  display:flex;
+		  flex-wrap:wrap;
+		  gap:4px;
+		  align-items:cente
+		}
+		#order-success .spice {
+		  display:inline-block;
+		  min-width:3.2rem; /* keeps 🌶️ from jumping */
+		}
+
+
+  /* menu items: full width on mobile */
+  .menu-item {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+		/* === Parallax background layer === */
+		.bg-parallax {
+		  position: fixed;
+		  inset: 0;
+		  z-index: -1;
+		  pointer-events: none;
+		  overflow: hidden;
+		  background:
+			/* top image */
+			url("./images/bg-top6.jpg") center top / cover no-repeat,
+			/* bottom image */
+			url("images/bg-bottom.jpg") center 120vh / cover no-repeat,
+			/* fallback colour under both */
+			#0b1120;
+		  background-attachment: fixed, fixed, scroll;
+		  /* dim it a bit so text stays readable */
+		  filter: brightness(.55);
+		}
+
+		/* extra spacing between sections so we *see* the background */
+		.card {
+		  margin-bottom: 175px;   /* was 14–18px in places */
+		}
+
+		/* give main a bit more vertical rhythm */
+		main > section > .card + .card {
+		  margin-top: 250px;
+		}
+
+		/* keep footer off the bottom a little so background shows */
+		footer {
+		  margin-top: 30px;
+		}
+
+		/* mobile fallback: iOS hates background-attachment:fixed */
+		@media (max-width: 768px) {
+		  .bg-parallax {
+			background-attachment: scroll, scroll, scroll;
+			background-size: cover, cover, auto;
+		  }
+		}
+		.card {
+		  background: rgba(255,255,255,0.9);
+		  backdrop-filter: blur(2px);
+		}
+
+		/* This helps anchors or programmatic scrolls land below the sticky header */
+		:root {
+		  --header-offset: 160px; /* fallback; JS will set the precise value */
+		}
+
+		html {
+		  scroll-behavior: smooth;                 /* native smooth scroll */
+		  scroll-padding-top: var(--header-offset);/* space for sticky header */
+		}
+
+		.category-body {
+		  transition: max-height .25s ease;        /* a touch shorter & snappier */
+		  will-change: max-height;                 /* hint for smoother anim */
+		  overflow: hidden;
+		}
+
+
+		/*.card-spacer { margin-bottom: 180px; }
+		.card { margin-bottom: 0; } */
+
+		
+		/* === Checkout modal alignment fixes === */
+		#checkout-modal .totals{
+		  display:grid;
+		  grid-template-columns: 1fr auto; /* label on left, amount on right */
+		  gap:12px;
+		  align-items:center;
+		}
+		#checkout-modal .totals .muted{ white-space:nowrap; }
+
+		#checkout-subtotal,
+		#checkout-delivery,
+		#checkout-total{
+		  min-width:6ch;     /* avoids clipping like £9.50 */
+		  text-align:right;  /* right-align prices */
+		}
+
+		/* Inputs layout */
+		#checkout-form .form-grid{ display:grid; gap:12px; }
+		#checkout-form .row-2{
+		  display:grid;
+		  grid-template-columns:1fr 1fr;
+		  gap:12px;
+		}
+		@media (max-width:560px){
+		  #checkout-form .row-2{ grid-template-columns:1fr; }
+		}
+
+		/* Modal padding & actions bar */
+		#checkout-modal .modal{ padding:16px 18px; }
+		#checkout-modal .checkout-actions{
+		  position:sticky;
+		  bottom:0;
+		  background:#fff;
+		  padding-top:8px;
+		  margin-top:6px;
+		}
+
+		/* Ensure modal sits above ticker */
+		#checkout-modal{ z-index:12001; }
+
+		/* === Order summary row layout (desktop & mobile) === */
+		#order-panel .order-list { overflow: visible; }
+
+		#order-panel .order-row {
+		  display: grid;
+		  /* image | wide name/details | price */
+		  grid-template-columns: 64px minmax(0, 1fr) auto;
+		  align-items: center;
+		  gap: 12px;
+		}
+
+		#order-panel .order-row .item-thumb {
+		  width: 64px; height: 64px; object-fit: cover; border-radius: 8px;
+		}
+
+		/* let the middle column actually grow */
+		#order-panel .order-row .meta { min-width: 0; max-width: 100%; overflow: hidden; }
+
+		/* DESKTOP/TABLET: single-line with ellipsis */
+		#order-panel .order-row .meta .title {
+		  white-space: nowrap;
+		  overflow: hidden;
+		  text-overflow: ellipsis;
+		  font-weight: 700;
+		}
+
+		/* price column stays tight and aligned right */
+		#order-panel .order-row .price,
+		#order-panel .order-row .order-price {
+		  white-space: nowrap;
+		  text-align: right;
+		  min-width: 6ch;
+		  justify-self: end;
+		}
+
+		/* MOBILE: allow two lines for long names */
+		@media (max-width: 768px) {
+		  #order-panel .order-row {
+			grid-template-columns: 54px minmax(0, 2fr) auto;
+			gap: 10px;
+		  }
+		  #order-panel .order-row .meta .title {
+			display: -webkit-box;
+			-webkit-line-clamp: 2;       /* up to 2 lines on mobile */
+			-webkit-box-orient: vertical;
+			white-space: normal;
+		  }
+		}
+		/* --- Order rows: flex layout, name gets the space --- */
+		#order-panel .order-list .order-row{
+		  display: flex !important;
+		  align-items: flex-start;
+		  gap: 12px;
+		}
+
+		/* thumbnail stays fixed */
+		#order-panel .order-row .item-thumb{
+		  flex: 0 0 64px;
+		  width: 64px;
+		  height: 64px;
+		}
+
+		/* NAME / meta column should grow and be wide enough */
+		#order-panel .order-row .meta{
+		  flex: 1 1 520px;       /* <-- give it most of the width */
+		  min-width: 320px;      /* prevent crazy narrow column on desktop */
+		  max-width: 100%;
+		}
+
+		/* keep price / qty / remove tight and on the right */
+		#order-panel .order-row .price,
+		#order-panel .order-row .qty-controls,
+		#order-panel .order-row a[href*="remove"],
+		#order-panel .order-row .remove{
+		  flex: 0 0 auto;
+		  white-space: nowrap;
+		}
+
+		/* push the price to the far right; others will sit before it */
+		#order-panel .order-row .price{ margin-left: auto; }
+
+		/* stop titles from breaking letter-by-letter */
+		#order-panel .order-row .meta .title{
+		  white-space: normal;
+		  word-break: normal;
+		  overflow-wrap: anywhere;   /* wrap at word boundaries when needed */
+		}
+
+		/* mobile tweak */
+		@media (max-width: 640px){
+		  #order-panel .order-row .item-thumb{ flex-basis: 54px; width: 54px; height: 54px; }
+		  #order-panel .order-row .meta{ flex-basis: 260px; min-width: 200px; }
+		}
+
+		/* --- force one-column layout everywhere --- */
+		main{ display:block !important; }
+		#order-panel{
+		  position:static !important;
+		  width:100% !important;
+		  margin-top:20px !important;
+		}
+
+		/* Divider (already added earlier, keeping for context) */
+		.order-row:not(:last-child),
+		.order-item:not(:last-child){
+		  border-bottom: 1px dashed rgba(217,70,74,0.35);
+		  padding-bottom: 10px;
+		  margin-bottom: 10px;
+		  transition: border-color .35s ease, opacity .25s ease;
+		}
+
+		/* Appear fade for newly-rendered rows */
+		.order-row.will-appear { opacity: 0; }
+		.order-row.appear      { opacity: 1; }
+
+		/* Gentle highlight “pulse” when qty changes */
+		.order-row.flash {
+		  animation: rtkFlash 600ms ease-out;
+		}
+
+		/* Motion safety */
+		@media (prefers-reduced-motion: reduce) {
+		  .order-row { transition: none !important; }
+		  .order-row.flash { animation: none !important; }
+		}
+
+		/* Keyframes for the pulse */
+		@keyframes rtkFlash {
+		  0%   { background: rgba(217,70,74,.10); }
+		  100% { background: transparent; }
+		}
+
+		/* Slightly tighter spacing on small screens */
+		@media (max-width:640px){
+		  .order-row:not(:last-child),
+		  .order-item:not(:last-child){
+			padding-bottom: 6px;
+			margin-bottom: 6px;
+		  }
+		}
+
+
+		#ticker-ghost, .ticker-spacer { display:none !important; }
+
+		/* --- Order summary: mobile-friendly layout & wrapping --- */
+		.order-row {
+		  display: grid;
+		  grid-template-columns: 68px 1fr auto; /* thumb | name | price */
+		  align-items: center;
+		  gap: 12px;
+		}
+
+		.order-row .item-thumb {
+		  width: 68px;
+		  height: 68px;
+		  border-radius: 8px;
+		  object-fit: cover;
+		}
+
+		.order-row .meta {
+		  min-width: 0;                 /* allow text to take available space */
+		}
+
+		.order-row .meta .title {
+		  white-space: normal;          /* allow multi-line names */
+		  word-break: keep-all;         /* don't break inside words */
+		  overflow-wrap: break-word;    /* but wrap long words if needed */
+		  line-height: 1.25;
+		}
+
+		.order-row .price {
+		  justify-self: end;            /* keep prices neatly aligned right */
+		}
+
+		/* Very narrow phones: put controls on the next line, keep price aligned */
+		@media (max-width: 420px) {
+		  .order-row {
+			grid-template-columns: 56px 1fr;   /* drop the dedicated price column */
+		  }
+		  .order-row .price {
+			grid-column: 2; justify-self: end; /* price sits in the name column row */
+		  }
+		  .order-row .qty-controls,
+		  .order-row .remove {
+			grid-column: 2;                    /* controls flow beneath the name */
+		  }
+		}
+		/* Override older width limits for order summary text */
+		.order-row .meta {
+		  max-width: none !important;
+		}
+
+		/* --- Order summary layout: mobile fix (portrait) --- */
+		@media (max-width: 520px) {
+		  /* 3-column grid: [thumb] [flex text] [fixed price] */
+		  .order-row {
+			display: grid;
+			grid-template-columns: 64px minmax(0, 1fr) 84px; /* tweak 84px if needed */
+			column-gap: 12px;
+			align-items: start;
+		  }
+
+		  .order-row .item-thumb {
+			grid-column: 1 / 2;
+			width: 64px; height: 64px;
+			flex: none;
+		  }
+
+		  /* text/meta column grows and can actually shrink (min-width:0 is key in grid) */
+		  .order-row .meta {
+			grid-column: 2 / 3;
+			min-width: 0 !important;
+			max-width: none !important;
+			white-space: normal !important;
+			word-break: normal !important;
+			overflow-wrap: anywhere;
+		  }
+		  .order-row .meta .title {
+			min-width: 0 !important;
+			white-space: normal !important;
+			word-break: normal !important;
+			overflow-wrap: anywhere;
+		  }
+
+		  /* fixed price column stays right-aligned and on one line */
+		  .order-row .price {
+			grid-column: 3 / 4;
+			justify-self: end;
+			text-align: right;
+			white-space: nowrap;
+		  }
+
+		  /* controls & remove sit under the text, not under price */
+		  .order-row .qty-controls,
+		  .order-row .remove-link {
+			grid-column: 2 / 3;
+			justify-self: start;
+			margin-top: 6px;
+		  }
+		}
+
+		/* Subtle dividers between order items */
+		.order-row:not(:last-child),
+		.order-item:not(:last-child) {
+		  border-bottom: 1px dashed rgba(0, 0, 0, 0.15);
+		  padding-bottom: 10px;
+		  margin-bottom: 10px;
+		}
+
+		/* Optional: lighter feel for dark backgrounds */
+		body.dark-mode .order-row:not(:last-child),
+		body.dark-mode .order-item:not(:last-child) {
+		  border-bottom: 1px dashed; rgba(17, 70, 74, 0.35); /* soft accent red */);
+			padding-bottom: 10px;
+		  margin-bottom: 10px;
+		}
+		/* Space before totals and checkout button */
+		.order-summary-totals,
+		#checkout-button {
+		  margin-top: 1rem;
+		}
+		.order-row:hover,
+		.order-item:hover {
+		  background: rgba(255,255,255,0.4);
+		  border-radius: 8px;
+		  transition: background 0.2s ease;
+		}
+
+		/* --- Center-align informational cards --- 
+		.about-section,
+		.food-section,
+		.allergens-section,
+		#about,
+		#our-food,
+		#allergens,
+		.card {
+		  text-align: center;
+		  justify-content: center;
+		  align-items: center;
+		}*/
+
+		/* If your .card uses flexbox internally, ensure it can center its contents 
+		.card {
+		  display: flex;
+		  flex-direction: column;
+		  justify-content: center;
+		  align-items: center;
+		}*/
+
+		/* Optional: constrain width for readability 
+		.about-section .card,
+		.food-section .card,
+		.allergens-section .card {
+		  max-width: 800px;
+		  margin: 0 auto;
+		}*/
+
+		/* Compact the header */
+		.site-header{
+		  padding: 8px 20px 10px !important;  /* was adding lots of white space */
+		  margin: 0 0 12px !important;
+		}
+
+		/* Centered layout, minimal gaps */
+		.header-inner.centered{
+		  display: flex;
+		  flex-direction: column;
+		  align-items: center;
+		  gap: 6px !important;                /* tighter gap between logo / tagline / nav */
+		}
+
+		/* Logo block */
+		.brand-block{
+		  display: flex;
+		  flex-direction: column;
+		  align-items: center;
+		  gap: 6px !important;                /* reduce space between logo and “Authentic Thai…” */
+		  padding: 0 !important;
+		}
+
+		/* The logo itself */
+		.brand-logo{
+		  height: 100px;                      /* keep your larger logo */
+		  width: auto;
+		  display: block;
+		  margin: 0 auto;
+		  padding: 0 !important;
+		}
+
+		/* Tagline just under the logo */
+		.brand-title{
+		  margin: 2px 0 0 !important;         /* very small gap */
+		  line-height: 1.15;
+		}
+
+		/* Nav sits a little closer to the tagline */
+		.main-nav{ margin-top: 6px !important; }
+
+		/* Optional: slightly smaller logo on small screens */
+		@media (max-width: 480px){
+		  .brand-logo{ height: 100px; }
+		}
+
+		/* Make the white header background slightly transparent */
+		.site-header {
+		  background-color: rgba(255, 255, 255, 0.8); /* 0.9 = 80% opaque */
+		  backdrop-filter: blur(6px);                 /* softens background behind it */
+		  -webkit-backdrop-filter: blur(6px);         /* Safari support */
+		  border-radius: 16px;               /* optional rounded bottom corners */
+		  box-shadow: 0 2px 10px rgba(0,0,0,0.1);     /* gentle shadow to separate from bg */
+		}
+
+		/* Make all main content cards slightly transparent */
+		.card,
+
+		.content-section {
+		  background-color: rgba(255, 255, 255, 0.8) !important; /* 0.9 = 90% opaque */
+		  backdrop-filter: blur(4px);
+		  -webkit-backdrop-filter: blur(4px);
+		}
+
+		/* Add breathing space below the header */
+		.site-header {
+		  margin-bottom: 200px !important; /* adjust this value as needed */
+		}
+
+		/* Glass look for major cards */
+		.card,
+		.content-section {
+		  background-color: rgba(255, 255, 255, 0.9);
+		  backdrop-filter: blur(4px);
+		  -webkit-backdrop-filter: blur(4px);
+		}
+
+		/* Checkout modal + sheet */
+		.modal,
+		#checkout-modal .modal,
+		#order-success .modal {
+		  background-color: rgba(255, 255, 255, 0.92);
+		  backdrop-filter: blur(6px);
+		  -webkit-backdrop-filter: blur(6px);
+		}
+
+		/* Footer glass + spacing */
+		footer {
+		  background-color: rgba(255, 255, 255, 0.9);
+		  backdrop-filter: blur(4px);
+		  -webkit-backdrop-filter: blur(4px);
+		  border-radius: 12px;
+		  padding: 18px;
+		}
+
+		/* Extra breathing room below the header */
+		.site-header { margin-bottom: 40px; }
+
+		/* Keep price column aligned in order summary on all sizes */
+		.order-row {
+		  align-items: start;
+		}
+		.order-row .price {
+		  margin-left: auto;
+		  text-align: right;
+		  min-width: 4.5ch;
+		}
+
+		/* Hide thumbnails in order summary */
+		.order-row img,
+		.order-item img,
+		.menu-item img {
+		  display: none !important;
+		}
+
+		/* Adjust padding/margins to reclaim space */
+		.order-row,
+		.order-item {
+		  grid-template-columns: 1fr auto;
+		  align-items: center;
+		  padding: 8px 0;
+		}
+
+		.order-row .meta,
+		.order-item .meta {
+		  margin-left: 0 !important;
+		}
+
+		footer {
+		  background-color: rgba(204, 12, 26, 0.4); /* #16205b @ 80% opacity */
+		  color: white;                            /* good contrast */
+		  padding: 20px 0;
+		  text-align: center;
+		  border-radius: 10px 10px 0 0;            /* optional soft top corners */
+		  backdrop-filter: blur(4px);              /* frosted effect for consistency */
+		}
+
+		/* Optional: make footer links match your site’s accent */
+		footer a {
+		  color: #ffb3b3;
+		  text-decoration: none;
+		}
+
+		footer a:hover {
+		  color: #ffffff;
+		  text-decoration: underline;
+		}
+
+		/* Normal (sticky) */
+		.site-header {
+		  top: 12px;
+		  z-index: 1100;
+		}
+
+
+
+		:root {
+		  --header-h: 0px;
+		}
+
+		/* Spacer reserves header height by default */
+		#header-spacer {
+		  height: var(--header-h);
+		  transition: height .22s ease;
+		  will-change: height;
+		}
+
+		/* When header slides up, collapse spacer so content moves up */
+		.header-slid-up #header-spacer {
+		  height: 0;
+		}
+
+		/* tighten the space under the header */
+		.site-header { margin-bottom: 8px; padding-bottom: 10px; }
+
+		/* make sure the spacer doesn't reserve space unless sliding */
+		#header-spacer { height: 0 !important; }
+
+		/* no accidental top margin on the very first content card */
+		main > section:first-of-type .card { margin-top: 0; }
+
+		/* (optional) if you still see a gap, remove top margin on the first section entirely */
+		main > section:first-of-type { margin-top: 0; }
+
+		/* --- Back to Top Button --- */
+		#backToTop {
+		  position: fixed;
+		  bottom: 24px;
+		  left: 16px;
+		  background: linear-gradient(135deg, #16205B 0%, #b02a2a 100%);
+		  color: white;
+		  border: none;
+		  border-radius: 10%;
+		  width: 56px;
+		  height: 56px;
+		  font-size: 22px;
+		  font-weight: bold;
+		  cursor: pointer;
+		  opacity: 0;
+		  visibility: hidden;
+		  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+		  z-index: 9999;
+		}
+
+		#backToTop:hover {
+		  background: #16205B;             /* your accent red */
+		  transform: scale(1.1);
+		}
+
+		/* when visible */
+		#backToTop.show {
+		  opacity: 0.9;
+		  visibility: visible;
+		}
+
+		/* === Customise modal image: fit without zoom === */
+		/* Customise modal image: show full photo, not zoomed */
+		#modal-img{
+		  display:block;
+		  width:100%;
+		  max-height:180px;   /* tweak 160–220px to taste */
+		  object-fit:contain; /* show whole image (no crop/zoom) */
+		  border-radius:8px;
+		  margin:8px 0 10px;
+		}
+
+		/* Optionally smaller on mobile */
+		@media (max-width: 480px) {
+		  #modal-img { max-height: 180px; }
+		}
+		
+		/* The overall popul list - just stacks categories vertically */
+		#menu-list {
+		display: block;
+		}
+
+		/* Full-screen menu overlay (under modals) */
+		.menu-overlay {
+		  position: fixed;
+		  inset: 0;
+		  background: rgba(0,0,0,0.6);
+		  display: none;
+		  align-items: center;
+		  justify-content: center;
+		  padding: 16px;
+		  z-index: 10000 !important;        /* BELOW modal backdrop */
+		}
+		
+	
+		.menu-overlay.show {
+		  display: flex;
+		}
+
+		.menu-overlay-inner {
+		  width: 100%;
+		  max-width: 1100px;
+		  max-height: 90vh;
+		  overflow-y: auto;
+		}
+
+		/* header row inside popup */
+		.menu-overlay-header {
+		  display: flex;
+		  align-items: center;
+		  justify-content: space-between;
+		  gap: 12px;
+		  margin-bottom: 12px;
+		}
+
+		.menu-overlay-close {
+		  border: none;
+		  background: transparent;
+		  font-size: 1.4rem;
+		  cursor: pointer;
+		}
+
+		/* grid of categories */
+		.menu-grid {
+		  display: grid;
+		  grid-template-columns: repeat(2, minmax(0, 1fr));
+		  gap: 16px;
+		}
+		
+		/* Category block inside popup */
+		.popup-category {
+		  margin-bottom: 28px;
+		}
+
+		.popup-category-title {
+		  margin: 0 0 8px;
+		  font-size: 1.5rem;
+		  font-weight: 800;
+		  color: #16205B;
+		}
+
+		/* Two-column grid per category */
+		.popup-items-grid {
+		  display: grid;
+		  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		  gap: 16px;
+		}
+
+		/* Stack on small screens */
+		@media (max-width: 768px) {
+		  .popup-items-grid {
+			grid-template-columns: 1fr;
+		  }
+		}
+
+		/* Item card layout */
+		.menu-item-card {
+		  display: flex;
+		  min-height: 150px; /*tweak to taste: 140-180px */
+		  gap: 10px;
+		  align-items: stretch;
+		  padding: 10px;
+		  border-radius: 10px;
+		  border: 3px solid #16205b;
+		  background: rgba(255, 255, 255, 0.92);
+		}
+
+		/* Thumbnail */
+		.menu-card-thumb-wrap img {
+		  width: 78px;
+		  height: 78px;
+		  border-radius: 8px;
+		  object-fit: cover;
+		  display: block;
+		}
+
+		/* Text part */
+		.menu-card-main {
+		  flex: 1;
+		  min-width: 0;
+		  display: flex;
+		  flex-direction: column;
+		}
+
+		.menu-card-title {
+		  font-weight: 700;
+		  margin-bottom: 2px;
+		}
+
+		.menu-card-desc {
+		  margin-bottom: 4px;
+		}
+
+		/* Price + button row */
+		.menu-card-bottom {
+		  display: flex;
+		  justify-content: space-between;
+		  align-items: center;
+		  gap: 8px;
+		  margin-top: auto;
+		}
+
+
+		/* on small screens → single column */
+		@media (max-width: 768px) {
+		  .menu-grid {
+			grid-template-columns: 1fr;
+		  }
+		}
+
+		/* tweak category card a little for popup */
+		.menu-grid .category {
+		  border-radius: 10px;
+		  border: 1px solid #f3e7e6;
+		  overflow: hidden;
+		  background: rgba(255,255,255,0.92);
+		}
+
+		.menu-grid .category-header {
+		  background:#fff4f3;
+		  padding:10px 12px;
+		}
+
+		.menu-grid .category-header h3 {
+		  margin: 0
+		  font-size: 16px;
+		}
+
+		/* always-open bodies inside popup */
+		.menu-grid .category-body {
+		  padding: 10px 12px 12px;
+		  max-height: none;
+		  overflow: visible;
+		}
+
+		/* make whole menu item clickable */
+		.menu-grid .menu-item {
+		  cursor: pointer;
+		  transition: transform .12s ease, box-shadow .12s ease;
+		}
+
+		.menu-grid .menu-item:hover {
+		  transform: translateY(-1px);
+		  box-shadow: 0 2px 10px rgba(15,23,42,0.08);
+		}
+		
+		.menu-sheet {
+  background: rgba(255,255,255,0.96);
+  border-radius: 16px;
+  max-width: 960px;
+  width: 100%;
+  max-height: 90vh;
+  padding: 16px 18px 18px;
+  box-shadow: 0 18px 45px rgba(15,23,42,0.45);
+  overflow: auto;
+}
+
+/* two-column layout for categories on bigger screens */
+.menu-grid {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 800px) {
+  .menu-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: flex-start;
+  }
+}
+
+/* close button in the top-right of the sheet */
+.menu-close {
+  position: sticky;
+  top: 0;
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* The sheet / card inside the overlay */
+.menu-sheet {
+  position: relative;
+  max-width: 1000px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px 16px 72px; /* extra bottom padding for the floating button */
+}
+
+/* Two-column menu grid (if not already styled) */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* On mobile, just stack */
+@media (max-width: 768px) {
+  .menu-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Floating checkout button inside the sheet */
+.menu-checkout-btn {
+  position: sticky;
+  bottom: 10px;          /* sticks near bottom of sheet viewport */
+  margin-left: auto;
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  font-weight: 700;
+  border-radius: 10%;
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+}
+
+	
+
+.menu-search {
+  margin-bottom: 12px;
+}
+
+.menu-search input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.12);
+  font-size: 0.95rem;
+  outline: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.menu-search input:focus {
+  border-color: #d9464a;
+  box-shadow: 0 0 0 2px rgba(217,70,74,0.2);
+}
+}
+
+.menu-fab:focus {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+
+
+/* you can hide on very small screens if you want */
+@media (max-width: 480px) {
+  .menu-fab {
+    bottom: 70px;
+    right: 12px;
+    font-size: 0.8rem;
+    padding: 8px 12px;
+  }
+}
+
+/* Make the floating menu button a full-width bottom bar */
+.menu-fab {
+  position: fixed;
+  left: 0;               /* stretch from left to right */
+  right: 0;
+  bottom: 0;             /* sit across the bottom edge */
+  width: 100%;
+  height: 56px;          /* adjust to taste */
+  border-radius: 0;      /* remove circle shape */
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  background: rgba(217,70,74,0.6);
+  color: #fff;
+  font-size: 1.2rem;
+  box-shadow: 0 -2px 10px rgba(0,0,0,.25);
+  z-index: 1500;
+}
+
+.menu-fab:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,.3);
+}
+
+.menu-fab.hidden {
+	opacity: 0;
+	pointer-events: none;
+	transform: translateY(8px);
+	}
+
+.social-links .icon {
+  width: 22px !important;
+  height: 22px !important;
+  fill: currentColor;
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
+/* Location card above footer */
+#location-card {
+  background: rgba(255,255,255,0.8);             /* tweak to match your theme */
+  color: #000;
+  padding: 24px 16px;
+  border-radius: 10px;
+  margin-bottom: 200px
+}
+
+.location-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* Stack on small screens */
+@media (max-width: 768px) {
+  .location-inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+.location-map-wrapper {
+  width: 100%;
+}
+
+#delivery-map {
+  width: 100%;
+  height: 260px;      /* change height if you want */
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Custom branded map marker */
+.brand-marker {
+  background: transparent;
+  border: none;
+}
+
+.brand-marker-inner {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #16205B 0%, #b02a2a 100%);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
+  position: relative;
+}
+
+/* Little "pin" point under the circle */
+.brand-marker-inner::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  background: #b02a2a;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+/* Optional: make text consistent with rest of site */
+#location-card .muted a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* Remove the outer card effect from the footer wrapper */
+footer#contact {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+/* Keep the actual card look on the inner footer block */
+footer#contact .footer-inner {
+  /* if you already have styles here, keep them –
+     these are just examples in case you need them */
+  background: rgba(176, 42, 42, 0.9); /* or your existing footer red */
+  border-radius: 12px;
+  margin-top: 2px;
+}
+
+/* Footer outer wrapper (full-width, no card styling) */
+footer#contact {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Footer card (same width as other cards) */
+footer#contact .footer-inner {
+  max-width: 1100px;  /* adjust to match your other cards (likely ~900–1100px) */
+  margin: 0 auto 24px;
+
+  background: rgba(176, 42, 42, 0.5); /* your existing footer red */
+  border-radius: 22px;
+}
+
+
+/* Ticker bar at the very top */
+#status-ticker {
+  position: relative;
+  z-index: 3000;  /* make sure it's above the header */
+  background: linear-gradient(90deg, #b02a2a, #d9464a);
+  color: #fff;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  padding: 8px 12px;
+  margin: 0 2px 2px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#status-ticker.hidden {
+  display: none;
+}
+
+#status-ticker .ticker-inner {
+  display: inline-block;
+  white-space: nowrap;
+  animation: ticker-move 25s linear infinite;
+}
+
+@keyframes ticker-move {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+/* mobile tweak so it starts already moving */
+@media (max-width: 640px) {
+  #status-ticker .ticker-inner {
+    animation-duration: 20s;
+    animation-delay: -8s;
+  }
+}
+
+/* make sure the header doesn't cover it */
+header {
+  position: relative;
+  z-index: 2000;
+}
+
+footer#contact h4 {
+  margin-top: 0.5rem;   /* reduce from default ~1.3rem */
+  margin-bottom: 0.5rem;
+  line-height: 1.2;     /* keeps them nicely compact */
+}
+
+/* Menu overlay panel should sit above the sticky bar */
+.menu-overlay {
+  position: fixed;          /* or absolute if you already use that */
+  z-index: 12002 !important; /* higher than .menu-fab (1500) and same ballpark as modals */
+}
+
+/* When menu is open, slide the sticky bar off screen */
+body.menu-open .menu-fab {
+  transform: translateY(120%);
+  pointer-events: none;
+}
+
+/* --- Z-INDEX STACKING MAP ----------------------------------- */
+/* Base content: cards, main sections, map, footer */
+main,
+#order-panel,
+#location-card,
+footer#contact,
+footer#contact .footer-inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* Background parallax stays behind everything */
+.bg-parallax {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+/* Ticker at the very top of normal content */
+#status-ticker {
+  position: relative;
+  z-index: 3000 !important;
+}
+
+/* Header just below ticker, above cards */
+header,
+.site-header {
+  position: relative;
+  z-index: 2500 !important;
+}
+
+/* Order panel can sit above content but below overlays */
+#order-panel {
+  position: static;            /* you already force static elsewhere */
+  z-index: 1000 !important;
+}
+
+/* Sticky View Menu & Place Order bar */
+.menu-fab {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 56px;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  background: rgba(217,70,74,0.6);
+  color: #fff;
+  font-size: 1.2rem;
+  box-shadow: 0 -2px 10px rgba(0,0,0,.25);
+  z-index: 1500 !important;    /* below overlays & modals */
+}
+
+/* Hide the sticky bar when the full menu overlay is open */
+body.menu-open .menu-fab {
+  transform: translateY(120%);
+  pointer-events: none;
+}
+
+.menu-fab {
+  display: flex;
+  flex-direction: column;    /* stack the two lines */
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 10px 12px;        /* enough space for two lines */
+  height: 80px;              /* adjust if needed */
+}
+
+.fab-main {
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.fab-note {
+  font-size: 0.8rem;
+  margin-top: 2px;
+  opacity: 0.9;
+  line-height: 1.2;
+}
+
+
+/* Back-to-top button above sticky bar but below modals */
+#backToTop {
+  z-index: 1600 !important;
+}
+
+/* Full-screen menu overlay: above sticky bar, below modals */
+#menu-overlay,
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12002 !important;   /* just under modal backdrops (12000+) */
+}
+
+/* Modal backdrops: dim the whole screen above everything so far */
+.customise-modal-backdrop,
+.checkout-modal-backdrop,
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 13000 !important;
+}
+
+/* Modal panels (customise, checkout, generic) */
+.customise-modal,
+.checkout-modal,
+.modal,
+#checkout-modal {
+  position: fixed;
+  z-index: 13001 !important;
+}
+
+<style>
+ html, body {
+  margin: 0;
+  padding: 0;
+}
+
+#kitchen-notice-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;                /* hidden by default */
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+/* When JS decides it *should* be shown */
+#kitchen-notice-overlay.is-visible {
+  display: flex;
+}
+
+
+/* Optional: prevent scrolling while overlay shown */
+body.overlay-open {
+  overflow: hidden;
+}
+
+  #kitchen-notice-overlay.kitchen-notice-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Card / modal */
+  .kitchen-notice-card {
+    background-color: rgba(255, 255, 255, 0.8);
+    color: #222;
+    max-width: 480px;
+    width: 100%;
+    border-radius: 1.25rem;
+    padding: 2rem 2.25rem;
+	position: relative;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    box-sizing: border-box;
+  }
+
+  /* Brand identity hooks (change to your brand colours) */
+  .kitchen-notice-card h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.6rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--brand-primary, #b22222); /* replace with your primary color */
+  }
+
+  .kitchen-notice-main {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .kitchen-notice-sub {
+    margin: 0 0 1.5rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  /* Optional logo */
+  .kitchen-notice-logo {
+    max-width: 140px;
+    height: auto;
+    margin: 0 auto 1rem;
+    display: block;
+  }
+
+  /* Button styled to match brand (tweak colours/border-radius) */
+  .kitchen-notice-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.65rem 1.75rem;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: var(--brand-primary, #b22222);
+    color: #fff;
+  }
+
+  .kitchen-notice-close:hover,
+  .kitchen-notice-close:focus-visible {
+    filter: brightness(1.05);
+    outline: none;
+  }
+  
+  #splash-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;   /* Always full viewport width */
+  height: 100vh;  /* Always full viewport height */
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999999;
+  margin: 0;
+  padding: 0;
+}
+
+/* Make the inner panel fill the whole overlay */
+.splash-inner {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;           /* remove rounded corners so it looks like a full page */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;    /* keep content centered vertically */
+  padding: 3rem 1.5rem;
+  box-sizing: border-box;
+}
+
+/* Outer spacing */
+.payment-section {
+  padding: 40px 16px;
+  margin-bottom: 200px;
+}
+
+/* Matches your FIND US card container */
+.payment-card {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  padding: 24px 28px 32px;
+  margin: 0 auto;
+  max-width: 1200px;
+
+  /* Top + bottom border */
+  border-top: 20px solid rgba(255, 255, 255, 0.25);
+  border-bottom: 20px solid rgba(255, 255, 255, 0.25);
+
+  /* Shadow same as your other cards */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+/* Slight indentation like FIND US */
+.payment-title {
+  font-size: 1.17rem;
+  font-weight: bold;
+  margin: 0 0 12px;
+  padding-left: 1px;    /* ≈ indentation of FIND US */
+}
+
+/* Message formatting */
+.payment-message {
+  margin: 0 0 22px;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* Icon layout */
+.payment-icons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Icon tile design (matches your aesthetic) */
+.payment-icon {
+  width: 80px;
+  height: 50px;
+  padding: 4px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-icon img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* --- Christmas: banner --- */
+.xmas-banner{
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  padding: 10px 14px;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: .2px;
+  color: #ffffff;
+  background: linear-gradient(90deg, #0b6b3a, #b80f1a);
+}
+
+/* --- Christmas: holly corners on the header --- */
+/* Put .xmas-wrap on the element that wraps your header area */
+.xmas-wrap{
+  position: relative;
+  overflow: clip; /* hides any overflow nicely */
+}
+
+/* Inline SVG holly (no external images needed) */
+.xmas-wrap::before,
+.xmas-wrap::after{
+  content:"";
+  position:absolute;
+  top: 10px;
+  width: 90px;
+  height: 90px;
+  pointer-events:none;
+  opacity: .95;
+  background-repeat:no-repeat;
+  background-size:contain;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,.15));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cpath d='M42 66c-16-2-28-13-30-27 16 2 28 13 30 27zm26-24c-4-16 2-32 15-40 4 16-2 32-15 40zm-8 34c-16 8-34 5-46-8 16-8 34-5 46 8zm36-8c12-13 30-16 46-8-12 13-30 16-46 8z' fill='%230b6b3a'/%3E%3Ccircle cx='72' cy='74' r='9' fill='%23b80f1a'/%3E%3Ccircle cx='90' cy='82' r='7' fill='%23d61a2a'/%3E%3Ccircle cx='56' cy='88' r='7' fill='%23d61a2a'/%3E%3C/svg%3E");
+}
+
+.xmas-wrap::before{ left: 10px; transform: rotate(-12deg); }
+.xmas-wrap::after{ right: 10px; transform: scaleX(-1) rotate(-12deg); }
+
+.xmas-snow{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+.xmas-snow-toggle{
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 9999;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 12px;
+  background: rgba(0,0,0,.65);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+
+.status-ticker:hover .ticker-inner {
+  animation-play-state: paused;
+}
+
+/* --- Rotating header banner --- */
+#headerBanner.header-banner {
+  display: block;
+  position: relative;
+  overflow: hidden;
+
+  padding: 12px 16px;
+  color: #fff;
+  font-weight: 600;
+  text-align: center;
+
+  background: linear-gradient(90deg, #0a7a3d 0%, #b0151b 100%);
+  border-radius: 2px;
+}
+
+/* Slides: keep in normal flow, just show/hide */
+#headerBanner .banner-slide {
+  display: none;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+#headerBanner .banner-slide.is-active {
+  display: block;
+}
+
+/* Link styling */
+#headerBanner .banner-link {
+  color: #fff;
+  text-decoration: underline;
+  font-weight: 700;
+  white-space: normal;
+}
+
+#headerBanner .banner-link:hover,
+#headerBanner .banner-link:focus {
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+/* Clamp to 2 lines on small screens so the start of the message is always visible */
+@media (max-width: 480px) {
+  #headerBanner .banner-slide {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+}
+
+/* --- Christmas Hours modal ONLY (scoped so it won't break other modals, e.g. "customise") --- */
+#hoursModalOverlay {
+  display: none; /* fully removed when closed (iOS-friendly) */
+}
+
+#hoursModal {
+  display: none; /* fully removed when closed */
+}
+
+/* OPEN */
+#hoursModalOverlay.is-open{
+  display: block;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 9998;
+  touch-action: none;
+}
+
+#hoursModal.is-open{
+  display: block;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(920px, calc(100vw - 24px));
+  height: min(80vh, 720px);
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  z-index: 9999;
+  overflow: hidden;
+}
+
+/* Modal internals (scoped) */
+#hoursModal .modal-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+#hoursModal .modal-title{
+  font-weight: 800;
+}
+
+#hoursModal .modal-close{
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+
+#hoursModal .modal-body{
+  height: calc(100% - 52px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#hoursModal .modal-iframe{
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.menu-item-card.khao-gaeng-special{
+  border: 2px solid #5a1d2f;
+  background: #fff7ef;
+  box-shadow: 0 10px 24px rgba(0,0,0,.14);
+  position: relative;
+}
+
+.menu-item-card.khao-gaeng-special .menu-card-title{
+  font-weight: 800;
+}
+
+.menu-item-card.khao-gaeng-special .special-badge{
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #b02a2a 0%, #16205b 100%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  letter-spacing: .4px;
+  z-index: 2;
+}
+
+.menu-item-card.khao-gaeng-special{
+  padding-top: 42px; /* creates space for the badge */
+}
+
+
+
+
+</style>
+
+
+		  </style>
+		</head>
+		<body>
+				  <!-- Kitchen notice overlay -->
+				  <div id="kitchen-notice-overlay"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="kitchen-notice-title"
+     style="display:none">
+				  <div class="kitchen-notice-card">
+					<!-- Optional logo (replace src with your logo and/or remove if not needed) -->
+					<img src="images/logotransparent2.png?v=3" alt="Rung's Thai Kitchen Logo" class="brand-logo">
+
+					<h2 id="kitchen-notice-title">Kitchen Closed Today</h2>
+					<p class="kitchen-notice-main">
+					  Rung's Thai Kitchen is closed today. Opening days are <strong>Weds to Sun, 17:00 to 21:00.</strong> Please feel free to view the menu and place a pre-order for a day when we are open.
+					</p>
+					<button type="button" id="kitchen-notice-close" class="kitchen-notice-close">
+					  Continue to website
+					</button>
+				  </div>
+				</div>
+					<!-- /Kitchen notice overlay -->
+		  <div class="bg-parallax" aria-hidden="true"></div>			
+
+		  <div class="container">
+			<!-- your existing header / main / etc -->
+
+		  <div class="container">	
+
+		  <!-- Status ticker (keep ONE of these) -->
+
+ <!-- <div id="status-ticker" class="status-ticker hidden"> (re-enable if ticker required)
+  <div class="ticker-inner">
+    <span id="ticker-text"></span>
   </div>
+</div>-->
+
+<!-- Header -->
+<header class="site-header xmas wrap">
+  <div class="header-inner centered">
+    <div class="brand-block" style="margin-top: 1px">
+      <img src="images/logotransparent2.png?v=3"
+           alt="Rung's Thai Kitchen Logo"
+           class="brand-logo">
+      <div class="brand-title">Authentic Thai Takeaway</div>
+    </div>
+		<div class="header-banner" id="headerBanner" aria-live="polite">
+		  <div class="banner-slide is-active">
+			🎄 <strong>Merry Christmas</strong> from Rung’s Thai Kitchen — thank you for supporting us! 🎁
+		  </div>
+
+		  <div class="banner-slide">
+  🕒 <strong>Christmas & New Year Opening Hours</strong> —
+		<a href="christmas-hours.html" class="banner-link" id="openHoursModal">
+		  View full schedule →
+		</a>
+
+
+  </a>
+</div>
+
+		</div>
+
+
+    <nav class="main-nav">
+      <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#our-food">Our Food</a></li>
+        <li><a href="#allergens">Allergens</a></li>
+        <!-- IMPORTANT: id="menu-link" for the popup JS -->
+        <li><a href="#menu" id="menu-link">Menu</a></li>
+		<li><a href="#payments">Payments</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- Header spacer (for sticky header script, if you’re still using it) -->
+<div id="header-spacer"></div>
+
+<script>
+(function(){
+  const el = document.getElementById('ticker-text');
+  if(!el) return;
+
+  // pixels per second → smaller = slower
+  const pxPerSec = 40;
+
+  // measure after layout
+  requestAnimationFrame(() => {
+    const w = el.getBoundingClientRect().width || 0;
+    // ensure a minimum duration
+    const seconds = Math.max(15, Math.ceil(w / pxPerSec));
+    el.style.animationDuration = seconds + 's';
+  });
+})();
+</script>
+
+
+    <main>
+      <!-- Left column -->
+      <section>
+        <!-- About -->
+        <!--<div class="card-spacer">-->
+		<div class="card" id="about" style="margin-top:8px">
+          <h3>About Rung's Thai Kitchen</h3>
+          <p class="muted">
+            Welcome to Rung's Thai Kitchen, where I take pride in delivering authentic Thai takeaway food right to your doorstep in Leeds.</p>
+			<p class="muted"> My culinary journey began with a passion for traditional Thai recipes handed down through generations. I believe that the secret to great Thai cuisine lies in using fresh, high-quality ingredients and a careful balance of flavours. Each dish is crafted with love and dedication, ensuring that you experience the vibrant and aromatic taste of Thailand in every bite.</p>
+			<p class="muted">Whether you're craving a comforting curry or a refreshing salad, I've got you covered.
+          </p>
+		  <div class="food-grid about-grid">
+      <img src="images/pestlemortar.jpg" alt="Traditional cooking tools" loading="lazy">
+      <img src="images/stirfry.jpg" alt="Traditional cooking methods" loading="lazy">
+      <img src="images/stickyrice.jpg" alt="Traditional food!" loading="lazy">
+    </div>
+        </div>
+		<!--</div>-->
+
+        <!-- Our Food -->
+        <!--<div class="card-spacer">-->
+		<div class="card" id="our-food" style="margin-top:8px">
+          <h3>Our Food</h3>
+          <div style="display:flex;gap:1px;align-items:flex-start;flex-wrap:wrap">
+            <div style="flex:1 1 320px;min-width:240px">
+              <p class="muted">
+                At Rung's Thai Kitchen we use fresh, locally sourced ingredients and traditional Thai techniques.
+                Our dishes are prepared to order — bold flavours, balanced spice, and a focus on bright, fresh herbs.
+              </p>
+              <p class="muted" style="margin-top:8px">
+                If you have dietary requirements please mention them when placing your order. We adapt where we can.
+              </p>
+            </div>
+            <div style="flex:1 1 360px;min-width:260px">
+              <div class="food-grid" id="food-grid">
+                <img src="images/SpringRoll.jpg" alt="Spring Rolls" loading="lazy" />
+                <img src="images/Prawns.jpg" alt="Deep Fried Tiger Prawns" loading="lazy" />
+                <img src="images/TomYum.jpg" alt="Tom Yum" loading="lazy" />
+                <img src="images/thaifishcakesjpg.jpg" alt="Thai Fish Cakes" loading="lazy" />
+                <img src="images/somtam.jpg" alt="Papaya salad" loading="lazy" />
+                <img src="images/PrawnCrackers.jpg" alt="Prawn Crackers" loading="lazy" />
+              </div>
+            </div>
+          </div>
+        </div>
+		<!--</div>-->
+
+        <!-- Allergens -->
+        <!--<div class="card-spacer">-->
+		<div class="card" id="allergens" style="margin-top:14px">
+          <h3 style="margin-bottom:10px">Allergens & Ingredients</h3>
+          <p class="muted">
+            We take food allergies seriously. Many of our dishes can be prepared without certain allergens — please
+            mention any allergies when placing your order. The icons below indicate that dishes contain:
+          </p>
+          <div style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;line-height:1.5">
+            <div><span class="allergen-icon">🥜</span> Peanuts</div>
+            <div><span class="allergen-icon">🌰</span> Tree Nuts</div>
+            <div><span class="allergen-icon">🌾</span> Gluten (Cereals)</div>
+            <div><span class="allergen-icon">🦐</span> Crustaceans (Shellfish)</div>
+            <div><span class="allergen-icon">🦪</span> Molluscs (e.g. squid, mussels)</div>
+            <div><span class="allergen-icon">🥛</span> Milk / Dairy</div>
+            <div><span class="allergen-icon">🍳</span> Egg</div>
+            <div><span class="allergen-icon">🐟</span> Fish</div>
+            <div><span class="allergen-icon">🌿</span> Celery</div>
+            <div><span class="allergen-icon">🌼</span> Lupin</div>
+            <div><span class="allergen-icon">&#x1F331;</span> Mustard</div>
+            <div><span class="allergen-icon">⚫</span> Sesame Seeds</div>
+            <div><span class="allergen-icon">🫘</span> Soya</div>
+            <div><span class="allergen-icon">💨</span> Sulphur Dioxide / Sulphites</div>
+            <div><span class="allergen-icon">🌶️</span> Spice Level (heat indicator)</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Right column: Order -->
+      <aside>
+        <div class="card" id="order-panel">
+          <h3>Your Order</h3>
+          <div id="order-list" class="order-list" style="margin-top:12px">
+            <div class="muted small">No items yet — add something from the menu.</div>
+          </div>
+          <div class="totals" style="margin-top:14px">
+            <div class="muted small">Total</div>
+            <div id="order-total" style="font-weight:800">£0.00</div>
+          </div>
+          <button id="open-checkout" type="button" class="btn btn-accent" style="width:100%;margin-top:12px">Proceed to Checkout</button>
+          <div id="order-msg" class="muted small" style="margin-top:8px"></div>
+        </div>
+      </aside>
+    </main>
+	
+	<section id="location-card">
+  <div class="location-inner">
+    <div class="location-text">
+      <h3>Find Us</h3>
+      <p class="muted">
+        30 Topcliffe Mews<br>
+        Morley<br>
+        West Yorkshire<br>
+        LS27 8UL
+      </p>
+      <p class="muted">
+        We deliver within a 3 mile radius (zoom out to view).
+      </p>
+	  <p class="muted">
+        Tel: 0113 4699564
+      </p>
+    </div>
+
+    <div class="location-map-wrapper">
+      <div id="delivery-map"></div>
+    </div>
+  </div>
+</section>
+
+
+<section id="payments" class="payment-section">
+  <div class="payment-card">
+    <h3 class="payment-title">Accepted Payment Methods</h3>
+
+    <p class="payment-message">
+      We’re working hard to bring secure online payments to the website as soon as possible.<br>
+      In the meantime, you can pay by <strong>cash or card on collection or delivery</strong>.
+    </p>
+
+    <div class="payment-icons">
+      <div class="payment-icon"><img src="images\payment\cash.svg" alt="Cash"></div>
+      <div class="payment-icon"><img src="images\payment\visa.svg" alt="Visa"></div>
+      <div class="payment-icon"><img src="images\payment\mastercard.svg" alt="Mastercard"></div>
+      <div class="payment-icon"><img src="images\payment\apple_pay.svg?v=2" alt="Apple Pay"></div>
+      <div class="payment-icon"><img src="images\payment\gpay.svg?v=2" alt="Google Pay"></div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+
+<footer id="contact">
+  <div class="footer-inner">
+
+    <!-- Contact + Social Section -->
+    <div class="footer-section">
+
+      <!-- Contact row all on ONE line -->
+      <div class="footer-contact-row">
+        <h4>Contact Us</h4>
+        <p class="contact-inline muted">
+          📞 <a href="tel:01134699564">0113 4699564</a>
+          <span class="dot">•</span>
+          ✉️ <a href="mailto:hello@rungsthaikitchen.co.uk">hello@rungsthaikitchen.co.uk</a>
+        </p>
+      </div>
+
+      <!-- Opening Hours -->
+      <h4>Opening Hours</h4>
+      <p class="muted">Opening Hours: 🕒 Wed–Sun: 17:00 – 21:00</p>
+
+      <!-- New Social Media Section -->
+      <h4>Social Media</h4>
+<p class="muted social-links">
+  <a href="https://www.facebook.com/RungsThaiKitchenLeeds" target="_blank" class="social-icon">
+    <svg viewBox="0 0 24 24" class="icon">
+      <path d="M22 12c0-5.522-4.477-10-10-10S2 6.478 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987H7.898v-2.89h2.54V9.845c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.242 0-1.63.771-1.63 1.562v1.875h2.773l-.443 2.89h-2.33v6.987C18.343 21.128 22 16.991 22 12z"/>
+    </svg>
+    Facebook
+  </a>
+
+  <span class="dot">•</span>
+
+  <a href="https://www.instagram.com/RungThaiKitchen" target="_blank" class="social-icon">
+    <svg viewBox="0 0 24 24" class="icon">
+      <path d="M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm10 2a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h10zm-5 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm4.5-.75a1.25 1.25 0 1 0 0-2.5 1.25 1.25 0 0 0 0 2.5z"/>
+    </svg>
+    Instagram
+  </a>
+</p>
+
+
+    </div>
+
+    <div class="footer-divider"></div>
+
+    <!-- Legal -->
+    <div class="footer-legal">
+      <div class="footer-copy">
+        © <span id="year"></span> Rung’s Thai Kitchen. All rights reserved.
+      </div>
+      <nav class="footer-links" aria-label="Legal">
+        <a href="privacypolicy.html" target="_blank" rel="noopener">Privacy Policy</a>
+        <span class="dot">•</span>
+        <a href="cookiepolicy.html" target="_blank" rel="noopener">Cookie Policy</a>
+      </nav>
+    </div>
+
+  </div>
+</footer>
+
+
+
+
+  </div>
+
+  <!-- customise Modal -->
+  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div id="modal-title" style="font-weight:800">customise</div>
+          <div id="modal-base" class="muted small" style="margin-top:4px" data-price="0">Base price: £0.00</div>
+        </div>
+        <button id="modal-close" class="btn btn-ghost">Close</button>
+      </div>
+
+      <img id="modal-img" alt="" style="margin-top:10px;width:100%;max-height:200px;object-fit:contain;border-radius:10px;display:none">
+
+      <div style="display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px">
+        <div>
+          <label class="small">Quantity</label>
+          <div class="qty-controls" style="margin-top:6px">
+            <button id="qty-decr" class="btn btn-ghost">-</button>
+            <input id="qty-input" type="number" min="1" value="1" />
+            <button id="qty-incr" class="btn btn-ghost">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="small">Modifiers (protein / extras)</div>
+        <div id="mods" class="mods"></div>
+        <div id="mod-required-note" class="mod-required-note">Please choose a protein/veg option. If you would like any changes made to the dish, please suggest in the checkout comments.</div>
+        <div id="mod-limit-note" class="mod-limit-note"></div>
+      </div>
+	  
+	  <!-- Add EXTRAS section (paid add-ons) -->
+	<div id="extras-wrap" style="margin-top:12px; display:none">
+  <div class="small">Add extras (priced per dish)</div>
+  <div id="extras" class="mods"></div>
+</div>
+
+
+      <div id="modal-allergens-wrap" style="margin-top:10px;display:none">
+        <div class="small">Allergens in this dish</div>
+        <div id="modal-allergens" class="allergen-badges"></div>
+      </div>
+
+      <div id="spice-wrap" class="spice-wrap" style="display:none">
+        <div class="spice-label">Spice level</div>
+        <div id="spice-buttons" class="spice-buttons"></div>
+      </div>
+
+      <div class="totals" style="margin-top:12px">
+        <div class="muted small">Unit price</div>
+        <div id="unit-price" style="font-weight:800">£0.00</div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">
+        <button id="modal-cancel" class="btn btn-ghost">Cancel</button>
+        <button id="modal-add" class="btn btn-accent">Add to basket</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout Modal -->
+  <div id="checkout-modal" class="modal-backdrop" style="display:none" aria-modal="true" role="dialog">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:800">Customer details</div>
+          <div class="muted small" style="margin-top:4px">We’ll save with your order.</div>
+        </div>
+        <button id="checkout-close" class="btn btn-ghost">Close</button>
+      </div>
+		<div id="checkout-banner" class="checkout-banner" role="status" aria-live="polite"></div>
+
+      <form id="checkout-form" class="form-grid">
+        <div class="field">
+          <label for="cust-name">Full name</label>
+          <input id="cust-name" name="name" type="text" autocomplete="name" required class="input auto-fit" required>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label for="cust-email">Email</label>
+            <input id="cust-email" name="email" type="email" inputmode="email" autocomplete="email" class="input auto-fit" required>
+          </div>
+          <div class="field">
+            <label for="cust-phone">Mobile</label>
+            <input id="cust-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required class="input auto-fit" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="cust-address">Address (flat/house number, street name & post code please)<span id="addr-required-hint" class="muted small">(required for delivery)</span></label>
+          <input id="cust-address" name="address" type="text" autocomplete="street-address"
+                 inputmode="text" class="input auto-fit" placeholder="House no., street, town, postcode">
+        </div>
+		
+
+        <div class="field">
+          <label>Order type</label>
+          <div style="display:flex;gap:12px;align-items:center">
+            <label><input type="radio" name="order-type" id="order-type-collection" value="collection" checked> Collection</label>
+            <label><input type="radio" name="order-type" id="order-type-delivery" value="delivery"> Delivery</label>
+          </div>
+          <div id="delivery-note" class="muted small" style="margin-top:4px;display:none">
+            Delivery is £3 for orders under £20, free for £20 and above.
+          </div>
+        </div>
+
+        <!-- Preferred time -->
+        <div class="field">
+		  <label for="cust-preferred-time">Preferred collection/delivery time</label>
+		  <input id="cust-preferred-time" name="preferred_time" type="datetime-local" class="input" step="300">
+
+		 <label style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+			<input type="checkbox" id="cust-asap" name="asap_requested">
+			As soon as possible
+		  </label>
+
+		  <div class="muted small">
+			Choose a time, or tick “As soon as possible” and we’ll offer you the earliest available time within our opening days (Weds to Sun, 17:00 - 21:00).
+		  </div>
+		</div>
+
+
+        <div class="field">
+          <label for="cust-notes">Notes (optional)</label>
+          <input id="cust-notes" name="notes" type="text" class="input auto-fit"
+                 placeholder="Allergies, delivery instructions, etc.">
+        </div>
+		<!-- Communication Preference -->
+			<div class="field">
+			  <label>How should we contact you about collection/delivery times?</label>
+			  <div style="display:flex;gap:12px;align-items:center;margin-top:6px">
+				<label>
+				  <input type="radio" name="communication_preference" value="email" checked>
+				  Email
+			
+			</label>
+				<label>
+				  <input type="radio" name="communication_preference" value="sms">
+				  SMS
+				</label>
+			  </div>
+			  <div class="muted small" style="margin-top:4px">
+				If you choose SMS, we’ll text you updates about timing and confirmations.
+			  </div>
+			</div>
+
+		
+        <div class="totals">
+          <div class="muted small">Subtotal</div>
+          <div id="checkout-subtotal" style="font-weight:800">£0.00</div>
+        </div>
+        <div class="totals">
+          <div class="muted small">Delivery Fee</div>
+          <div id="checkout-delivery" style="font-weight:800">£0.00</div>
+        </div>
+        <div class="totals">
+          <div class="muted small">Total</div>
+          <div id="checkout-total" style="font-weight:800">£0.00</div>
+        </div>
+		<!--<div class="checkout-section">
+	  <h3>How would you like to pay?</h3>
+	  <div class="payment-preference-options">
+		<label>
+		  <input type="radio" name="paymentPreference" value="in_advance" checked>
+		  Pay in advance (we’ll send you a secure payment link)
+		</label>
+		<label>
+		  <input type="radio" name="paymentPreference" value="on_arrival">
+		  Pay on collection/delivery
+		</label>
+	  </div>
+	</div>-->
+
+
+        <div class="checkout-actions" style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px;position:sticky;bottom:0;background:#fff;padding-top:8px">
+          <button type="button" id="checkout-cancel" class="btn btn-ghost">Cancel</button>
+          <button type="submit" id="checkout-submit" class="btn btn-accent">Place order</button>
+        </div>
+        <div id="checkout-msg" class="muted small" style="margin-top:6px"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Order Success Modal -->
+<div id="order-success" class="modal-backdrop" style="display:none" role="dialog" aria-modal="true">
+  <div class="modal" style="max-width:560px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <h3 id="order-success-title" style="margin:0">Order placed</h3>
+      <button id="order-success-x" class="btn btn-ghost" type="button">×</button>
+    </div>
+
+    <div id="order-success-msg" class="muted small" style="margin-bottom:10px"></div>
+
+    <div id="order-success-items" class="small"
+         style="max-height:260px;overflow:auto;border:1px solid #eee;
+                border-radius:8px;padding:8px;margin-bottom:10px">
+    </div>
+
+    <div class="totals">
+      <div class="muted small">Total</div>
+      <div id="order-success-total" style="font-weight:800">£0.00</div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+	  <button id="order-success-pdf" class="btn btn-ghost" type="button">Download receipt</button>
+	  <button id="order-success-close" class="btn btn-accent" type="button">OK</button>
+	</div>
+
+  </div>
+</div>
+		<!-- Full-screen menu overlay -->
+		<div id="menu-overlay" class="menu-overlay" aria-hidden="true">
+		  <div class="menu-sheet">
+			<button
+			  id="menu-overlay-close"
+			  class="menu-close"
+			  type="button"
+			  aria-label="Close menu"
+			>
+			  ×
+			</button>
+
+			<h2 style="margin-top: 0; margin-bottom: 12px;">Our menu</h2>
+			
+			<!-- 🔴 THIS IS WHERE WE ADD THE SEARCH BAR -->
+		<div class="menu-search">
+		  <input
+			id="menu-search-input"
+			type="search"
+			placeholder="Search dishes (e.g. pad thai, chicken)…"
+			autocomplete="off"
+		  />
+		</div>
+		
+			<!-- two-column menu grid -->
+			<div id="menu-list"></div>
+
+			<!-- ✅ Floating checkout button -->
+			<button
+			  id="menu-checkout-btn"
+			  type="button"
+			  class="btn btn-accent menu-checkout-btn"
+			>
+			  Proceed to checkout
+			</button>
+		  </div>
+		</div>
+		<button id="menu-fab" class="menu-fab" type="button" aria-label="Open menu">
+  <span class="fab-main">View Menu & Place Order</span>
+</button>
+
+		<button id="menu-fab" class="menu-fab hidden" type="button" aria-label="Open menu">Menu</button>
+		
+		<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""
+>
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
+
+<button class="xmas-snow-toggle" type="button" aria-pressed="true">
+  ❄️ Snow: On
+</button>
+<canvas id="xmasSnow" class="xmas-snow" aria-hidden="true"></canvas>
+
+<div class="modal-overlay" id="hoursModalOverlay" aria-hidden="true"></div>
+
+<div class="modal" id="hoursModal" role="dialog" aria-modal="true" aria-labelledby="hoursModalTitle" aria-hidden="true">
+  <div class="modal-header">
+    <div id="hoursModalTitle" class="modal-title">Christmas & New Year Opening Hours</div>
+    <button type="button" class="modal-close" id="closeHoursModal" aria-label="Close">
+      ×
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <iframe
+      class="modal-iframe"
+      src="christmas-hours.html"
+      title="Christmas & New Year Opening Hours"
+      loading="lazy">
+    </iframe>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<script>
+  const SUPABASE_URL = 'https://ubyjrrsvbbqomitpaidb.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVieWpycnN2YmJxb21pdHBhaWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NTYyNjMsImV4cCI6MjA3NjUzMjI2M30.WTllxO5KnaMI0i1d4VHNBhjLuRMfu4_Xx5arqZmYevw';
+  
+  
+  window.sb = window.sb || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  console.log('Supabase ready:', window.supabaseClient);
+</script>
+
+
+  <script>
+
+	document.addEventListener('DOMContentLoaded', () => {
+	// ---------- Allergen registry ----------
+  const ALLERGENS = {
+
+      peanuts:   { icon:'🥜',        label:'Peanuts' },
+      tree_nuts: { icon:'🌰',        label:'Tree Nuts' },
+      gluten:    { icon:'🌾',        label:'Gluten (Cereals)' },
+      shellfish: { icon:'🦐',        label:'Crustaceans (Shellfish)' },
+      molluscs:  { icon:'🦪',        label:'Molluscs' },
+      dairy:     { icon:'🥛',        label:'Milk / Dairy' },
+      egg:       { icon:'🍳',        label:'Egg' },
+      fish:      { icon:'🐟',        label:'Fish' },
+      celery:    { icon:'🌿',        label:'Celery' },
+      lupin:     { icon:'🌼',        label:'Lupin' },
+      mustard:   { icon:'&#x1F331;', label:'Mustard' },
+      sesame:    { icon:'⚫',        label:'Sesame Seeds' },
+      soya:      { icon:'🫘',        label:'Soya' },
+      sulphites: { icon:'💨',        label:'Sulphur Dioxide / Sulphites' },
+      spicy:     { icon:'🌶️',       label:'Spicy (heat)' }
+    };
+    function normalizeAllergens(list){
+      const out = [];
+      (list || []).forEach(k => { if (k === 'nuts') out.push('peanuts','tree_nuts'); else out.push(k); });
+      return [...new Set(out)];
+    }
+    function renderAllergenIconsCompact(list){
+      const normalized = normalizeAllergens(list);
+      if(!normalized.length) return '';
+      const spans = normalized.map(key => {
+        const a = ALLERGENS[key]; if(!a) return '';
+        return `<span class="allergen-icon" title="${a.label}" aria-label="${a.label}">${a.icon}</span>`;
+      }).join(' ');
+      return `<div class="muted small">${spans}</div>`;
+    }
+    function renderAllergenBadges(list){
+      const normalized = normalizeAllergens(list);
+      if(!normalized.length) return '';
+      return normalized.map(key => {
+        const a = ALLERGENS[key]; if(!a) return '';
+        return `<span class="allergen-badge" title="${a.label}" aria-label="${a.label}">
+                 <span class="allergen-icon">${a.icon}</span><span>${a.label}</span>
+               </span>`;
+      }).join('');
+    }
+	
+	// Paid EXTRAS (per dish)
+const EXTRAS = [
+  { id:'extra-chicken', name:'Extra Chicken', delta: 2.00 },
+  { id:'extra-beef',    name:'Extra Beef',    delta: 2.50 },
+  { id:'extra-pork',    name:'Extra Pork',    delta: 2.50 },
+  { id:'extra-prawn',   name:'Extra Prawn',   delta: 3.00 },
+  { id:'extra-tofu',    name:'Extra Tofu',    delta: 1.50 },
+  { id:'extra-veg',     name:'Extra Vegetable', delta: 1.50 },
+  { id:'extra-bchicken', name:'Extra Battered Chicken', delta: 2.50 },
+  { id:'extra-egg', name:'Fried Egg', delta: 1.00 },
+];
+
+	
+    // ---------- Data ----------
+    const MENU_CATEGORIES = [
+      
+	  
+	  // { id:'mid-week', title: 'Mid Week Specials (Pre-Order for Wednesday's only)', allowExtras:false, items:[
+	  //  { id:'slow-beef-massaman', name: 'Slow Cooked Beef Massaman & Jasmine Rice', desc: 'Braised beef with a delicious, creamy and comforting Massaman curry sauce. Perfect for a mid-week winter treat.', price: 7.50, img: 'images/beefmassaman.jpg'
+		//]},
+		/*{ id:'mid-week', title: 'Mid-Week Specials (Thursday Only)', allowExtras:false, items:[  
+        { id: 'slow-beef-massaman', name: 'Slow Cooked Beef Massaman & Jasmine Rice (Khao Gaeng)', desc: 'Braised beef with a delicious, creamy and comforting Massaman curry sauce. Perfect for a mid-week winter treat.', price: 7.50, img: 'images/beefmassaman.jpg',  allergens: [],special: true,
+		badge: 'MID-WEEK SPECIAL'}
+		]},*/
+	  { id:'starters', title:'Starter', allowExtras:false, items:[
+        { id: 'veg-spring-rolls', name: 'Vegetable Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of glass noodles and vegetables, served with a sweet chilli sauce.', price: 5.50, img: 'images/SpringRoll.jpg',  allergens: ['gluten', 'soya','molluscs','mustard','celery'] },
+        { id: 'chicken-satay', name: 'Chicken Satay', desc: 'Tender chicken pieces marinated in a fragrant blend of turmeric, lemongrass, and spices. Served with a peanut sauce.', price: 6.50, img: 'images/Satay.jpg', allergens: ['peanuts','soya','mustard'] },
+        { id: 'prawn-crackers', name: 'Prawn Crackers', desc: 'A light and crispy snack made from tapioca flour, shrimp, and seasonings. Served with sweet chilli sauce.', price: 2.50, img: 'images/PrawnCrackers.jpg', allergens: ['shellfish','gluten'] },
+        { id: 'moo-ping', name: 'Pork Skewer (Moo Ping)', desc: 'Thai grilled pork skewers marinated in a sweet and savoury sauce.', price: 6.50, img: 'images/mooping.jpg', allergens: ['fish','soya','dairy'] },
+        { id: 'chicken-spring-rolls', name: 'Chicken Spring Rolls (x4)', desc: 'Crispy, deep-fried rolls filled with a savoury mixture of meat, glass noodles, and vegetables, served with a sweet chilli sauce.', price: 6.00, img: 'images/SpringRoll.jpg',  allergens: ['gluten', 'soya','molluscs','mustard','celery'] },
+        { id: 'fried-tofu', name: 'Deep Fried Tofu', desc: 'Crispy Thai Fried Tofu with a sweet-spicy Thai peanut sauce!', price: 5.00, img: 'images/DeepFriedTofu.jpg', allergens: ['soya','peanuts'] },
+        { id: 'fish-cakes', name: 'Thai Fish Cakes', desc: 'Flavourful, bite-sized fritters with a blend of savoury, spicy, and tangy flavours.', price: 6.00, img: 'images/thaifishcakesjpg.jpg',spiceEnabled: true, spiceDefault: 1, allergens: ['fish','egg'] },
+        { id: 'porkprawn-dumplings', name: 'Pork & Prawn Steamed Dumplings', desc: 'Steamed dumplings filled with a savoury combination of tender pork and juicy prawns.', price: 6.00, img: 'images/dumplings.jpg', allergens: ['gluten','shellfish'] },
+        { id: 'fried-prawns', name: 'Deep Fried Tiger Prawns (x4)', desc: 'Tiger Prawns cooked in a crispy tempura batter served with authentic Thai sweet Chilli Sauce.', price: 6.50, img: 'images/Prawns.jpg',  allergens: ['shellfish','gluten'] },
+        { id: 'thai-sausage', name: 'Thai Pork Sausage', desc: 'A traditional fermented Thai sausage made with ground pork, sticky rice, and fragrant seasonings. Served with fresh sliced ginger, whole peanuts and slices of cucumber.', price: 6.50, img: 'images/sausage.jpg', allergens: [] },
+		{ id: 'spare-ribs', name: 'Thai Spare Ribs (Sii Khrong Moo Yang)', desc: 'Tender ribs with a sweet, salty and savoury flavour. Served with a sticky carmelised glaze.', price: 7.50, img: 'images/spareribs.jpg', allergens: ['soya','gluten','molluscs','sesame'] }
+      ]},
+      { id:'soup', title:'Soup', allowExtras:true, items:[
+        { id: 'tom-yum', name: 'Tom Yum Soup 🌶️🌶️', desc: 'A vibrant and aromatic Thai classic featuring a hot and sour clear broth infused with lemongrass, galangal, and kaffir lime leaves.', price: 5.50, img: 'images/TomYum.jpg', allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya'], allowedExtras: ['extra-chicken','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'tom-kha', name: 'Tom Kha🌶️', desc: 'A creamy and aromatic Thai coconut soup featuring fragrant galangal, lemongrass, and kaffir lime leaves.', price: 5.50, img: 'images/TomKha.jpg', allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','soya'], allowedExtras: ['extra-chicken','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'dumpling-broth', name: 'Chicken Steamed Dumplings Broth (Gaew Naam)', desc: 'A savoury and flavourful broth with fragrant chicken-stuffed wontons.', price: 6.00, img: 'images/GaewNam.jpg', allergens: ['gluten','soya','celery'], allowedExtras: [''] }
+      ]},
+      { id:'salad',    title:'Salad',   allowExtras:true,  items:[
+        { id: 'papaya-salad', name: 'Green Papaya Salad (Som Tam)🌶️🌶️🌶️', desc: 'A spicy, savoury, and sweet Thai salad made primarily of shredded green papaya.', price: 7.00, img: 'images/somtam.jpg', spiceEnabled: true, spiceDefault: 3, allergens: ['peanuts','fish'], allowedExtras: ['extra-prawn'] },
+        { id: 'beef-salad', name: 'Spicy Beef Salad (Yum Nuea)🌶️🌶️', desc: 'A classic Thai salad with grilled sirloin steak (cooked mediu - please advise in the checkout comments if you would prefer it cooked differently), tossed with crisp vegetables, fresh mint, coriander, and a tangy lime-fish sauce dressing.', price: 9.50, img: 'images/ymbeef.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish','celery','soya'], allowedExtras: ['extra-beef'] },
+        { id: 'pork-salad', name: 'Grilled Pork Salad (Nam Tok)🌶️', desc: 'This classic North-eastern Thai salad features smoky, charred grilled pork slices tossed with a fiery dressing of lime, fish sauce, and chili flakes.', price: 8.50, img: 'images/porksalad.jpg', spiceEnabled: true, spiceDefault: 1, allergens: ['fish'], allowedExtras: ['extra-pork'] },
+        { id: 'laab', name: 'Laab🌶️🌶️', desc: 'A vibrant and flavourful meat salad known for its harmony of spicy, sour, salty, and savoury flavours.', price: 7.50, img: 'images/Larb.jpg', allowedModifiers: ['chicken','pork'], spiceEnabled: true, spiceDefault: 2, allergens: ['fish',',soya'], allowedExtras: ['extra-chicken',
+		'extra-pork'] }
+      ]},
+      { id:'curry',    title:'Curry',   allowExtras:true,  items:[
+        { id: 'rung-curry', name: 'Chefs Special Rainbow Curry🌶️', desc: 'Chef Rungs special curry. Rich and mildly spiced curry, this is a real crowd pleaser!', price: 8.00, img: 'images/rainbowcurry.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['gluten','celery','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'green-curry', name: 'Green Curry🌶️🌶️', desc: 'A vibrant green curry sauce with creamy coconut milk, peppers, courgette,green beans and fresh Thai basil.', price: 8.00, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, img: 'images/greencurry.jpg', spiceEnabled: true, spiceDefault: 2, allergens: [], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'red-curry', name: 'Red Curry🌶️', desc: 'A medium-spiced, savoury, and creamy Thai dish featuring a rich red chili-based paste in coconut milk.', price: 8.00, img: 'images/redcurry.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: [], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'massaman-curry', name: 'Massaman Curry', desc: 'Made with a unique blend of spices like cinnamon and cardamom, combined with coconut milk, potatoes, and peanuts.', price: 8.00, img: 'images/massaman.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1,spiceEnabled: true, spiceDefault: 0, allergens: [], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'panang-curry', name: 'Paneng Curry🌶️', desc: 'Flavored with a fragrant curry paste that includes lemongrass, galangal, and kaffir lime leaves, this is a rich and creamy curry!', price: 8.00, img: 'images/paneng.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1,spiceEnabled: true, spiceDefault: 1, allergens: [], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] }
+      ]},
+      { id:'stir-fry', title:'Stir Fry',allowExtras:true,  items:[
+        { id: 'stir-basil', name: 'Stir Fried Chilli & Basil (Pad Kra Pao)🌶️🌶️', desc: 'Street food classic, its a spicy, savoury Thai stir-fry of usually minced meat with garlic, chilies, and holy basil', price: 8.50, img: 'images/Kaprow.jpeg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','gluten','molluscs'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-tofu','extra-veg','extra-egg'] },
+        { id: 'stir-ginger', name: 'Stir Fried Ginger (Pad Khing)🌶️', desc: 'A stir-fried dish flavoured with fresh ginger, spring onions, onions, mushrooms and chilli.', price: 8.00, img: 'images/padkhing.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['soya','gluten','celery','mustard','shellfish'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        //{ id: 'stir-cashew', name: 'Stir Fried Cashew Nuts', desc: 'A vibrant and flavorful stir-fry featuring crisp vegetables tossed in a savoury sauce. Finished with the rich, buttery crunch of toasted cashew nuts', price: 8.50, img: 'images/cashew.jpg', allowedModifiers: ['batter-chicken','tofu','vegetable' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['tree_nuts','soya','sesame','celery','mustard','shellfish'], allowedExtras: ['extra-bchicken','extra-tofu','extra-veg'] },
+        { id: 'stir-sweetsour', name: 'Sweet & Sour (Pad Priew Wan)', desc: 'Thai sweet and sour stir-fry dish featuring vegetables such as cucumber, tomatoes, onions, and bell peppers in a tangy, sweet, and savoury sauce.', price: 8.00, img: 'images/sweetsour.jpg', allowedModifiers: ['batter-chicken','tofu','vegetable' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['soya'], allowedExtras: ['extra-bchicken','extra-tofu','extra-veg'] },
+        { id: 'stir-yellow', name: 'Stir Fried Yellow Curry (Pad Pong Karee)', desc: 'Thai stir-fry dish made with a flavourful, savoury sauce of yellow curry powder, coconut milk, and egg, mixed with vegetables such as onions, bell peppers, and green onions', price: 8.50, img: 'images/padpong.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','soya','mustard','dairy','shellfish','celery'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'stir-chilli', name: 'Stir Fried Chilli Paste (Pad Nam Prik Pao)🌶️🌶️', desc: 'A medium stir-fry, but dont let the chilli paste alarm you, it is not too spicy!', price: 8.00, img: 'images/padnamprikpao.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','fish','gluten','mustard','celery'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'stir-pepper', name: 'Stir Fried Black Pepper Sauce', desc: 'A bold and aromatic Thai-style stir-fry featuring crisp vegetables wok-tossed in a black pepper sauce. ', price: 7.50, img: 'images/blackpepper.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['soya','sesame','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] }
+      ]},
+      { id:'noodles',  title:'Noodles & Rice', allowExtras:true, items:[
+        { id: 'pad-thai', name: 'Pad Thai', desc: 'Balanced flavours using tamarind, fish sauce, and palm sugar accompanying bean sprouts, garlic and chives.', price: 8.00, img: 'images/padthai.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: false, spiceDefault: 0, allergens: ['egg','fish','peanuts'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+		{ id: 'chef-pad-thai', name: 'Chefs Special Pad Thai🌶🌶️', desc: 'Just like the traditional Pad Thai, but with a little extra heat!', price: 8.00, img: 'images/spicypadthai.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','fish','peanuts'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },  
+		{ id: 'pad-kee-mao', name: 'Pad Kee Mao🌶️🌶️', desc: 'Drunken Noodles is a spicy and savory Thai stir-fried noodle dish. It is made with wide rice noodles and a variety of vegetables, stir-fried with a flavorful sauce made from soy, oyster, and fish sauces, and heavily flavored with fresh chilies.', price: 8.00, img: 'images/padkeemao.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','gluten','shellfish'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+		//{ id: 'pad-see-ew', name: 'Thai Stir Fried Noodles (Pad See Ew)', desc: 'Thai stir-fried noodle dish featuring wide, flat rice noodles, Chinese broccoli, and egg, all coated in a savoury, salty-sweet soy sauce', price: 8.00, img: 'images/newpadseeew.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya','gluten','shellfish','celery','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'fried-rice', name: 'Thai Special Fried Rice (Khao Pad)', desc: 'A classic Thai street food staple. Fragrant jasmine rice wok-fried with egg, onions, and tomatoes, seasoned with fish sauce, soy sauce, and oyster sauce.', price: 7.50, img: 'images/khaopad.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya','gluten','shellfish','celery','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] }
+      ]},
+	  { id:'sides',    title:'Side Dishes', allowExtras:false, items:[
+        { id: 'jasmine-rice', name: 'Jasmine Rice (Khao Suay)', desc: 'Fragrant, long-grain rice.', price: 2.00, img: 'images/rice.jpg', allergens: [] },
+        { id: 'egg-rice', name: 'Egg Fried Rice (Khao Pad Khai)', desc: 'Rice with egg, simple & comforting.', price: 2.50, img: 'images/eggrice.jpg', allergens: ['egg','soya'] },
+        { id: 'sticky-rice', name: 'Sticky Rice (Khao Neow)', desc: 'Perfect sticky jasmine rice.', price: 2.50, img: 'images/stickyrice.jpg', allergens: [] },
+        { id: 'coconut-ricee', name: 'Coconut Rice (Khao Man)', desc: 'Jasmine rice simmered in coconut milk.', price: 3.00, img: 'images/coconutrice.jpg', allergens: [] },
+		 { id: 'chips', name: 'Chips', desc: 'Deep fried chips. Because sometimes you just need them!', price: 3.00, img: 'images/chips.jpg', allergens: [] },
+		 { id: 'fried-egg', name: 'Fried egg', desc: 'Thai style fried eggs have crispy whites with a soft yolk. But please let us know how you like yours', price: 1.00, img: 'images/egg.jpg', allergens: ['egg'] }
+      ]},
+      { id:'drinks',    title:'Soft Drinks', allowExtras:false, items:[
+        { id: 'pepsi-max', name: 'Pepsi Max', price: 1.50, img: 'images/pepsimax1.jpg', allergens: [] },
+        { id: 'pepsi', name: 'Pepsi', price: 1.75, img: 'images/pepsi.jpg', allergens: [] },
+        { id: 'sprite-zero', name: 'Sprite Zero',  price: 1.50, img: 'images/spritezero.jpg', allergens: [] },
+        { id: 'fanta-orange', name: 'Fanta Orange', price: 1.75, img: 'images/fanta.jpg', allergens: [] },
+		 { id: 'lemonade', name: 'Lemonade', price: 1.75, img: 'images/sprite.jpg', allergens: [] },
+      ]},	  
+    ];
+
+    const MODIFIERS = [
+      { id: 'chicken', name: 'Chicken', delta: 1.00 },
+      { id: 'beef', name: 'Beef', delta: 1.50 },
+      { id: 'pork', name: 'Pork', delta: 1.50 },
+      { id: 'tofu', name: 'Tofu', delta: 0.50 },
+      { id: 'prawn', name: 'Prawn', delta: 2.00 },
+      { id: 'vegetable', name: 'Vegetable', delta: 0.00 },
+      { id: 'fried-egg', name: 'Fried Egg', delta: 1.00 },
+      { id: 'batter-chicken', name: 'Battered Chicken', delta: 1.50 },
+    ];
+
+    // ---------- State ----------
+    let basket = []; // { name, itemId, mods:[{id,name,delta}], unitPrice, qty, img, spice }
+	window.basket = basket;  // expose the array reference to the second script
+    //const ITEMS_BY_ID = new Map();
+	
+	// remove chilli emojis that are baked into menu item names
+		const CHILLI_RE = /🌶️+/g;
+		function nameWithoutChillies(str) {
+		  return (str || '')
+			.replace(CHILLI_RE, '')
+			.replace(/\s{2,}/g, ' ')
+			.trim();
+		}
+
+
+
+    // ---------- Helpers ----------
+    function formatCurrency(n){ const cents = Math.round((n + Number.EPSILON) * 100); return '£' + (cents/100).toFixed(2); }
+    function roundToTwo(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
+    function chilliIcons(n){ return '🌶️'.repeat(Math.max(0, Math.min(3, n||0))); }
+
+// Single source of truth for how much space to keep above scrolled content
+// Single source of truth for how much space to keep above targets
+function computeHeaderOffset() {
+  const root = document.documentElement;
+  const headerSlidUp = root.classList.contains('header-slid-up'); // when header is hidden past Allergens
+  if (headerSlidUp) return 12; // tiny gap when header isn’t covering content
+  const h = (document.querySelector('.site-header') || document.querySelector('header'));
+  return (h ? Math.round(h.getBoundingClientRect().height) : 0) + 12;
+}
+
+function applyHeaderOffset() {
+  document.documentElement.style.setProperty('--header-offset', computeHeaderOffset() + 'px');
+}
+
+window.addEventListener('load', applyHeaderOffset, { passive:true });
+window.addEventListener('resize', applyHeaderOffset, { passive:true });
+window.addEventListener('orientationchange', applyHeaderOffset, { passive:true });
+window.addEventListener('scroll', applyHeaderOffset, { passive:true }); // keep it fresh while you move
+applyHeaderOffset();
+
+
+	
+	
+	// robust smooth scroll that clamps to page bounds (prevents “footer snaps”)
+	function smoothScrollToElTop(el){
+	  if (!el) return;
+	  const offset = computeHeaderOffset();
+	  const target = el.getBoundingClientRect().top + window.scrollY - offset;
+	  const maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+	  const top = Math.max(0, Math.min(target, maxTop));
+
+	  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+	  window.scrollTo({ top, behavior: (isIOS || prefersReduced) ? 'auto' : 'smooth' });
+	}
+	
+	// ---- Holiday / fully-booked ticker ----
+		const tickerEl = document.getElementById('status-ticker');
+		const tickerText = document.getElementById('ticker-text');
+
+		// Simple config object (edit this anytime)
+		const siteStatus = {
+		  active: true,  // turn off when not needed
+		  message: "Unfortunately, due to illness, Rung’s Thai Kitchen will be closed today (14th December). We are very sorry for any inconvenience this may cause."
+
+		};
+		
+		// ✅ Add this line:
+			console.log('TICKER INIT', { 
+			  active: siteStatus.active, 
+			  hasTickerEl: !!tickerEl, 
+			  hasTickerText: !!tickerText 
+			});
+
+		if (siteStatus.active && tickerEl && tickerText) {
+		  tickerText.textContent = siteStatus.message;
+		  tickerEl.classList.remove('hidden');
+		}
+
+		(function adjustForTicker(){
+		  const bar = document.getElementById('status-ticker');
+		  if (!bar) return;
+		  const set = () => {
+			const h = bar.offsetHeight || 0;
+			document.documentElement.style.setProperty('--ticker-height', h + 'px');
+		  };
+		  new ResizeObserver(set).observe(bar);
+		  window.addEventListener('load', set, { passive:true });
+		  window.addEventListener('resize', set, { passive:true });
+		  set();
+		})();
+		
+		// === Order idempotency ===
+		function getIdempotencyKey() {
+		  const existing = localStorage.getItem("checkout_idempotency_key");
+		  if (existing) return existing;
+
+		  const key = crypto.randomUUID();
+		  localStorage.setItem("checkout_idempotency_key", key);
+		  return key;
+		}
+
+
+// === Customise globals (place near top, before buildMenu) ===
+const ITEMS_BY_ID = new Map();   // lookup from item.id → item object
+let currentItem = null;          // the item currently being customised
+let selectedMods = new Set();    // your existing modifier selection
+let selectedExtras = [];         // extras (added proteins)
+let currentAllowExtras = false;
+let isSubmittingOrder = false;   // double submit guard
+
+
+
+
+// ---------- Build menu (single, clean version) ----------
+/* === Full-screen menu overlay === */
+// ---------- Build menu (for full-screen popup) ----------
+function buildMenu() {
+  const container = document.getElementById('menu-list');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  MENU_CATEGORIES.forEach(cat => {
+    // outer wrapper per category
+    const catSection = document.createElement('section');
+    catSection.className = 'popup-category';
+
+    // category heading
+    const h = document.createElement('h3');
+    h.className = 'popup-category-title';
+    h.textContent = cat.title;
+    catSection.appendChild(h);
+
+    // 2-column grid for this category’s items
+    const grid = document.createElement('div');
+    grid.className = 'popup-items-grid';
+
+    const categoryAllowExtras = !!cat.allowExtras;
+
+    cat.items.forEach(item => {
+      // enrich + store for customise logic
+      ITEMS_BY_ID.set(item.id, {
+        ...item,
+        categoryAllowedExtras: categoryAllowExtras
+      });
+
+      // item card
+      const card = document.createElement('div');
+      card.className = 'menu-item-card';
+      card.dataset.id = item.id;
+      card.dataset.price = item.price;
+      card.dataset.allowExtras = categoryAllowExtras ? '1' : '0';
+
+      if (item.allowedModifiers) card.dataset.allowedModifiers = item.allowedModifiers.join(',');
+      if (item.modifierRequired) card.dataset.modifierRequired = 'true';
+      if (item.modifiersMulti)   card.dataset.modifiersMulti   = 'true';
+      if (item.modifierMax)      card.dataset.modifierMax      = String(item.modifierMax);
+      if (item.img)              card.dataset.img              = item.img;
+      if (item.spiceEnabled)     card.dataset.spiceEnabled     = 'true';
+      if (typeof item.spiceDefault === 'number') {
+        card.dataset.spiceDefault = String(item.spiceDefault);
+      }
+
+      const allergenHTML = renderAllergenIconsCompact(item.allergens || []);
+
+      // small thumbnail if available
+      const thumbHTML = item.img
+        ? `
+          <div class="menu-card-thumb-wrap">
+            <img src="${item.img}" alt="${item.name}">
+          </div>
+        `
+        : '';
+		
+		// ⭐ Special / badge handling
+			if (item.special) {
+			  card.classList.add('khao-gaeng-special');
+			}
+
+			const badgeHTML = item.badge
+			  ? `<div class="special-badge">${item.badge}</div>`
+			  : '';
+
+
+		  card.innerHTML = `
+			  ${thumbHTML}
+			  ${badgeHTML}
+			  <div class="menu-card-main">
+				<div class="menu-card-title">${item.name}</div>
+				<div class="menu-card-desc muted small">${item.desc || ''}</div>
+				${allergenHTML}
+				<div class="menu-card-bottom">
+				  <div class="price">${formatCurrency(item.price)}</div>
+				  <button class="btn btn-accent" type="button" data-id="${item.id}">
+					customise
+				  </button>
+				</div>
+			  </div>
+			`;
+
+
+      grid.appendChild(card);
+    });
+
+    catSection.appendChild(grid);
+    container.appendChild(catSection);
+  });
+
+  // ✅ make sure customise buttons still work (one delegated handler)
+  if (!container.dataset.bound) {
+    container.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-id]');
+      if (!btn) return;
+      openCustomise(btn.getAttribute('data-id'));
+    });
+    container.dataset.bound = '1';
+  }
+}
+
+
+    // --------- Order rendering ----------
+			function renderOrder(){
+		  const orderListEl  = document.getElementById('order-list');
+		  const orderTotalEl = document.getElementById('order-total');
+
+		  orderListEl.innerHTML = '';
+
+		  if (basket.length === 0){
+			orderListEl.innerHTML = '<div class="muted small">No items yet — add something from the menu.</div>';
+			orderTotalEl.textContent = formatCurrency(0);
+			return;
+		  }
+
+		  basket.forEach((row, idx) => {
+			const r = document.createElement('div');
+			r.className = 'order-row';
+
+			const leftWrap = document.createElement('div');
+			leftWrap.style.display = 'flex';
+			leftWrap.style.alignItems = 'center';
+			leftWrap.style.gap = '10px';
+
+			const img = document.createElement('img');
+			img.className = 'item-thumb';
+			img.alt = row.name;
+			img.loading = 'lazy';
+			img.src = (row.img && row.img.trim())
+			  ? row.img
+			  : 'data:image/svg+xml;utf8,' + encodeURIComponent(
+				`<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">
+				   <rect width="100%" height="100%" fill="#f1f1f1"/>
+				   <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle"
+						 font-family="sans-serif" font-size="12" fill="#999">No image</text>
+				 </svg>`
+			  );
+
+			// ✅ HERE: use clean name (no built-in chillies)
+			const cleanName = nameWithoutChillies(row.name);
+
+			const details = [];
+			if (row.mods && row.mods.length) {
+			  details.push(row.mods.map(m => m.name).join(', '));
+			}
+			if (typeof row.spice === 'number') {
+			  details.push(chilliIcons(row.spice));
+			}
+
+			const text = document.createElement('div');
+			text.innerHTML = `
+			  <div style="font-weight:700">
+				${cleanName}
+				${details.length ? ` <span class="muted small">• ${details.join(' • ')}</span>` : ''}
+			  </div>
+			  <div class="muted small">Unit: ${formatCurrency(row.unitPrice)}</div>
+			`;
+
+			const right = document.createElement('div');
+			right.style.textAlign = 'right';
+			right.innerHTML = `
+			  <div style="font-weight:800">${formatCurrency(roundToTwo(row.unitPrice * row.qty))}</div>
+			  <div style="margin-top:8px;display:flex;gap:8px;align-items:center;justify-content:flex-end">
+				<button class="btn btn-ghost" data-action="dec" data-idx="${idx}">-</button>
+				<div class="muted">${row.qty}</div>
+				<button class="btn btn-ghost" data-action="inc" data-idx="${idx}">+</button>
+				<button class="btn" style="background:transparent;color:#b02a2a;border:none;padding:6px 8px" data-action="remove" data-idx="${idx}">Remove</button>
+			  </div>
+			`;
+
+			leftWrap.appendChild(img);
+			leftWrap.appendChild(text);
+			r.appendChild(leftWrap);
+			r.appendChild(right);
+			orderListEl.appendChild(r);
+		  });
+
+		  const total = basket.reduce((s, i) => s + i.unitPrice * i.qty, 0);
+		  orderTotalEl.textContent = formatCurrency(roundToTwo(total));
+		}
+		
+		// ---------- Menu popup open / close ----------
+const menuOverlay     = document.getElementById('menu-overlay');
+const menuLink        = document.getElementById('menu-link');
+const menuClose       = document.getElementById('menu-overlay-close');
+const menuCheckoutBtn = document.getElementById('menu-checkout-btn');
+const menuFab         = document.getElementById('menu-fab');
+
+// Open / close helpers
+function openMenuOverlay() {
+  if (!menuOverlay) return;
+  menuOverlay.classList.add('show');
+  menuOverlay.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden'; // stop background scroll
+}
+
+function closeMenuOverlay() {
+  if (!menuOverlay) return;
+  menuOverlay.classList.remove('show');
+  menuOverlay.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+// Header nav "Menu" link
+if (menuLink) {
+  menuLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    openMenuOverlay();
+  });
+}
+
+// Floating FAB "Menu" button
+if (menuFab) {
+  menuFab.addEventListener('click', (e) => {
+    e.preventDefault();
+    openMenuOverlay();
+  });
+}
+
+if (menuFab) {
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 300) {
+      menuFab.classList.remove('hidden');
+    } else {
+      menuFab.classList.add('hidden');
+    }
+  });
+}
+
+// Close X in overlay
+if (menuClose) {
+  menuClose.addEventListener('click', closeMenuOverlay);
+}
+
+// Click outside sheet closes
+if (menuOverlay) {
+  menuOverlay.addEventListener('click', (e) => {
+    if (e.target === menuOverlay) closeMenuOverlay();
+  });
+}
+
+// Proceed to checkout button in overlay
+if (menuCheckoutBtn) {
+  menuCheckoutBtn.addEventListener('click', () => {
+    if (!basket || basket.length === 0) {
+      alert('Please add at least one dish before proceeding to checkout.');
+      return;
+    }
+
+    // close the menu overlay
+    closeMenuOverlay();
+
+    // compute subtotal from basket and open checkout
+    const subtotal = basket.reduce(
+      (sum, line) => sum + line.unitPrice * line.qty,
+      0
+    );
+    openCheckout(subtotal);
+  });
+}
+
+// ESC key closes popup too
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && menuOverlay?.classList.contains('show')) {
+    closeMenuOverlay();
+  }
+});
+
+
+    // ---------- Modal (customise) ----------
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBase = document.getElementById('modal-base');
+    const qtyInput = document.getElementById('qty-input');
+    const qtyIncr = document.getElementById('qty-incr');
+    const qtyDecr = document.getElementById('qty-decr');
+    const modsEl = document.getElementById('mods');
+    const unitPriceEl = document.getElementById('unit-price');
+	// if any older code still uses `modalPrice`, point it at #unit-price
+	const modalPrice = unitPriceEl;
+    const modalClose = document.getElementById('modal-close');
+    const modalCancel = document.getElementById('modal-cancel');
+    const modalAdd = document.getElementById('modal-add');
+    const modalImg = document.getElementById('modal-img');
+    const modRequiredNote = document.getElementById('mod-required-note');
+    const modLimitNote = document.getElementById('mod-limit-note');
+    const modalAllWrap = document.getElementById('modal-allergens-wrap');
+    const modalAll = document.getElementById('modal-allergens');
+    const spiceWrap = document.getElementById('spice-wrap');
+    const spiceButtons = document.getElementById('spice-buttons');
+    let currentAllowedMods = null;
+    let currentRequires = false;
+    let currentMulti = false;
+    let currentMax = null;
+    let currentSpice = null; // 0..3 or null
+	
+
+// include extras in the price calculation
+function sumExtras() {
+  return selectedExtras.reduce((s, e) => s + (e.delta || 0), 0);
+}
+
+const extrasWrap = document.getElementById('extras-wrap');
+const extrasEl   = document.getElementById('extras');
+
+function buildExtraChips() {
+  // No extras for this item/category → hide the whole block
+  if (!currentAllowExtras || !extrasWrap || !extrasEl) {
+    if (extrasWrap) extrasWrap.style.display = 'none';
+    return;
+  }
+
+  extrasWrap.style.display = 'block';
+  extrasEl.innerHTML = '';
+
+  // Decide which extras to show:
+  // - if currentAllowExtras is an array → only those IDs
+  // - otherwise → show all EXTRAS (current behaviour)
+  let extrasToRender = EXTRAS;
+
+  if (Array.isArray(currentAllowExtras)) {
+    extrasToRender = EXTRAS.filter(opt =>
+      currentAllowExtras.includes(opt.id)
+    );
+
+    // If filter removes everything, hide the block
+    if (extrasToRender.length === 0) {
+      extrasWrap.style.display = 'none';
+      return;
+    }
+  }
+
+  extrasToRender.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chip';
+
+    const isSelected = selectedExtras.some(x => x.id === opt.id);
+    if (isSelected) btn.classList.add('selected');
+
+    btn.textContent = `${opt.name} ${formatCurrency(opt.delta)}`;
+
+    btn.addEventListener('click', () => {
+      // we’ll handle the "only 1 extra" rule in the next section
+      handleExtraClick(opt);
+    });
+
+    extrasEl.appendChild(btn);
+  });
+}
+
+function handleExtraClick(opt) {
+  // If this extra is already selected → deselect it
+  const already = selectedExtras.findIndex(x => x.id === opt.id);
+
+  if (already >= 0) {
+    // clicking again removes the extra
+    selectedExtras.splice(already, 1);
+  } else {
+    // Only allow ONE extra → replace the array with just this option
+    selectedExtras = [{ ...opt }];
+  }
+
+  // Rebuild UI + refresh price
+  buildExtraChips();
+  updateUnitPricePreview();
+}
+
+    function buildModifierChips(allowed, required=false, multi=false, max=null){
+      modsEl.innerHTML = '';
+      selectedMods.clear();
+      currentAllowedMods = Array.isArray(allowed) && allowed.length ? allowed.slice() : null;
+      currentRequires = !!required;
+      currentMulti = !!multi || (typeof max === 'number' && max > 0);
+      currentMax = (typeof max === 'number' && max > 0) ? max : null;
+
+      if(currentRequires && currentAllowedMods){ modRequiredNote.style.display = 'block'; modalAdd.disabled = true; }
+      else { modRequiredNote.style.display = 'none'; modalAdd.disabled = false; }
+
+      if(currentMulti && currentMax){ modLimitNote.style.display = 'block'; modLimitNote.textContent = `Choose up to ${currentMax} options`; }
+      else { modLimitNote.style.display = 'none'; }
+
+      if(!currentAllowedMods){ modsEl.style.display = 'none'; return; }
+      modsEl.style.display = 'flex';
+
+      MODIFIERS.forEach(m => {
+        if(!currentAllowedMods.includes(m.id)) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'chip';
+        btn.innerHTML = `${m.name}${m.delta ? ` (+${formatCurrency(m.delta)})` : ''}`;
+        btn.dataset.id = m.id;
+
+        btn.addEventListener('click', () => {
+          if(currentMulti){
+            if(selectedMods.has(m.id)){
+              selectedMods.delete(m.id);
+              btn.classList.remove('selected');
+            } else {
+              if(currentMax && selectedMods.size >= currentMax){
+                btn.animate([{transform:'translateY(-2px)'},{transform:'translateY(0)'}],{duration:140});
+                return;
+              }
+              selectedMods.add(m.id);
+              btn.classList.add('selected');
+            }
+            if(currentRequires) modalAdd.disabled = (selectedMods.size === 0);
+            if(currentMax && currentMulti){ modLimitNote.textContent = `Selected ${selectedMods.size}/${currentMax}`; }
+          } else {
+            if(selectedMods.has(m.id)){
+              selectedMods.delete(m.id);
+              btn.classList.remove('selected');
+            } else {
+              selectedMods.clear();
+              modsEl.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
+              selectedMods.add(m.id);
+              btn.classList.add('selected');
+            }
+            if(currentRequires) modalAdd.disabled = (selectedMods.size === 0);
+          }
+          updateUnitPricePreview();
+        });
+
+        modsEl.appendChild(btn);
+      });
+    }
+	
+	function openCustomiseById(itemId) {
+  const item = ITEMS_BY_ID.get(String(itemId));
+  if (!item || !modal) {
+    console.warn('openCustomiseById: item not found', itemId);
+    return;
+  }
+
+  currentItem = item;
+  modalBase.dataset.id = item.id;   // ✅ ADD THIS LINE
+  selectedMods.clear();
+  selectedExtras = [];
+  currentAllowExtras = !!item.categoryAllowedExtras;
+
+  const allowed  = Array.isArray(item.allowedModifiers) ? item.allowedModifiers : null;
+  const requires = !!item.modifierRequired;
+  const isMulti  = !!item.modifierMax || !!item.modifiersMulti;
+  const max      = (typeof item.modifierMax === 'number' && item.modifierMax > 0)
+    ? item.modifierMax
+    : null;
+
+  buildModifierChips(allowed, requires, isMulti, max);
+  buildExtraChips();
+  modalTitle.textContent = `Customise — ${item.name}`;
+  modalBase.dataset.price = item.price;
+  modalBase.textContent   = `Base price: ${formatCurrency(item.price)}`;
+  qtyInput.value = 1;
+  updateUnitPricePreview();
+
+  if (modalImg) {
+    if (item.img) {
+      modalImg.src = item.img;
+      modalImg.style.display = 'block';
+    } else {
+      modalImg.removeAttribute('src');
+      modalImg.style.display = 'none';
+    }
+  }
+
+  if (item.allergens && item.allergens.length) {
+    modalAll.innerHTML = renderAllergenBadges(item.allergens);
+    modalAllWrap.style.display = 'block';
+  } else {
+    modalAll.innerHTML = '';
+    modalAllWrap.style.display = 'none';
+  }
+
+  const defaultSpice = (typeof item.spiceDefault === 'number') ? item.spiceDefault : 0;
+  buildSpiceSelector(!!item.spiceEnabled, defaultSpice);
+
+  modal.style.display = 'flex';
+}
+
+	
+	// ---------- Success popup (matches #order-success in HTML) ----------
+	const orderSuccess      = document.getElementById('order-success');
+	const orderSuccessX     = document.getElementById('order-success-x');
+	const orderSuccessClose = document.getElementById('order-success-close');
+
+	function showOrderSuccess({ ref, subtotal, delivery, total, orderType }, items, preferredTimeStr) {
+	  if (!orderSuccess) {
+		// fallback
+		alert(`Order placed! ${ref}`);
+		return;
+	  }
+
+	  // 1) header
+	  const titleEl = document.getElementById('order-success-title');
+	  if (titleEl) {
+		// ⬅️ use ref AS-IS, do NOT add "RTK-" again
+		titleEl.textContent = `Order confirmed — ${ref}`;
+	  }
+
+	  // 2) message
+	  const msgEl = document.getElementById('order-success-msg');
+	  if (msgEl) {
+		const suffix = orderType === 'delivery' ? 'delivery' : 'collection';
+		const note = preferredTimeStr
+		  ? `Thanks! We’ll contact you to confirm your ${suffix} time (${preferredTimeStr}).`
+		  : `Thanks! We’ll contact you to confirm your ${suffix}.`;
+		msgEl.textContent = note;
+	  }
+
+	  // 3) items
+	  const listEl = document.getElementById('order-success-items');
+	  if (listEl) {
+		listEl.innerHTML = '';
+		items.forEach(row => {
+		  const details = [];
+		  if (row.mods?.length) details.push(row.mods.map(m => m.name).join(', '));
+		  if (typeof row.spice === 'number') details.push('🌶️'.repeat(row.spice));
+
+		  const div = document.createElement('div');
+		  div.style.padding = '6px 0';
+		  div.style.borderBottom = '1px dashed #eee';
+		  div.innerHTML = `
+			${row.qty} × ${row.name}
+			${details.length ? ` <span class="muted small">• ${details.join(' • ')}</span>` : ''}
+		  `;
+		  listEl.appendChild(div);
+		});
+	  }
+
+	  // 4) total
+	  const totalEl = document.getElementById('order-success-total');
+	  if (totalEl) {
+		totalEl.textContent = formatCurrency(total);
+	  }
+
+	  orderSuccess.style.display = 'flex';
+	}
+
+	// close buttons
+	if (orderSuccessX)     orderSuccessX.addEventListener('click', () => orderSuccess.style.display = 'none');
+	if (orderSuccessClose) orderSuccessClose.addEventListener('click', () => orderSuccess.style.display = 'none');
+	if (orderSuccess) {
+	  orderSuccess.addEventListener('click', (e) => {
+		if (e.target === orderSuccess) orderSuccess.style.display = 'none';
+	  });
+	}
+
+
+	// make it available to the second script
+	window.showOrderSuccess = showOrderSuccess;
+
+	
+		// ----  (pure front-end) ----
+
+	(function(){
+	  const wrap  = document.getElementById('order-success');
+	  const title = document.getElementById('order-success-title');
+	  const msg   = document.getElementById('order-success-msg');
+	  const list  = document.getElementById('order-success-items');
+	  const totalEl = document.getElementById('order-success-total');
+	  const btnClose = document.getElementById('order-success-close');
+	  const btnX     = document.getElementById('order-success-x');
+
+	  function hide() {
+		if (wrap) wrap.style.display = 'none';
+	  }
+
+	  // expose a global helper we can call later (kept for backwards compatibility)
+	function showOrderSuccess(orderId, items, total, orderType, preferredTime) {
+	  // If the new-style function exists, delegate to it
+	  if (typeof window.showOrderSuccessNew === 'function') {
+		window.showOrderSuccessNew(
+		  {
+			// if checkout already passed "RTK-012", keep it;
+			// if it passed just "012", add RTK-
+			ref: (typeof orderId === 'string' && orderId.startsWith('RTK-'))
+			  ? orderId
+			  : `RTK-${orderId}`,
+			subtotal: 0,
+			delivery: 0,
+			total: total || 0,
+			orderType: orderType || 'collection'
+		  },
+		  items || [],
+		  preferredTime || null
+		);
+		return;
+	  }
+	  
+
+	  // Fallback if the new function isn’t there
+	  alert(
+		(typeof orderId === 'string' ? orderId : `RTK-${orderId}`) ||
+		'Order placed!'
+	  );
+	}
+
+
+	  if (btnClose) btnClose.addEventListener('click', hide);
+	  if (btnX)     btnX.addEventListener('click', hide);
+	  if (wrap)     wrap.addEventListener('click', e => {
+		if (e.target === wrap) hide();
+	  });
+
+	  // make available to other scripts
+	  window.showOrderSuccess = showOrderSuccess;
+	})();
+
+
+    function buildSpiceSelector(enabled, defaultLevel=0){
+      if(!enabled){
+        spiceWrap.style.display = 'none';
+        spiceButtons.innerHTML = '';
+        currentSpice = null;
+        return;
+      }
+      spiceWrap.style.display = 'block';
+      spiceButtons.innerHTML = '';
+      currentSpice = Math.max(0, Math.min(3, Number(defaultLevel)||0));
+
+      const labels = [
+        {v:0, text:'No spice'},
+        {v:1, text:'Mild 🌶️'},
+        {v:2, text:'Medium 🌶️🌶️'},
+        {v:3, text:'Very spicy 🌶️🌶️🌶️'}
+      ];
+      labels.forEach(l=>{
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'spice-btn' + (l.v===currentSpice ? ' active':'');
+        b.textContent = l.text;
+        b.setAttribute('aria-pressed', l.v===currentSpice ? 'true':'false');
+        b.addEventListener('click', ()=>{
+          currentSpice = l.v;
+          [...spiceButtons.querySelectorAll('.spice-btn')].forEach(x=>{
+            x.classList.remove('active'); x.setAttribute('aria-pressed','false');
+          });
+          b.classList.add('active'); b.setAttribute('aria-pressed','true');
+        });
+        spiceButtons.appendChild(b);
+      });
+    }
+
+    function closeModal(){
+      modal.style.display = 'none';
+      currentItem = null;
+      selectedMods.clear();
+      currentAllowedMods = null;
+      if (modalImg){ modalImg.removeAttribute('src'); modalImg.style.display = 'none'; }
+      buildSpiceSelector(false);
+    }
+
+    function updateUnitPricePreview(){
+  const base = Number(modalBase.dataset.price) || 0;
+
+  // existing modifiers total…
+  let modsTotal = 0;
+  selectedMods.forEach(id => {
+    const m = MODIFIERS.find(x => x.id === id);
+    if (m) modsTotal += m.delta;
+  });
+
+  // extras total (only if allowed)
+  let extrasTotal = 0;
+  if (currentAllowExtras) {
+    extrasTotal = selectedExtras.reduce((s,e)=> s + (e.delta || 0), 0);
+  }
+
+  const total = roundToTwo(base + modsTotal + extrasTotal);
+  unitPriceEl.textContent = formatCurrency(total);
+}
+
+
+// Safe wrapper so old calls still work
+function opencustomise(id){ openCustomize(id); }
+
+
+// Canonical customise opener
+function openCustomiseById(itemId) {
+  const item = ITEMS_BY_ID.get(String(itemId));
+  if (!item || !modal) {
+    console.warn('openCustomiseById: item not found', itemId);
+    return;
+  }
+
+  currentItem = item;
+  selectedMods.clear();
+  selectedExtras = [];
+
+  // NEW: per-item extras control
+  if (Array.isArray(item.allowedExtras) && item.allowedExtras.length > 0) {
+    currentAllowExtras = item.allowedExtras;        // e.g. ['extra-beef']
+  } else {
+    currentAllowExtras = !!item.categoryAllowedExtras; // existing behaviour
+  }
+
+  const allowed  = Array.isArray(item.allowedModifiers) ? item.allowedModifiers : null;
+  const requires = !!item.modifierRequired;
+  const isMulti  = !!item.modifierMax || !!item.modifiersMulti;
+  const max      = (typeof item.modifierMax === 'number' && item.modifierMax > 0)
+    ? item.modifierMax
+    : null;
+
+  buildModifierChips(allowed, requires, isMulti, max);
+  buildExtraChips();
+  modalTitle.textContent = `Customise — ${item.name}`;
+  modalBase.dataset.price = item.price;
+  modalBase.textContent   = `Base price: ${formatCurrency(item.price)}`;
+  qtyInput.value = 1;
+  updateUnitPricePreview();
+
+  if (modalImg) {
+    if (item.img) {
+      modalImg.src = item.img;
+      modalImg.style.display = 'block';
+    } else {
+      modalImg.removeAttribute('src');
+      modalImg.style.display = 'none';
+    }
+  }
+
+  if (item.allergens && item.allergens.length) {
+    modalAll.innerHTML = renderAllergenBadges(item.allergens);
+    modalAllWrap.style.display = 'block';
+  } else {
+    modalAll.innerHTML = '';
+    modalAllWrap.style.display = 'none';
+  }
+
+  const defaultSpice = (typeof item.spiceDefault === 'number') ? item.spiceDefault : 0;
+  buildSpiceSelector(!!item.spiceEnabled, defaultSpice);
+
+  modal.style.display = 'flex';
+}
+function openCustomise(itemId) {
+  // Backwards-compat wrapper so old code still works
+  return openCustomiseById(itemId);
+}
+
+// If anything uses it from inline HTML like onclick="openCustomise(...)"
+window.openCustomise = openCustomise;
+
+
+// Optional aliases if other code uses different casing:
+// keep old call sites working
+window.openCustomise  = openCustomise;
+window.openCustomize  = openCustomise;
+window.opencustomise  = openCustomise;
+
+
+
+
+    document.getElementById('qty-incr').addEventListener('click', ()=>{ qtyInput.value = Math.max(1, parseInt(qtyInput.value || '1') + 1); });
+    document.getElementById('qty-decr').addEventListener('click', ()=>{ qtyInput.value = Math.max(1, parseInt(qtyInput.value || '1') - 1); });
+
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', (ev) => { if(ev.target === modal) closeModal(); });
+
+    document.getElementById('modal-add').addEventListener('click', () => {
+  // … your existing checks …
+
+  const base = Number(modalBase.dataset.price) || 0;
+
+  let modsTotal = 0;
+  const modsArr = [];
+  selectedMods.forEach(id => {
+    const m = MODIFIERS.find(x => x.id === id);
+    if (m) { modsTotal += m.delta; modsArr.push(m); }
+  });
+
+  const extrasArr = currentAllowExtras
+    ? selectedExtras.map(e => ({ id:e.id, name:e.name, delta:e.delta, type:'extra' }))
+    : [];
+
+  const extrasTotal = currentAllowExtras
+    ? selectedExtras.reduce((s,e)=> s + (e.delta || 0), 0)
+    : 0;
+
+  const unitPrice = roundToTwo(base + modsTotal + extrasTotal);
+  const qty = Math.max(1, parseInt(qtyInput.value || '1'));
+  
+const item = currentItem;
+if (!item) {
+  console.error('[Customise] No currentItem set — modal opened without selecting an item');
+  return;
+}
+const itemId = item.id;
+
+  basket.push({
+    name: item.name,
+    itemId: item.id,
+    mods: [...modsArr, ...extrasArr],   // put extras in mods for downstream reuse
+    unitPrice,
+    qty,
+    img: item.img || '',
+    spice: currentSpice ?? null
+  });
+
+  closeModal();
+  renderOrder();
+});
+
+
+
+// One delegated handler for all customise buttons inside the popup
+(function bindCustomiseClicks() {
+  const container = document.getElementById('menu-list');
+  if (!container || container.dataset.customBound) return;
+
+  container.addEventListener('click', (e) => {
+    // works for either a button or the whole card if we later add data-id there
+    const btn = e.target.closest('[data-id]');
+    if (!btn) return;
+
+    const id = btn.getAttribute('data-id');
+    if (!id) return;
+
+    // call our canonical opener
+    if (typeof openCustomise === 'function') {
+      openCustomise(id);
+    } else if (typeof window.openCustomise === 'function') {
+      window.openCustomise(id);
+    }
+  });
+
+  container.dataset.customBound = '1';
+})();
+
+    document.getElementById('order-panel').addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if(!btn) return;
+      const action = btn.dataset.action;
+      const idx = Number(btn.dataset.idx);
+      if(action === 'inc'){ basket[idx].qty += 1; renderOrder(); }
+      if(action === 'dec'){ basket[idx].qty = Math.max(1, basket[idx].qty - 1); renderOrder(); }
+      if(action === 'remove'){ basket.splice(idx, 1); renderOrder(); }
+    });
+
+    // Lightbox
+document.querySelectorAll('#food-grid img').forEach(img => {
+  img.addEventListener('click', ()=> {
+    const lb = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lightbox-img');
+    if (!lb || !lbImg) return;
+    lbImg.src = img.src || '';
+    lb.style.display = 'flex';
+  });
+});
+const lbRoot = document.getElementById('lightbox');
+if (lbRoot) {
+  lbRoot.addEventListener('click', (e) => {
+    if(e.target.id === 'lightbox' || e.target.id === 'lightbox-img') lbRoot.style.display = 'none';
+  });
+};
+
+    document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (typeof closeModal === 'function' && modal?.style.display === 'flex') closeModal();
+    if (typeof closeCheckout === 'function' && checkoutModal?.style.display === 'flex') closeCheckout();
+    if (typeof hideOrderSuccess === 'function') hideOrderSuccess();
+  }
+});
+
+// --- One handler for all "customise" buttons in the popup menu ---
+const menuListEl = document.getElementById('menu-list');
+
+if (menuListEl) {
+  menuListEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-id]');
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+    // just open customise – do NOT close menu
+    openCustomise(id);
+  });
+}
+
+function filterMenu(query) {
+  const q = (query || '').trim().toLowerCase();
+  const sections = document.querySelectorAll('#menu-list .popup-category');
+
+  if (!q) {
+    // reset: show all categories & items
+    sections.forEach(sec => {
+      sec.style.display = '';
+      sec.querySelectorAll('.menu-item-card').forEach(card => {
+        card.style.display = '';
+      });
+    });
+    return;
+  }
+
+  sections.forEach(sec => {
+    let anyVisible = false;
+
+    sec.querySelectorAll('.menu-item-card').forEach(card => {
+      const text = card.dataset.searchText || card.textContent.toLowerCase();
+      const match = text.includes(q);
+      card.style.display = match ? '' : 'none';
+      if (match) anyVisible = true;
+    });
+
+    // hide category completely if none of its items match
+    sec.style.display = anyVisible ? '' : 'none';
+  });
+}
+
+const menuSearchInput = document.getElementById('menu-search');
+if (menuSearchInput) {
+  menuSearchInput.addEventListener('input', () => {
+    filterMenu(menuSearchInput.value);
+  });
+}
+
+const searchInput = document.getElementById('menu-search-input');
+
+if (searchInput) {
+  searchInput.addEventListener('input', () => {
+    const term = searchInput.value.trim().toLowerCase();
+
+    // every dish card in the popup
+    const cards = document.querySelectorAll('#menu-list .menu-item-card');
+
+    cards.forEach(card => {
+      const text = (card.textContent || '').toLowerCase();
+      // show card if its text contains the search term
+      if (!term || text.includes(term)) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  });
+}
+
+
+
+// ---------- Build & first render ----------
+buildMenu();
+renderOrder();
+
+// expose helpers the other script uses
+window.formatCurrency     = formatCurrency;
+window.orderMsg           = document.getElementById('order-msg');
+window.basket             = basket;
+window.renderOrder        = renderOrder;
+window.roundToTwo         = roundToTwo;
+window.chilliIcons        = chilliIcons;
+window.nameWithoutChillies= nameWithoutChillies;
+
+  
+  function openMenuOverlay() {
+  if (!menuOverlay) return;
+  menuOverlay.classList.add('show');
+  document.body.style.overflow = 'hidden';   // stop background scroll
+  document.body.classList.add('menu-open');  // 👈 NEW: flag that menu is open
+}
+
+function closeMenuOverlay() {
+  if (!menuOverlay) return;
+  menuOverlay.classList.remove('show');
+  document.body.style.overflow = '';
+  document.body.classList.remove('menu-open'); // 👈 NEW: remove flag
+}
+
+
+  if (menuLink) {
+    menuLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      openMenuOverlay();
+    });
+  }
+
+  if (menuClose) {
+    menuClose.addEventListener('click', () => {
+      closeMenuOverlay();
+    });
+  }
+
+  if (menuOverlay) {
+    // click outside the inner card closes
+    menuOverlay.addEventListener('click', (e) => {
+      if (e.target === menuOverlay) closeMenuOverlay();
+    });
+  }
+
+  // ESC key closes popup too
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menuOverlay?.classList.contains('show')) {
+      closeMenuOverlay();
+    }
+  });
+
+function cancelOrder(order, reason, meta = {}) {
+  order.status = 'cancelled';
+  order.cancelReason = reason;            // <- short code/string
+  order.cancelMeta = meta;                // <- optional extra detail
+  order.cancelledAt = new Date().toISOString();
+  console.warn('[ORDER CANCELLED]', reason, meta, order);
+  return order;
+}
+
+
+// (no extra closers past here)
+}); 
+
+// end Loaded
+
+
+
+
+</script>
+<script>
+// — measures the header and exposes its height in --header-h
+function updateHeaderVar() {
+  const root   = document.documentElement;
+  const header = document.querySelector('.site-header') || document.querySelector('header');
+  const h = header ? Math.round(header.getBoundingClientRect().height) : 0;
+  root.style.setProperty('--header-h', h + 'px');
+}
+</script>
+
+
+<script>
+(function() {
+  const root      = document.documentElement;
+  const header    = document.querySelector('.site-header') || document.querySelector('header');
+  const spacer    = document.getElementById('header-spacer');
+  const allergens = document.querySelector('#allergens');
+  if (!header || !spacer || !allergens) return;
+
+  // keep spacer and CSS var in sync with header height
+  function syncSpacer() {
+    updateHeaderVar(); // sets --header-h
+    const h = parseInt(getComputedStyle(root).getPropertyValue('--header-h')) || 0;
+    spacer.style.height = h + 'px';
+  }
+
+  function getTriggerY() {
+    const h   = parseInt(getComputedStyle(root).getPropertyValue('--header-h')) || 0;
+    const top = window.scrollY + allergens.getBoundingClientRect().top;
+    return top - h;
+  }
+
+  let triggerY = 0;
+
+  function updateTrigger() {
+    syncSpacer();
+    triggerY = getTriggerY();
+    handleScroll();
+  }
+
+  function handleScroll() {
+    if (window.scrollY >= triggerY) {
+      root.classList.add('header-slid-up');
+    } else {
+      root.classList.remove('header-slid-up');
+    }
+  }
+
+  // init + listeners
+  updateTrigger();
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('resize', updateTrigger, { passive: true });
+  window.addEventListener('orientationchange', updateTrigger, { passive: true });
+  setTimeout(updateTrigger, 300); // second pass after fonts/images
+})();
+</script>
+
+
+
+
+
+
+	<script>
+	  if (typeof window.formatCurrency !== 'function') {
+		window.formatCurrency = n => '£' + Number(n || 0).toFixed(2);
+	  }
+	  if (typeof window.roundToTwo !== 'function') {
+		window.roundToTwo = n => Math.round((n || 0) * 100) / 100;
+	  }
+	</script>
+	
+	<script>
+	  // hard-sanitize anything we send to the PDF
+	  function pdfSafe(str) {
+		return (str || '')
+		  // remove chilli emoji (both with vs16 and plain)
+		  .replace(/🌶️/gu, '')
+		  .replace(/🌶/g, '')
+		  // remove any emoji / symbols in the big emoji planes
+		  .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
+		  // finally, strip anything not basic ASCII
+		  .replace(/[^\x20-\x7E]/g, '')
+		  .trim();
+	  }
+</script>
+
+	<!-- jsPDF (must be before our downloadReceipt) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+
+
+ Supabase JS (CDN)
+  <!--<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>-->
+  <script>
+  console.log("Supabase global:", window.supabase);
+  console.log("createClient:", window.supabase?.createClient);
+</script>
+
+
+
+  <script>
+    // Init Supabase
+   // const SUPABASE_URL = 'https://ubyjrrsvbbqomitpaidb.supabase.co';
+    //const SUPABASE_ANON_KEY = //'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVieWpycnN2YmJxb21pdHBhaWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NTYyNjMsImV4cCI6MjA3NjUzMjI2M30.WTllxO5KnaMI0i1d4VHNBhjLuRMfu4_Xx5arqZmYevw';
+   // const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+	
+
+/* ------------------------------
+   Blackout windows (from Supabase)
+---------------------------------*/
+
+// In-memory windows (filled by Supabase)
+let CLOSED_RANGES = [];      // [{start:Date, end:Date, message?:string}]
+let FULLY_BOOKED  = [];      // same shape
+
+// Load active windows that intersect “now → +60 days” (tweak as needed)
+async function loadBlackouts() {
+  const now = new Date();
+  const horizon = new Date();
+  horizon.setDate(horizon.getDate() + 60);
+
+  const { data, error } = await sb
+    .from('booking_blackouts')
+    .select('kind,start_at,end_at,message,active')
+    .eq('active', true)
+    // overlap test (start < horizon && end > now)
+    .lt('start_at', horizon.toISOString())
+    .gt('end_at',  now.toISOString());
+
+  if (error) {
+    console.warn('[blackouts] fetch failed', error);
+    return;
+  }
+
+  CLOSED_RANGES = [];
+  FULLY_BOOKED  = [];
+
+  (data || []).forEach(row => {
+    const win = {
+      start: new Date(row.start_at),
+      end:   new Date(row.end_at),
+      message: row.message || ''
+    };
+    if (row.kind === 'closed')       CLOSED_RANGES.push(win);
+    if (row.kind === 'fully_booked') FULLY_BOOKED.push(win);
+  });
+}
+
+// Helpers
+function inAnyWindow(dt, windows) {
+  const t = +dt;
+  return windows.find(w => t >= +w.start && t <= +w.end) || null;
+}
+
+// Banner helpers
+function showCheckoutBanner(kind, msg) {
+  const el = document.getElementById('checkout-banner');
+  if (!el) return;
+  el.className = 'checkout-banner ' + (kind === 'closed'
+    ? 'checkout-banner--closed'
+    : 'checkout-banner--fullybooked');
+
+  el.innerHTML = `
+    <button class="x" aria-label="Dismiss" onclick="this.parentElement.style.display='none'">×</button>
+    ${msg}
+  `;
+  el.style.display = 'block';
+}
+function hideCheckoutBanner() {
+  const el = document.getElementById('checkout-banner');
+  if (el) { el.style.display = 'none'; el.textContent = ''; el.className = 'checkout-banner'; }
+}
+
+/* ------------------------------
+   Wire into your existing flow
+---------------------------------*/
+
+// 1) Load blackouts early (don’t block UI)
+loadBlackouts();
+
+// 2) When opening checkout, keep your existing min (+30m) and step=300
+//    Just add an input change listener to live-validate the chosen time.
+const preferredTimeInput = document.getElementById('cust-preferred-time');
+if (preferredTimeInput) {
+  preferredTimeInput.addEventListener('change', () => {
+    hideCheckoutBanner();
+    const raw = preferredTimeInput.value; // 'YYYY-MM-DDTHH:mm'
+    if (!raw) return;
+
+    const chosen = new Date(raw);
+    const isClosed = inAnyWindow(chosen, CLOSED_RANGES);
+    const isFull   = inAnyWindow(chosen, FULLY_BOOKED);
+
+const submitBtn = document.getElementById('checkout-submit');
+
+if (isClosed) {
+  showCheckoutBanner(
+    'closed',
+    isClosed.message || 'We’re closed at the selected time.'
+  );
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+
+    // 🔁 re-enable after short delay
+    setTimeout(() => {
+      submitBtn.disabled = false;
+    }, 2000);
+  }
+
+  return;
+}
+    if (isFull) {
+      showCheckoutBanner('fully_booked', isFull.message || 'We’re fully booked at the selected time.');
+      if (submitBtn) submitBtn.disabled = true;
+      return;
+    }
+    if (submitBtn) submitBtn.disabled = false;
+  });
+}
+
+// 3) Guard your submit handler (fail fast if invalid)
+//    In your existing `checkoutForm.addEventListener('submit', async (e) => { ... })`,
+//    add these lines near the top, right after you read `preferredTimeRaw`:
+
+/*
+  // inside your submit handler, after:
+  // const preferredTimeRaw = document.getElementById('cust-preferred-time').value;
+  hideCheckoutBanner();
+  const chosenDt = preferredTimeRaw ? new Date(preferredTimeRaw) : null;
+  const isClosedNow = chosenDt && inAnyWindow(chosenDt, CLOSED_RANGES);
+  const isFullNow   = chosenDt && inAnyWindow(chosenDt, FULLY_BOOKED);
+
+  if (isClosedNow) {
+    showCheckoutBanner('closed', isClosedNow.message || 'We’re closed at the selected time.');
+    return; // stop submit
+  }
+  if (isFullNow) {
+    showCheckoutBanner('fully_booked', isFullNow.message || 'We’re fully booked at the selected time.');
+    return; // stop submit
+  }
+*/
+
+
+
+    // Checkout modal helpers
+    const checkoutModal = document.getElementById('checkout-modal');
+    const checkoutClose = document.getElementById('checkout-close');
+    const checkoutCancel = document.getElementById('checkout-cancel');
+    const checkoutForm = document.getElementById('checkout-form');
+    const checkoutMsg = document.getElementById('checkout-msg');
+    const checkoutSubtotalEl = document.getElementById('checkout-subtotal');
+    const checkoutDeliveryEl = document.getElementById('checkout-delivery');
+    const checkoutTotalEl = document.getElementById('checkout-total');
+    const deliveryNote = document.getElementById('delivery-note');
+    const orderMsg = document.getElementById('order-msg');
+    const openCheckoutBtn = document.getElementById('open-checkout');
+
+	const orderTypeRadios = document.querySelectorAll('input[name="order-type"]');
+    let checkoutBaseSubtotal = 0;
+
+    function calcDeliveryFee(subtotal, orderType){
+      if(orderType !== 'delivery') return 0;
+      return subtotal < 20 ? 3 : 0;
+    }
+    function recomputeCheckoutTotals(){
+      const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+      const fee = calcDeliveryFee(checkoutBaseSubtotal, orderType);
+      const total = checkoutBaseSubtotal + fee;
+      deliveryNote.style.display = (orderType === 'delivery') ? 'block' : 'none';
+      checkoutSubtotalEl.textContent = formatCurrency(checkoutBaseSubtotal);
+      checkoutDeliveryEl.textContent = formatCurrency(fee);
+      checkoutTotalEl.textContent = formatCurrency(total);
+    }
+    orderTypeRadios.forEach(r => r.addEventListener('change', recomputeCheckoutTotals));
+	
+	// ---- Address required only for delivery ----
+	function updateAddressRequirement() {
+	  const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+	  const addr = document.getElementById('cust-address');
+	  const hint = document.getElementById('addr-required-hint');
+
+	  const isDelivery = (orderType === 'delivery');
+
+	  if (addr) {
+		// Toggle HTML5 required attribute
+		addr.required = isDelivery;
+
+		// Optional: visual cue
+		if (hint) hint.style.opacity = isDelivery ? '1' : '0.6';
+
+		// Optional: show/hide the whole field for collection
+		// (comment out if you prefer to always show it)
+		// addr.closest('.field').style.display = isDelivery ? '' : '';
+	  }
+	}
+
+	// run when radios change
+	orderTypeRadios.forEach(r => r.addEventListener('change', () => {
+	  recomputeCheckoutTotals();        // you already have this
+	  updateAddressRequirement();       // add this
+	}));
+	
+		
+// ====== CONFIG YOU CAN EDIT ======
+const OPEN_DAYS = [0,3,4,5,6]; // Sun=0, Mon=1, Tue=2, Wed=3, Thu=4, Fri=5, Sat=6  (open Wed–Sun)
+const OPEN_WINDOW = { start: "17:00", end: "21:00" }; // local time, 24h
+
+// Specific closed dates (all day)
+const CLOSED_DATES = [
+ "2025-12-25", "2025-12-26"
+];
+
+// Closed ranges (start/end local)
+//const CLOSED_RANGES = [
+  // { start:"2025-11-08T00:00", end:"2025-11-11T23:59" }
+//];
+
+// Fully booked windows by date: { "YYYY-MM-DD": [ ["HH:MM","HH:MM"], ... ] }
+//const FULLY_BOOKED = {
+  // "2025-11-05": [["17:00","18:30"], ["20:00","21:00"]]
+//};
+
+// ====== HELPERS ======
+function toYMD(d){
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function parseHm(dateRef, hm){ // "HH:MM" -> Date on same Y/M/D
+  const [h,m] = hm.split(':').map(Number);
+  const d = new Date(dateRef);
+  d.setHours(h, m, 0, 0);
+  return d;
+}
+function isBetween(d, start, end){ return d >= start && d <= end; }
+function roundTo5Min(d){
+  const ms = 5 * 60 * 1000;
+  return new Date(Math.ceil(d.getTime() / ms) * ms);
+}
+function withinOpenHours(d){
+  // day
+  if (!OPEN_DAYS.includes(d.getDay())) return false;
+  // time
+  const start = parseHm(d, OPEN_WINDOW.start);
+  const end   = parseHm(d, OPEN_WINDOW.end);
+  return d >= start && d <= end;
+}
+function isClosedDate(d){
+  const ymd = toYMD(d);
+  if (CLOSED_DATES.includes(ymd)) return true;
+  for (const r of CLOSED_RANGES){
+    const rs = new Date(r.start);
+    const re = new Date(r.end);
+    if (isBetween(d, rs, re)) return true;
+  }
+  return false;
+}
+function isFullyBooked(d){
+  const ymd = toYMD(d);
+  const slots = FULLY_BOOKED[ymd];
+  if (!slots) return false;
+  return slots.some(([a,b]) => {
+    const s = parseHm(d, a);
+    const e = parseHm(d, b);
+    return isBetween(d, s, e);
+  });
+}
+function isAllowed(dt){
+  return withinOpenHours(dt) && !isClosedDate(dt) && !isFullyBooked(dt);
+}
+function nextAllowed(from){
+  // walk forward in 5-minute steps until we find an allowed slot (cap at +30 days)
+  const cap = new Date(from); cap.setDate(cap.getDate() + 30);
+  let t = new Date(from);
+  t = roundTo5Min(t);
+  while (t <= cap){
+    if (isAllowed(t)) return t;
+    t = new Date(t.getTime() + 5*60*1000);
+  }
+  return null;
+}
+
+// ---- Preferred time helpers ----
+
+// How many minutes from "now" before the earliest slot is allowed
+const LEAD_MINUTES = 10;
+
+/** Convert a Date to the value format of datetime-local input */
+function toLocalInputValue(d) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
+         `T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/**
+ * Starting from now + LEAD_MINUTES, find the next allowed slot
+ * using your existing nextAllowed/isAllowed logic.
+ */
+function findNextAllowedFromNow() {
+  const start = new Date();
+  start.setMinutes(start.getMinutes() + LEAD_MINUTES);
+  return nextAllowed(start);  // may return null if nothing within +30 days
+}
+
+
+// Single, clean checkout opener
+function openCheckout(subtotal) {
+  // 1. Basic totals housekeeping
+  checkoutBaseSubtotal = Math.round(subtotal * 100) / 100;
+  checkoutMsg.textContent = '';
+  checkoutMsg.style.color = '';
+  document.querySelector('input[name="order-type"][value="collection"]').checked = true;
+  recomputeCheckoutTotals();
+
+  // 2. Preferred time input setup
+  const t = document.getElementById('cust-preferred-time');
+  if (t) {
+    // enforce 5-minute steps
+    t.step = 300;
+
+    // 👉 Find the first allowed slot starting from now + LEAD_MINUTES
+    const firstAllowed = findNextAllowedFromNow();
+
+    if (!firstAllowed) {
+      // Nothing available in +30 days – very unlikely, but handle gracefully
+      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.textContent = 'No available time slots found. Please choose a different date.';
+      t.value = '';
+      t.min = '';
+    } else {
+      const val = toLocalInputValue(firstAllowed);
+      t.min = val;
+      t.value = val;
+    }
+
+    // Live validation + snapping on change
+    const onChoose = () => {
+      if (!t.value) return;
+      const chosen = new Date(t.value);
+      const rounded = roundTo5Min(chosen);
+
+      if (!isAllowed(rounded)) {
+        const next = nextAllowed(rounded);
+        if (next) {
+          const nv = toLocalInputValue(next);
+          t.value = nv;
+          t.min = nv;
+          checkoutMsg.style.color = '#b02a2a';
+          checkoutMsg.textContent =
+            'That time is unavailable; we’ve moved you to the next available slot.';
+        } else {
+          checkoutMsg.style.color = '#b02a2a';
+          checkoutMsg.textContent =
+            'No available time slots found. Please choose a different day.';
+        }
+      } else {
+        // valid slot picked
+        checkoutMsg.textContent = '';
+        checkoutMsg.style.color = '';
+      }
+    };
+
+    // Avoid double binding if openCheckout runs multiple times
+    t.removeEventListener('change', onChoose);
+    t.removeEventListener('input', onChoose);
+    t.addEventListener('change', onChoose);
+    t.addEventListener('input', onChoose);
+  }
+
+  // 3. Show the modal
+  checkoutModal.style.display = 'flex';
+}
+
+// Ensure other code can call it
+window.openCheckout = openCheckout;
+
+
+function closeCheckout(){
+  if (checkoutModal) checkoutModal.style.display = 'none';
+}
+
+// safe listeners
+if (checkoutClose) {
+  checkoutClose.addEventListener('click', closeCheckout);
+}
+if (checkoutCancel) {
+  checkoutCancel.addEventListener('click', closeCheckout);
+}
+if (checkoutModal) {
+  checkoutModal.addEventListener('click', (e) => {
+    if (e.target === checkoutModal) closeCheckout();
+  });
+}
+
+// Open checkout (safe)
+if (openCheckoutBtn) {
+  openCheckoutBtn.addEventListener('click', () => {
+    if (!window.basket || window.basket.length === 0) {
+      if (orderMsg) {
+        orderMsg.textContent = 'Your basket is empty.';
+        orderMsg.style.color = '#b02a2a';
+      }
+      return;
+    }
+    if (orderMsg) {
+      orderMsg.textContent = '';
+      orderMsg.style.color = '';
+    }
+    const subtotal = window.basket.reduce((s, i) => s + i.unitPrice * i.qty, 0);
+    openCheckout(subtotal);
+  });
+}
+
+	
+		// ---------- Helpers to call Supabase RPC & REST ----------
+    async function getNextOrderRef() {
+  if (!window.sb) {
+    throw new Error("Supabase client not initialised");
+  }
+
+  const { data, error } = await window.sb.rpc('get_next_order_number');
+
+  if (error) {
+    console.error('get_next_order_number failed', error);
+    throw error;
+  }
+
+  const assigned =
+    Array.isArray(data)
+      ? data[0]?.assigned
+      : (data?.assigned ?? data);
+
+  const num = Number(assigned || 0);
+  return 'RTK-' + String(num).padStart(3, '0');
+}
+
+	
+		// --- Success popup renderer (with Download PDF) ---
+		window.__lastOrderForPdf = null;
+		
+		// helper: strip any 🌶️ from item names so we only show user's chosen level
+		function stripChillies(str) {
+		  return (str || '').replace(/🌶️+/g, '').replace(/\s{2,}/g, ' ').trim();
+		}
+
+
+		window.showOrderSuccessNew = function (summary, items, preferredTimeStr) {
+		  const wrap     = document.getElementById('order-success');
+		  const titleEl  = document.getElementById('order-success-title');
+		  const msgEl    = document.getElementById('order-success-msg');
+		  const listEl   = document.getElementById('order-success-items');
+		  const totalEl  = document.getElementById('order-success-total');
+
+		  if (!wrap) {
+			alert(`Order placed! ${summary?.ref || ''}`);
+			return;
+		  }
+
+		  // header
+		  if (titleEl) {
+			titleEl.textContent = `Order confirmed — ${summary.ref}`;
+		  }
+
+		  // note
+		  if (msgEl) {
+			const suffix = summary.orderType === 'delivery' ? 'delivery' : 'collection';
+			const note = preferredTimeStr
+			  ? `Thanks! We’ll contact you to confirm your ${suffix} time (${preferredTimeStr}).`
+			  : `Thanks! We’ll contact you to confirm your ${suffix} time.`;
+			msgEl.textContent = note;
+		  }
+
+		  // items
+		  if (listEl) {
+			listEl.innerHTML = items.map((row) => {
+	  const cleanName = stripChillies(row.name);
+	  const hasMods  = row.mods && row.mods.length;
+	  const hasSpice = typeof row.spice === 'number';
+	  const spiceStr = hasSpice ? ' ' + '🌶️'.repeat(Math.max(0, Math.min(3, row.spice))) : '';
+	  return `
+		<div style="padding:6px 0;border-bottom:1px dashed #eee">
+		  ${row.qty} × ${cleanName}
+		  ${hasMods ? `<span class="muted small"> • ${row.mods.map(m => m.name).join(', ')}</span>` : ''}
+		  ${spiceStr}
+		  <div class="muted small">Line: ${window.formatCurrency(row.qty * row.unitPrice)}</div>
+		</div>
+	  `;
+	}).join('');
+
+		  }
+
+		  // total
+		  if (totalEl) {
+			totalEl.textContent = window.formatCurrency(summary.total);
+		  }
+		  
+		    // hook up the "Download receipt" button
+  const dlBtn = document.getElementById('order-success-download');
+  if (dlBtn) {
+    dlBtn.onclick = () => {
+      // make it loud so we see it even if console is filtered
+      console.error('[Receipt] download clicked', items);
+      if (typeof window.downloadReceipt === 'function') {
+        window.downloadReceiptPlain(summary, items, preferredTimeStr);
+      }
+    };
+  }
+
+
+		  // ✅ store for PDF generation
+		  window.__lastOrderForPdf = { summary, items, preferredTimeStr };
+
+		  wrap.style.display = 'flex';
+		};
+
+			async function getOrCreateCustomer({ name, email, phone, address }) {
+		  const sb = window.sb;
+		  if (!sb) throw new Error('Supabase client not initialised');
+
+		  const normEmail = email ? email.trim().toLowerCase() : null;
+		  const normPhone = phone ? phone.trim() : null;
+
+		  // 1) Try find by email
+		  if (normEmail) {
+			const { data: byEmail, error: e1 } = await sb
+			  .from('customers')
+			  .select('id, phone, email')
+			  .eq('email', normEmail)
+			  .maybeSingle();
+			if (e1) throw e1;
+
+			if (byEmail?.id) {
+			  // Update existing
+			  const updatePayload = { full_name: name, address: address || null };
+			  if (!byEmail.phone && normPhone) updatePayload.phone = normPhone;
+
+			  const { data: updated, error: e2 } = await sb
+				.from('customers')
+				.update(updatePayload)
+				.eq('id', byEmail.id)
+				.select('id')
+				.single();
+			  if (e2) throw e2;
+
+			  return updated;
+			}
+		  }
+
+		  // 2) Try find by phone
+		  if (normPhone) {
+			const { data: byPhone, error: p1 } = await sb
+			  .from('customers')
+			  .select('id, phone, email')
+			  .eq('phone', normPhone)
+			  .maybeSingle();
+			if (p1) throw p1;
+
+			if (byPhone?.id) {
+			  // Update existing
+			  const updatePayload = { full_name: name, address: address || null };
+			  if (!byPhone.email && normEmail) updatePayload.email = normEmail;
+
+			  const { data: updated, error: p2 } = await sb
+				.from('customers')
+				.update(updatePayload)
+				.eq('id', byPhone.id)
+				.select('id')
+				.single();
+			  if (p2) throw p2;
+
+			  return updated;
+			}
+		  }
+
+		  // 3) Insert new (handle unique collisions gracefully)
+		  const insertPayload = {
+			full_name: name,
+			email: normEmail,
+			phone: normPhone,
+			address: address || null
+		  };
+
+		  // First attempt: insert with whatever we have
+		  let { data: inserted, error: insErr } = await sb
+			.from('customers')
+			.insert([insertPayload])
+			.select('id')
+			.single();
+
+		  if (!insErr) return inserted;
+
+		  // If we hit a unique violation, re-fetch whichever key collided and return that row
+		  if (insErr.code === '23505') {
+			if (normEmail) {
+			  const { data: existing, error: e3 } = await sb
+				.from('customers')
+				.select('id')
+				.eq('email', normEmail)
+				.maybeSingle();
+			  if (e3) throw e3;
+			  if (existing?.id) return existing;
+			}
+
+			if (normPhone) {
+			  const { data: existing, error: p3 } = await sb
+				.from('customers')
+				.select('id')
+				.eq('phone', normPhone)
+				.maybeSingle();
+			  if (p3) throw p3;
+			  if (existing?.id) return existing;
+			}
+		  }
+
+		  // Otherwise, throw the real error
+		  throw insErr;
+		}
+
+
+		// Prevent accidental double submit in the same session
+		let isSubmittingOrder = false;
+
+		// One key per checkout attempt; reused on retries; cleared on success
+		function getIdempotencyKey() {
+		  const existing = localStorage.getItem("checkout_idempotency_key");
+		  if (existing) return existing;
+
+		  const key = crypto.randomUUID();
+		  localStorage.setItem("checkout_idempotency_key", key);
+		  return key;
+		}
+
+
+   // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
+checkoutForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+    if (isSubmittingOrder) return;
+  isSubmittingOrder = true;
+
+  const submitBtn = checkoutForm.querySelector('button[type="submit"], input[type="submit"]');
+  if (submitBtn) submitBtn.disabled = true;
+
+  checkoutMsg.style.color = '';
+  checkoutMsg.textContent = 'Placing order…';
+
+  try {
+    const name      = document.getElementById('cust-name').value.trim();
+    const email     = document.getElementById('cust-email').value.trim();
+    const phone     = document.getElementById('cust-phone').value.trim();
+    const address   = document.getElementById('cust-address').value.trim();
+    const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+    const notes     = document.getElementById('cust-notes').value.trim() || null;
+
+    // ASAP checkbox
+    const asapCheckbox   = document.getElementById('cust-asap');
+    const asapRequested  = !!(asapCheckbox && asapCheckbox.checked);
+
+    // Preferred time input
+    const preferredInput   = document.getElementById('cust-preferred-time');
+    const preferredTimeRaw = preferredInput ? preferredInput.value : "";
+    const selectedLocal    = preferredTimeRaw ? new Date(preferredTimeRaw) : null;
+
+    // Only store a preferred_time in DB if NOT ASAP
+    const preferredTimeISO =
+      (!asapRequested && selectedLocal) ? selectedLocal.toISOString() : null;
+
+    // Communication preference (sms / email)
+    const commPrefInput = document.querySelector(
+      'input[name="communication_preference"]:checked'
+    );
+    const communicationPreference = commPrefInput
+      ? commPrefInput.value
+      : 'email';
+
+    // ---------- Basic validation ----------
+    if (!name){
+      checkoutMsg.style.color='#b02a2a';
+      checkoutMsg.textContent='Please enter your full name.';
+      return;
+    }
+    if (!email){
+      checkoutMsg.style.color='#b02a2a';
+      checkoutMsg.textContent='Please enter your email.';
+      return;
+    }
+    if (!phone){
+      checkoutMsg.style.color='#b02a2a';
+      checkoutMsg.textContent='Please enter your phone number.';
+      return;
+    }
+    if (orderType === 'delivery' && !address){
+      checkoutMsg.style.color='#b02a2a';
+      checkoutMsg.textContent='Please enter your delivery address.';
+      document.getElementById('cust-address').focus();
+      return;
+    }
+
+    // Only enforce time if NOT ASAP
+    if (!asapRequested) {
+      if (!selectedLocal || !isAllowed(roundTo5Min(selectedLocal))) {
+        checkoutMsg.style.color = '#b02a2a';
+        checkoutMsg.textContent =
+          'Please choose an available date/time during our opening hours.';
+        return;
+      }
+    }
+
+    // ---------- Basket + totals ----------
+    const itemsSnapshot = basket.map(i => ({ ...i }));
+    const subtotal = itemsSnapshot.reduce((s,i)=> s + i.unitPrice * i.qty, 0);
+    const deliveryFee =
+      (orderType === 'delivery' && subtotal < 20) ? 3.00 : 0.00;
+
+    function fail(step, err){
+      console.error(`[Checkout] ${step} failed:`, err);
+      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.textContent =
+        `${step} failed: ${err?.message || err?.hint || 'Unknown error'}`;
+    }
+
+    // ---------- Get or create customer ----------
+    let customerId = null;
+    try {
+      const row = await getOrCreateCustomer({
+        name,
+        email: email?.trim().toLowerCase() || null,
+        phone: phone?.trim() || null,
+        address
+      });
+      customerId = row?.id;
+    } catch (err) {
+      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.textContent =
+        'Saving your details had a hiccup — trying again…';
+      const row = await getOrCreateCustomer({
+        name,
+        email: email?.trim().toLowerCase() || null,
+        phone: phone?.trim() || null,
+        address
+      });
+      customerId = row?.id;
+    }
+    if (!customerId) {
+      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.textContent = 'Sorry — we could not save your details.';
+      return;
+    }
+
+    // ---------- Global sequential order ref ----------
+    let orderRef = 'RTK-???';
+    try {
+      orderRef = await getNextOrderRef();
+    } catch (err) {
+      console.warn('Falling back to timestamp-based ref');
+      orderRef = 'RTK-' + Date.now();
+    }
+
+    // ---------- Payment preference ----------
+    const paymentPreferenceInput = document.querySelector(
+      'input[name="paymentPreference"]:checked'
+    );
+    const payment_preference = paymentPreferenceInput
+      ? paymentPreferenceInput.value
+      : 'on_arrival';
+
+		// ---------- Create order ----------
+
+		// ✅ NEW: generate a fresh idempotency key for THIS submit
+		const idempotencyKey = crypto.randomUUID();
+
+		const baseOrderPayload = {
+		  customer_id: customerId,
+		  subtotal: Number(subtotal.toFixed(2)),
+		  delivery_fee: Number(deliveryFee.toFixed(2)),
+		  order_type: orderType,
+		  notes,
+		  order_ref: orderRef,
+		  payment_preference,
+		  preferred_time: preferredTimeISO,
+		  asap_requested: asapRequested,
+		  communication_preference: communicationPreference,
+
+		  // ✅ CHANGED LINE (see step 2)
+		  idempotency_key: idempotencyKey,
+		};
+
+
+		const { data: orderRow, error: orderUpsertErr } = await sb
+		  .from('orders')
+		  .upsert(baseOrderPayload, { onConflict: 'idempotency_key' })
+		  .select('id')
+		  .single();
+
+		if (orderUpsertErr) return fail('Create order', orderUpsertErr);
+
+		const orderId = orderRow.id;
+
+
+
+			// 4) Items (with safety check)
+			const rows = itemsSnapshot.map(line => {
+			  const item_id = line.itemId; // ✅ basket uses itemId
+
+			  if (!item_id) {
+				console.error('[ORDER_ITEMS] Missing itemId on line:', line);
+				throw new Error('Basket item missing itemId (cannot save order items).');
+			  }
+
+			  return {
+				order_id: orderId,
+				item_id,
+				name: line.name,
+				unit_price: Number(line.unitPrice.toFixed(2)),
+				qty: line.qty,
+				modifiers: (line.mods ?? []).map(m => ({ id: m.id, name: m.name, delta: m.delta })),
+				spice: (typeof line.spice === 'number') ? line.spice : null,
+				img: line.img || null
+			  };
+			});
+
+			const { error: itemsErr } = await window.sb.from('order_items').insert(rows);
+			if (itemsErr) return fail('Add order items', itemsErr);
+
+
+    // (optional) confirmation hook — non-blocking
+    try {
+      await fetch('https://order-backend-production.up.railway.app/send-order-confirmation', {
+		  method: 'POST',
+		  // IMPORTANT: use text/plain to avoid CORS preflight
+		  headers: { 'Content-Type': 'text/plain' },
+		  body: JSON.stringify({
+			order_id: orderId,
+			order_ref: orderRef,
+			name,
+			email,
+			phone,
+			order_type: orderType,
+			preferred_time: preferredTimeRaw,
+			total: subtotal + deliveryFee,
+			communication_preference: communicationPreference,
+			asap_requested: asapRequested 
+		  })
+		});
+
+    } catch (err) {
+      console.warn('[Order] Confirmation hook failed (non-blocking)', err);
+    }
+
+    // --- SUCCESS UI ---
+    checkoutMsg.textContent = '';
+    checkoutModal.style.display = 'none';
+
+    // clear basket + re-render
+    basket.length = 0;
+    renderOrder();
+
+    // pretty time string
+    const prefPretty = preferredTimeRaw
+      ? new Date(preferredTimeRaw).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })
+      : null;
+
+    // ensure ref is a string like RTK-012
+    const refText = (orderRef && typeof orderRef === 'object')
+      ? ('RTK-' + String(Number(orderRef.assigned ?? orderRef.id ?? orderRef.value ?? 0)).padStart(3,'0'))
+      : String(orderRef);
+
+    // numeric total
+    const grandTotal = (Number(subtotal) || 0) + (Number(deliveryFee) || 0);
+
+    showOrderSuccess(refText, itemsSnapshot, grandTotal, orderType, prefPretty);
+
+  } catch (err) {
+    fail('Unexpected error', err);
+  } finally {
+    isSubmittingOrder = false;
+    if (submitBtn) submitBtn.disabled = false;
+  }
+});
+
+  </script>
+  
+<script>
+  // … your Supabase / checkout code …
+
+  // ⬇️ put this somewhere after you've defined window.formatCurrency,
+  // and before the closing </script> 
+</script>
+
+  <!-- Lightbox backdrop -->
+  <div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;z-index:1500">
+    <img id="lightbox-img" style="max-width:92%;max-height:92%;border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,0.6)" alt="">
+  </div>
+  <!-- jsPDF (client-side PDF generator) -->
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<!-- receipt helper (put this just before </body>) -->
+<script>
+(function () {
+  // safety: currency helper
+  if (typeof window.formatCurrency !== 'function') {
+    window.formatCurrency = function (n) {
+      return '£' + Number(n || 0).toFixed(2);
+    };
+  }
+
+// ✅ final, ASCII-safe, UTF-8 receipt
+	window.downloadReceipt = function downloadReceipt(summary, items, preferredTimeStr) {
+	  const pound = '\u00A3'; // £
+	  const bullet = '\u2022'; // •
+	  const colon = '\u003A'; // :
+
+	  const noChilli = (s = '') =>
+		s.replace(/🌶️/g, '').replace(/🌶/g, '').replace(/\s{2,}/g, ' ').trim();
+
+	  const lines = [];
+	  lines.push("Rung's Thai Kitchen");
+	  lines.push('----------------------------------------');
+	  lines.push(`Order ref: ${summary?.ref || 'RTK-???'}`);
+	  lines.push(`Total: ${pound}${(summary?.total || 0).toFixed(2)}`);
+	  lines.push(`Type: ${summary?.orderType || ''}`);
+	  if (preferredTimeStr) lines.push(`Preferred time: ${preferredTimeStr}`);
+	  lines.push('');
+	  lines.push('Items');
+
+	  (items || []).forEach((row) => {
+		const cleanName = noChilli(row.name || '');
+		const qty = row.qty || 1;
+		const lineTotal = (row.unitPrice || 0) * qty;
+		lines.push(`${qty} × ${cleanName} ${pound}${lineTotal.toFixed(2)}`);
+
+		const extras = [];
+		if (Array.isArray(row.mods) && row.mods.length) {
+		  extras.push(row.mods.map(m => m.name).join(', '));
+		}
+		if (typeof row.spice === 'number') {
+		  const spiceText =
+			row.spice === 0 ? 'None' :
+			row.spice === 1 ? 'Mild' :
+			row.spice === 2 ? 'Medium' : 'Hot';
+		  extras.push(`Spice: ${spiceText}`);
+		}
+		if (extras.length) lines.push(`• ${extras.join(' • ')}`);
+	  });
+
+	  lines.push('');
+	  lines.push('Thank you for ordering with Rung\'s Thai Kitchen!');
+
+	  // make .txt UTF-8
+	  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+	  const url = URL.createObjectURL(blob);
+	  const a = document.createElement('a');
+	  a.href = url;
+	  a.download = (summary?.ref || 'receipt') + '.txt';
+	  document.body.appendChild(a);
+	  a.click();
+	  document.body.removeChild(a);
+	  URL.revokeObjectURL(url);
+	};
+
+
+  // 3) wire the button on the success popup (if present)
+  const btn = document.getElementById('order-success-download');
+  if (btn) {
+    btn.addEventListener('click', function () {
+      if (!window._lastOrderSummary) {
+        alert('No order to download yet.');
+        return;
+      }
+      window.downloadReceipt(
+        window._lastOrderSummary,
+        window._lastOrderItems,
+        window._lastOrderPreferredTime
+      );
+    });
+  }
+})();
+</script>
+<script>
+// final, plain-text, no-chilli, Windows-friendly version
+window.downloadReceiptPlain = function (summary, items, preferredTimeStr) {
+  // helper: strip chilli emojis
+  const stripSpice = (s = '') =>
+    s.replace(/🌶️/g, '')
+     .replace(/🌶/g, '')
+     .replace(/\s{2,}/g, ' ')
+     .trim();
+
+  const lines = [];
+  lines.push("Rung's Thai Kitchen");
+  lines.push('----------------------------------------');
+  lines.push(`Order ref: ${summary?.ref || 'RTK-???'}`);
+
+  const totalNum = Number(summary?.total || 0);
+  const totalText = (typeof window.formatCurrency === 'function')
+    ? window.formatCurrency(totalNum)
+    : '£' + totalNum.toFixed(2);
+  lines.push(`Total: ${totalText}`);
+
+  if (summary?.orderType) {
+    lines.push(`Type: ${summary.orderType}`);
+  }
+  if (preferredTimeStr) {
+    lines.push(`Preferred time: ${preferredTimeStr}`);
+  }
+
+  lines.push('');
+  lines.push('Items');
+
+  (items || []).forEach(row => {
+    const name = stripSpice(row.name || '');
+    const qty  = row.qty || 1;
+    const lineTotal = Number(qty) * Number(row.unitPrice || 0);
+    const linePrice = (typeof window.formatCurrency === 'function')
+      ? window.formatCurrency(lineTotal)
+      : '£' + lineTotal.toFixed(2);
+
+    // main line
+    lines.push(`${qty} × ${name} ${linePrice}`);
+
+    // extras line
+    const extras = [];
+    if (Array.isArray(row.mods) && row.mods.length) {
+      extras.push(row.mods.map(m => m.name).join(', '));
+    }
+    if (typeof row.spice === 'number') {
+      const spiceText =
+        row.spice === 0 ? 'None' :
+        row.spice === 1 ? 'Mild' :
+        row.spice === 2 ? 'Medium' : 'Hot';
+      extras.push(`Spice: ${spiceText}`);
+    }
+    if (extras.length) {
+      lines.push('• ' + extras.join(' • '));
+    }
+  });
+
+  lines.push('');
+  lines.push('Thank you!');
+
+  // 👇 add a BOM so Windows/Notepad knows it's UTF-8
+  const BOM = '\uFEFF';
+  const blob = new Blob([BOM + lines.join('\n')], {
+    type: 'text/plain;charset=utf-8'
+  });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (summary?.ref || 'receipt') + '.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+</script>
+
+<script>
+(function setupReceiptDownload() {
+  const btn = document.getElementById('order-success-pdf');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    const payload = window.__lastOrderForPdf;
+    if (!payload) {
+      alert('No order data to export yet.');
+      return;
+    }
+
+    const { summary, items, preferredTimeStr } = payload;
+
+    // this should already be defined in your Supabase / checkout script
+    if (typeof window.downloadReceipt === 'function') {
+      window.downloadReceipt(summary, items, preferredTimeStr);
+    } else {
+      alert('Order: ' + (summary?.ref || 'RTK-???'));
+    }
+  });
+})();
+</script>
+<script>
+(function () {
+  function refreshTickerOffset() {
+    const bar = document.getElementById('status-ticker');
+    const visible = bar && !bar.classList.contains('hidden');
+    const h = (visible ? Math.ceil(bar.getBoundingClientRect().height) : 0);
+    document.documentElement.style.setProperty('--ticker-offset', (h + 12) + 'px');
+  }
+
+  // Make the marquee seamless by duplicating the text once
+  function initTickerMarquee() {
+    const bar = document.getElementById('status-ticker');
+    if (!bar) return;
+    const text = document.getElementById('ticker-text');
+    const dup  = bar.querySelector('.ticker-dup');
+    if (!text || !dup) return;
+
+    dup.textContent = text.textContent;
+
+    // Optionally tweak speed based on length (longer message = slower)
+    const len = text.textContent.length;
+    const base = Math.min(Math.max(len / 3, 24), 60); // 24–60s
+    document.documentElement.style.setProperty('--ticker-speed', base + 's');
+    document.documentElement.style.setProperty('--ticker-speed-mobile', (base + 8) + 's');
+  }
+
+  // Expose so your status loader can call after setting the message
+  window.showTicker = function showTicker(message) {
+    const bar = document.getElementById('status-ticker');
+    const text = document.getElementById('ticker-text');
+    if (!bar || !text) return;
+    text.textContent = message;
+    bar.classList.remove('hidden');
+    initTickerMarquee();
+    refreshTickerOffset();
+  };
+
+  window.hideTicker = function hideTicker() {
+    const bar = document.getElementById('status-ticker');
+    if (!bar) return;
+    bar.classList.add('hidden');
+    refreshTickerOffset();
+  };
+
+  window.addEventListener('load',  refreshTickerOffset, { passive: true });
+  window.addEventListener('resize', refreshTickerOffset, { passive: true });
+})();
+</script>
+
+
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+<!-- other small scripts -->
+<!-- Back to Top Button -->
+<button id="backToTop" title="Go to top">↑</button>
+<script>
+(function removeTickerGhost(){
+  const t = document.getElementById('status-ticker');
+  if (!t) return;
+  const next = t.nextElementSibling;
+  if (!next) return;
+  const txt = (next.textContent || '').replace(/\u00A0/g,' ').trim();
+  if (txt === '...' || txt === '') {
+    next.remove();
+  }
+})();
+
+// --- Back to Top Button Logic ---
+const backToTopBtn = document.getElementById('backToTop');
+
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 400) { // show after scrolling down a bit
+    backToTopBtn.classList.add('show');
+  } else {
+    backToTopBtn.classList.remove('show');
+  }
+});
+
+backToTopBtn.addEventListener('click', () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+});
+
+</script>
+<script>
+// --- Lightbox safe listener ---
+const lightboxEl = document.getElementById('lightbox');
+if (lightboxEl) {
+  lightboxEl.addEventListener('click', (e) => {
+    if (e.target.id === 'lightbox' || e.target.id === 'lightbox-img') {
+      e.currentTarget.style.display = 'none';
+    }
+  });
+}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  // Coordinates for your address
+  var lat = 53.744437;
+  var lng = -1.576570;
+
+  // Create the map with closer zoom
+  var map = L.map('delivery-map').setView([lat, lng], 15);
+
+  // 🌙 Night-mode / dark map tiles
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+  }).addTo(map);
+
+  // 🌶️ Custom branded marker using a DivIcon
+  var brandIcon = L.divIcon({
+    className: 'brand-marker',
+    html: '<div class="brand-marker-inner"></div>',
+    iconSize: [26, 32],   // width, height (includes little "pin")
+    iconAnchor: [13, 32], // bottom center
+    popupAnchor: [0, -30] // popup above marker
+  });
+
+  L.marker([lat, lng], { icon: brandIcon }).addTo(map)
+    .bindPopup("Rung's Thai Kitchen<br>30 Topcliffe Mews<br>Morley, LS27 8UL")
+    .openPopup();
+
+  // 🟠 3-mile delivery radius
+  var radiusMeters = 3 * 1609.34;
+
+  L.circle([lat, lng], {
+    radius: radiusMeters,
+    color: '#ffb347',        // warm accent for dark map
+    fillColor: '#ffb347',
+    fillOpacity: 0.18,
+    weight: 2
+  }).addTo(map);
+});
+</script>
+
+getComputedStyle(document.documentElement).getPropertyValue('--header-offset')
+
+<script>
+console.info('Console levels forced');
+console.log = console.info = console.debug = console.warn = console.error = console.log.bind(console);
+</script>
+
+<script>
+
+// ---- Temporary closure override (edit when needed) ----
+const tempClosure = {
+  active: false, // ✅ set true when temporarily closed
+  title: "Temporarily closed",
+  message: "Unfortunately, due to illness, Rung’s Thai Kitchen will be closed today (14th December). We are very sorry for any inconvenience this may cause.",
+  // Optional reopen time shown to customers (UK local time)
+  reopenText: "We expect to reopen Wednesday at 17:00.",
+  // Behaviour
+  autoHideMs: null, // null = don't auto-hide; e.g. 10000 to auto-hide
+  blockOrdering: true
+};
+
+  // Returns true if we are between:
+  // Sunday 21:00  and  Wednesday 12:00 (midday)
+function shouldShowKitchenNotice(now = new Date()) {
+  // Temporary override always wins
+  if (tempClosure.active) return true;
+
+  const day = now.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed...
+  const hour = now.getHours() + now.getMinutes() / 60;
+
+  if (day === 0 && hour >= 21) return true; // Sun after 21:00
+  if (day === 1 || day === 2) return true;  // Mon, Tue
+  if (day === 3 && hour < 12) return true;  // Wed before 12:00
+
+  return false;
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const overlay = document.getElementById("kitchen-notice-overlay");
+  const closeBtn = document.getElementById("kitchen-notice-close");
+  const titleEl = document.getElementById("kitchen-notice-title");
+  const msgEl = overlay?.querySelector(".kitchen-notice-main");
+
+  if (!overlay) return;
+
+  if (!shouldShowKitchenNotice()) return;
+
+  // If temporary closure is active, override the text
+  if (tempClosure.active) {
+    if (titleEl) titleEl.textContent = tempClosure.title;
+
+    if (msgEl) {
+      const reopenLine = tempClosure.reopenText ? `<br><br><strong>${tempClosure.reopenText}</strong>` : "";
+      msgEl.innerHTML = `${tempClosure.message}${reopenLine}`;
+    }
+
+    // Optional: change button label
+    if (closeBtn) closeBtn.textContent = "Continue to website";
+
+    // Optional: block ordering by hiding/disable checkout UI
+    if (tempClosure.blockOrdering) {
+      const checkoutBtn = document.getElementById("checkoutBtn");
+      if (checkoutBtn) checkoutBtn.disabled = true;
+
+      const checkoutForm = document.getElementById("checkoutForm");
+      if (checkoutForm) checkoutForm.style.display = "none";
+    }
+  }
+
+  // Show overlay
+  overlay.style.display = "";
+  overlay.classList.add("is-visible");
+
+  function hideNotice() {
+    overlay.classList.remove("is-visible");
+    overlay.style.display = "none";
+  }
+
+  if (closeBtn) closeBtn.addEventListener("click", hideNotice);
+
+  // Auto-hide logic:
+  // - Weekly notice: keep your existing 10s auto-hide
+  // - Temporary closure: controlled by tempClosure.autoHideMs (null = stay up)
+  if (tempClosure.active) {
+    if (typeof tempClosure.autoHideMs === "number") {
+      setTimeout(hideNotice, tempClosure.autoHideMs);
+    }
+  } else {
+    setTimeout(hideNotice, 10000);
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('checkout-submit');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    console.log('[DEBUG] checkout submit clicked');
+  });
+});
+
+
+
+</script>
+
+<script>
+(() => {
+  const canvas = document.getElementById('xmasSnow');
+  const btn = document.querySelector('.xmas-snow-toggle');
+  if (!canvas || !btn) return;
+
+  const ctx = canvas.getContext('2d');
+  let w, h, running = true;
+  let flakes = [];
+
+  function resize(){
+    w = canvas.width = window.innerWidth * devicePixelRatio;
+    h = canvas.height = window.innerHeight * devicePixelRatio;
+  }
+  window.addEventListener('resize', resize, {passive:true});
+  resize();
+
+  const count = Math.min(140, Math.floor(window.innerWidth / 8));
+  flakes = Array.from({length: count}, () => makeFlake());
+
+  function makeFlake(){
+    return {
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: (Math.random() * 2.4 + 0.8) * devicePixelRatio,
+      s: (Math.random() * 1.2 + 0.6) * devicePixelRatio, // speed
+      d: (Math.random() * 0.8 + 0.2) * devicePixelRatio  // drift
+    };
+  }
+
+  function tick(){
+    if (!running) return;
+    ctx.clearRect(0,0,w,h);
+    ctx.globalAlpha = 0.85;
+
+    for (const f of flakes){
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+
+      f.y += f.s;
+      f.x += Math.sin(f.y / (60 * devicePixelRatio)) * f.d;
+
+      if (f.y > h + 10) { f.y = -10; f.x = Math.random() * w; }
+      if (f.x > w + 10) f.x = -10;
+      if (f.x < -10) f.x = w + 10;
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+
+  // Respect reduced motion
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    running = false;
+    canvas.style.display = 'none';
+    btn.style.display = 'none';
+  }
+
+  btn.addEventListener('click', () => {
+    running = !running;
+    btn.setAttribute('aria-pressed', String(running));
+    btn.textContent = running ? '❄️ Snow: On' : '❄️ Snow: Off';
+    canvas.style.display = running ? 'block' : 'none';
+    if (running) requestAnimationFrame(tick);
+  });
+})();
+</script>
+
+<script>
+  (function () {
+    const banner = document.getElementById("headerBanner");
+    if (!banner) return;
+
+    const slides = Array.from(banner.querySelectorAll(".banner-slide"));
+    if (slides.length <= 1) return;
+
+    let index = 0;
+    const intervalMs = 6000; // change to 4000-8000 as you like
+
+    function show(i) {
+      slides.forEach((s, n) => s.classList.toggle("is-active", n === i));
+    }
+
+    // Start
+    show(index);
+
+    // Pause rotation if user hovers (desktop)
+    let timer = setInterval(next, intervalMs);
+    function next() {
+      index = (index + 1) % slides.length;
+      show(index);
+    }
+
+    banner.addEventListener("mouseenter", () => clearInterval(timer));
+    banner.addEventListener("mouseleave", () => (timer = setInterval(next, intervalMs)));
+  })();
+</script>
+
+<script>
+  (function () {
+    const openBtn = document.getElementById("openHoursModal");
+    const modal = document.getElementById("hoursModal");
+    const overlay = document.getElementById("hoursModalOverlay");
+    const closeBtn = document.getElementById("closeHoursModal");
+
+    if (!openBtn || !modal || !overlay || !closeBtn) return;
+
+    function openModal(e) {
+      e.preventDefault();
+      modal.classList.add("is-open");
+      overlay.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+      overlay.setAttribute("aria-hidden", "false");
+      closeBtn.focus();
+    }
+
+    function closeModal() {
+      modal.classList.remove("is-open");
+      overlay.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+      overlay.setAttribute("aria-hidden", "true");
+      openBtn.focus();
+    }
+
+    openBtn.addEventListener("click", openModal);
+    closeBtn.addEventListener("click", closeModal);
+    overlay.addEventListener("click", closeModal);
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.classList.contains("is-open")) {
+        closeModal();
+      }
+    });
+  })();
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(() => {
+  // ====== CONFIG ======
+  const SUPABASE_URL = "https://ubyjrrsvbbqomitpaidb.supabase.co";
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVieWpycnN2YmJxb21pdHBhaWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NTYyNjMsImV4cCI6MjA3NjUzMjI2M30.WTllxO5KnaMI0i1d4VHNBhjLuRMfu4_Xx5arqZmYevw';
+
+  // ====== HARD GUARDS ======
+  if (!window.supabase || typeof window.supabase.createClient !== "function") {
+    console.error("[SB] Supabase library not available. window.supabase =", window.supabase);
+    alert("Checkout error: Supabase library didn't load. Please refresh and try again.");
+    return;
+  }
+
+  // ====== MINIMAL HELPERS ======
+  const $ = (id) => document.getElementById(id);
+
+  // Change this if your basket lives somewhere else
+  const getBasket = () => window.basket || [];
+
+  // ====== MINIMAL SUBMIT HANDLER ======
+  const form = $("checkout-form");
+  if (!form) {
+    console.warn("[Checkout] No #checkout-form found on page.");
+    return;
+  }
+  
+  const sb = window.sb;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const msg = $("checkout-msg");
+    const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+    if (msg) { msg.style.color = ""; msg.textContent = "Placing order…"; }
+
+    try {
+      const name  = ($("cust-name")?.value || "").trim();
+      const email = ($("cust-email")?.value || "").trim().toLowerCase();
+      const phone = ($("cust-phone")?.value || "").trim();
+      const address = ($("cust-address")?.value || "").trim();
+
+      const orderType = document.querySelector('input[name="order-type"]:checked')?.value || "collection";
+      const notes = ($("cust-notes")?.value || "").trim() || null;
+
+      // Minimal validation
+      if (!name || !email || !phone) throw new Error("Please enter name, email, and phone.");
+      if (orderType === "delivery" && !address) throw new Error("Please enter a delivery address.");
+
+      const basket = getBasket();
+      if (!basket.length) throw new Error("Your basket is empty.");
+
+      // IMPORTANT: item id field — support both itemId and id
+      const items = basket.map((line) => ({
+        item_id: line.itemId ?? line.id ?? null,
+        name: line.name,
+        unit_price: Number(line.unitPrice || 0),
+        qty: Number(line.qty || 1),
+        modifiers: line.mods || [],
+        spice: (typeof line.spice === "number") ? line.spice : null,
+        img: line.img || null
+      }));
+
+      const bad = items.find((x) => !x.item_id);
+      if (bad) throw new Error(`Internal error: missing item_id for "${bad.name}".`);
+
+      const subtotal = items.reduce((s, x) => s + x.unit_price * x.qty, 0);
+      const deliveryFee = (orderType === "delivery" && subtotal < 20) ? 3 : 0;
+
+      // 1) create customer (minimal insert)
+      const { data: cust, error: custErr } = await window.sb
+        .from("customers")
+        .insert([{ full_name: name, email, phone, address }])
+        .select("id")
+        .single();
+
+      if (custErr) throw custErr;
+
+      // 2) create order
+      const { data: order, error: orderErr } = await window.sb
+        .from("orders")
+        .insert([{
+          customer_id: cust.id,
+          order_type: orderType,
+          notes,
+          subtotal: Number(subtotal.toFixed(2)),
+          delivery_fee: Number(deliveryFee.toFixed(2)),
+          status: "pending"
+        }])
+        .select("id")
+        .single();
+
+      if (orderErr) throw orderErr;
+
+      // 3) create order_items
+      const rows = items.map((x) => ({
+        order_id: order.id,
+        item_id: x.item_id,
+        name: x.name,
+        unit_price: Number(x.unit_price.toFixed(2)),
+        qty: x.qty,
+        modifiers: x.modifiers,
+        spice: x.spice,
+        img: x.img
+      }));
+
+      const { error: itemsErr } = await window.sb.from("order_items").insert(rows);
+      if (itemsErr) throw itemsErr;
+
+      if (msg) { msg.style.color = ""; msg.textContent = "Order placed ✅"; }
+      console.log("[Checkout] Success. order_id =", order.id);
+
+      // Optional: clear basket + close modal if your site uses these
+      if (Array.isArray(window.basket)) window.basket.length = 0;
+      if (typeof window.renderOrder === "function") window.renderOrder();
+      const modal = $("checkout-modal");
+      if (modal) modal.style.display = "none";
+
+    } catch (err) {
+      console.error("[Checkout] Failed:", err);
+      if (msg) { msg.style.color = "#b02a2a"; msg.textContent = err?.message || "Checkout failed"; }
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
+})();
+</script>
+
+
+
 </body>
 </html>
