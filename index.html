@@ -2627,17 +2627,25 @@ body.overlay-open {
 
 		
         <div class="totals">
-          <div class="muted small">Subtotal</div>
-          <div id="checkout-subtotal" style="font-weight:800">£0.00</div>
-        </div>
-        <div class="totals">
-          <div class="muted small">Delivery Fee</div>
-          <div id="checkout-delivery" style="font-weight:800">£0.00</div>
-        </div>
-        <div class="totals">
-          <div class="muted small">Total</div>
-          <div id="checkout-total" style="font-weight:800">£0.00</div>
-        </div>
+  <div class="muted small">Subtotal</div>
+  <div id="checkout-subtotal" style="font-weight:800">£0.00</div>
+</div>
+
+<div class="totals" id="discountRow" style="display:none;">
+  <div class="muted small">10% Wed/Thu discount</div>
+  <div id="discountValue" style="font-weight:800; color:#2e7d32">-£0.00</div>
+</div>
+
+<div class="totals">
+  <div class="muted small">Delivery Fee</div>
+  <div id="checkout-delivery" style="font-weight:800">£0.00</div>
+</div>
+
+<div class="totals">
+  <div class="muted small">Total</div>
+  <div id="checkout-total" style="font-weight:800">£0.00</div>
+</div>
+
 		<!--<div class="checkout-section">
 	  <h3>How would you like to pay?</h3>
 	  <div class="payment-preference-options">
@@ -2908,13 +2916,13 @@ const EXTRAS = [
 		 { id: 'chips', name: 'Chips', desc: 'Deep fried chips. Because sometimes you just need them!', price: 3.00, img: 'images/chips.jpg', allergens: [] },
 		 { id: 'fried-egg', name: 'Fried egg', desc: 'Thai style fried eggs have crispy whites with a soft yolk. But please let us know how you like yours', price: 1.00, img: 'images/egg.jpg', allergens: ['egg'] }
       ]},
-      { id:'drinks',    title:'Soft Drinks', allowExtras:false, items:[
-        { id: 'pepsi-max', name: 'Pepsi Max', price: 1.50, img: 'images/pepsimax1.jpg', allergens: [] },
-        { id: 'pepsi', name: 'Pepsi', price: 1.75, img: 'images/pepsi.jpg', allergens: [] },
+      /*{ id:'drinks',    title:'Soft Drinks', allowExtras:false, items:[
+        { id: 'pepsi-max', name: 'Pepsi Max', price: 1.00, img: 'images/pepsimax1.jpg', allergens: [] },
+        { id: 'pepsi', name: 'Pepsi', price: 1.25, img: 'images/pepsi.jpg', allergens: [] },
         { id: 'sprite-zero', name: 'Sprite Zero',  price: 1.50, img: 'images/spritezero.jpg', allergens: [] },
         { id: 'fanta-orange', name: 'Fanta Orange', price: 1.75, img: 'images/fanta.jpg', allergens: [] },
 		 { id: 'lemonade', name: 'Lemonade', price: 1.75, img: 'images/sprite.jpg', allergens: [] },
-      ]},	  
+      ]},*/	  
     ];
 
     const MODIFIERS = [
@@ -2969,8 +2977,7 @@ window.addEventListener('orientationchange', applyHeaderOffset, { passive:true }
 window.addEventListener('scroll', applyHeaderOffset, { passive:true }); // keep it fresh while you move
 applyHeaderOffset();
 
-
-	
+			
 	
 	// robust smooth scroll that clamps to page bounds (prevents “footer snaps”)
 	function smoothScrollToElTop(el){
@@ -3533,58 +3540,99 @@ function handleExtraClick(opt) {
 	const orderSuccessX     = document.getElementById('order-success-x');
 	const orderSuccessClose = document.getElementById('order-success-close');
 
-	function showOrderSuccess({ ref, subtotal, delivery, total, orderType }, items, preferredTimeStr) {
-	  if (!orderSuccess) {
-		// fallback
-		alert(`Order placed! ${ref}`);
-		return;
-	  }
+	function showOrderSuccessNew(summary, items, preferredTimeStr) {
+  if (!orderSuccess) {
+    alert(`Order placed! ${summary?.ref || ''}`);
+    return;
+  }
+  
+			  // ✅ Store last order data so "Download receipt" works
+			window.__lastOrderReceipt = {
+			  summary: summary || {},
+			  items: items || [],
+			  preferredTimeStr: preferredTimeStr || ''
+			};
 
-	  // 1) header
-	  const titleEl = document.getElementById('order-success-title');
-	  if (titleEl) {
-		// ⬅️ use ref AS-IS, do NOT add "RTK-" again
-		titleEl.textContent = `Order confirmed — ${ref}`;
-	  }
 
-	  // 2) message
-	  const msgEl = document.getElementById('order-success-msg');
-	  if (msgEl) {
-		const suffix = orderType === 'delivery' ? 'delivery' : 'collection';
-		const note = preferredTimeStr
-		  ? `Thanks! We’ll contact you to confirm your ${suffix} time (${preferredTimeStr}).`
-		  : `Thanks! We’ll contact you to confirm your ${suffix}.`;
-		msgEl.textContent = note;
-	  }
+  // Use the same totals logic as checkout (discount + correct delivery rule)
+		const successTotals = window.__lastOrderTotals || window.__checkoutTotals || {};
 
-	  // 3) items
-	  const listEl = document.getElementById('order-success-items');
-	  if (listEl) {
-		listEl.innerHTML = '';
-		items.forEach(row => {
-		  const details = [];
-		  if (row.mods?.length) details.push(row.mods.map(m => m.name).join(', '));
-		  if (typeof row.spice === 'number') details.push('🌶️'.repeat(row.spice));
 
-		  const div = document.createElement('div');
-		  div.style.padding = '6px 0';
-		  div.style.borderBottom = '1px dashed #eee';
-		  div.innerHTML = `
-			${row.qty} × ${row.name}
-			${details.length ? ` <span class="muted small">• ${details.join(' • ')}</span>` : ''}
-		  `;
-		  listEl.appendChild(div);
-		});
-	  }
+  // 1) header
+  const titleEl = document.getElementById('order-success-title');
+  if (titleEl) {
+    titleEl.textContent = `Order confirmed — ${summary?.ref || ''}`;
+  }
 
-	  // 4) total
-	  const totalEl = document.getElementById('order-success-total');
-	  if (totalEl) {
-		totalEl.textContent = formatCurrency(total);
-	  }
+  // 2) message
+  const msgEl = document.getElementById('order-success-msg');
+  if (msgEl) {
+    const suffix = (summary?.orderType === 'delivery') ? 'delivery' : 'collection';
+    const note = preferredTimeStr
+      ? `Thanks! We’ll contact you to confirm your ${suffix} time (${preferredTimeStr}).`
+      : `Thanks! We’ll contact you to confirm your ${suffix}.`;
+    msgEl.textContent = note;
+  }
 
-	  orderSuccess.style.display = 'flex';
-	}
+  // 3) items
+  const listEl = document.getElementById('order-success-items');
+  if (listEl) {
+    listEl.innerHTML = '';
+    (items || []).forEach(row => {
+      const details = [];
+      if (row.mods?.length) details.push(row.mods.map(m => m.name).join(', '));
+      if (typeof row.spice === 'number') details.push('🌶️'.repeat(row.spice));
+
+      const div = document.createElement('div');
+      div.style.padding = '6px 0';
+      div.style.borderBottom = '1px dashed #eee';
+      div.innerHTML = `
+        ${row.qty} × ${row.name}
+        ${details.length ? ` <span class="muted small">• ${details.join(' • ')}</span>` : ''}
+      `;
+      listEl.appendChild(div);
+    });
+  }
+
+			  // 4) total (force numeric; no undefined fallbacks)
+				const totalEl = document.getElementById('order-success-total');
+				if (totalEl) {
+				  const t = window.__lastOrderTotals || window.__checkoutTotals || {};
+				  const finalTotal = Number(t.total);
+
+				  const safeTotal = Number.isFinite(finalTotal)
+					? finalTotal
+					: Number(summary?.total || 0);
+
+				  totalEl.textContent = formatCurrency(safeTotal);
+
+				  // DEBUG: watch for anything that changes the total after we set it
+					if (!window.__watchingSuccessTotal) {
+					  window.__watchingSuccessTotal = true;
+
+					  const el = document.getElementById('order-success-total');
+					  if (el) {
+						const obs = new MutationObserver(() => {
+						  console.log('[SUCCESS TOTAL MUTATION] now =', el.textContent);
+						  console.trace('[SUCCESS TOTAL MUTATION TRACE]');
+						});
+						obs.observe(el, { childList: true, characterData: true, subtree: true });
+					  }
+					}
+
+				}
+				// 🔒 Force-correct total AFTER popup is rendered
+					setTimeout(() => {
+					  const t = window.__lastOrderTotals || {};
+					  const el = document.getElementById('order-success-total');
+					  if (el && typeof t.total === 'number') {
+						el.textContent = formatCurrency(t.total);
+					  }
+					}, 0);
+
+  orderSuccess.style.display = 'flex';
+}
+
 
 	// close buttons
 	if (orderSuccessX)     orderSuccessX.addEventListener('click', () => orderSuccess.style.display = 'none');
@@ -3597,7 +3645,8 @@ function handleExtraClick(opt) {
 
 
 	// make it available to the second script
-	window.showOrderSuccess = showOrderSuccess;
+	window.showOrderSuccessNew = showOrderSuccessNew;
+
 
 	
 		// ----  (pure front-end) ----
@@ -4215,6 +4264,26 @@ function inAnyWindow(dt, windows) {
   return windows.find(w => t >= +w.start && t <= +w.end) || null;
 }
 
+function isWedThuLondon(d = new Date()){
+  const day = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    weekday: 'short'
+  }).format(d); // "Mon", "Tue", "Wed", "Thu", ...
+  return day === 'Wed' || day === 'Thu';
+}
+
+			function applyWedThuDiscount(subtotal, preferredTimeRaw, asapRequested) {
+			  const eligible = isWedThuLondonForFulfilment(preferredTimeRaw, asapRequested);
+			  const discount = eligible ? Math.round(subtotal * 0.10 * 100) / 100 : 0;
+			  return {
+				eligible,
+				discount,
+				discountedSubtotal: Math.round((subtotal - discount) * 100) / 100
+			  };
+			}
+
+
+
 // Banner helpers
 function showCheckoutBanner(kind, msg) {
   const el = document.getElementById('checkout-banner');
@@ -4321,20 +4390,99 @@ if (isClosed) {
 
 	const orderTypeRadios = document.querySelectorAll('input[name="order-type"]');
     let checkoutBaseSubtotal = 0;
+	
+	// Recompute totals whenever fulfilment time / ASAP / order type changes
+(function wireCheckoutTotalRecompute() {
+  const timeEl =
+    document.getElementById('preferred-time') ||
+    document.querySelector('input[name="preferred_time"]');
+
+  const asapEl =
+    document.getElementById('asap') ||
+    document.getElementById('asap-requested') ||
+    document.getElementById('asapRequested') ||
+    document.querySelector('input[name="asap_requested"]');
+
+  if (timeEl) {
+    timeEl.addEventListener('input', recomputeCheckoutTotals);
+    timeEl.addEventListener('change', recomputeCheckoutTotals);
+  }
+
+  if (asapEl) {
+    asapEl.addEventListener('change', recomputeCheckoutTotals);
+  }
+
+  // You already have orderTypeRadios — hook them too
+  if (typeof orderTypeRadios !== 'undefined' && orderTypeRadios?.length) {
+    orderTypeRadios.forEach(r => r.addEventListener('change', recomputeCheckoutTotals));
+  }
+})();
+
 
     function calcDeliveryFee(subtotal, orderType){
       if(orderType !== 'delivery') return 0;
       return subtotal < 20 ? 3 : 0;
     }
-    function recomputeCheckoutTotals(){
-      const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
-      const fee = calcDeliveryFee(checkoutBaseSubtotal, orderType);
-      const total = checkoutBaseSubtotal + fee;
-      deliveryNote.style.display = (orderType === 'delivery') ? 'block' : 'none';
-      checkoutSubtotalEl.textContent = formatCurrency(checkoutBaseSubtotal);
-      checkoutDeliveryEl.textContent = formatCurrency(fee);
-      checkoutTotalEl.textContent = formatCurrency(total);
+function recomputeCheckoutTotals() {
+  const orderType =
+    document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+
+  // Base subtotal (food only)
+  const subtotal = Math.round(checkoutBaseSubtotal * 100) / 100;
+
+const preferredTimeRaw =
+  (document.getElementById('preferred-time')?.value ||
+   document.querySelector('input[name="preferred_time"]')?.value ||
+   '').trim();
+
+const asapRequested =
+  !!document.querySelector('input[name="asap_requested"]:checked') ||
+  !!document.getElementById('asap')?.checked ||
+  !!document.getElementById('asap-requested')?.checked ||
+  !!document.getElementById('asapRequested')?.checked;
+
+const disc = applyWedThuDiscount(subtotal, preferredTimeRaw, asapRequested);
+const discountedSubtotal = disc.discountedSubtotal;
+
+
+  // Delivery fee threshold (USUAL: based on PRE-discount subtotal)
+  const fee = (orderType === 'delivery' && subtotal < 20) ? 3.00 : 0.00;
+
+  // Final total
+  const total = Math.round((discountedSubtotal + fee) * 100) / 100;
+
+  // Update notes + totals UI
+  deliveryNote.style.display = (orderType === 'delivery') ? 'block' : 'none';
+
+  checkoutSubtotalEl.textContent = formatCurrency(subtotal);
+  checkoutDeliveryEl.textContent = formatCurrency(fee);
+  checkoutTotalEl.textContent = formatCurrency(total);
+
+  // Show / hide discount row
+  const discountRow = document.getElementById('discountRow');
+  const discountValue = document.getElementById('discountValue');
+
+  if (discountRow && discountValue) {
+    if (disc.eligible && disc.discount > 0) {
+      discountRow.style.display = 'flex';
+      discountValue.textContent = `-£${disc.discount.toFixed(2)}`;
+    } else {
+      discountRow.style.display = 'none';
     }
+  }
+
+  // ✅ Store totals for submit + receipt + confirmations (single source of truth)
+  window.__checkoutTotals = {
+    subtotal,
+    discount: (disc.eligible && disc.discount > 0) ? disc.discount : 0,
+    delivery_fee: fee,
+    total
+  };
+
+  return window.__checkoutTotals;
+}
+
+
     orderTypeRadios.forEach(r => r.addEventListener('change', recomputeCheckoutTotals));
 	
 	// ---- Address required only for delivery ----
@@ -4464,6 +4612,51 @@ function findNextAllowedFromNow() {
   start.setMinutes(start.getMinutes() + LEAD_MINUTES);
   return nextAllowed(start);  // may return null if nothing within +30 days
 }
+
+			function isWedThuLondonForFulfilment(preferredTimeRaw, asapRequested) {
+			  // Option A: ASAP uses "today" in London
+			  if (asapRequested) return isWedThuLondon();
+
+			  try {
+				const raw = String(preferredTimeRaw || '').trim();
+				if (!raw) return false;
+
+				let y, m, d;
+
+				// Format A: "YYYY-MM-DDTHH:MM" or "YYYY-MM-DD HH:MM"
+				if (/^\d{4}-\d{2}-\d{2}/.test(raw)) {
+				  const datePart = raw.split('T')[0].split(' ')[0];
+				  const parts = datePart.split('-').map(n => parseInt(n, 10));
+				  [y, m, d] = parts;
+				}
+				// Format B: "DD/MM/YYYY HH:MM" (your UI)
+				else if (/^\d{2}\/\d{2}\/\d{4}/.test(raw)) {
+				  const datePart = raw.split(' ')[0];
+				  const parts = datePart.split('/').map(n => parseInt(n, 10));
+				  [d, m, y] = parts;
+				} else {
+				  return false;
+				}
+
+				if (![y, m, d].every(Number.isFinite)) return false;
+
+				// Noon UTC avoids DST edge cases
+				const dt = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+
+				const weekday = new Intl.DateTimeFormat('en-GB', {
+				  timeZone: 'Europe/London',
+				  weekday: 'short'
+				}).format(dt);
+
+				return weekday === 'Wed' || weekday === 'Thu';
+			  } catch {
+				return false;
+			  }
+			}
+
+
+
+
 
 
 // Single, clean checkout opener
@@ -4868,11 +5061,20 @@ checkoutForm.addEventListener('submit', async (e) => {
       }
     }
 
-    // ---------- Basket + totals ----------
-    const itemsSnapshot = basket.map(i => ({ ...i }));
-    const subtotal = itemsSnapshot.reduce((s,i)=> s + i.unitPrice * i.qty, 0);
-    const deliveryFee =
-      (orderType === 'delivery' && subtotal < 20) ? 3.00 : 0.00;
+// ---------- Basket + totals ----------
+const itemsSnapshot = basket.map(i => ({ ...i }));
+const subtotal = Math.round(itemsSnapshot.reduce((s,i)=> s + i.unitPrice * i.qty, 0) * 100) / 100;
+
+// 10% Wed/Thu discount applies to subtotal (food only)
+const disc = applyWedThuDiscount(subtotal);
+const discountedSubtotal = disc.discountedSubtotal;
+
+const deliveryFee =
+  (orderType === 'delivery' && discountedSubtotal < 20) ? 3.00 : 0.00;
+
+// Final total used for checkout / order message
+const total = Math.round((discountedSubtotal + deliveryFee) * 100) / 100;
+
 
     function fail(step, err){
       console.error(`[Checkout] ${step} failed:`, err);
@@ -4985,29 +5187,40 @@ checkoutForm.addEventListener('submit', async (e) => {
 			if (itemsErr) return fail('Add order items', itemsErr);
 
 
-    // (optional) confirmation hook — non-blocking
-    try {
-      await fetch('https://order-backend-production.up.railway.app/send-order-confirmation', {
-		  method: 'POST',
-		  // IMPORTANT: use text/plain to avoid CORS preflight
-		  headers: { 'Content-Type': 'text/plain' },
-		  body: JSON.stringify({
-			order_id: orderId,
-			order_ref: orderRef,
-			name,
-			email,
-			phone,
-			order_type: orderType,
-			preferred_time: preferredTimeRaw,
-			total: subtotal + deliveryFee,
-			communication_preference: communicationPreference,
-			asap_requested: asapRequested 
-		  })
-		});
+			// ✅ Recompute and freeze totals once
+				const submitTotals = recomputeCheckoutTotals();
+				window.__lastOrderTotals = submitTotals;
+				console.log('[CHECKOUT TOTALS @ SUBMIT]', submitTotals);
 
-    } catch (err) {
-      console.warn('[Order] Confirmation hook failed (non-blocking)', err);
-    }
+				try {
+				  await fetch('https://order-backend-production.up.railway.app/send-order-confirmation', {
+					method: 'POST',
+					headers: { 'Content-Type': 'text/plain' },
+					body: JSON.stringify({
+					  order_id: orderId,
+					  order_ref: orderRef,
+					  name,
+					  email,
+					  phone,
+					  order_type: orderType,
+					  preferred_time: preferredTimeRaw,
+
+					  subtotal: submitTotals.subtotal,
+					  discount: submitTotals.discount,
+					  delivery_fee: submitTotals.delivery_fee,
+					  total: submitTotals.total,
+
+					  discount_label: submitTotals.discount > 0 ? '10% Wed/Thu discount' : null,
+
+					  communication_preference: communicationPreference,
+					  asap_requested: asapRequested
+					})
+				  });
+				} catch (err) {
+				  console.warn('send-order-confirmation failed', err);
+				}
+
+
 
     // --- SUCCESS UI ---
     checkoutMsg.textContent = '';
@@ -5065,59 +5278,76 @@ checkoutForm.addEventListener('submit', async (e) => {
     };
   }
 
-// ✅ final, ASCII-safe, UTF-8 receipt
-	window.downloadReceipt = function downloadReceipt(summary, items, preferredTimeStr) {
-	  const pound = '\u00A3'; // £
-	  const bullet = '\u2022'; // •
-	  const colon = '\u003A'; // :
+// ✅ final, ASCII-safe, UTF-8 receipt (with discount support)
+window.downloadReceipt = function downloadReceipt(summary, items, preferredTimeStr) {
+  const pound = '\u00A3'; // £
+  const bullet = '\u2022'; // •
+  const colon = '\u003A'; // :
 
-	  const noChilli = (s = '') =>
-		s.replace(/🌶️/g, '').replace(/🌶/g, '').replace(/\s{2,}/g, ' ').trim();
+  const noChilli = (s = '') =>
+    s.replace(/🌶️/g, '').replace(/🌶/g, '').replace(/\s{2,}/g, ' ').trim();
 
-	  const lines = [];
-	  lines.push("Rung's Thai Kitchen");
-	  lines.push('----------------------------------------');
-	  lines.push(`Order ref: ${summary?.ref || 'RTK-???'}`);
-	  lines.push(`Total: ${pound}${(summary?.total || 0).toFixed(2)}`);
-	  lines.push(`Type: ${summary?.orderType || ''}`);
-	  if (preferredTimeStr) lines.push(`Preferred time: ${preferredTimeStr}`);
-	  lines.push('');
-	  lines.push('Items');
+  const totals = window.__checkoutTotals || {};
 
-	  (items || []).forEach((row) => {
-		const cleanName = noChilli(row.name || '');
-		const qty = row.qty || 1;
-		const lineTotal = (row.unitPrice || 0) * qty;
-		lines.push(`${qty} × ${cleanName} ${pound}${lineTotal.toFixed(2)}`);
+  const lines = [];
+  lines.push("Rung's Thai Kitchen");
+  lines.push('----------------------------------------');
+  lines.push(`Order ref: ${summary?.ref || 'RTK-???'}`);
 
-		const extras = [];
-		if (Array.isArray(row.mods) && row.mods.length) {
-		  extras.push(row.mods.map(m => m.name).join(', '));
-		}
-		if (typeof row.spice === 'number') {
-		  const spiceText =
-			row.spice === 0 ? 'None' :
-			row.spice === 1 ? 'Mild' :
-			row.spice === 2 ? 'Medium' : 'Hot';
-		  extras.push(`Spice: ${spiceText}`);
-		}
-		if (extras.length) lines.push(`• ${extras.join(' • ')}`);
-	  });
+  // 💰 Totals section
+  if (totals.discount && totals.discount > 0) {
+    lines.push(`Subtotal: ${pound}${totals.subtotal.toFixed(2)}`);
+    lines.push(`10% Wed/Thu discount: -${pound}${totals.discount.toFixed(2)}`);
+    if (totals.delivery_fee > 0) {
+      lines.push(`Delivery: ${pound}${totals.delivery_fee.toFixed(2)}`);
+    }
+    lines.push(`Total: ${pound}${totals.total.toFixed(2)}`);
+  } else {
+    // Non-discount fallback
+    const fallbackTotal = totals.total ?? summary?.total ?? 0;
+    lines.push(`Total: ${pound}${fallbackTotal.toFixed(2)}`);
+  }
 
-	  lines.push('');
-	  lines.push('Thank you for ordering with Rung\'s Thai Kitchen!');
+  lines.push(`Type: ${summary?.orderType || ''}`);
+  if (preferredTimeStr) lines.push(`Preferred time: ${preferredTimeStr}`);
+  lines.push('');
+  lines.push('Items');
 
-	  // make .txt UTF-8
-	  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
-	  const url = URL.createObjectURL(blob);
-	  const a = document.createElement('a');
-	  a.href = url;
-	  a.download = (summary?.ref || 'receipt') + '.txt';
-	  document.body.appendChild(a);
-	  a.click();
-	  document.body.removeChild(a);
-	  URL.revokeObjectURL(url);
-	};
+  (items || []).forEach((row) => {
+    const cleanName = noChilli(row.name || '');
+    const qty = row.qty || 1;
+    const lineTotal = (row.unitPrice || 0) * qty;
+    lines.push(`${qty} × ${cleanName} ${pound}${lineTotal.toFixed(2)}`);
+
+    const extras = [];
+    if (Array.isArray(row.mods) && row.mods.length) {
+      extras.push(row.mods.map(m => m.name).join(', '));
+    }
+    if (typeof row.spice === 'number') {
+      const spiceText =
+        row.spice === 0 ? 'None' :
+        row.spice === 1 ? 'Mild' :
+        row.spice === 2 ? 'Medium' : 'Hot';
+      extras.push(`Spice: ${spiceText}`);
+    }
+    if (extras.length) lines.push(`${bullet} ${extras.join(` ${bullet} `)}`);
+  });
+
+  lines.push('');
+  lines.push('Thank you for ordering with Rung\'s Thai Kitchen!');
+
+  // make .txt UTF-8
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (summary?.ref || 'receipt') + '.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
 
 
   // 3) wire the button on the success popup (if present)
@@ -5222,23 +5452,28 @@ window.downloadReceiptPlain = function (summary, items, preferredTimeStr) {
   if (!btn) return;
 
   btn.addEventListener('click', () => {
-    const payload = window.__lastOrderForPdf;
-    if (!payload) {
+    // New storage (recommended), with fallback to legacy name
+    const payload =
+      window.__lastOrderReceipt ||
+      window.__lastOrderForPdf ||
+      null;
+
+    if (!payload || !payload.summary || !Array.isArray(payload.items)) {
       alert('No order data to export yet.');
       return;
     }
 
     const { summary, items, preferredTimeStr } = payload;
 
-    // this should already be defined in your Supabase / checkout script
     if (typeof window.downloadReceipt === 'function') {
-      window.downloadReceipt(summary, items, preferredTimeStr);
+      window.downloadReceipt(summary, items, preferredTimeStr || '');
     } else {
       alert('Order: ' + (summary?.ref || 'RTK-???'));
     }
   });
 })();
 </script>
+
 <script>
 (function () {
   function refreshTickerOffset() {
@@ -5692,8 +5927,31 @@ document.addEventListener('DOMContentLoaded', () => {
       const bad = items.find((x) => !x.item_id);
       if (bad) throw new Error(`Internal error: missing item_id for "${bad.name}".`);
 
-      const subtotal = items.reduce((s, x) => s + x.unit_price * x.qty, 0);
-      const deliveryFee = (orderType === "delivery" && subtotal < 20) ? 3 : 0;
+const subtotal = Math.round(items.reduce((s, x) => s + x.unit_price * x.qty, 0) * 100) / 100;
+
+const disc = applyWedThuDiscount(subtotal);
+const discountedSubtotal = disc.discountedSubtotal;
+
+// Delivery fee (use discountedSubtotal for the threshold)
+const deliveryFee = (orderType === "delivery" && discountedSubtotal < 20) ? 3.00 : 0.00;
+
+const total = Math.round((discountedSubtotal + deliveryFee) * 100) / 100;
+
+const discountRow = document.getElementById("discountRow");
+const discountValue = document.getElementById("discountValue");
+
+if (discountRow && discountValue) {
+  if (disc.eligible && disc.discount > 0) {
+    discountRow.style.display = "flex";
+    discountValue.textContent = `-£${disc.discount.toFixed(2)}`;
+  } else {
+    discountRow.style.display = "none";
+  }
+}
+
+
+
+	  
 
       // 1) create customer (minimal insert)
       const { data: cust, error: custErr } = await window.sb

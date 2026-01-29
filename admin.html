@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -239,6 +240,19 @@
 		  color: #111827;
 		}
 
+			tr.row-attention td {
+			  background-color: #ffe9c6 !important;
+			}
+			tr.row-attention:hover td {
+			tr.row-attention td {
+  background-color: #ffe9c6 !important;
+}
+
+/* Highlight future orders - force it to win over existing styles */
+	tbody#tbody tr.row-attention > td { background: #ffe9c6 !important; }
+	tbody#tbody tr.row-attention:hover > td { background: #ffd89a !important; }
+
+
 
   
   </style>
@@ -255,7 +269,7 @@
   <button id="export" class="btn">Export CSV</button>
 
   <label class="filter-today">
-    <input type="checkbox" id="filter-today" />
+    <input type="checkbox" id="filter-today" checked />
     Today only
   </label>
 </div>
@@ -296,8 +310,41 @@
     const SUPABASE_URL = 'https://ubyjrrsvbbqomitpaidb.supabase.co';
 	const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVieWpycnN2YmJxb21pdHBhaWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NTYyNjMsImV4cCI6MjA3NjUzMjI2M30.WTllxO5KnaMI0i1d4VHNBhjLuRMfu4_Xx5arqZmYevw';
 
+		// do this ONCE
+		window.supabaseClient = window.supabaseClient
+		  || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+		// then everywhere else:
+		const sb = window.supabaseClient;
+		
+		let showTodayOnly = true;
+
+document.addEventListener("DOMContentLoaded", () => {
+  const cb = document.getElementById("filter-today");
+  if (!cb) {
+    console.error("Checkbox #filter-today not found");
+    return;
+  }
+
+  // Force default ON on every load
+  showTodayOnly = true;
+  cb.checked = true;
+  localStorage.setItem("showTodayOnly", "true");
+
+  cb.addEventListener("change", () => {
+    showTodayOnly = cb.checked;
+    localStorage.setItem("showTodayOnly", showTodayOnly ? "true" : "false");
+    render(getFilteredOrders());
+  });
+
+  console.log("[today-only] init:", {
+    saved: localStorage.getItem("showTodayOnly"),
+    checked: cb.checked,
+    showTodayOnly
+  });
+});
+
+
 	
 	// ---- Restaurant location (centre point for distance) ----
 // Replace with your real coordinates from Google Maps:
@@ -359,7 +406,7 @@ function distanceKmBetween(lat1, lon1, lat2, lon2) {
 		  }
 
 		  try {
-			const { data, error } = await supabase.functions.invoke("geocode-order", {
+			const { data, error } = await sb.functions.invoke("geocode-order", {
 			  body: {
 				order_id: order.id,
 				customer_address: address,
@@ -388,8 +435,7 @@ function distanceKmBetween(lat1, lon1, lat2, lon2) {
 
 
 	
-		const ordersChannel = supabase
-	  .channel('orders-realtime')
+		const ordersChannel = sb.channel('orders-realtime')
 	  .on(
 		'postgres_changes',
 		{ event: 'INSERT', schema: 'public', table: 'orders' },
@@ -409,7 +455,6 @@ function distanceKmBetween(lat1, lon1, lat2, lon2) {
 	  .subscribe();
 
 		let currentOrders = [];
-		let showTodayOnly = false;
 
 		function isSameDay(a, b) {
 		  return (
@@ -671,16 +716,67 @@ function distanceKmBetween(lat1, lon1, lat2, lon2) {
 			}
 
 
-		function getBookingDate(o) {
-		  // Prefer confirmed/requested time, then proposed, then created_at as a last resort
-		  const raw = o.preferred_time || o.proposed_time || o.created_at;
-		  if (!raw) return null;
+		function parseUkDateTime(raw) {
+  // Accepts: "24/12/2025, 20:15" or "24/12/2025 20:15" or "24/12/2025"
+  const s = String(raw).trim();
 
-		  const d = new Date(raw);
-		  if (Number.isNaN(d.getTime())) return null;
-		  return d;
-		}
+  const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:[,\s]+(\d{2}):(\d{2}))?$/);
+  if (!m) return null;
 
+  const dd = Number(m[1]);
+  const mm = Number(m[2]);
+  const yyyy = Number(m[3]);
+  const HH = m[4] ? Number(m[4]) : 0;
+  const MIN = m[5] ? Number(m[5]) : 0;
+
+  // Create a local Date (UK browsers will treat this as local time)
+  const d = new Date(yyyy, mm - 1, dd, HH, MIN, 0, 0);
+  if (Number.isNaN(d.getTime())) return null;
+  return d;
+}
+
+function getBookingDate(o) {
+  // Try the likely booking/scheduled fields first, then created_at last.
+  const raw =
+    o.preferred_time ||
+    o.proposed_time ||
+    o.scheduled_for ||
+    o.requested_for ||
+    o.booking_time ||
+    o.booking_datetime ||
+    o.delivery_time ||
+    o.collection_time ||
+    o.created_at;
+
+  if (!raw) return null;
+
+  // 1) Try normal Date parsing (ISO timestamps etc.)
+  let d = new Date(raw);
+  if (!Number.isNaN(d.getTime())) return d;
+
+  // 2) Try UK format parsing (dd/mm/yyyy, hh:mm)
+  d = parseUkDateTime(raw);
+  if (d) return d;
+
+  return null;
+}
+
+
+		
+		function isFutureUkDay(o) {
+  const d = getBookingDate(o);
+  if (!d) return false;
+
+  // Today (UK = UTC in winter)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Booking day
+  const bookingDay = new Date(d);
+  bookingDay.setHours(0, 0, 0, 0);
+
+  return bookingDay > today;
+}
 
 
 
@@ -891,7 +987,7 @@ function distanceKmBetween(lat1, lon1, lat2, lon2) {
 const tbody = document.getElementById('tbody');
 const empty = document.getElementById('empty');
 
-function render(orders){
+function render(orders) {
   tbody.innerHTML = '';
 
   if (!orders.length) {
@@ -902,7 +998,13 @@ function render(orders){
 
   orders.forEach(o => {
     const tr = document.createElement('tr');
-    tr.className = 'row';
+    tr.classList.add('row');
+
+    // Highlight future booking dates
+    const isFuture = isFutureUkDay(o);
+    if (isFuture) {
+      tr.classList.add('row-attention');
+    }
 
     const customer = o.customers || {};
     const total = sumTotal(o);
@@ -913,21 +1015,19 @@ function render(orders){
     const status = o.status || 'pending';
     const statusLabel = STATUS_LABELS[status] || status;
 
-    // ----------- REQUIRED data-* attributes for SMS/email backend -----------
+    // data-* attributes
     tr.dataset.orderId = o.id;
     tr.dataset.orderRef = rtkRef;
     tr.dataset.name = customer.full_name || "";
     tr.dataset.email = customer.email || "";
     tr.dataset.phone = customer.phone || "";
     tr.dataset.total = total;
-	tr.dataset.asapRequested = o.asap_requested ? "true" : "false";
+    tr.dataset.asapRequested = o.asap_requested ? "true" : "false";
     tr.dataset.communicationPreference = o.communication_preference || "email";
     tr.dataset.createdAt = o.created_at;
-	tr.dataset.preferredTime = o.preferred_time || "";
-	tr.dataset.asapRequested = o.asap_requested ? "true" : "false";
+    tr.dataset.preferredTime = o.preferred_time || "";
 
-
-    // ------------------ ROW HTML ------------------
+    // ROW HTML
     tr.innerHTML = `
       <td class="mono">${rtkRef}</td>
       <td>${fmtDisplayTime(o)}</td>
@@ -959,17 +1059,16 @@ function render(orders){
       </td>
     `;
 
-    // --- details row ---
+    // ---- details row (your existing block) ----
     const details = document.createElement('div');
     details.className = 'details';
     details.innerHTML = buildDetailsHTML(o);
 
-    // --- status change dropdown ---
     const statusSelect = details.querySelector('.status-select');
     if (statusSelect) {
       statusSelect.addEventListener('change', async (e) => {
         const newStatus = e.target.value;
-        const orderId   = e.target.dataset.orderId;
+        const orderId = e.target.dataset.orderId;
 
         await updateOrderStatus(orderId, newStatus);
         loadAndRender();
@@ -998,13 +1097,12 @@ function render(orders){
 
     tbody.appendChild(tr);
     tbody.appendChild(detailsRow);
-
   });
 }
 
 async function updateOrderStatus(orderId, newStatus) {
   try {
-    const { error } = await supabase
+    const { error } = await sb
       .from('orders')
       .update({ status: newStatus })
       .eq('id', orderId);
@@ -1024,8 +1122,9 @@ async function updateOrderStatus(orderId, newStatus) {
 
 		// --- LOAD + RENDER WITH NEW-ORDER DETECTION ------------------------
 
+					
 			async function loadAndRender() {
-			  const { data: orders, error } = await supabase
+			  const { data: orders, error } = await sb
 			  .from('orders')
 			  .select(`
 				id,
@@ -1107,20 +1206,17 @@ async function updateOrderStatus(orderId, newStatus) {
 
 		  // 🔹 render either today-only or all
 		  render(getFilteredOrders());
+			syncTodayOnlyCheckbox();
+
 		}
 
 
 	// Initial load
 	loadAndRender();
 
-	// Poll every 15 seconds
-	setInterval(loadAndRender, 15000);
+	/* Poll every 15 seconds
+	setInterval(loadAndRender, 15000);*/
 	
-			document.getElementById("filter-today").addEventListener("change", (e) => {
-		  showTodayOnly = e.target.checked;
-		  render(getFilteredOrders());
-		});
-		
 		// ---------- EXPORT CSV ----------
 			function csvEscape(value) {
 			  if (value == null) return "";
