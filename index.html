@@ -5061,19 +5061,35 @@ checkoutForm.addEventListener('submit', async (e) => {
       }
     }
 
-// ---------- Basket + totals ----------
-const itemsSnapshot = basket.map(i => ({ ...i }));
-const subtotal = Math.round(itemsSnapshot.reduce((s,i)=> s + i.unitPrice * i.qty, 0) * 100) / 100;
+			// ---------- Basket + totals ----------
+			const itemsSnapshot = basket.map(i => ({ ...i }));
+			const subtotal = Math.round(itemsSnapshot.reduce((s,i)=> s + i.unitPrice * i.qty, 0) * 100) / 100;
 
-// 10% Wed/Thu discount applies to subtotal (food only)
-const disc = applyWedThuDiscount(subtotal);
-const discountedSubtotal = disc.discountedSubtotal;
+			// fulfilment time + ASAP (match checkout rules) — use UNIQUE names here
+			const preferredTimeRawTotals =
+			  (document.getElementById('cust-preferred-time')?.value ||
+			   document.getElementById('preferred-time')?.value ||
+			   document.querySelector('input[name="preferred_time"]')?.value ||
+			   '').trim();
 
-const deliveryFee =
-  (orderType === 'delivery' && discountedSubtotal < 20) ? 3.00 : 0.00;
+			const asapRequestedTotals =
+			  !!document.querySelector('input[name="asap_requested"]:checked') ||
+			  !!document.getElementById('asap')?.checked ||
+			  !!document.getElementById('asap-requested')?.checked ||
+			  !!document.getElementById('asapRequested')?.checked;
 
-// Final total used for checkout / order message
-const total = Math.round((discountedSubtotal + deliveryFee) * 100) / 100;
+			// discount based on fulfilment day (Wed/Thu), ASAP uses "today" (Option A)
+			const disc = applyWedThuDiscount(subtotal, preferredTimeRawTotals, asapRequestedTotals);
+			const discountedSubtotal = disc.discountedSubtotal;
+
+			// ✅ Delivery threshold based on PRE-discount subtotal
+			const deliveryFee =
+			  (orderType === 'delivery' && subtotal < 20) ? 3.00 : 0.00;
+
+			// Final total used for checkout / order message
+			const total = Math.round((discountedSubtotal + deliveryFee) * 100) / 100;
+
+
 
 
     function fail(step, err){
@@ -5134,20 +5150,26 @@ const total = Math.round((discountedSubtotal + deliveryFee) * 100) / 100;
 		const idempotencyKey = crypto.randomUUID();
 
 		const baseOrderPayload = {
-		  customer_id: customerId,
-		  subtotal: Number(subtotal.toFixed(2)),
-		  delivery_fee: Number(deliveryFee.toFixed(2)),
-		  order_type: orderType,
-		  notes,
-		  order_ref: orderRef,
-		  payment_preference,
-		  preferred_time: preferredTimeISO,
-		  asap_requested: asapRequested,
-		  communication_preference: communicationPreference,
+  customer_id: customerId,
 
-		  // ✅ CHANGED LINE (see step 2)
-		  idempotency_key: idempotencyKey,
-		};
+  // money fields (discount-aware)
+  subtotal: Number(subtotal.toFixed(2)),                       // pre-discount food subtotal
+  discount: Number((disc.discount || 0).toFixed(2)),           // ✅ needs column in Supabase
+  discount_label: (disc.discount > 0 ? '10% Wed/Thu discount' : null), // ✅ needs column
+  delivery_fee: Number(deliveryFee.toFixed(2)),
+  total: Number(total.toFixed(2)),                              // ✅ needs column
+
+  order_type: orderType,
+  notes,
+  order_ref: orderRef,
+  payment_preference,
+  preferred_time: preferredTimeISO,
+  asap_requested: asapRequested,
+  communication_preference: communicationPreference,
+
+  idempotency_key: idempotencyKey,
+};
+
 
 
 		const { data: orderRow, error: orderUpsertErr } = await sb
@@ -5240,10 +5262,10 @@ const total = Math.round((discountedSubtotal + deliveryFee) * 100) / 100;
       ? ('RTK-' + String(Number(orderRef.assigned ?? orderRef.id ?? orderRef.value ?? 0)).padStart(3,'0'))
       : String(orderRef);
 
-    // numeric total
-    const grandTotal = (Number(subtotal) || 0) + (Number(deliveryFee) || 0);
+			// numeric total
+			const grandTotal = total;
+			showOrderSuccess(refText, itemsSnapshot, grandTotal, orderType, prefPretty);
 
-    showOrderSuccess(refText, itemsSnapshot, grandTotal, orderType, prefPretty);
 
   } catch (err) {
     fail('Unexpected error', err);
@@ -5861,7 +5883,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script>
+<!--<script>
 (() => {
   // ====== CONFIG ======
   const SUPABASE_URL = "https://ubyjrrsvbbqomitpaidb.supabase.co";
@@ -5874,13 +5896,13 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // ====== MINIMAL HELPERS ======
+ // ====== MINIMAL HELPERS ======
   const $ = (id) => document.getElementById(id);
 
   // Change this if your basket lives somewhere else
   const getBasket = () => window.basket || [];
 
-  // ====== MINIMAL SUBMIT HANDLER ======
+/*  // ====== MINIMAL SUBMIT HANDLER ======
   const form = $("checkout-form");
   if (!form) {
     console.warn("[Checkout] No #checkout-form found on page.");
@@ -5927,56 +5949,100 @@ document.addEventListener('DOMContentLoaded', () => {
       const bad = items.find((x) => !x.item_id);
       if (bad) throw new Error(`Internal error: missing item_id for "${bad.name}".`);
 
-const subtotal = Math.round(items.reduce((s, x) => s + x.unit_price * x.qty, 0) * 100) / 100;
+			// ---- Money (single source of truth for DB/admin) ----
+			const subtotal = Math.round(items.reduce((s, x) => s + x.unit_price * x.qty, 0) * 100) / 100;
 
-const disc = applyWedThuDiscount(subtotal);
-const discountedSubtotal = disc.discountedSubtotal;
+			// fulfilment time + ASAP (match your checkout logic)
+			const preferredTimeRaw =
+			  (document.getElementById('cust-preferred-time')?.value ||
+			   document.getElementById('preferred-time')?.value ||
+			   document.querySelector('input[name="preferred_time"]')?.value ||
+			   '').trim();
 
-// Delivery fee (use discountedSubtotal for the threshold)
-const deliveryFee = (orderType === "delivery" && discountedSubtotal < 20) ? 3.00 : 0.00;
+			const asapRequested =
+			  !!document.querySelector('input[name="asap_requested"]:checked') ||
+			  !!document.getElementById('asap')?.checked ||
+			  !!document.getElementById('asap-requested')?.checked ||
+			  !!document.getElementById('asapRequested')?.checked;
 
-const total = Math.round((discountedSubtotal + deliveryFee) * 100) / 100;
+			// discount based on fulfilment day (Wed/Thu), ASAP uses "today" (Option A)
+			const disc = applyWedThuDiscount(subtotal, preferredTimeRaw, asapRequested);
+			const discountedSubtotal = disc.discountedSubtotal;
 
-const discountRow = document.getElementById("discountRow");
-const discountValue = document.getElementById("discountValue");
+			// ✅ Delivery threshold should be based on PRE-discount subtotal (your chosen rule)
+			const deliveryFee = (orderType === "delivery" && subtotal < 20) ? 3.00 : 0.00;
 
-if (discountRow && discountValue) {
-  if (disc.eligible && disc.discount > 0) {
-    discountRow.style.display = "flex";
-    discountValue.textContent = `-£${disc.discount.toFixed(2)}`;
-  } else {
-    discountRow.style.display = "none";
-  }
-}
+			// final total
+			const total = Math.round((discountedSubtotal + deliveryFee) * 100) / 100;
+
+			  // 1) create-or-get customer (handles 409 conflict / existing email)
+				let cust = null;
+
+				const { data: insertedCust, error: custErr } = await window.sb
+				  .from("customers")
+				  .insert([{ full_name: name, email, phone, address }])
+				  .select("id")
+				  .single();
+
+				if (custErr) {
+				  // If already exists (common with unique email), look up by email
+				  console.warn("[Checkout] customer insert failed; trying lookup by email", custErr);
+
+				  const { data: existingCust, error: lookupErr } = await window.sb
+					.from("customers")
+					.select("id")
+					.eq("email", email)
+					.single();
+
+				  if (lookupErr) throw lookupErr;
+				  cust = existingCust;
+				} else {
+				  cust = insertedCust;
+				}
+
+				if (!cust?.id) throw new Error("Could not create or find customer record.");
 
 
 
-	  
+			
+		// 🔍 DEBUG: log what we're about to insert
+			console.log('[ORDER INSERT PAYLOAD]', {
+			  subtotal,
+			  preferredTimeRaw,
+			  asapRequested,
+			  discount: disc?.discount,
+			  deliveryFee,
+			  total
+			});
 
-      // 1) create customer (minimal insert)
-      const { data: cust, error: custErr } = await window.sb
-        .from("customers")
-        .insert([{ full_name: name, email, phone, address }])
-        .select("id")
-        .single();
+			const { data: order, error: orderErr } = await window.sb
+			  .from("orders")
+			  .insert([{
+				customer_id: cust.id,
+				order_type: orderType,
+				notes,
 
-      if (custErr) throw custErr;
+				// fulfilment info
+				preferred_time: preferredTimeRaw || null,
+				asap_requested: asapRequested,
 
-      // 2) create order
-      const { data: order, error: orderErr } = await window.sb
-        .from("orders")
-        .insert([{
-          customer_id: cust.id,
-          order_type: orderType,
-          notes,
-          subtotal: Number(subtotal.toFixed(2)),
-          delivery_fee: Number(deliveryFee.toFixed(2)),
-          status: "pending"
-        }])
-        .select("id")
-        .single();
+				// money fields
+				subtotal: Number(subtotal.toFixed(2)),
+				discount: Number((disc.discount || 0).toFixed(2)),
+				delivery_fee: Number(deliveryFee.toFixed(2)),
+				total: Number(total.toFixed(2)),
+				discount_label: (disc.discount > 0 ? '10% Wed/Thu discount' : null),
 
-      if (orderErr) throw orderErr;
+				status: "pending"
+			  }])
+			  .select("id, subtotal, discount, delivery_fee, total, discount_label")
+			  .single();
+
+			if (orderErr) throw orderErr;
+
+			// 🔍 DEBUG: log what Supabase actually stored
+			console.log('[ORDER INSERT RESULT]', order);
+
 
       // 3) create order_items
       const rows = items.map((x) => ({
@@ -5990,7 +6056,7 @@ if (discountRow && discountValue) {
         img: x.img
       }));
 
-      const { error: itemsErr } = await window.sb.from("order_items").insert(rows);
+	  const { error: itemsErr } = await window.sb.from("order_items").insert(rows);
       if (itemsErr) throw itemsErr;
 
       if (msg) { msg.style.color = ""; msg.textContent = "Order placed ✅"; }
@@ -6009,8 +6075,8 @@ if (discountRow && discountValue) {
       if (submitBtn) submitBtn.disabled = false;
     }
   });
-})();
-</script>
+})();*/
+</script>-->
 
 
 
