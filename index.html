@@ -5650,8 +5650,8 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 const tempClosure = {
   active: true, // ✅ set true when temporarily closed
   title: "Temporarily closed",
-  message: "🌴 We’re taking a short break while a member of Rung's Thai Kitchen heads to Las Vegas to cheer on the mighty Leeds Rhinos 🏉
-We’ll be back soon — rested, recharged and ready to fire up the woks again! 🔥",
+  message: `🌴 We’re taking a short break while a member of Rung's Thai Kitchen heads to Las Vegas to cheer on the mighty Leeds Rhinos 🏉
+We’ll be back soon — rested, recharged and ready to fire up the woks again! 🔥`,
   // Optional reopen time shown to customers (UK local time)
   reopenText: "We hope to re-open on Wednesday 4th March. Thanks for your understanding and continued support!",
   // Behaviour
@@ -5659,8 +5659,8 @@ We’ll be back soon — rested, recharged and ready to fire up the woks again! 
   blockOrdering: true
 };
 
-  // Returns true if we are between:
-  // Sunday 21:00  and  Wednesday 12:00 (midday)
+// Returns true if we are between:
+// Sunday 21:00  and  Wednesday 12:00 (midday)
 function shouldShowKitchenNotice(now = new Date()) {
   // Temporary override always wins
   if (tempClosure.active) return true;
@@ -5669,12 +5669,11 @@ function shouldShowKitchenNotice(now = new Date()) {
   const hour = now.getHours() + now.getMinutes() / 60;
 
   if (day === 0 && hour >= 21) return true; // Sun after 21:00
-  if (day === 1 || day === 2) return true;  // Mon, Tue
-  if (day === 3 && hour < 12) return true;  // Wed before 12:00
+  if (day === 1 || day === 2) return true; // Mon, Tue
+  if (day === 3 && hour < 12) return true; // Wed before 12:00
 
   return false;
 }
-
 
 document.addEventListener("DOMContentLoaded", () => {
   const overlay = document.getElementById("kitchen-notice-overlay");
@@ -6083,6 +6082,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </body>
 
 </html>
+
 
 
 
