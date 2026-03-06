@@ -5648,12 +5648,11 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 
 // ---- Temporary closure override (edit when needed) ----
 const tempClosure = {
-  active: false, // ✅ set true when temporarily closed
+  active: true, // ✅ set true when temporarily closed
   title: "Temporarily closed",
-  message: `🌴 We’re taking a short break while a member of Rung's Thai Kitchen heads to Las Vegas to cheer on the mighty Leeds Rhinos 🏉
-We’ll be back soon — rested, recharged and ready to fire up the woks again! 🔥`,
+  message: `We've had a breakdown of some key equipment in the kitchen as we attempted to fire things up today, which means we will not be able to open today (6th March) unfortunately.`,
   // Optional reopen time shown to customers (UK local time)
-  reopenText: "We will re-open on Friday 6th March. Thanks for your understanding and continued support!",
+  reopenText: "Replacement equipment will be collected in the morning and thoroughly tested before opening time on 7th March",
   // Behaviour
   autoHideMs: null, // null = don't auto-hide; e.g. 10000 to auto-hide
   blockOrdering: true
@@ -6082,6 +6081,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </body>
 
 </html>
+
 
 
 
