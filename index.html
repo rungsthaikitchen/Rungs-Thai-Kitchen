@@ -5659,7 +5659,7 @@ const tempClosure = {
 };
 
 // Returns true if we are between:
-// Sunday 21:00  and  Wednesday 12:00 (midday)
+// Saturday 21:00  and  Wednesday 12:00 (midday)
 function shouldShowKitchenNotice(now = new Date()) {
   // Temporary override always wins
   if (tempClosure.active) return true;
@@ -5668,7 +5668,7 @@ function shouldShowKitchenNotice(now = new Date()) {
   const hour = now.getHours() + now.getMinutes() / 60;
 
   if (day === 6 && hour >= 21) return true; // Sun after 21:00
-  if (day === 1 || day === 2) return true; // Mon, Tue
+  if (day === 0 || day === 1 || day === 2) return true; // Sun, Mon, Tue
   if (day === 3 && hour < 12) return true; // Wed before 12:00
 
   return false;
@@ -6081,6 +6081,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </body>
 
 </html>
+
 
 
 
