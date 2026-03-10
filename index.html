@@ -5648,11 +5648,11 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 
 // ---- Temporary closure override (edit when needed) ----
 const tempClosure = {
-  active: false, // ✅ set true when temporarily closed
+  active: true, // ✅ set true when temporarily closed
   title: "Temporarily closed",
-  message: `We've had a breakdown of some key equipment in the kitchen as we attempted to fire things up, which means we will not be able to open today (6th March) unfortunately.`,
+  message: `Just a quick heads up for our lovely local customers — unfortunately we won’t be open Wed/Thurs this week due to car trouble 🚗😒`,
   // Optional reopen time shown to customers (UK local time)
-  reopenText: "Replacement equipment will be collected in the morning and thoroughly tested before opening time on 7th March",
+  reopenText: "Hoping to be back Friday evening 🤞",
   // Behaviour
   autoHideMs: null, // null = don't auto-hide; e.g. 10000 to auto-hide
   blockOrdering: true
@@ -6081,6 +6081,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </body>
 
 </html>
+
 
 
 
