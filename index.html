@@ -2670,20 +2670,34 @@ body.overlay-open {
     </div>
   </div>
 
-  <!-- Order Success Modal -->
-<div id="order-success" class="modal-backdrop" style="display:none" role="dialog" aria-modal="true">
-  <div class="modal" style="max-width:560px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <h3 id="order-success-title" style="margin:0">Order placed</h3>
-      <button id="order-success-x" class="btn btn-ghost" type="button">×</button>
-    </div>
+			  <!-- Order Success Modal -->
+			<div id="order-success" class="modal-backdrop" style="display:none" role="dialog" aria-modal="true">
+			  <div class="modal" style="max-width:560px">
+				<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+				  <h3 id="order-success-title" style="margin:0">Order placed</h3>
+				  <button id="order-success-x" class="btn btn-ghost" type="button">×</button>
+				</div>
 
-    <div id="order-success-msg" class="muted small" style="margin-bottom:10px"></div>
+				<div id="order-success-msg" class="muted small" style="margin-bottom:10px"></div>
 
-    <div id="order-success-items" class="small"
-         style="max-height:260px;overflow:auto;border:1px solid #eee;
-                border-radius:8px;padding:8px;margin-bottom:10px">
-    </div>
+				<div id="order-success-check" class="small"
+					 style="margin-bottom:10px;background:#fafafa;border:1px solid #eee;border-radius:8px;padding:10px">
+				  <div style="font-weight:700;margin-bottom:6px">Please check your order details carefully:</div>
+				  <div><strong>Order type:</strong> <span id="order-success-type">-</span></div>
+				  <div><strong>Time:</strong> <span id="order-success-time">-</span></div>
+				  <div class="muted" style="margin-top:6px">
+					Please make sure your order type and time are correct. If anything looks wrong, please contact us as soon as possible.
+				  </div>
+				</div>
+
+				<div class="muted small" style="margin-bottom:10px">
+				  📧 If you chose email for updates and haven’t received your confirmation, please check your spam or junk folder just in case.
+				</div>
+
+				<div id="order-success-items" class="small"
+					 style="max-height:260px;overflow:auto;border:1px solid #eee;
+							border-radius:8px;padding:8px;margin-bottom:10px">
+				</div>
 
     <div class="totals">
       <div class="muted small">Total</div>
@@ -3563,7 +3577,7 @@ function handleExtraClick(opt) {
     titleEl.textContent = `Order confirmed — ${summary?.ref || ''}`;
   }
 
-  // 2) message
+    // 2) message
   const msgEl = document.getElementById('order-success-msg');
   if (msgEl) {
     const suffix = (summary?.orderType === 'delivery') ? 'delivery' : 'collection';
@@ -3571,6 +3585,18 @@ function handleExtraClick(opt) {
       ? `Thanks! We’ll contact you to confirm your ${suffix} time (${preferredTimeStr}).`
       : `Thanks! We’ll contact you to confirm your ${suffix}.`;
     msgEl.textContent = note;
+  }
+
+  // 2b) order type + time check
+  const typeEl = document.getElementById('order-success-type');
+  const timeEl = document.getElementById('order-success-time');
+
+  if (typeEl) {
+    typeEl.textContent = (summary?.orderType === 'delivery') ? 'Delivery' : 'Collection';
+  }
+
+  if (timeEl) {
+    timeEl.textContent = preferredTimeStr || 'To be confirmed';
   }
 
   // 3) items
@@ -6081,7 +6107,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </body>
 
 </html>
-
 
 
 
