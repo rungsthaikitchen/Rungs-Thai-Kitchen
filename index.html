@@ -5674,7 +5674,7 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 
 // ---- Temporary closure override (edit when needed) ----
 const tempClosure = {
-  active: true, // ✅ set true when temporarily closed
+  active: false, // ✅ set true when temporarily closed
   title: "Temporarily closed",
   message: `Just a quick heads up for our lovely local customers — unfortunately we won’t be open Wed/Thurs this week due to car trouble 🚗😒`,
   // Optional reopen time shown to customers (UK local time)
@@ -6107,6 +6107,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </body>
 
 </html>
+
 
 
 
