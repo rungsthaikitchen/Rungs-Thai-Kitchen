@@ -2186,7 +2186,7 @@ body.overlay-open {
 
 					<h2 id="kitchen-notice-title">Kitchen Closed Today</h2>
 					<p class="kitchen-notice-main">
-					  Rung's Thai Kitchen is closed today. Opening days are <strong>Weds to Sat, 17:00 to 21:00.</strong> Please feel free to view the menu and place a pre-order for a day when we are open.
+					  Rung's Thai Kitchen is closed today. Opening days are <strong>Fri & Sat, 17:00 to 21:00.</strong> Please feel free to view the menu and place a pre-order for a day when we are open.
 					</p>
 					<button type="button" id="kitchen-notice-close" class="kitchen-notice-close">
 					  Continue to website
@@ -5685,7 +5685,7 @@ const tempClosure = {
 };
 
 // Returns true if we are between:
-// Saturday 21:00  and  Wednesday 12:00 (midday)
+// Saturday 21:00  and  Friday 12:00 (midday)
 function shouldShowKitchenNotice(now = new Date()) {
   // Temporary override always wins
   if (tempClosure.active) return true;
@@ -5694,8 +5694,8 @@ function shouldShowKitchenNotice(now = new Date()) {
   const hour = now.getHours() + now.getMinutes() / 60;
 
   if (day === 6 && hour >= 21) return true; // Sun after 21:00
-  if (day === 0 || day === 1 || day === 2) return true; // Sun, Mon, Tue
-  if (day === 3 && hour < 12) return true; // Wed before 12:00
+  if (day === 0 || day === 1 || day === 2 || day === 3 || day === 4) return true; // Sun, Mon, Tue, Wed, Thu
+  if (day === 5 && hour < 12) return true; // Wed before 12:00
 
   return false;
 }
