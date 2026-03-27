@@ -283,17 +283,18 @@
       <table>
         <thead>
           <tr>
-			<th>RTK Ref</th>
-            <!--<th>Order</th>-->
-            <th>Booking Time</th>
-            <th>Customer</th>
-            <th>Type</th>
-			<th>Status</th>
-            <th class="nowrap">Subtotal</th>
-            <th class="nowrap">Delivery</th>
-            <th class="nowrap">Total</th>
-            <th style="text-align:right">Actions</th>
-          </tr>
+		  <th>RTK Ref</th>
+		  <th>Customer</th>
+		  <th>Type</th>
+		  <th>Customer Time</th>
+		  <th>Status</th>
+		  <th>Proposed Time</th>
+		  <th>Time Status</th>
+		  <th class="nowrap">Subtotal</th>
+		  <th class="nowrap">Delivery</th>
+		  <th class="nowrap">Total</th>
+		  <th style="text-align:right">Actions</th>
+		</tr>
         </thead>
         <tbody id="tbody">
           <!-- rows injected here -->	
@@ -1022,7 +1023,37 @@ function buildDetailsHTML(o) {
 			  w.document.close();
 			}
 
+function fmtShortTimeOnly(value) {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
 
+function fmtCustomerTime(value, isAsap) {
+  if (isAsap) return "ASAP";
+  if (!value) return "—";
+
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+
+  return d.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function getTimeStatusLabel(o) {
+  if (o.proposed_time) return "PROPOSED";
+  if (o.asap_requested) return "ASAP";
+  return "—";
+}
 
 	
 // ---------- Render ----------
@@ -1088,6 +1119,17 @@ function render(orders) {
     </td>
     <td><span class="pill">${(o.order_type || 'collection').toUpperCase()}</span></td>
     <td><span class="status-pill status-${status}">${statusLabel}</span></td>
+  tr.innerHTML = `
+    <td class="mono">${rtkRef}</td>
+    <td>
+      <div><strong>${customer.full_name || '—'}</strong></div>
+      <div class="small muted">${customer.phone || ''}</div>
+    </td>
+    <td><span class="pill">${(o.order_type || 'collection').toUpperCase()}</span></td>
+    <td>${fmtCustomerTime(o.preferred_time, o.asap_requested)}</td>
+    <td><span class="status-pill status-${status}">${statusLabel}</span></td>
+    <td>${fmtShortTimeOnly(o.proposed_time)}</td>
+    <td>${getTimeStatusLabel(o)}</td>
     <td class="nowrap">${fmtMoney(subtotal)}</td>
     <td class="nowrap">${fmtMoney(delivery)}</td>
     <td class="nowrap"><strong>${fmtMoney(finalTotal)}</strong></td>
@@ -1103,9 +1145,9 @@ function render(orders) {
         <button class="btn-small btn-suggest" data-order-id="${o.id}">Suggest</button>
       </div>
 
-      <button class="btn-small btn-accept"  data-order-id="${o.id}">Accept</button>
+      <button class="btn-small btn-accept" data-order-id="${o.id}">Accept</button>
       <button class="btn-small btn-decline" data-order-id="${o.id}">Decline</button>
-      <button class="btn-small btn-paid"    data-order-id="${o.id}">Mark paid</button>
+      <button class="btn-small btn-paid" data-order-id="${o.id}">Mark paid</button>
       <button class="btn-small btn-complete" data-order-id="${o.id}">Completed</button>
     </td>
   `;
@@ -1129,7 +1171,7 @@ function render(orders) {
 
     const detailsRow = document.createElement('tr');
     const detailsCell = document.createElement('td');
-    detailsCell.colSpan = 9;
+    detailsCell.colSpan = 11;
     detailsCell.appendChild(details);
     detailsRow.appendChild(detailsCell);
 
