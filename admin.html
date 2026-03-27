@@ -1540,7 +1540,7 @@ document.addEventListener("click", async (event) => {
     return;
   }
 
-  /* ---------------- SUGGEST NEW TIME ---------------- */
+    /* ---------------- SUGGEST NEW TIME ---------------- */
   if (btn.classList.contains("btn-suggest")) {
     const input = row ? row.querySelector(".suggest-time-input") : null;
     const suggestedTime = input ? input.value : "";
@@ -1580,19 +1580,16 @@ document.addEventListener("click", async (event) => {
     const result = await callOrderAction(payload);
 
     if (result?.success) {
-      if (isAsap) {
-        await notifyCustomer("time_suggested", row, {
-          proposed_time: proposedIso,
-          asap_requested: true
-        });
-      }
+      await notifyCustomer("time_suggested", row, {
+        proposed_time: proposedIso,
+        asap_requested: isAsap
+      });
 
       alert("Suggested time sent to customer.");
       location.reload();
     }
     return;
   }
-
   /* ---------------- MARK PAID ---------------- */
   if (btn.classList.contains("btn-paid")) {
     if (!confirm("Mark this order as paid?")) return;
