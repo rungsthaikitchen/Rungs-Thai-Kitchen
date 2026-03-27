@@ -1397,24 +1397,21 @@ async function updateOrderStatus(orderId, newStatus) {
 const ORDER_ACTION_API_URL =
   "https://ubyjrrsvbbqomitpaidb.supabase.co/functions/v1/hyper-worker";
 
-
-
-// 2) Must match ADMIN_SECRET env var in Supabase
-	const ADMIN_SECRET = "f18ea1324e4d6e011f5d3f41ccb9767cf9226d0bd2f8a21";
-
-
+	
 /*async function ca/* -----------------------------------------------------------
    ORDER ACTION API CALLER (existing function — unchanged)
 ----------------------------------------------------------- */
+const ORDER_ACTION_API_URL =
+  "https://order-backend-production.up.railway.app/admin-order-action";
+
 async function callOrderAction(payload) {
-  console.log("Calling order-action with payload:", payload);
+  console.log("Calling admin-order-action with payload:", payload);
 
   try {
     const res = await fetch(ORDER_ACTION_API_URL, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "x-admin-secret": ADMIN_SECRET
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(payload)
     });
@@ -1426,7 +1423,7 @@ async function callOrderAction(payload) {
       data = {};
     }
 
-    console.log("order-action response:", res.status, data);
+    console.log("admin-order-action response:", res.status, data);
 
     if (!res.ok) {
       alert("Error: " + (data.error || "Unknown error"));
@@ -1435,8 +1432,8 @@ async function callOrderAction(payload) {
 
     return data;
   } catch (err) {
-    console.error("Network error calling order-action:", err);
-    alert("Network error calling order-action");
+    console.error("Network error calling admin-order-action:", err);
+    alert("Network error calling admin-order-action");
     return null;
   }
 }
