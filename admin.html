@@ -1432,30 +1432,7 @@ async function callOrderAction(payload) {
     return null;
   }
 }
-    let data;
-    try {
-      data = await res.json();
-    } catch {
-      data = {};
-    }
-
-    console.log("admin-order-action response:", res.status, data);
-
-    if (!res.ok) {
-      alert("Error: " + (data.error || "Unknown error"));
-      return null;
-    }
-
-    return data;
-  } catch (err) {
-    console.error("Network error calling admin-order-action:", err);
-    alert("Network error calling admin-order-action");
-    return null;
-  }
-}
-
-
-
+    
 /* -----------------------------------------------------------
    notifyCustomer() — sends SMS/email via Railway backend
 ----------------------------------------------------------- */
