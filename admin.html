@@ -1150,13 +1150,10 @@ function render(orders) {
       </td>
     `;
 
-    tbody.appendChild(tr);
-  });
-}
-
-    // ---- details row (your existing block) ----
+    // ---- details row ----
     const details = document.createElement('div');
     details.className = 'details';
+    details.style.display = 'none';
     details.innerHTML = buildDetailsHTML(o);
 
     const statusSelect = details.querySelector('.status-select');
@@ -1172,7 +1169,7 @@ function render(orders) {
 
     const detailsRow = document.createElement('tr');
     const detailsCell = document.createElement('td');
-    detailsCell.colSpan = 11;
+    detailsCell.colSpan = 12;
     detailsCell.appendChild(details);
     detailsRow.appendChild(detailsCell);
 
