@@ -1393,13 +1393,8 @@ async function updateOrderStatus(orderId, newStatus) {
 <script>
   console.log("Admin actions script loaded");
 
- // 1) URL of your Supabase Edge Function
-const ORDER_ACTION_API_URL =
-  "https://ubyjrrsvbbqomitpaidb.supabase.co/functions/v1/hyper-worker";
-
-	
-/*async function ca/* -----------------------------------------------------------
-   ORDER ACTION API CALLER (existing function — unchanged)
+ /* -----------------------------------------------------------
+   ORDER ACTION API CALLER
 ----------------------------------------------------------- */
 const ORDER_ACTION_API_URL =
   "https://order-backend-production.up.railway.app/admin-order-action";
@@ -1416,6 +1411,27 @@ async function callOrderAction(payload) {
       body: JSON.stringify(payload)
     });
 
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      data = {};
+    }
+
+    console.log("admin-order-action response:", res.status, data);
+
+    if (!res.ok) {
+      alert("Error: " + (data.error || "Unknown error"));
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Network error calling admin-order-action:", err);
+    alert("Network error calling admin-order-action");
+    return null;
+  }
+}
     let data;
     try {
       data = await res.json();
