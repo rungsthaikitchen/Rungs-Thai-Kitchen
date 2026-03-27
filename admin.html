@@ -1523,34 +1523,31 @@ document.addEventListener("click", async (event) => {
 
   const row = btn.closest("tr");
 
- /* ---------------- ACCEPT ORDER ---------------- */
-if (btn.classList.contains("btn-accept")) {
-  const result = await callOrderAction({ action: "accept", orderId });
+  /* ---------------- ACCEPT ORDER ---------------- */
+  if (btn.classList.contains("btn-accept")) {
+    const result = await callOrderAction({ action: "accept", orderId });
 
-  if (result?.success) {
-    // Prefer whatever we already have on the row; fall back to API result
-    const preferredTime =
-      row.dataset.preferredTime ||
-      result.preferred_time ||
-      null;
+    if (result?.success) {
+      const preferredTime =
+        row.dataset.preferredTime ||
+        result.preferred_time ||
+        null;
 
-    await notifyCustomer("time_confirmed", row, {
-      preferred_time: preferredTime,
-      asap_requested: row.dataset.asapRequested === "true"
-    });
+      await notifyCustomer("time_confirmed", row, {
+        preferred_time: preferredTime,
+        asap_requested: row.dataset.asapRequested === "true"
+      });
 
-    alert("Order accepted. Customer notified.");
-    location.reload();
+      alert("Order accepted. Customer notified.");
+      location.reload();
+    }
+    return;
   }
-  return;
-}
-
-
 
   /* ---------------- DECLINE ORDER ---------------- */
   if (btn.classList.contains("btn-decline")) {
     const reason = window.prompt("Reason for declining? (optional):");
-    if (reason === null) return; // cancel pressed
+    if (reason === null) return;
 
     const result = await callOrderAction({
       action: "decline",
@@ -1566,65 +1563,58 @@ if (btn.classList.contains("btn-accept")) {
     return;
   }
 
-
   /* ---------------- SUGGEST NEW TIME ---------------- */
-		 if (btn.classList.contains("btn-suggest")) {
-		  const row = btn.closest("tr");
-		  const input = row ? row.querySelector(".suggest-time-input") : null;
-		  const suggestedTime = input ? input.value : ""; // "19:45"
+  if (btn.classList.contains("btn-suggest")) {
+    const input = row ? row.querySelector(".suggest-time-input") : null;
+    const suggestedTime = input ? input.value : "";
 
-		  if (!suggestedTime) {
-			alert("Please choose a time first.");
-			return;
-		  }
+    if (!suggestedTime) {
+      alert("Please choose a time first.");
+      return;
+    }
 
-		  const createdAt = row ? row.dataset.createdAt : null;
-		  const isAsap = row && row.dataset.asapRequested === "true";
+    const createdAt = row ? row.dataset.createdAt : null;
+    const isAsap = row && row.dataset.asapRequested === "true";
 
-		  let proposedIso;
-		  try {
-			let base = createdAt ? new Date(createdAt) : new Date();
+    let proposedIso;
+    try {
+      let base = createdAt ? new Date(createdAt) : new Date();
 
-			if (isAsap) {
-			  // For ASAP orders, move to the next working day (we're closed Mon/Tue)
-			  base = nextWorkingDay(base);
-			}
+      if (isAsap) {
+        base = nextWorkingDay(base);
+      }
 
-			const [hh, mm] = suggestedTime.split(":");
-			base.setHours(Number(hh) || 0, Number(mm) || 0, 0, 0);
-			proposedIso = base.toISOString();
-		  } catch (e) {
-			console.error("Failed to build proposedTime ISO:", e);
-			alert("Could not build the proposed time – please try again.");
-			return;
-		  }
+      const [hh, mm] = suggestedTime.split(":");
+      base.setHours(Number(hh) || 0, Number(mm) || 0, 0, 0);
+      proposedIso = base.toISOString();
+    } catch (e) {
+      console.error("Failed to build proposedTime ISO:", e);
+      alert("Could not build the proposed time – please try again.");
+      return;
+    }
 
-		  const payload = {
-			action: "suggest_time",
-			orderId,
-			proposedTime: proposedIso
-		  };
-		  console.log("Suggest payload:", payload);
+    const payload = {
+      action: "suggest_time",
+      orderId,
+      proposedTime: proposedIso
+    };
+    console.log("Suggest payload:", payload);
 
-		  const result = await callOrderAction(payload);
+    const result = await callOrderAction(payload);
 
-		  if (result?.success) {
-			// 🔔 For ASAP orders, send customer SMS directly from admin
-			if (isAsap) {
-			  await notifyCustomer("time_suggested", row, {
-				proposed_time: proposedIso,
-				asap_requested: true
-			  });
-			}
+    if (result?.success) {
+      if (isAsap) {
+        await notifyCustomer("time_suggested", row, {
+          proposed_time: proposedIso,
+          asap_requested: true
+        });
+      }
 
-			alert("Suggested time sent to customer.");
-			location.reload();
-		  }
-		  return;
-		}
-
-
-
+      alert("Suggested time sent to customer.");
+      location.reload();
+    }
+    return;
+  }
 
   /* ---------------- MARK PAID ---------------- */
   if (btn.classList.contains("btn-paid")) {
@@ -1641,7 +1631,6 @@ if (btn.classList.contains("btn-accept")) {
     }
     return;
   }
-
 
   /* ---------------- MARK COMPLETED / COLLECTED ---------------- */
   if (btn.classList.contains("btn-complete")) {
