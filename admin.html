@@ -1067,91 +1067,98 @@ function render(orders) {
     empty.style.display = 'block';
     return;
   }
+
   empty.style.display = 'none';
 
   orders.forEach(o => {
-  const tr = document.createElement('tr');
-  tr.classList.add('row');
+    const tr = document.createElement('tr');
+    tr.classList.add('row');
 
-  const isFuture = isFutureUkDay(o);
-  if (isFuture) tr.classList.add('row-attention');
+    const isFuture = isFutureUkDay(o);
+    if (isFuture) tr.classList.add('row-attention');
 
-  const customer = o.customers || {};
-  console.log('[ADMIN MONEY]', o.order_ref, { subtotal: o.subtotal, discount: o.discount, delivery_fee: o.delivery_fee, total: o.total });
+    const customer = o.customers || {};
+    console.log('[ADMIN MONEY]', o.order_ref, {
+      subtotal: o.subtotal,
+      discount: o.discount,
+      delivery_fee: o.delivery_fee,
+      total: o.total
+    });
 
-  const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
+    const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
 
-  const status = o.status || 'pending';
-  const statusLabel = STATUS_LABELS[status] || status;
+    const status = o.status || 'pending';
+    const statusLabel = STATUS_LABELS[status] || status;
 
-  // ---- correct money calculation (discount-aware) ----
-  const subtotal = Number(o.subtotal || 0);
-  const discount = Number(o.discount || 0);
-  const delivery = Number(o.delivery_fee || 0);
+    // ---- correct money calculation (discount-aware) ----
+    const subtotal = Number(o.subtotal || 0);
+    const discount = Number(o.discount || 0);
+    const delivery = Number(o.delivery_fee || 0);
 
-  const finalTotal =
-    (Number(o.total) > 0)
-      ? Number(o.total)
-      : Math.round((subtotal - discount + delivery) * 100) / 100;
+    const finalTotal =
+      (Number(o.total) > 0)
+        ? Number(o.total)
+        : Math.round((subtotal - discount + delivery) * 100) / 100;
 
-  // data-* attributes (use the correct totals)
-  tr.dataset.orderId = o.id;
-  tr.dataset.orderRef = rtkRef;
-  tr.dataset.name = customer.full_name || "";
-  tr.dataset.email = customer.email || "";
-  tr.dataset.phone = customer.phone || "";
-  tr.dataset.total = finalTotal;              // ✅ correct
-  tr.dataset.subtotal = subtotal;             // ✅ useful
-  tr.dataset.discount = discount;             // ✅ useful
-  tr.dataset.deliveryFee = delivery;          // ✅ useful
-  tr.dataset.asapRequested = o.asap_requested ? "true" : "false";
-  tr.dataset.communicationPreference = o.communication_preference || "email";
-  tr.dataset.createdAt = o.created_at;
-  tr.dataset.preferredTime = o.preferred_time || "";
+    // data-* attributes
+    tr.dataset.orderId = o.id;
+    tr.dataset.orderRef = rtkRef;
+    tr.dataset.name = customer.full_name || "";
+    tr.dataset.email = customer.email || "";
+    tr.dataset.phone = customer.phone || "";
+    tr.dataset.total = finalTotal;
+    tr.dataset.subtotal = subtotal;
+    tr.dataset.discount = discount;
+    tr.dataset.deliveryFee = delivery;
+    tr.dataset.asapRequested = o.asap_requested ? "true" : "false";
+    tr.dataset.communicationPreference = o.communication_preference || "email";
+    tr.dataset.createdAt = o.created_at || "";
+    tr.dataset.preferredTime = o.preferred_time || "";
+    tr.dataset.proposedTime = o.proposed_time || "";
+    tr.dataset.status = status;
 
-  // ROW HTML
-  tr.innerHTML = `
-    <td class="mono">${rtkRef}</td>
-    <td>${fmtDisplayTime(o)}</td>
-    <td>
-      <div><strong>${customer.full_name || '—'}</strong></div>
-      <div class="small muted">${customer.phone || ''}</div>
-    </td>
-    <td><span class="pill">${(o.order_type || 'collection').toUpperCase()}</span></td>
-    <td><span class="status-pill status-${status}">${statusLabel}</span></td>
-  tr.innerHTML = `
-    <td class="mono">${rtkRef}</td>
-    <td>
-      <div><strong>${customer.full_name || '—'}</strong></div>
-      <div class="small muted">${customer.phone || ''}</div>
-    </td>
-    <td><span class="pill">${(o.order_type || 'collection').toUpperCase()}</span></td>
-    <td>${fmtCustomerTime(o.preferred_time, o.asap_requested)}</td>
-    <td><span class="status-pill status-${status}">${statusLabel}</span></td>
-    <td>${fmtShortTimeOnly(o.proposed_time)}</td>
-    <td>${getTimeStatusLabel(o)}</td>
-    <td class="nowrap">${fmtMoney(subtotal)}</td>
-    <td class="nowrap">${fmtMoney(delivery)}</td>
-    <td class="nowrap"><strong>${fmtMoney(finalTotal)}</strong></td>
-    <td class="actions" style="text-align:right">
-      <button class="btn-small" data-action="toggle">Details</button>
-      <button class="btn-small" data-action="print">Print</button>
+    tr.innerHTML = `
+      <td class="mono">${rtkRef}</td>
+      <td>${fmtDisplayTime(o)}</td>
+      <td>
+        <div><strong>${customer.full_name || '—'}</strong></div>
+        <div class="small muted">${customer.phone || ''}</div>
+      </td>
+      <td><span class="pill">${(o.order_type || 'collection').toUpperCase()}</span></td>
+      <td>${fmtCustomerTime(o.preferred_time, o.asap_requested)}</td>
+      <td><span class="status-pill status-${status}">${statusLabel}</span></td>
+      <td>${fmtShortTimeOnly(o.proposed_time)}</td>
+      <td>${getTimeStatusLabel(o)}</td>
+      <td class="nowrap">${fmtMoney(subtotal)}</td>
+      <td class="nowrap">${fmtMoney(delivery)}</td>
+      <td class="nowrap"><strong>${fmtMoney(finalTotal)}</strong></td>
+      <td class="actions" style="text-align:right">
+        <button class="btn-small" data-action="toggle">Details</button>
+        <button class="btn-small" data-action="print">Print</button>
 
-      <div style="display:inline-flex;align-items:center;gap:4px;margin-left:8px">
-        <input type="time"
-               class="suggest-time-input"
-               data-order-id="${o.id}"
-               style="font-size:12px;padding:3px 4px">
-        <button class="btn-small btn-suggest" data-order-id="${o.id}">Suggest</button>
-      </div>
+        <div style="display:inline-flex;align-items:center;gap:4px;margin-left:8px">
+          <input
+            type="time"
+            class="suggest-time-input"
+            data-order-id="${o.id}"
+            style="font-size:12px;padding:3px 4px"
+          >
+          <button class="btn-small btn-suggest" data-order-id="${o.id}">Suggest</button>
+        </div>
 
-      <button class="btn-small btn-accept" data-order-id="${o.id}">Accept</button>
-      <button class="btn-small btn-decline" data-order-id="${o.id}">Decline</button>
-      <button class="btn-small btn-paid" data-order-id="${o.id}">Mark paid</button>
-      <button class="btn-small btn-complete" data-order-id="${o.id}">Completed</button>
-    </td>
-  `;
+        <button class="btn-small btn-accept" data-order-id="${o.id}">Accept</button>
+        <button class="btn-small btn-decline" data-order-id="${o.id}">Decline</button>
+        <button class="btn-small btn-paid" data-order-id="${o.id}">Mark paid</button>
+        <button class="btn-small btn-complete" data-order-id="${o.id}">Completed</button>
+      </td>
+    `;
 
+    tbody.appendChild(tr);
+
+    // If you already have a details row builder below this in your real file,
+    // leave it exactly as it is underneath this appendChild.
+  });
+}
 
     // ---- details row (your existing block) ----
     const details = document.createElement('div');
