@@ -1086,7 +1086,7 @@ function printTicket(o) {
         <style>
           @page {
             size: 80mm auto;
-            margin: 2mm;
+            margin: 1.5mm;
           }
 
           html, body {
@@ -1098,7 +1098,7 @@ function printTicket(o) {
           }
 
           body {
-            width: 76mm;
+            width: 78mm;
             padding: 2px;
             font-size: 13pt;
             line-height: 1.2;
@@ -1216,7 +1216,7 @@ function printTicket(o) {
         ${notesHtml}
 
         <div class="total">TOTAL: GBP ${total.toFixed(2)}</div>
-		<div style="height: 12mm;"></div>
+		<div style="height: 20mm;"></div>
       </body>
     </html>
   `;
@@ -1234,7 +1234,7 @@ function printTicket(o) {
 			  setTimeout(() => {
 			    w.focus();
 			    w.print();
-			  }, 300);
+			  }, 500);
 			}
 	
 // ---------- Render ----------
