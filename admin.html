@@ -1192,6 +1192,12 @@ function printTicket(o) {
             font-size: 16pt;
             font-weight: 700;
           }
+
+		  .total-top {
+		  margin-top: 6px;
+		  font-size: 15pt;
+		  font-weight: 700;
+		}
         </style>
       </head>
       <body>
@@ -1202,9 +1208,10 @@ function printTicket(o) {
         <div class="phone">${escapeHtml(c.phone || "")}</div>
 
         <div class="meta">
-          <div class="meta-row"><span class="label">TYPE:</span> ${escapeHtml(orderType)}</div>
-          <div class="meta-row"><span class="label">TIME:</span> ${escapeHtml(bookingTime)}</div>
-        </div>
+		  <div class="meta-row"><span class="label">TYPE:</span> ${escapeHtml(orderType)}</div>
+		  <div class="meta-row"><span class="label">TIME:</span> ${escapeHtml(bookingTime)}</div>
+		  <div class="meta-row total-top"><span class="label">TOTAL:</span> GBP ${total.toFixed(2)}</div>
+		</div>
 
         ${addressHtml}
 
