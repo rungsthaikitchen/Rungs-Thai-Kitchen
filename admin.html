@@ -1032,46 +1032,48 @@ function printTicket(o) {
     : "";
 
   const itemsHtml = items.length
-    ? items.map((it) => {
-        const modifiers = getModifiers(it.modifiers);
+    ? items
+        .map((it) => {
+          const modifiers = getModifiers(it.modifiers);
 
-        const modifiersHtml = modifiers
-          .map((m) => {
-            const modName =
-              typeof m === "string"
-                ? m
-                : (m && (m.name || m.label || m.id)) || "";
+          const modifiersHtml = modifiers
+            .map((m) => {
+              const modName =
+                typeof m === "string"
+                  ? m
+                  : (m && (m.name || m.label || m.id)) || "";
 
-            if (!modName) return "";
+              if (!modName) return "";
 
-            const delta =
-              m && typeof m === "object" && m.delta && Number(m.delta) !== 0
-                ? ` (£${Number(m.delta).toFixed(2)})`
-                : "";
+              const delta =
+                m && typeof m === "object" && m.delta && Number(m.delta) !== 0
+                  ? ` (£${Number(m.delta).toFixed(2)})`
+                  : "";
 
-            return `<div class="item-mod">+ ${escapeHtml(modName)}${escapeHtml(delta)}</div>`;
-          })
-          .join("");
+              return `<div class="item-mod">+ ${escapeHtml(modName)}${escapeHtml(delta)}</div>`;
+            })
+            .join("");
 
-        const spiceHtml =
-          it.spice !== undefined && it.spice !== null && it.spice !== ""
-            ? `<div class="item-mod">Spice: ${escapeHtml(it.spice)}</div>`
-            : "";
+          const spiceHtml =
+            it.spice !== undefined && it.spice !== null && it.spice !== ""
+              ? `<div class="item-mod">Spice: ${escapeHtml(it.spice)}</div>`
+              : "";
 
-        const itemNotesHtml =
-          it.notes
-            ? `<div class="item-mod">Note: ${escapeHtml(it.notes)}</div>`
-            : "";
+          const itemNotesHtml =
+            it.notes
+              ? `<div class="item-mod">Note: ${escapeHtml(it.notes)}</div>`
+              : "";
 
-        return `
-          <div class="item">
-            <div class="item-main">${escapeHtml(it.qty || 1)} × ${escapeHtml(it.name || "")}</div>
-            ${modifiersHtml}
-            ${spiceHtml}
-            ${itemNotesHtml}
-          </div>
-        `;
-      }).join("")
+          return `
+            <div class="item">
+              <div class="item-main">${escapeHtml(it.qty || 1)} × ${escapeHtml(it.name || "")}</div>
+              ${modifiersHtml}
+              ${spiceHtml}
+              ${itemNotesHtml}
+            </div>
+          `;
+        })
+        .join("")
     : `<div class="item"><div class="item-main">No items found</div></div>`;
 
   const html = `
@@ -1083,7 +1085,7 @@ function printTicket(o) {
         <style>
           @page {
             size: 80mm auto;
-            margin: 2mm;
+            margin: 4mm;
           }
 
           html, body {
@@ -1095,36 +1097,35 @@ function printTicket(o) {
           }
 
           body {
-            width: 76mm;
-            padding: 1mm 1mm 8mm 1mm;
-            font-size: 12pt;
-            line-height: 1.2;
-            box-sizing: border-box;
+            width: 72mm;
+            padding: 0;
+            font-size: 14pt;
+            line-height: 1.25;
           }
 
           .ref {
-            font-size: 16pt;
+            font-size: 20pt;
             font-weight: 700;
-            margin-bottom: 6px;
-          }
-
-          .customer {
-            font-size: 13pt;
-            font-weight: 700;
-            margin-bottom: 1px;
-          }
-
-          .phone {
-            font-size: 13pt;
-            margin-bottom: 6px;
-          }
-
-          .meta {
             margin-bottom: 8px;
           }
 
+          .customer {
+            font-size: 15pt;
+            font-weight: 700;
+            margin-bottom: 2px;
+          }
+
+          .phone {
+            font-size: 14pt;
+            margin-bottom: 8px;
+          }
+
+          .meta {
+            margin-bottom: 10px;
+          }
+
           .meta-row {
-            margin-bottom: 1px;
+            margin-bottom: 2px;
           }
 
           .label {
@@ -1132,59 +1133,56 @@ function printTicket(o) {
           }
 
           .section {
-            margin-top: 8px;
-            margin-bottom: 8px;
+            margin-top: 10px;
+            margin-bottom: 10px;
           }
 
           .section-title {
-            font-size: 13pt;
+            font-size: 15pt;
             font-weight: 700;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
             border-top: 1px dashed #000;
-            padding-top: 4px;
+            padding-top: 6px;
           }
 
           .item {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             page-break-inside: avoid;
             break-inside: avoid;
           }
 
           .item-main {
             display: block;
-            font-size: 12pt;
+            font-size: 15pt;
             font-weight: 700;
             white-space: normal;
             word-break: break-word;
-            overflow-wrap: anywhere;
           }
 
           .item-mod {
             display: block;
-            margin-left: 8px;
-            font-size: 11pt;
+            margin-left: 10px;
+            font-size: 13pt;
             white-space: normal;
             word-break: break-word;
-            overflow-wrap: anywhere;
           }
 
           .text-block {
             white-space: normal;
             word-break: break-word;
-            overflow-wrap: anywhere;
           }
 
           .total {
-            margin-top: 10px;
-            padding-top: 6px;
+            margin-top: 12px;
+            padding-top: 8px;
             border-top: 1px dashed #000;
-            font-size: 14pt;
+            font-size: 16pt;
             font-weight: 700;
           }
         </style>
       </head>
-      <body>
+      <body onload="window.focus(); window.print();">
         <div class="ref">${escapeHtml(rtkRef)}</div>
 
         <div class="customer">${escapeHtml(c.full_name || "")}</div>
@@ -1205,15 +1203,6 @@ function printTicket(o) {
         ${notesHtml}
 
         <div class="total">TOTAL: £${total.toFixed(2)}</div>
-
-        <script>
-          window.onload = function () {
-            setTimeout(function () {
-              window.focus();
-              window.print();
-            }, 300);
-          };
-        </script>
       </body>
     </html>
   `;
