@@ -1085,7 +1085,7 @@ function printTicket(o) {
         <style>
           @page {
             size: 80mm auto;
-            margin: 4mm;
+            margin: 2mm;
           }
 
           html, body {
@@ -1097,10 +1097,10 @@ function printTicket(o) {
           }
 
           body {
-            width: 72mm;
-            padding: 0;
-            font-size: 14pt;
-            line-height: 1.25;
+            width: 76mm;
+            padding: 2px;
+            font-size: 13pt;
+            line-height: 1.2;
           }
 
           .ref {
@@ -1153,12 +1153,13 @@ function printTicket(o) {
           }
 
           .item-main {
-            display: block;
-            font-size: 15pt;
-            font-weight: 700;
-            white-space: normal;
-            word-break: break-word;
-          }
+		  display: block;
+		  font-size: 13pt;
+		  font-weight: 700;
+		  white-space: normal;
+		  word-break: break-word;
+		  overflow-wrap: anywhere;
+		}
 
           .item-mod {
             display: block;
@@ -1182,7 +1183,15 @@ function printTicket(o) {
           }
         </style>
       </head>
-      <body onload="window.focus(); window.print();">
+      <body>
+		<script>
+		  window.onload = function () {
+		    setTimeout(function () {
+		      window.focus();
+		      window.print();
+		    }, 300);
+		  };
+		</script>
         <div class="ref">${escapeHtml(rtkRef)}</div>
 
         <div class="customer">${escapeHtml(c.full_name || "")}</div>
@@ -1203,6 +1212,7 @@ function printTicket(o) {
         ${notesHtml}
 
         <div class="total">TOTAL: £${total.toFixed(2)}</div>
+		<div style="height: 12mm;"></div>
       </body>
     </html>
   `;
