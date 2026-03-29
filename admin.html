@@ -1195,14 +1195,7 @@ function printTicket(o) {
         </style>
       </head>
       <body>
-		<script>
-		  window.onload = function () {
-		    setTimeout(function () {
-		      window.focus();
-		      window.print();
-		    }, 300);
-		  };
-		</script>
+		
         <div class="ref">${escapeHtml(rtkRef)}</div>
 
         <div class="customer">${escapeHtml(c.full_name || "")}</div>
@@ -1228,16 +1221,20 @@ function printTicket(o) {
     </html>
   `;
 
-  const w = window.open("", "PRINT", "height=800,width=600");
-  if (!w) {
-    alert("Pop-up blocked. Please allow pop-ups for printing.");
-    return;
-  }
-
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
-}
+		  const w = window.open("", "PRINT", "height=800,width=600");
+		if (!w) {
+		  alert("Pop-up blocked. Please allow pop-ups for printing.");
+		  return;
+		}
+		
+		w.document.open();
+		w.document.write(html);
+		w.document.close();
+		
+		setTimeout(() => {
+		  w.focus();
+		  w.print();
+		}, 300);
 	
 // ---------- Render ----------
 const tbody = document.getElementById('tbody');
