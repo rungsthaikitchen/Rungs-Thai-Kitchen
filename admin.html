@@ -1127,10 +1127,7 @@ const itemsHtml = PRINT_CATEGORY_ORDER
 
             if (!modName) return "";
 
-            const delta =
-              m && typeof m === "object" && m.delta && Number(m.delta) !== 0
-                ? ` (£${Number(m.delta).toFixed(2)})`
-                : "";
+            const delta = "";
 
             return `<div class="item-mod">- ${escapeHtml(modName)}${escapeHtml(delta)}</div>`;
           })
