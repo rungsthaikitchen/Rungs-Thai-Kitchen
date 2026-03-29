@@ -965,7 +965,79 @@ function getTimeStatusLabel(o) {
 }
 
 			// ---------- Print ticket ----------
-function printTicket(o) {
+const PRINT_CATEGORY_LOOKUP = {
+		  // Starter
+		  "veg-spring-rolls": "STARTER",
+		  "chicken-satay": "STARTER",
+		  "prawn-crackers": "STARTER",
+		  "moo-ping": "STARTER",
+		  "chicken-spring-rolls": "STARTER",
+		  "fried-tofu": "STARTER",
+		  "fish-cakes": "STARTER",
+		  "pork-dumplings": "STARTER",
+		  "fried-prawns": "STARTER",
+		  "thai-sausage": "STARTER",
+		  "spare-ribs": "STARTER",
+		
+		  // Soup
+		  "tom-yum": "SOUP",
+		  "tom-kha": "SOUP",
+		  "dumpling-broth": "SOUP",
+		
+		  // Salad
+		  "papaya-salad": "SALAD",
+		  "beef-salad": "SALAD",
+		  "pork-salad": "SALAD",
+		  "laab": "SALAD",
+		
+		  // Curry
+		  "rung-curry": "CURRY",
+		  "green-curry": "CURRY",
+		  "red-curry": "CURRY",
+		  "massaman-curry": "CURRY",
+		  "panang-curry": "CURRY",
+		
+		  // Stir Fry
+		  "stir-basil": "STIR FRY",
+		  "stir-ginger": "STIR FRY",
+		  "stir-cashew": "STIR FRY",
+		  "stir-sweetsour": "STIR FRY",
+		  "stir-yellow": "STIR FRY",
+		  "stir-chilli": "STIR FRY",
+		  "stir-pepper": "STIR FRY",
+		
+		  // Noodles & Rice
+		  "pad-thai": "NOODLES & RICE",
+		  "chef-pad-thai": "NOODLES & RICE",
+		  "pad-kee-mao": "NOODLES & RICE",
+		  "pad-see-ew": "NOODLES & RICE",
+		  "fried-rice": "NOODLES & RICE",
+		
+		  // Side Dishes
+		  "jasmine-rice": "SIDE DISHES",
+		  "egg-rice": "SIDE DISHES",
+		  "sticky-rice": "SIDE DISHES",
+		  "coconut-ricee": "SIDE DISHES",
+		  "chips": "SIDE DISHES",
+		  "fried-egg": "SIDE DISHES"
+		};
+		
+		const PRINT_CATEGORY_ORDER = [
+		  "STARTER",
+		  "SOUP",
+		  "SALAD",
+		  "CURRY",
+		  "STIR FRY",
+		  "NOODLES & RICE",
+		  "SIDE DISHES",
+		  "OTHER"
+		];
+		
+		function getPrintCategory(item) {
+		  return PRINT_CATEGORY_LOOKUP[item.item_id] || "OTHER";
+		}
+	  
+	  function printTicket(o) {
   const c = o.customers || {};
   const items = o.order_items || [];
 
@@ -983,7 +1055,7 @@ function printTicket(o) {
   const subtotal = Number(o.subtotal || 0);
   const delivery = Number(o.delivery_fee || 0);
   const total = subtotal + delivery;
-
+  
   function escapeHtml(value) {
     return String(value ?? "")
       .replace(/&/g, "&amp;")
@@ -1031,51 +1103,68 @@ function printTicket(o) {
     `
     : "";
 
-  const itemsHtml = items.length
-    ? items
-        .map((it) => {
-          const modifiers = getModifiers(it.modifiers);
+  const grouped = {};
 
-          const modifiersHtml = modifiers
-            .map((m) => {
-              const modName =
-                typeof m === "string"
-                  ? m
-                  : (m && (m.name || m.label || m.id)) || "";
+items.forEach((it) => {
+  const category = getPrintCategory(it);
+  if (!grouped[category]) grouped[category] = [];
+  grouped[category].push(it);
+});
 
-              if (!modName) return "";
+const itemsHtml = PRINT_CATEGORY_ORDER
+  .filter((cat) => grouped[cat] && grouped[cat].length)
+  .map((cat) => {
+    const sectionItemsHtml = grouped[cat]
+      .map((it) => {
+        const modifiers = getModifiers(it.modifiers);
 
-              const delta =
-                m && typeof m === "object" && m.delta && Number(m.delta) !== 0
-                  ? ` (£${Number(m.delta).toFixed(2)})`
-                  : "";
+        const modifiersHtml = modifiers
+          .map((m) => {
+            const modName =
+              typeof m === "string"
+                ? m
+                : (m && (m.name || m.label || m.id)) || "";
 
-              return `<div class="item-mod">+ ${escapeHtml(modName)}${escapeHtml(delta)}</div>`;
-            })
-            .join("");
+            if (!modName) return "";
 
-          const spiceHtml =
-            it.spice !== undefined && it.spice !== null && it.spice !== ""
-              ? `<div class="item-mod">Spice: ${escapeHtml(it.spice)}</div>`
-              : "";
+            const delta =
+              m && typeof m === "object" && m.delta && Number(m.delta) !== 0
+                ? ` (£${Number(m.delta).toFixed(2)})`
+                : "";
 
-          const itemNotesHtml =
-            it.notes
-              ? `<div class="item-mod">Note: ${escapeHtml(it.notes)}</div>`
-              : "";
+            return `<div class="item-mod">- ${escapeHtml(modName)}${escapeHtml(delta)}</div>`;
+          })
+          .join("");
 
-          return `
-			  <div class="item">
-			    <div class="item-main">${escapeHtml(it.qty || 1)} x ${escapeHtml(it.name || "")}</div>
-			    ${modifiersHtml}
-			    ${spiceHtml}
-			    ${itemNotesHtml}
-			    <div class="item-sep"><br></div>
-			  </div>
-			`;
-        })
-        .join("")
-    : `<div class="item"><div class="item-main">No items found</div></div>`;
+        const spiceHtml =
+          it.spice !== undefined && it.spice !== null && it.spice !== ""
+            ? `<div class="item-mod">- Spice: ${escapeHtml(it.spice)}</div>`
+            : "";
+
+        const itemNotesHtml =
+          it.notes
+            ? `<div class="item-mod">- Note: ${escapeHtml(it.notes)}</div>`
+            : "";
+
+        return `
+          <div class="item">
+            <div class="item-main">- ${escapeHtml(it.qty || 1)} x ${escapeHtml(it.name || "")}</div>
+            ${modifiersHtml}
+            ${spiceHtml}
+            ${itemNotesHtml}
+          </div>
+        `;
+      })
+      .join("");
+
+    return `
+      <div class="section">
+        <div class="section-title">${escapeHtml(cat)}</div>
+        ${sectionItemsHtml}
+      </div>
+    `;
+  })
+  .join("");
 
   const html = `
     <!doctype html>
@@ -1139,12 +1228,14 @@ function printTicket(o) {
           }
 
           .section-title {
-            font-size: 15pt;
-            font-weight: 700;
-            margin-bottom: 4px;
-            border-top: 1px dashed #000;
-            padding-top: 6px;
-          }
+		  font-size: 15pt;
+		  font-weight: 700;
+		  margin-top: 8px;
+		  margin-bottom: 4px;
+		  border-top: 1px dashed #000;
+		  padding-top: 6px;
+		  text-transform: uppercase;
+		}
 
           .item {
 			  display: block;
