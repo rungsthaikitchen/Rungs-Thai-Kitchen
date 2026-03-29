@@ -1221,21 +1221,23 @@ function printTicket(o) {
     </html>
   `;
 
-		    const w = window.open("", "PRINT", "height=800,width=600");
-			  if (!w) {
-			    alert("Pop-up blocked. Please allow pop-ups for printing.");
-			    return;
-			  }
-			
-			  w.document.open();
-			  w.document.write(html);
-			  w.document.close();
-			
-			  setTimeout(() => {
-			    w.focus();
-			    w.print();
-			  }, 500);
-			}
+		  const w = window.open("", "PRINT", "height=800,width=600");
+if (!w) {
+  alert("Pop-up blocked. Please allow pop-ups for printing.");
+  return;
+}
+
+w.document.open();
+w.document.write(html);
+w.document.close();
+
+w.onload = function () {
+  setTimeout(() => {
+    w.focus();
+    w.print();
+  }, 800);
+};
+}
 	
 // ---------- Render ----------
 const tbody = document.getElementById('tbody');
