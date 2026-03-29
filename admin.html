@@ -923,138 +923,258 @@ function buildDetailsHTML(o) {
 		};
 
 			// ---------- Print ticket ----------
-			function printTicket(o) {
-		  const c = o.customers || {};
-		  const items = o.order_items || [];
+function printTicket(o) {
+  const c = o.customers || {};
+  const items = o.order_items || [];
 
-		  const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
+  const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
 
-		  const rawTime = o.preferred_time || o.proposed_time || null;
-		  const bookingTime = rawTime
-			? new Date(rawTime).toLocaleString([], {
-				dateStyle: "medium",
-				timeStyle: "short",
-			  })
-			: "No time set";
+  const rawTime = o.preferred_time || o.proposed_time || null;
+  const bookingTime = rawTime
+    ? new Date(rawTime).toLocaleString("en-GB", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })
+    : "No time set";
 
-		  const orderType = (o.order_type || "collection").toUpperCase();
-		  const subtotal = Number(o.subtotal || 0);
-		  const delivery = Number(o.delivery_fee || 0);
-		  const total = subtotal + delivery;
+  const orderType = (o.order_type || "collection").toUpperCase();
+  const subtotal = Number(o.subtotal || 0);
+  const delivery = Number(o.delivery_fee || 0);
+  const total = subtotal + delivery;
 
-		  // ESC/POS COMMANDS
-		  const ESC = "\x1B";
-		  const GS  = "\x1D";
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
 
-		  const BIG = ESC + "!" + "\x38";   // Double height + double width + bold
-		  const LARGE = ESC + "!" + "\x20"; // Double height
-		  const NORMAL = ESC + "!" + "\x00";
+  function nlToBr(value) {
+    return escapeHtml(value).replace(/\r?\n/g, "<br>");
+  }
 
-		  let text = "";
+  function getModifiers(modifiers) {
+    if (!modifiers) return [];
 
-		  // BIG RTK REF
-		  text += BIG + rtkRef + "\n\n";
+    if (Array.isArray(modifiers)) return modifiers;
 
-		  // Larger customer details
-		  text += LARGE + (c.full_name || "") + "\n";
-		  text += (c.phone || "") + "\n\n";
+    if (typeof modifiers === "string") {
+      try {
+        const parsed = JSON.parse(modifiers);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
 
-		  // Order type + time
-		  text += LARGE + `TYPE: ${orderType}\n`;
-		  text += `TIME: ${bookingTime}\n\n`;
+    return [];
+  }
 
-		  // Address for delivery
-		  if (orderType === "DELIVERY" && c.address) {
-			text += LARGE + "ADDRESS:\n";
-			text += NORMAL + c.address + "\n\n";
-		  }
+  const addressHtml =
+    orderType === "DELIVERY" && c.address
+      ? `
+        <div class="section">
+          <div class="section-title">ADDRESS</div>
+          <div class="text-block">${nlToBr(c.address)}</div>
+        </div>
+      `
+      : "";
 
-		  // Items
-		  text += LARGE + "ITEMS:\n";
-		  text += NORMAL;
+  const notesHtml = o.notes
+    ? `
+      <div class="section">
+        <div class="section-title">NOTES</div>
+        <div class="text-block">${nlToBr(o.notes)}</div>
+      </div>
+    `
+    : "";
 
-		  items.forEach(it => {
-			text += `${it.qty}× ${it.name}\n`;
+  const itemsHtml = items.length
+    ? items
+        .map((it) => {
+          const modifiers = getModifiers(it.modifiers);
 
-			if (it.modifiers && it.modifiers.length) {
-			  it.modifiers.forEach(m => {
-				text += `   + ${m.name}\n`;
-			  });
-			}
+          const modifiersHtml = modifiers
+            .map((m) => {
+              const modName =
+                typeof m === "string"
+                  ? m
+                  : (m && (m.name || m.label || m.id)) || "";
 
-			text += "\n";
-		  });
+              if (!modName) return "";
 
-		  // Notes
-		  if (o.notes) {
-			text += LARGE + "NOTES:\n";
-			text += NORMAL + o.notes + "\n\n";
-		  }
+              const delta =
+                m && typeof m === "object" && m.delta && Number(m.delta) !== 0
+                  ? ` (£${Number(m.delta).toFixed(2)})`
+                  : "";
 
-		  // Total
-		  text += LARGE + `TOTAL: £${total.toFixed(2)}\n\n`;
+              return `<div class="item-mod">+ ${escapeHtml(modName)}${escapeHtml(delta)}</div>`;
+            })
+            .join("");
 
-		  // Cut
-		  text += GS + "V" + "\x00";
+          const spiceHtml =
+            it.spice !== undefined && it.spice !== null && it.spice !== ""
+              ? `<div class="item-mod">Spice: ${escapeHtml(it.spice)}</div>`
+              : "";
 
-		  // ESCAPE FOR HTML
-		  const safeText = text
-			.replace(/&/g, "&amp;")
-			.replace(/</g, "&lt;")
-			.replace(/>/g, "&gt;");
+          const itemNotesHtml =
+            it.notes
+              ? `<div class="item-mod">Note: ${escapeHtml(it.notes)}</div>`
+              : "";
 
-		  // PRINT USING A POPUP
-		 const w = window.open("", "PRINT", "height=800,width=600");
-			  w.document.write(`
-				<!doctype html>
-				<html>
-				  <head><title>${rtkRef}</title></head>
-				  <body onload="window.focus(); window.print();">
-					<pre style="
-					  font-family: 'Courier New', monospace;
-					  font-size: 22pt;
-					  line-height: 1.4;
-					  white-space: pre;
-					  margin: 0;
-					">${safeText}</pre>
-				  </body>
-				</html>
-			  `);
-			  w.document.close();
-			}
+          return `
+            <div class="item">
+              <div class="item-main">${escapeHtml(it.qty || 1)} × ${escapeHtml(it.name || "")}</div>
+              ${modifiersHtml}
+              ${spiceHtml}
+              ${itemNotesHtml}
+            </div>
+          `;
+        })
+        .join("")
+    : `<div class="item"><div class="item-main">No items found</div></div>`;
 
-function fmtShortTimeOnly(value) {
-  if (!value) return "—";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+  const html = `
+    <!doctype html>
+    <html>
+      <head>
+        <title>${escapeHtml(rtkRef)}</title>
+        <meta charset="utf-8">
+        <style>
+          @page {
+            size: 80mm auto;
+            margin: 4mm;
+          }
+
+          html, body {
+            margin: 0;
+            padding: 0;
+            background: #fff;
+            color: #000;
+            font-family: "Courier New", monospace;
+          }
+
+          body {
+            width: 72mm;
+            padding: 0;
+            font-size: 14pt;
+            line-height: 1.25;
+          }
+
+          .ref {
+            font-size: 20pt;
+            font-weight: 700;
+            margin-bottom: 8px;
+          }
+
+          .customer {
+            font-size: 15pt;
+            font-weight: 700;
+            margin-bottom: 2px;
+          }
+
+          .phone {
+            font-size: 14pt;
+            margin-bottom: 8px;
+          }
+
+          .meta {
+            margin-bottom: 10px;
+          }
+
+          .meta-row {
+            margin-bottom: 2px;
+          }
+
+          .label {
+            font-weight: 700;
+          }
+
+          .section {
+            margin-top: 10px;
+            margin-bottom: 10px;
+          }
+
+          .section-title {
+            font-size: 15pt;
+            font-weight: 700;
+            margin-bottom: 4px;
+            border-top: 1px dashed #000;
+            padding-top: 6px;
+          }
+
+          .item {
+            display: block;
+            margin-bottom: 8px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+
+          .item-main {
+            display: block;
+            font-size: 15pt;
+            font-weight: 700;
+            white-space: normal;
+            word-break: break-word;
+          }
+
+          .item-mod {
+            display: block;
+            margin-left: 10px;
+            font-size: 13pt;
+            white-space: normal;
+            word-break: break-word;
+          }
+
+          .text-block {
+            white-space: normal;
+            word-break: break-word;
+          }
+
+          .total {
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px dashed #000;
+            font-size: 16pt;
+            font-weight: 700;
+          }
+        </style>
+      </head>
+      <body onload="window.focus(); window.print();">
+        <div class="ref">${escapeHtml(rtkRef)}</div>
+
+        <div class="customer">${escapeHtml(c.full_name || "")}</div>
+        <div class="phone">${escapeHtml(c.phone || "")}</div>
+
+        <div class="meta">
+          <div class="meta-row"><span class="label">TYPE:</span> ${escapeHtml(orderType)}</div>
+          <div class="meta-row"><span class="label">TIME:</span> ${escapeHtml(bookingTime)}</div>
+        </div>
+
+        ${addressHtml}
+
+        <div class="section">
+          <div class="section-title">ITEMS</div>
+          ${itemsHtml}
+        </div>
+
+        ${notesHtml}
+
+        <div class="total">TOTAL: £${total.toFixed(2)}</div>
+      </body>
+    </html>
+  `;
+
+  const w = window.open("", "PRINT", "height=800,width=600");
+  if (!w) {
+    alert("Pop-up blocked. Please allow pop-ups for printing.");
+    return;
+  }
+
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
 }
-
-function fmtCustomerTime(value, isAsap) {
-  if (isAsap) return "ASAP";
-  if (!value) return "—";
-
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "—";
-
-  return d.toLocaleString("en-GB", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-}
-
-function getTimeStatusLabel(o) {
-  if (o.proposed_time) return "PROPOSED";
-  if (o.asap_requested) return "ASAP";
-  return "—";
-}
-
 	
 // ---------- Render ----------
 const tbody = document.getElementById('tbody');
