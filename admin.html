@@ -1157,12 +1157,13 @@ const itemsHtml = PRINT_CATEGORY_ORDER
       })
       .join("");
 
-    return `
-      <div class="section">
-        <div class="section-title">${escapeHtml(cat)}</div>
-        ${sectionItemsHtml}
-      </div>
-    `;
+   return `
+	  <div class="section">
+	    <div class="section-divider">--------------------------------</div>
+	    <div class="section-title">${escapeHtml(cat)}</div>
+	    ${sectionItemsHtml}
+	  </div>
+	`;
   })
   .join("");
 
@@ -1230,10 +1231,8 @@ const itemsHtml = PRINT_CATEGORY_ORDER
           .section-title {
 		  font-size: 15pt;
 		  font-weight: 700;
-		  margin-top: 8px;
+		  margin-top: 0;
 		  margin-bottom: 4px;
-		  border-top: 1px dashed #000;
-		  padding-top: 6px;
 		  text-transform: uppercase;
 		}
 
@@ -1288,6 +1287,15 @@ const itemsHtml = PRINT_CATEGORY_ORDER
 		  margin-top: 6px;
 		  font-size: 15pt;
 		  font-weight: 700;
+		}
+
+		.section-divider {
+		  display: block;
+		  font-size: 11pt;
+		  line-height: 1;
+		  margin-top: 6px;
+		  margin-bottom: 4px;
+		  white-space: pre;
 		}
         </style>
       </head>
