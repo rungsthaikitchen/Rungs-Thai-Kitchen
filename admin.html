@@ -1284,9 +1284,10 @@ const itemsHtml = PRINT_CATEGORY_ORDER
           }
 
 		  .total-top {
-		  margin-top: 6px;
-		  font-size: 15pt;
+		  font-size: 16pt;
 		  font-weight: 700;
+		  margin-top: 6px;
+		  margin-bottom: 8px;
 		}
 
 		.section-divider {
@@ -1300,34 +1301,35 @@ const itemsHtml = PRINT_CATEGORY_ORDER
         </style>
       </head>
       <body>
+				
+		<div class="ref">${escapeHtml(rtkRef)}</div>
 		
-        <div class="ref">${escapeHtml(rtkRef)}</div>
-
-        <div class="customer">${escapeHtml(c.full_name || "")}</div>
-        <div class="phone">${escapeHtml(c.phone || "")}</div>
-
-        <div class="meta">
+		<div class="customer">${escapeHtml(c.full_name || "")}</div>
+		<div class="phone">${escapeHtml(c.phone || "")}</div>
+		
+		<div class="meta">
 		  <div class="meta-row"><span class="label">TYPE:</span> ${escapeHtml(orderType)}</div>
 		  <div class="meta-row"><span class="label">TIME:</span> ${escapeHtml(bookingTime)}</div>
-		  <div class="meta-row total-top"><span class="label">TOTAL:</span> GBP ${total.toFixed(2)}</div>
 		</div>
-
-        ${addressHtml}
-
-        <div class="section">
-          <div class="section-title">ITEMS</div>
-          ${itemsHtml}
-        </div>
-
-        ${notesHtml}
-
-        <div class="total">TOTAL: GBP ${total.toFixed(2)}</div>
+		
+		<div class="total-top">TOTAL: GBP ${total.toFixed(2)}</div>
+		
+		${addressHtml}
+		
+		<div class="section">
+		  <div class="section-title">ITEMS</div>
+		  ${itemsHtml}
+		</div>
+		
+		${notesHtml}
+		
+		<div class="total">TOTAL: GBP ${total.toFixed(2)}</div>
 		<div style="height: 20mm;"></div>
       </body>
     </html>
   `;
 
-		  const w = window.open("", "PRINT", "height=800,width=600");
+		  const w = window.open("", `PRINT_${Date.now()}`, "height=800,width=600");
 if (!w) {
   alert("Pop-up blocked. Please allow pop-ups for printing.");
   return;
