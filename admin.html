@@ -1065,13 +1065,14 @@ function printTicket(o) {
               : "";
 
           return `
-            <div class="item">
-              <div class="item-main">${escapeHtml(it.qty || 1)} × ${escapeHtml(it.name || "")}</div>
-              ${modifiersHtml}
-              ${spiceHtml}
-              ${itemNotesHtml}
-            </div>
-          `;
+			  <div class="item">
+			    <div class="item-main">${escapeHtml(it.qty || 1)} x ${escapeHtml(it.name || "")}</div>
+			    ${modifiersHtml}
+			    ${spiceHtml}
+			    ${itemNotesHtml}
+			    <div class="item-sep"><br></div>
+			  </div>
+			`;
         })
         .join("")
     : `<div class="item"><div class="item-main">No items found</div></div>`;
@@ -1146,28 +1147,38 @@ function printTicket(o) {
           }
 
           .item {
-            display: block;
-            margin-bottom: 8px;
-            page-break-inside: avoid;
-            break-inside: avoid;
-          }
+			  display: block;
+			  margin-bottom: 6px;
+			  page-break-inside: avoid;
+			  break-inside: avoid;
+			  clear: both;
+			}
+			
+			.item-main {
+			  display: block;
+			  font-size: 13pt;
+			  font-weight: 700;
+			  white-space: normal;
+			  word-break: break-word;
+			  overflow-wrap: anywhere;
+			  clear: both;
+			}
+			
+			.item-mod {
+			  display: block;
+			  margin-left: 8px;
+			  font-size: 11pt;
+			  white-space: normal;
+			  word-break: break-word;
+			  overflow-wrap: anywhere;
+			  clear: both;
+			}
 
-          .item-main {
+		  .item-sep {
 		  display: block;
-		  font-size: 13pt;
-		  font-weight: 700;
-		  white-space: normal;
-		  word-break: break-word;
-		  overflow-wrap: anywhere;
+		  height: 6px;
+		  line-height: 6px;
 		}
-
-          .item-mod {
-            display: block;
-            margin-left: 10px;
-            font-size: 13pt;
-            white-space: normal;
-            word-break: break-word;
-          }
 
           .text-block {
             white-space: normal;
@@ -1211,7 +1222,7 @@ function printTicket(o) {
 
         ${notesHtml}
 
-        <div class="total">TOTAL: £${total.toFixed(2)}</div>
+        <div class="total">TOTAL: GBP ${total.toFixed(2)}</div>
 		<div style="height: 12mm;"></div>
       </body>
     </html>
