@@ -345,6 +345,16 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+function syncTodayOnlyCheckbox() {
+  const cb = document.getElementById("filter-today");
+  if (!cb) {
+    console.error("Checkbox #filter-today not found");
+    return;
+  }
+
+  cb.checked = !!showTodayOnly;
+}
+
 
 	
 	// ---- Restaurant location (centre point for distance) ----
@@ -921,6 +931,38 @@ function buildDetailsHTML(o) {
 		  completed: 'Completed',
 		  cancelled: 'Cancelled'
 		};
+
+	  function fmtShortTimeOnly(value) {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function fmtCustomerTime(value, isAsap) {
+  if (isAsap) return "ASAP";
+  if (!value) return "—";
+
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+
+  return d.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function getTimeStatusLabel(o) {
+  if (o.proposed_time) return "PROPOSED";
+  if (o.asap_requested) return "ASAP";
+  return "—";
+}
 
 			// ---------- Print ticket ----------
 function printTicket(o) {
