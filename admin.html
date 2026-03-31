@@ -1055,6 +1055,7 @@ const PRINT_CATEGORY_LOOKUP = {
   const subtotal = Number(o.subtotal || 0);
   const delivery = Number(o.delivery_fee || 0);
   const total = subtotal + delivery;
+  const itemCount = items.reduce((sum, it) => sum + Number(it.qty || 1), 0);
   
   function escapeHtml(value) {
     return String(value ?? "")
@@ -1315,6 +1316,7 @@ const itemsHtml = PRINT_CATEGORY_ORDER
 		<div class="meta">
 		  <div class="meta-row"><span class="label">TYPE:</span> ${escapeHtml(orderType)}</div>
 		  <div class="meta-row"><span class="label">TIME:</span> ${escapeHtml(bookingTime)}</div>
+		  <div class="meta-row"><span class="label">ITEMS:</span> ${itemCount}</div>
 		</div>
 		
 		<div class="total-top">TOTAL: GBP ${total.toFixed(2)}</div>
