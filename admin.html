@@ -1287,6 +1287,16 @@ const itemsHtml = PRINT_CATEGORY_ORDER
 		  margin-bottom: 4px;
 		  white-space: pre;
 		}
+		.ticket-buffer {
+		  margin-top: 10px;
+		  font-size: 10pt;
+		  line-height: 1.1;
+		  white-space: normal;
+		}
+		
+		.ticket-end-space {
+		  height: 25mm;
+		}
 
 		@media print {
 		  body {
@@ -1316,12 +1326,22 @@ const itemsHtml = PRINT_CATEGORY_ORDER
 		  ${itemsHtml}
 		</div>
 		
-		${notesHtml}
-		
+			${notesHtml}
+			
+			<div class="ticket-buffer">
+			--------------------------------
+			END OF ORDER
+			IGNORE ANY TEXT BELOW
+			XXXX XXXX XXXX XXXX
+			XXXX XXXX XXXX XXXX
+			XXXX XXXX XXXX XXXX
+			</div>
+			
 			<div class="ticket-end-space"></div>
 			<div style="page-break-after: always;"></div>
-      </body>
-    </html>
+			
+			</body>
+			</html>
   `;
 
 		  const w = window.open("", `PRINT_${Date.now()}`, "height=800,width=600");
