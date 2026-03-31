@@ -1172,9 +1172,9 @@ const itemsHtml = PRINT_CATEGORY_ORDER
         <meta charset="utf-8">
         <style>
           @page {
-            size: 80mm auto;
-            margin: 1.5mm;
-          }
+		  size: 80mm auto;
+		  margin: 0;
+		}
 
           html, body {
             margin: 0;
@@ -1184,12 +1184,12 @@ const itemsHtml = PRINT_CATEGORY_ORDER
             font-family: "Courier New", monospace;
           }
 
-          body {
-            width: 78mm;
-            padding: 2px;
-            font-size: 13pt;
-            line-height: 1.2;
-          }
+         body {
+			  width: 78mm;
+			  padding: 3mm;
+			  font-size: 13pt;
+			  line-height: 1.2;
+			}
 
           .ref {
             font-size: 20pt;
@@ -1287,6 +1287,12 @@ const itemsHtml = PRINT_CATEGORY_ORDER
 		  margin-bottom: 4px;
 		  white-space: pre;
 		}
+
+		@media print {
+		  body {
+		    page-break-after: always;
+		  }
+		}
         </style>
       </head>
       <body>
@@ -1312,7 +1318,8 @@ const itemsHtml = PRINT_CATEGORY_ORDER
 		
 		${notesHtml}
 		
-			<div style="height: 25mm;"></div>
+			<div class="ticket-end-space"></div>
+			<div style="page-break-after: always;"></div>
       </body>
     </html>
   `;
