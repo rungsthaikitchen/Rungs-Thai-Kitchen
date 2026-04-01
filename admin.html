@@ -1885,55 +1885,65 @@ document.addEventListener("click", async (event) => {
   }
 
     /* ---------------- SUGGEST NEW TIME ---------------- */
-  if (btn.classList.contains("btn-suggest")) {
-    const input = row ? row.querySelector(".suggest-time-input") : null;
-    const suggestedTime = input ? input.value : "";
+if (btn.classList.contains("btn-suggest")) {
+  const input = row ? row.querySelector(".suggest-time-input") : null;
+  const suggestedTime = input ? input.value : "";
 
-    if (!suggestedTime) {
-      alert("Please choose a time first.");
-      return;
-    }
-
-    const createdAt = row ? row.dataset.createdAt : null;
-    const isAsap = row && row.dataset.asapRequested === "true";
-
-    let proposedIso;
-    try {
-      let base = createdAt ? new Date(createdAt) : new Date();
-
-      if (isAsap) {
-        base = nextWorkingDay(base);
-      }
-
-      const [hh, mm] = suggestedTime.split(":");
-      base.setHours(Number(hh) || 0, Number(mm) || 0, 0, 0);
-      proposedIso = base.toISOString();
-    } catch (e) {
-      console.error("Failed to build proposedTime ISO:", e);
-      alert("Could not build the proposed time – please try again.");
-      return;
-    }
-
-    const payload = {
-      action: "suggest_time",
-      orderId,
-      proposedTime: proposedIso
-    };
-    console.log("Suggest payload:", payload);
-
-    const result = await callOrderAction(payload);
-
-    if (result?.success) {
-      await notifyCustomer("time_suggested", row, {
-        proposed_time: proposedIso,
-        asap_requested: isAsap
-      });
-
-      alert("Suggested time sent to customer.");
-      location.reload();
-    }
+  if (!suggestedTime) {
+    alert("Please choose a time first.");
     return;
   }
+
+  const preferredTime = row ? row.dataset.preferredTime : null;
+  const createdAt = row ? row.dataset.createdAt : null;
+  const isAsap = row && row.dataset.asapRequested === "true";
+
+  let proposedIso;
+  try {
+    let base;
+
+    if (isAsap) {
+      // ASAP: suggest against the next working day from now/order date
+      base = createdAt ? new Date(createdAt) : new Date();
+      base = nextWorkingDay(base);
+    } else if (preferredTime) {
+      // Non-ASAP: keep the customer's original requested DATE
+      base = new Date(preferredTime);
+    } else {
+      // Fallback only
+      base = createdAt ? new Date(createdAt) : new Date();
+    }
+
+    const [hh, mm] = suggestedTime.split(":");
+    base.setHours(Number(hh) || 0, Number(mm) || 0, 0, 0);
+
+    proposedIso = base.toISOString();
+  } catch (e) {
+    console.error("Failed to build proposedTime ISO:", e);
+    alert("Could not build the proposed time – please try again.");
+    return;
+  }
+
+  const payload = {
+    action: "suggest_time",
+    orderId,
+    proposedTime: proposedIso
+  };
+  console.log("Suggest payload:", payload);
+
+  const result = await callOrderAction(payload);
+
+  if (result?.success) {
+    await notifyCustomer("time_suggested", row, {
+      proposed_time: proposedIso,
+      asap_requested: isAsap
+    });
+
+    alert("Suggested time sent to customer.");
+    location.reload();
+  }
+  return;
+}
   /* ---------------- MARK PAID ---------------- */
   if (btn.classList.contains("btn-paid")) {
     if (!confirm("Mark this order as paid?")) return;
