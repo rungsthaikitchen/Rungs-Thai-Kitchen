@@ -283,17 +283,18 @@
       <table>
         <thead>
           <tr>
-			<th>RTK Ref</th>
-            <!--<th>Order</th>-->
-            <th>Booking Time</th>
-            <th>Customer</th>
-            <th>Type</th>
-			<th>Status</th>
-            <th class="nowrap">Subtotal</th>
-            <th class="nowrap">Delivery</th>
-            <th class="nowrap">Total</th>
-            <th style="text-align:right">Actions</th>
-          </tr>
+		  <th>RTK Ref</th>
+		  <th>Customer</th>
+		  <th>Type</th>
+		  <th>Customer Time</th>
+		  <th>Status</th>
+		  <th>Proposed Time</th>
+		  <th>Time Status</th>
+		  <th class="nowrap">Subtotal</th>
+		  <th class="nowrap">Delivery</th>
+		  <th class="nowrap">Total</th>
+		  <th style="text-align:right">Actions</th>
+		</tr>
         </thead>
         <tbody id="tbody">
           <!-- rows injected here -->	
@@ -343,6 +344,16 @@ document.addEventListener("DOMContentLoaded", () => {
     showTodayOnly
   });
 });
+
+function syncTodayOnlyCheckbox() {
+  const cb = document.getElementById("filter-today");
+  if (!cb) {
+    console.error("Checkbox #filter-today not found");
+    return;
+  }
+
+  cb.checked = !!showTodayOnly;
+}
 
 
 	
@@ -921,109 +932,434 @@ function buildDetailsHTML(o) {
 		  cancelled: 'Cancelled'
 		};
 
+	  function fmtShortTimeOnly(value) {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function fmtCustomerTime(value, isAsap) {
+  if (isAsap) return "ASAP";
+  if (!value) return "—";
+
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+
+  return d.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function getTimeStatusLabel(o) {
+  if (o.proposed_time) return "PROPOSED";
+  if (o.asap_requested) return "ASAP";
+  return "—";
+}
+
 			// ---------- Print ticket ----------
-			function printTicket(o) {
-		  const c = o.customers || {};
-		  const items = o.order_items || [];
+const PRINT_CATEGORY_LOOKUP = {
+		  // Starter
+		  "veg-spring-rolls": "STARTER",
+		  "chicken-satay": "STARTER",
+		  "prawn-crackers": "STARTER",
+		  "moo-ping": "STARTER",
+		  "chicken-spring-rolls": "STARTER",
+		  "fried-tofu": "STARTER",
+		  "fish-cakes": "STARTER",
+		  "pork-dumplings": "STARTER",
+		  "fried-prawns": "STARTER",
+		  "thai-sausage": "STARTER",
+		  "spare-ribs": "STARTER",
+		
+		  // Soup
+		  "tom-yum": "SOUP",
+		  "tom-kha": "SOUP",
+		  "dumpling-broth": "SOUP",
+		
+		  // Salad
+		  "papaya-salad": "SALAD",
+		  "beef-salad": "SALAD",
+		  "pork-salad": "SALAD",
+		  "laab": "SALAD",
+		
+		  // Curry
+		  "rung-curry": "CURRY",
+		  "green-curry": "CURRY",
+		  "red-curry": "CURRY",
+		  "massaman-curry": "CURRY",
+		  "panang-curry": "CURRY",
+		
+		  // Stir Fry
+		  "stir-basil": "STIR FRY",
+		  "stir-ginger": "STIR FRY",
+		  "stir-cashew": "STIR FRY",
+		  "stir-sweetsour": "STIR FRY",
+		  "stir-yellow": "STIR FRY",
+		  "stir-chilli": "STIR FRY",
+		  "stir-pepper": "STIR FRY",
+		
+		  // Noodles & Rice
+		  "pad-thai": "NOODLES & RICE",
+		  "chef-pad-thai": "NOODLES & RICE",
+		  "pad-kee-mao": "NOODLES & RICE",
+		  "pad-see-ew": "NOODLES & RICE",
+		  "fried-rice": "NOODLES & RICE",
+		
+		  // Side Dishes
+		  "jasmine-rice": "SIDE DISHES",
+		  "egg-rice": "SIDE DISHES",
+		  "sticky-rice": "SIDE DISHES",
+		  "coconut-ricee": "SIDE DISHES",
+		  "chips": "SIDE DISHES",
+		  "fried-egg": "SIDE DISHES"
+		};
+		
+		const PRINT_CATEGORY_ORDER = [
+		  "STARTER",
+		  "SOUP",
+		  "SALAD",
+		  "CURRY",
+		  "STIR FRY",
+		  "NOODLES & RICE",
+		  "SIDE DISHES",
+		  "OTHER"
+		];
+		
+		function getPrintCategory(item) {
+		  return PRINT_CATEGORY_LOOKUP[item.item_id] || "OTHER";
+		}
+	  
+	  function printTicket(o) {
+  const c = o.customers || {};
+  const items = o.order_items || [];
 
-		  const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
+  const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
 
-		  const rawTime = o.preferred_time || o.proposed_time || null;
-		  const bookingTime = rawTime
-			? new Date(rawTime).toLocaleString([], {
-				dateStyle: "medium",
-				timeStyle: "short",
-			  })
-			: "No time set";
+  const rawTime = o.preferred_time || o.proposed_time || null;
+  const bookingTime = rawTime
+    ? new Date(rawTime).toLocaleString("en-GB", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })
+    : "No time set";
 
-		  const orderType = (o.order_type || "collection").toUpperCase();
-		  const subtotal = Number(o.subtotal || 0);
-		  const delivery = Number(o.delivery_fee || 0);
-		  const total = subtotal + delivery;
+  const orderType = (o.order_type || "collection").toUpperCase();
+  const subtotal = Number(o.subtotal || 0);
+  const delivery = Number(o.delivery_fee || 0);
+  const total = subtotal + delivery;
+  const itemCount = items.reduce((sum, it) => sum + Number(it.qty || 1), 0);
+  
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
 
-		  // ESC/POS COMMANDS
-		  const ESC = "\x1B";
-		  const GS  = "\x1D";
+  function nlToBr(value) {
+    return escapeHtml(value).replace(/\r?\n/g, "<br>");
+  }
 
-		  const BIG = ESC + "!" + "\x38";   // Double height + double width + bold
-		  const LARGE = ESC + "!" + "\x20"; // Double height
-		  const NORMAL = ESC + "!" + "\x00";
+  function getModifiers(modifiers) {
+    if (!modifiers) return [];
 
-		  let text = "";
+    if (Array.isArray(modifiers)) return modifiers;
 
-		  // BIG RTK REF
-		  text += BIG + rtkRef + "\n\n";
+    if (typeof modifiers === "string") {
+      try {
+        const parsed = JSON.parse(modifiers);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
 
-		  // Larger customer details
-		  text += LARGE + (c.full_name || "") + "\n";
-		  text += (c.phone || "") + "\n\n";
+    return [];
+  }
 
-		  // Order type + time
-		  text += LARGE + `TYPE: ${orderType}\n`;
-		  text += `TIME: ${bookingTime}\n\n`;
+  const addressHtml =
+    orderType === "DELIVERY" && c.address
+      ? `
+        <div class="section">
+          <div class="section-title">ADDRESS</div>
+          <div class="text-block">${nlToBr(c.address)}</div>
+        </div>
+      `
+      : "";
 
-		  // Address for delivery
-		  if (orderType === "DELIVERY" && c.address) {
-			text += LARGE + "ADDRESS:\n";
-			text += NORMAL + c.address + "\n\n";
-		  }
+  const notesHtml = o.notes
+    ? `
+      <div class="section">
+        <div class="section-title">NOTES</div>
+        <div class="text-block">${nlToBr(o.notes)}</div>
+      </div>
+    `
+    : "";
 
-		  // Items
-		  text += LARGE + "ITEMS:\n";
-		  text += NORMAL;
+  const grouped = {};
 
-		  items.forEach(it => {
-			text += `${it.qty}× ${it.name}\n`;
+items.forEach((it) => {
+  const category = getPrintCategory(it);
+  if (!grouped[category]) grouped[category] = [];
+  grouped[category].push(it);
+});
 
-			if (it.modifiers && it.modifiers.length) {
-			  it.modifiers.forEach(m => {
-				text += `   + ${m.name}\n`;
-			  });
+const itemsHtml = PRINT_CATEGORY_ORDER
+  .filter((cat) => grouped[cat] && grouped[cat].length)
+  .map((cat) => {
+    const sectionItemsHtml = grouped[cat]
+      .map((it) => {
+        const modifiers = getModifiers(it.modifiers);
+
+        const modifiersHtml = modifiers
+          .map((m) => {
+            const modName =
+              typeof m === "string"
+                ? m
+                : (m && (m.name || m.label || m.id)) || "";
+
+            if (!modName) return "";
+
+            const delta = "";
+
+            return `<div class="item-mod">- ${escapeHtml(modName)}${escapeHtml(delta)}</div>`;
+          })
+          .join("");
+
+        const spiceHtml =
+          it.spice !== undefined && it.spice !== null && it.spice !== ""
+            ? `<div class="item-mod">- Spice: ${escapeHtml(it.spice)}</div>`
+            : "";
+
+        const itemNotesHtml =
+          it.notes
+            ? `<div class="item-mod">- Note: ${escapeHtml(it.notes)}</div>`
+            : "";
+
+        return `
+          <div class="item">
+            <div class="item-main">- ${escapeHtml(it.qty || 1)} x ${escapeHtml(it.name || "")}</div>
+            ${modifiersHtml}
+            ${spiceHtml}
+            ${itemNotesHtml}
+          </div>
+        `;
+      })
+      .join("");
+
+   return `
+	  <div class="section">
+	    <div class="section-divider">--------------------------------</div>
+	    <div class="section-title">${escapeHtml(cat)}</div>
+	    ${sectionItemsHtml}
+	  </div>
+	`;
+  })
+  .join("");
+
+  const html = `
+    <!doctype html>
+    <html>
+      <head>
+        <title>${escapeHtml(rtkRef)}</title>
+        <meta charset="utf-8">
+        <style>
+          @page {
+		  size: 80mm auto;
+		  margin: 0;
+		}
+
+          html, body {
+            margin: 0;
+            padding: 0;
+            background: #fff;
+            color: #000;
+            font-family: "Courier New", monospace;
+          }
+
+         body {
+			  width: 78mm;
+			  padding: 3mm;
+			  font-size: 13pt;
+			  line-height: 1.2;
 			}
 
-			text += "\n";
-		  });
+          .ref {
+            font-size: 20pt;
+            font-weight: 700;
+            margin-bottom: 8px;
+          }
 
-		  // Notes
-		  if (o.notes) {
-			text += LARGE + "NOTES:\n";
-			text += NORMAL + o.notes + "\n\n";
-		  }
+          .customer {
+            font-size: 15pt;
+            font-weight: 700;
+            margin-bottom: 2px;
+          }
 
-		  // Total
-		  text += LARGE + `TOTAL: £${total.toFixed(2)}\n\n`;
+          .phone {
+            font-size: 14pt;
+            margin-bottom: 8px;
+          }
 
-		  // Cut
-		  text += GS + "V" + "\x00";
+          .meta {
+            margin-bottom: 10px;
+          }
 
-		  // ESCAPE FOR HTML
-		  const safeText = text
-			.replace(/&/g, "&amp;")
-			.replace(/</g, "&lt;")
-			.replace(/>/g, "&gt;");
+          .meta-row {
+            margin-bottom: 2px;
+          }
 
-		  // PRINT USING A POPUP
-		 const w = window.open("", "PRINT", "height=800,width=600");
-			  w.document.write(`
-				<!doctype html>
-				<html>
-				  <head><title>${rtkRef}</title></head>
-				  <body onload="window.focus(); window.print();">
-					<pre style="
-					  font-family: 'Courier New', monospace;
-					  font-size: 22pt;
-					  line-height: 1.4;
-					  white-space: pre;
-					  margin: 0;
-					">${safeText}</pre>
-				  </body>
-				</html>
-			  `);
-			  w.document.close();
+          .label {
+            font-weight: 700;
+          }
+
+          .section {
+            margin-top: 10px;
+            margin-bottom: 10px;
+          }
+
+          .section-title {
+		  font-size: 15pt;
+		  font-weight: 700;
+		  margin-top: 0;
+		  margin-bottom: 4px;
+		  text-transform: uppercase;
+		}
+
+          .item {
+			  display: block;
+			  margin-bottom: 6px;
+			  page-break-inside: avoid;
+			  break-inside: avoid;
+			  clear: both;
+			}
+			
+			.item-main {
+			  display: block;
+			  font-size: 13pt;
+			  font-weight: 700;
+			  white-space: normal;
+			  word-break: break-word;
+			  overflow-wrap: anywhere;
+			  clear: both;
+			}
+			
+			.item-mod {
+			  display: block;
+			  margin-left: 8px;
+			  font-size: 11pt;
+			  white-space: normal;
+			  word-break: break-word;
+			  overflow-wrap: anywhere;
+			  clear: both;
 			}
 
+		  .item-sep {
+		  display: block;
+		  height: 6px;
+		  line-height: 6px;
+		}
 
+          .text-block {
+            white-space: normal;
+            word-break: break-word;
+          }
 
+		  .total-top {
+		  font-size: 16pt;
+		  font-weight: 700;
+		  margin-top: 6px;
+		  margin-bottom: 8px;
+		}
+
+		.section-divider {
+		  display: block;
+		  font-size: 11pt;
+		  line-height: 1;
+		  margin-top: 6px;
+		  margin-bottom: 4px;
+		  white-space: pre;
+		}
+		.ticket-buffer {
+		  margin-top: 10px;
+		  font-size: 10pt;
+		  line-height: 1.1;
+		  white-space: normal;
+		}
+		
+		.ticket-end-space {
+		  height: 25mm;
+		}
+
+		@media print {
+		  body {
+		    page-break-after: always;
+		  }
+		}
+        </style>
+      </head>
+      <body>
+				
+		<div class="ref">${escapeHtml(rtkRef)}</div>
+		
+		<div class="customer">${escapeHtml(c.full_name || "")}</div>
+		<div class="phone">${escapeHtml(c.phone || "")}</div>
+		
+		<div class="meta">
+		  <div class="meta-row"><span class="label">TYPE:</span> ${escapeHtml(orderType)}</div>
+		  <div class="meta-row"><span class="label">TIME:</span> ${escapeHtml(bookingTime)}</div>
+		  <div class="meta-row"><span class="label">ITEMS:</span> ${itemCount}</div>
+		</div>
+		
+		<div class="total-top">TOTAL: GBP ${total.toFixed(2)}</div>
+		
+		${addressHtml}
+		
+		<div class="section">
+		  <div class="section-title">ITEMS</div>
+		  ${itemsHtml}
+		</div>
+		
+			${notesHtml}
+			
+			<div class="ticket-buffer">
+			--------------------------------
+			END OF ORDER - ${escapeHtml(rtkRef)}
+			--------------------------------
+			</div>
+			
+			<div class="ticket-end-space"></div>
+			<div style="page-break-after: always;"></div>
+			
+			</body>
+			</html>
+  `;
+
+		  const w = window.open("", `PRINT_${Date.now()}`, "height=800,width=600");
+if (!w) {
+  alert("Pop-up blocked. Please allow pop-ups for printing.");
+  return;
+}
+
+w.document.open();
+w.document.write(html);
+w.document.close();
+
+w.onload = function () {
+  setTimeout(() => {
+    w.focus();
+    w.print();
+  }, 800);
+};
+}
 	
 // ---------- Render ----------
 const tbody = document.getElementById('tbody');
@@ -1036,84 +1372,92 @@ function render(orders) {
     empty.style.display = 'block';
     return;
   }
+
   empty.style.display = 'none';
 
   orders.forEach(o => {
-  const tr = document.createElement('tr');
-  tr.classList.add('row');
+    const tr = document.createElement('tr');
+    tr.classList.add('row');
 
-  const isFuture = isFutureUkDay(o);
-  if (isFuture) tr.classList.add('row-attention');
+    const isFuture = isFutureUkDay(o);
+    if (isFuture) tr.classList.add('row-attention');
 
-  const customer = o.customers || {};
-  console.log('[ADMIN MONEY]', o.order_ref, { subtotal: o.subtotal, discount: o.discount, delivery_fee: o.delivery_fee, total: o.total });
+    const customer = o.customers || {};
+    console.log('[ADMIN MONEY]', o.order_ref, {
+      subtotal: o.subtotal,
+      discount: o.discount,
+      delivery_fee: o.delivery_fee,
+      total: o.total
+    });
 
-  const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
+    const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
+    const status = o.status || 'pending';
+    const statusLabel = STATUS_LABELS[status] || status;
 
-  const status = o.status || 'pending';
-  const statusLabel = STATUS_LABELS[status] || status;
+    const subtotal = Number(o.subtotal || 0);
+    const discount = Number(o.discount || 0);
+    const delivery = Number(o.delivery_fee || 0);
 
-  // ---- correct money calculation (discount-aware) ----
-  const subtotal = Number(o.subtotal || 0);
-  const discount = Number(o.discount || 0);
-  const delivery = Number(o.delivery_fee || 0);
+    const finalTotal =
+      Number(o.total) > 0
+        ? Number(o.total)
+        : Math.round((subtotal - discount + delivery) * 100) / 100;
 
-  const finalTotal =
-    (Number(o.total) > 0)
-      ? Number(o.total)
-      : Math.round((subtotal - discount + delivery) * 100) / 100;
+    tr.dataset.orderId = o.id;
+    tr.dataset.orderRef = rtkRef;
+    tr.dataset.name = customer.full_name || '';
+    tr.dataset.email = customer.email || '';
+    tr.dataset.phone = customer.phone || '';
+    tr.dataset.total = String(finalTotal);
+    tr.dataset.subtotal = String(subtotal);
+    tr.dataset.discount = String(discount);
+    tr.dataset.deliveryFee = String(delivery);
+    tr.dataset.asapRequested = o.asap_requested ? 'true' : 'false';
+    tr.dataset.communicationPreference = o.communication_preference || 'email';
+    tr.dataset.createdAt = o.created_at || '';
+    tr.dataset.preferredTime = o.preferred_time || '';
+    tr.dataset.proposedTime = o.proposed_time || '';
+    tr.dataset.status = status;
 
-  // data-* attributes (use the correct totals)
-  tr.dataset.orderId = o.id;
-  tr.dataset.orderRef = rtkRef;
-  tr.dataset.name = customer.full_name || "";
-  tr.dataset.email = customer.email || "";
-  tr.dataset.phone = customer.phone || "";
-  tr.dataset.total = finalTotal;              // ✅ correct
-  tr.dataset.subtotal = subtotal;             // ✅ useful
-  tr.dataset.discount = discount;             // ✅ useful
-  tr.dataset.deliveryFee = delivery;          // ✅ useful
-  tr.dataset.asapRequested = o.asap_requested ? "true" : "false";
-  tr.dataset.communicationPreference = o.communication_preference || "email";
-  tr.dataset.createdAt = o.created_at;
-  tr.dataset.preferredTime = o.preferred_time || "";
+    tr.innerHTML = `
+      <td class="mono">${rtkRef}</td>
+      <td>
+        <div><strong>${customer.full_name || '—'}</strong></div>
+        <div class="small muted">${customer.phone || ''}</div>
+      </td>
+      <td><span class="pill">${(o.order_type || 'collection').toUpperCase()}</span></td>
+      <td>${fmtCustomerTime(o.preferred_time, o.asap_requested)}</td>
+      <td><span class="status-pill status-${status}">${statusLabel}</span></td>
+      <td>${fmtShortTimeOnly(o.proposed_time)}</td>
+      <td>${getTimeStatusLabel(o)}</td>
+      <td class="nowrap">${fmtMoney(subtotal)}</td>
+      <td class="nowrap">${fmtMoney(delivery)}</td>
+      <td class="nowrap"><strong>${fmtMoney(finalTotal)}</strong></td>
+      <td class="actions" style="text-align:right">
+        <button class="btn-small" data-action="toggle">Details</button>
+        <button class="btn-small" data-action="print">Print</button>
 
-  // ROW HTML
-  tr.innerHTML = `
-    <td class="mono">${rtkRef}</td>
-    <td>${fmtDisplayTime(o)}</td>
-    <td>
-      <div><strong>${customer.full_name || '—'}</strong></div>
-      <div class="small muted">${customer.phone || ''}</div>
-    </td>
-    <td><span class="pill">${(o.order_type || 'collection').toUpperCase()}</span></td>
-    <td><span class="status-pill status-${status}">${statusLabel}</span></td>
-    <td class="nowrap">${fmtMoney(subtotal)}</td>
-    <td class="nowrap">${fmtMoney(delivery)}</td>
-    <td class="nowrap"><strong>${fmtMoney(finalTotal)}</strong></td>
-    <td class="actions" style="text-align:right">
-      <button class="btn-small" data-action="toggle">Details</button>
-      <button class="btn-small" data-action="print">Print</button>
+        <div style="display:inline-flex;align-items:center;gap:4px;margin-left:8px">
+          <input
+            type="time"
+            class="suggest-time-input"
+            data-order-id="${o.id}"
+            style="font-size:12px;padding:3px 4px"
+          >
+          <button class="btn-small btn-suggest" data-order-id="${o.id}">Suggest</button>
+        </div>
 
-      <div style="display:inline-flex;align-items:center;gap:4px;margin-left:8px">
-        <input type="time"
-               class="suggest-time-input"
-               data-order-id="${o.id}"
-               style="font-size:12px;padding:3px 4px">
-        <button class="btn-small btn-suggest" data-order-id="${o.id}">Suggest</button>
-      </div>
+        <button class="btn-small btn-accept" data-order-id="${o.id}">Accept</button>
+        <button class="btn-small btn-decline" data-order-id="${o.id}">Decline</button>
+        <button class="btn-small btn-paid" data-order-id="${o.id}">Mark paid</button>
+        <button class="btn-small btn-complete" data-order-id="${o.id}">Completed</button>
+      </td>
+    `;
 
-      <button class="btn-small btn-accept"  data-order-id="${o.id}">Accept</button>
-      <button class="btn-small btn-decline" data-order-id="${o.id}">Decline</button>
-      <button class="btn-small btn-paid"    data-order-id="${o.id}">Mark paid</button>
-      <button class="btn-small btn-complete" data-order-id="${o.id}">Completed</button>
-    </td>
-  `;
-
-
-    // ---- details row (your existing block) ----
+    // ---- details row ----
     const details = document.createElement('div');
     details.className = 'details';
+    details.style.display = 'none';
     details.innerHTML = buildDetailsHTML(o);
 
     const statusSelect = details.querySelector('.status-select');
@@ -1129,7 +1473,7 @@ function render(orders) {
 
     const detailsRow = document.createElement('tr');
     const detailsCell = document.createElement('td');
-    detailsCell.colSpan = 9;
+    detailsCell.colSpan = 12;
     detailsCell.appendChild(details);
     detailsRow.appendChild(detailsCell);
 
@@ -1393,28 +1737,20 @@ async function updateOrderStatus(orderId, newStatus) {
 <script>
   console.log("Admin actions script loaded");
 
- // 1) URL of your Supabase Edge Function
-const ORDER_ACTION_API_URL =
-  "https://ubyjrrsvbbqomitpaidb.supabase.co/functions/v1/hyper-worker";
-
-
-
-// 2) Must match ADMIN_SECRET env var in Supabase
-	const ADMIN_SECRET = "f18ea1324e4d6e011f5d3f41ccb9767cf9226d0bd2f8a21";
-
-
-/*async function ca/* -----------------------------------------------------------
-   ORDER ACTION API CALLER (existing function — unchanged)
+ /* -----------------------------------------------------------
+   ORDER ACTION API CALLER
 ----------------------------------------------------------- */
+const ORDER_ACTION_API_URL =
+  "https://order-backend-production.up.railway.app/admin-order-action";
+
 async function callOrderAction(payload) {
-  console.log("Calling order-action with payload:", payload);
+  console.log("Calling admin-order-action with payload:", payload);
 
   try {
     const res = await fetch(ORDER_ACTION_API_URL, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "x-admin-secret": ADMIN_SECRET
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(payload)
     });
@@ -1426,7 +1762,7 @@ async function callOrderAction(payload) {
       data = {};
     }
 
-    console.log("order-action response:", res.status, data);
+    console.log("admin-order-action response:", res.status, data);
 
     if (!res.ok) {
       alert("Error: " + (data.error || "Unknown error"));
@@ -1435,14 +1771,12 @@ async function callOrderAction(payload) {
 
     return data;
   } catch (err) {
-    console.error("Network error calling order-action:", err);
-    alert("Network error calling order-action");
+    console.error("Network error calling admin-order-action:", err);
+    alert("Network error calling admin-order-action");
     return null;
   }
 }
-
-
-
+    
 /* -----------------------------------------------------------
    notifyCustomer() — sends SMS/email via Railway backend
 ----------------------------------------------------------- */
@@ -1510,34 +1844,31 @@ document.addEventListener("click", async (event) => {
 
   const row = btn.closest("tr");
 
- /* ---------------- ACCEPT ORDER ---------------- */
-if (btn.classList.contains("btn-accept")) {
-  const result = await callOrderAction({ action: "accept", orderId });
+  /* ---------------- ACCEPT ORDER ---------------- */
+  if (btn.classList.contains("btn-accept")) {
+    const result = await callOrderAction({ action: "accept", orderId });
 
-  if (result?.success) {
-    // Prefer whatever we already have on the row; fall back to API result
-    const preferredTime =
-      row.dataset.preferredTime ||
-      result.preferred_time ||
-      null;
+    if (result?.success) {
+      const preferredTime =
+        row.dataset.preferredTime ||
+        result.preferred_time ||
+        null;
 
-    await notifyCustomer("time_confirmed", row, {
-      preferred_time: preferredTime,
-      asap_requested: row.dataset.asapRequested === "true"
-    });
+      await notifyCustomer("time_confirmed", row, {
+        preferred_time: preferredTime,
+        asap_requested: row.dataset.asapRequested === "true"
+      });
 
-    alert("Order accepted. Customer notified.");
-    location.reload();
+      alert("Order accepted. Customer notified.");
+      location.reload();
+    }
+    return;
   }
-  return;
-}
-
-
 
   /* ---------------- DECLINE ORDER ---------------- */
   if (btn.classList.contains("btn-decline")) {
     const reason = window.prompt("Reason for declining? (optional):");
-    if (reason === null) return; // cancel pressed
+    if (reason === null) return;
 
     const result = await callOrderAction({
       action: "decline",
@@ -1553,66 +1884,66 @@ if (btn.classList.contains("btn-accept")) {
     return;
   }
 
+    /* ---------------- SUGGEST NEW TIME ---------------- */
+if (btn.classList.contains("btn-suggest")) {
+  const input = row ? row.querySelector(".suggest-time-input") : null;
+  const suggestedTime = input ? input.value : "";
 
-  /* ---------------- SUGGEST NEW TIME ---------------- */
-		 if (btn.classList.contains("btn-suggest")) {
-		  const row = btn.closest("tr");
-		  const input = row ? row.querySelector(".suggest-time-input") : null;
-		  const suggestedTime = input ? input.value : ""; // "19:45"
+  if (!suggestedTime) {
+    alert("Please choose a time first.");
+    return;
+  }
 
-		  if (!suggestedTime) {
-			alert("Please choose a time first.");
-			return;
-		  }
+  const preferredTime = row ? row.dataset.preferredTime : null;
+  const createdAt = row ? row.dataset.createdAt : null;
+  const isAsap = row && row.dataset.asapRequested === "true";
 
-		  const createdAt = row ? row.dataset.createdAt : null;
-		  const isAsap = row && row.dataset.asapRequested === "true";
+  let proposedIso;
+  try {
+    let base;
 
-		  let proposedIso;
-		  try {
-			let base = createdAt ? new Date(createdAt) : new Date();
+    if (isAsap) {
+      // ASAP: suggest against the next working day from now/order date
+      base = createdAt ? new Date(createdAt) : new Date();
+      base = nextWorkingDay(base);
+    } else if (preferredTime) {
+      // Non-ASAP: keep the customer's original requested DATE
+      base = new Date(preferredTime);
+    } else {
+      // Fallback only
+      base = createdAt ? new Date(createdAt) : new Date();
+    }
 
-			if (isAsap) {
-			  // For ASAP orders, move to the next working day (we're closed Mon/Tue)
-			  base = nextWorkingDay(base);
-			}
+    const [hh, mm] = suggestedTime.split(":");
+    base.setHours(Number(hh) || 0, Number(mm) || 0, 0, 0);
 
-			const [hh, mm] = suggestedTime.split(":");
-			base.setHours(Number(hh) || 0, Number(mm) || 0, 0, 0);
-			proposedIso = base.toISOString();
-		  } catch (e) {
-			console.error("Failed to build proposedTime ISO:", e);
-			alert("Could not build the proposed time – please try again.");
-			return;
-		  }
+    proposedIso = base.toISOString();
+  } catch (e) {
+    console.error("Failed to build proposedTime ISO:", e);
+    alert("Could not build the proposed time – please try again.");
+    return;
+  }
 
-		  const payload = {
-			action: "suggest_time",
-			orderId,
-			proposedTime: proposedIso
-		  };
-		  console.log("Suggest payload:", payload);
+  const payload = {
+    action: "suggest_time",
+    orderId,
+    proposedTime: proposedIso
+  };
+  console.log("Suggest payload:", payload);
 
-		  const result = await callOrderAction(payload);
+  const result = await callOrderAction(payload);
 
-		  if (result?.success) {
-			// 🔔 For ASAP orders, send customer SMS directly from admin
-			if (isAsap) {
-			  await notifyCustomer("time_suggested", row, {
-				proposed_time: proposedIso,
-				asap_requested: true
-			  });
-			}
+  if (result?.success) {
+    await notifyCustomer("time_suggested", row, {
+      proposed_time: proposedIso,
+      asap_requested: isAsap
+    });
 
-			alert("Suggested time sent to customer.");
-			location.reload();
-		  }
-		  return;
-		}
-
-
-
-
+    alert("Suggested time sent to customer.");
+    location.reload();
+  }
+  return;
+}
   /* ---------------- MARK PAID ---------------- */
   if (btn.classList.contains("btn-paid")) {
     if (!confirm("Mark this order as paid?")) return;
@@ -1628,7 +1959,6 @@ if (btn.classList.contains("btn-accept")) {
     }
     return;
   }
-
 
   /* ---------------- MARK COMPLETED / COLLECTED ---------------- */
   if (btn.classList.contains("btn-complete")) {
