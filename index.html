@@ -420,7 +420,71 @@ footer {
   .footer-section, .footer-legal { text-align: center; }
 }
 
+/* ===== Featured menu item ===== */
+.menu-item-featured {
+  border: 3px solid #f2c94c !important;
+  background: #fff8dc !important;
+  box-shadow: 0 10px 25px rgba(242, 201, 76, 0.25);
+  position: relative;
+  transform: translateY(-2px);
+    animation: featuredGlow 3s ease-in-out infinite;
+}
 
+@keyframes featuredGlow {
+  0%   { box-shadow: 0 8px 18px rgba(242,201,76,0.15); }
+  50%  { box-shadow: 0 12px 28px rgba(242,201,76,0.35); }
+  100% { box-shadow: 0 8px 18px rgba(242,201,76,0.15); }
+
+}
+
+/* gold accent bar at top */
+.menu-item-featured::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 10px;
+  right: 10px;
+  height: 6px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f2c94c, #f7d774, #f2c94c);
+}
+
+/* badge */
+.special-badge {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #f2c94c;
+  color: #5a3d00;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* title highlight */
+.menu-item-featured .menu-card-title {
+  color: #5a3d00;
+  font-weight: 800;
+}
+
+/* price highlight */
+.menu-item-featured .price {
+  font-weight: 900;
+  font-size: 1.1em;
+}
+
+.special-badge.popular {
+  background: #ffd1d1;
+  border: 1px solid #ff9a9a;
+  color: #7a0000;
+}
+
+.special-badge.new {
+  background: #d4f7d4;
+  border: 1px solid #9be39b;
+  color: #1f5c1a;
+}
 
     /* Checkout form layout/styling */
     #checkout-form > div { margin-top: 10px; }
@@ -2186,7 +2250,7 @@ body.overlay-open {
 
 					<h2 id="kitchen-notice-title">Kitchen Closed Today</h2>
 					<p class="kitchen-notice-main">
-					  Rung's Thai Kitchen is closed today. Opening days are <strong>Weds to Sat, 17:00 to 21:00.</strong> Please feel free to view the menu and place a pre-order for a day when we are open.
+					  Rung's Thai Kitchen is closed today. Opening days are <strong>Fri & Sat, 17:00 to 21:00.</strong> Please feel free to view the menu and place a pre-order for a day when we are open.
 					</p>
 					<button type="button" id="kitchen-notice-close" class="kitchen-notice-close">
 					  Continue to website
@@ -2430,7 +2494,7 @@ body.overlay-open {
 
       <!-- Opening Hours -->
       <h4>Opening Hours</h4>
-      <p class="muted">Opening Hours: 🕒 Wed–Sat: 17:00 – 21:00</p>
+      <p class="muted">Opening Hours: 🕒 Fri–Sat: 17:00 – 21:00</p>
 
       <!-- New Social Media Section -->
       <h4>Social Media</h4>
@@ -2596,7 +2660,7 @@ body.overlay-open {
 		  </label>-->
 
 		  <div class="muted small">
-			Choose a time, or tick “As soon as possible” and we’ll offer you the earliest available time within our opening days (Weds to Sun, 17:00 - 21:00).
+			Please select a suitable time. We will either confirm that time once the order has been reviewed, or get in contact with you to suggest an alternative within our opening days (Weds to Sat, 17:00 - 21:00).
 		  </div>
 		</div>
 
@@ -2686,7 +2750,7 @@ body.overlay-open {
 				  <div><strong>Order type:</strong> <span id="order-success-type">-</span></div>
 				  <div><strong>Time:</strong> <span id="order-success-time">-</span></div>
 				  <div class="muted" style="margin-top:6px">
-					Please make sure your order type and time are correct. If anything looks wrong, please contact us as soon as possible.
+					Please make sure your order type and time are correct. If anything looks wrong, please contact us (on 0113 469 9564) as soon as possible.
 				  </div>
 				</div>
 
@@ -2890,7 +2954,7 @@ const EXTRAS = [
       { id:'soup', title:'Soup', allowExtras:true, items:[
         { id: 'tom-yum', name: 'Tom Yum Soup 🌶️🌶️', desc: 'A vibrant and aromatic Thai classic featuring a hot and sour clear broth infused with lemongrass, galangal, and kaffir lime leaves.', price: 5.50, img: 'images/TomYum.jpg', allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['fish','soya','dairy'], allowedExtras: ['extra-chicken','extra-prawn','extra-tofu','extra-veg'] },
         { id: 'tom-kha', name: 'Tom Kha🌶️', desc: 'A creamy and aromatic Thai coconut soup featuring fragrant galangal, lemongrass, and kaffir lime leaves.', price: 5.50, img: 'images/TomKha.jpg', allowedModifiers: ['chicken','prawn','tofu','vegetable'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['fish','soya'], allowedExtras: ['extra-chicken','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'dumpling-broth', name: 'Pork Steamed Dumplings Broth (Gaew Naam)', desc: 'A savoury and flavourful broth with fragrant pork-stuffed wontons.', price: 6.00, img: 'images/GaewNam.jpg', allergens: ['gluten','soya','celery'], allowedExtras: [''] }
+        /*{ id: 'dumpling-broth', name: 'Pork Steamed Dumplings Broth (Gaew Naam)', desc: 'A savoury and flavourful broth with fragrant pork-stuffed wontons.', price: 6.00, img: 'images/GaewNam.jpg', allergens: ['gluten','soya','celery'], allowedExtras: [''] }*/
       ]},
       { id:'salad',    title:'Salad',   allowExtras:true,  items:[
         { id: 'papaya-salad', name: 'Green Papaya Salad (Som Tam)🌶️🌶️🌶️', desc: 'A spicy, savoury, and sweet Thai salad made primarily of shredded green papaya.', price: 7.00, img: 'images/somtam.jpg', spiceEnabled: true, spiceDefault: 3, allergens: ['peanuts','fish'], allowedExtras: ['extra-prawn'] },
@@ -2902,11 +2966,12 @@ const EXTRAS = [
         { id: 'rung-curry', name: 'Chefs Special Rainbow Curry🌶️', desc: 'Chef Rungs special curry. Rich and mildly spiced curry, this is a real crowd pleaser!', price: 8.00, img: 'images/rainbowcurry.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['gluten','celery','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
         { id: 'green-curry', name: 'Green Curry🌶️🌶️', desc: 'A vibrant green curry sauce with creamy coconut milk, peppers, courgette,green beans and fresh Thai basil.', price: 8.00, allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, img: 'images/greencurry.jpg', spiceEnabled: true, spiceDefault: 2, allergens: [], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
         { id: 'red-curry', name: 'Red Curry🌶️', desc: 'A medium-spiced, savoury, and creamy Thai dish featuring a rich red chili-based paste in coconut milk.', price: 8.00, img: 'images/redcurry.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: [], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'massaman-curry', name: 'Massaman Curry', desc: 'Made with a unique blend of spices like cinnamon and cardamom, combined with coconut milk, potatoes, and peanuts.', price: 8.00, img: 'images/massaman.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1,spiceEnabled: true, spiceDefault: 0, allergens: [], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'panang-curry', name: 'Paneng Curry🌶️', desc: 'Flavored with a fragrant curry paste that includes lemongrass, galangal, and kaffir lime leaves, this is a rich and creamy curry!', price: 8.00, img: 'images/paneng.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1,spiceEnabled: true, spiceDefault: 1, allergens: [], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] }
+        { id: 'massaman-curry', name: 'Massaman Curry', desc: 'Made with a unique blend of spices like cinnamon and cardamom, combined with coconut milk, potatoes, and peanuts.', price: 8.00, img: 'images/massaman.jpg',  allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1,spiceEnabled: true, spiceDefault: 0, allergens: ['peanuts'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'], badge: 'popular' },
+        { id: 'panang-curry', name: 'Paneng Curry🌶️', desc: 'Flavored with a fragrant curry paste that includes lemongrass, galangal, and kaffir lime leaves, this is a rich and creamy curry!', price: 8.00, img: 'images/paneng.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1,spiceEnabled: true, spiceDefault: 1, allergens: [], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'], badge: 'popular' }
       ]},
       { id:'stir-fry', title:'Stir Fry',allowExtras:true,  items:[
-        { id: 'stir-basil', name: 'Stir Fried Chilli & Basil (Pad Kra Pao)🌶️🌶️', desc: 'Street food classic, its a spicy, savoury Thai stir-fry of usually minced meat with garlic, chilies, and holy basil', price: 8.50, img: 'images/padgrapow_new.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','gluten','molluscs'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-tofu','extra-veg','extra-egg'] },
+        { id: 'stir-crispy', name: 'Stir Fried Crispy Chicken (Pad Kra Pao Gai Krob)🌶️🌶️', desc: 'Crispy chicken stir-fried with vegetables, in a spicy Kra Pao sauce', price: 10.00, img: 'images/crispy-chicken.jpeg', spiceEnabled: true, spiceDefault: 2, allergens: ['soya','gluten','molluscs'], allowedExtras: ['extra-bchicken'], badge: 'new' },
+		{ id: 'stir-basil', name: 'Stir Fried Chilli & Basil (Pad Kra Pao)🌶️🌶️', desc: 'Street food classic, its a spicy, savoury Thai stir-fry of usually minced meat with garlic, chilies, and holy basil', price: 8.50, img: 'images/padgrapow_new.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','gluten','molluscs'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-tofu','extra-veg','extra-egg'] },
         { id: 'stir-ginger', name: 'Stir Fried Ginger (Pad Khing)🌶️', desc: 'A stir-fried dish flavoured with fresh ginger, spring onions, onions, mushrooms and chilli.', price: 8.00, img: 'images/padkhing.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['soya','gluten','celery','mustard','shellfish'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
         { id: 'stir-cashew', name: 'Stir Fried Cashew Nuts', desc: 'A vibrant and flavorful stir-fry featuring crisp vegetables tossed in a savoury sauce. Finished with the rich, buttery crunch of toasted cashew nuts', price: 8.50, img: 'images/cashew.jpg', allowedModifiers: ['batter-chicken','tofu','vegetable' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['tree_nuts','soya','sesame','celery','mustard','shellfish'], allowedExtras: ['extra-bchicken','extra-tofu','extra-veg'] },
         { id: 'stir-sweetsour', name: 'Sweet & Sour (Pad Priew Wan)', desc: 'Thai sweet and sour stir-fry dish featuring vegetables such as cucumber, tomatoes, onions, and bell peppers in a tangy, sweet, and savoury sauce.', price: 8.00, img: 'images/sweetsour.jpg', allowedModifiers: ['batter-chicken','tofu','vegetable' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['soya'], allowedExtras: ['extra-bchicken','extra-tofu','extra-veg'] },
@@ -2915,8 +2980,8 @@ const EXTRAS = [
         { id: 'stir-pepper', name: 'Stir Fried Black Pepper Sauce', desc: 'A bold and aromatic Thai-style stir-fry featuring crisp vegetables wok-tossed in a black pepper sauce. ', price: 7.50, img: 'images/blackpepper.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['soya','sesame','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] }
       ]},
       { id:'noodles',  title:'Noodles & Rice', allowExtras:true, items:[
-        { id: 'pad-thai', name: 'Pad Thai', desc: 'Balanced flavours using tamarind, fish sauce, and palm sugar accompanying bean sprouts, garlic and chives.', price: 8.00, img: 'images/padthai.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: false, spiceDefault: 0, allergens: ['egg','fish','peanuts'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-		{ id: 'chef-pad-thai', name: 'Chefs Special Pad Thai🌶🌶️', desc: 'Just like the traditional Pad Thai, but with a little extra heat!', price: 8.00, img: 'images/spicypadthai.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','fish','peanuts'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },  
+        { id: 'pad-thai', name: 'Pad Thai', desc: 'Balanced flavours using tamarind, fish sauce, and palm sugar accompanying bean sprouts, garlic and chives.', price: 8.00, img: 'images/padthai.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: false, spiceDefault: 0, allergens: ['egg','fish','peanuts'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'], badge: 'popular' },
+		{ id: 'chef-pad-thai', name: 'Chef Rungs Special Pad Thai🌶🌶️', desc: 'Just like the traditional Pad Thai, but with a little extra heat!', price: 8.00, img: 'images/spicypadthai.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','fish','peanuts'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },  
 		{ id: 'pad-kee-mao', name: 'Pad Kee Mao🌶️🌶️', desc: 'Drunken Noodles is a spicy and savory Thai stir-fried noodle dish. It is made with wide rice noodles and a variety of vegetables, stir-fried with a flavorful sauce made from soy, oyster, and fish sauces, and heavily flavored with fresh chilies.', price: 8.00, img: 'images/padkeemao.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','gluten','shellfish'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
 		{ id: 'pad-see-ew', name: 'Thai Stir Fried Noodles (Pad See Ew)', desc: 'Thai stir-fried noodle dish featuring wide, flat rice noodles, Chinese broccoli, and egg, all coated in a savoury, salty-sweet soy sauce', price: 8.00, img: 'images/newpadseeew.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya','gluten','shellfish','celery','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
         { id: 'fried-rice', name: 'Thai Special Fried Rice (Khao Pad)', desc: 'A classic Thai street food staple. Fragrant jasmine rice wok-fried with egg, onions, and tomatoes, seasoned with fish sauce, soy sauce, and oyster sauce.', price: 7.50, img: 'images/khaopad.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya','gluten','shellfish','celery','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] }
@@ -3072,108 +3137,117 @@ function buildMenu() {
 
   container.innerHTML = '';
 
-  MENU_CATEGORIES.forEach(cat => {
-    // outer wrapper per category
-    const catSection = document.createElement('section');
-    catSection.className = 'popup-category';
+MENU_CATEGORIES.forEach(cat => {
+  // outer wrapper per category
+  const catSection = document.createElement('section');
+  catSection.className = 'popup-category';
 
-    // category heading
-    const h = document.createElement('h3');
-    h.className = 'popup-category-title';
-    h.textContent = cat.title;
-    catSection.appendChild(h);
+  // category heading
+  const h = document.createElement('h3');
+  h.className = 'popup-category-title';
+  h.textContent = cat.title;
+  catSection.appendChild(h);
 
-    // 2-column grid for this category’s items
-    const grid = document.createElement('div');
-    grid.className = 'popup-items-grid';
+  // 2-column grid for this category’s items
+  const grid = document.createElement('div');
+  grid.className = 'popup-items-grid';
 
-    const categoryAllowExtras = !!cat.allowExtras;
+  const categoryAllowExtras = !!cat.allowExtras;
 
-    cat.items.forEach(item => {
-      // enrich + store for customise logic
-      ITEMS_BY_ID.set(item.id, {
-        ...item,
-        categoryAllowedExtras: categoryAllowExtras
-      });
+  const sortedItems = [...cat.items].sort((a, b) => {
+  if (a.badge && !b.badge) return -1;
+  if (!a.badge && b.badge) return 1;
+  return 0;
+});
 
-      // item card
-      const card = document.createElement('div');
-      card.className = 'menu-item-card';
-      card.dataset.id = item.id;
-      card.dataset.price = item.price;
-      card.dataset.allowExtras = categoryAllowExtras ? '1' : '0';
-
-      if (item.allowedModifiers) card.dataset.allowedModifiers = item.allowedModifiers.join(',');
-      if (item.modifierRequired) card.dataset.modifierRequired = 'true';
-      if (item.modifiersMulti)   card.dataset.modifiersMulti   = 'true';
-      if (item.modifierMax)      card.dataset.modifierMax      = String(item.modifierMax);
-      if (item.img)              card.dataset.img              = item.img;
-      if (item.spiceEnabled)     card.dataset.spiceEnabled     = 'true';
-      if (typeof item.spiceDefault === 'number') {
-        card.dataset.spiceDefault = String(item.spiceDefault);
-      }
-
-      const allergenHTML = renderAllergenIconsCompact(item.allergens || []);
-
-      // small thumbnail if available
-      const thumbHTML = item.img
-        ? `
-          <div class="menu-card-thumb-wrap">
-            <img src="${item.img}" alt="${item.name}">
-          </div>
-        `
-        : '';
-		
-		// ⭐ Special / badge handling
-			if (item.special) {
-			  card.classList.add('khao-gaeng-special');
-			}
-
-			const badgeHTML = item.badge
-			  ? `<div class="special-badge">${item.badge}</div>`
-			  : '';
-
-
-		  card.innerHTML = `
-			  ${thumbHTML}
-			  ${badgeHTML}
-			  <div class="menu-card-main">
-				<div class="menu-card-title">${item.name}</div>
-				<div class="menu-card-desc muted small">${item.desc || ''}</div>
-				${allergenHTML}
-				<div class="menu-card-bottom">
-				  <div class="price">${formatCurrency(item.price)}</div>
-				  <button class="btn btn-accent" type="button" data-id="${item.id}">
-					customise
-				  </button>
-				</div>
-			  </div>
-			`;
-
-
-      grid.appendChild(card);
+sortedItems.forEach(item => {
+    // enrich + store for customise logic
+    ITEMS_BY_ID.set(item.id, {
+      ...item,
+      categoryAllowedExtras: categoryAllowExtras
     });
 
-    catSection.appendChild(grid);
-    container.appendChild(catSection);
-  });
+    // item card
+    const card = document.createElement('div');
+    card.className = 'menu-item-card';
+    card.dataset.id = item.id;
+    card.dataset.price = item.price;
+    card.dataset.allowExtras = categoryAllowExtras ? '1' : '0';
 
-  // ✅ make sure customise buttons still work (one delegated handler)
-  if (!container.dataset.bound) {
-    container.addEventListener('click', (e) => {
-      const btn = e.target.closest('button[data-id]');
-      if (!btn) return;
-      openCustomise(btn.getAttribute('data-id'));
-    });
-    container.dataset.bound = '1';
-  }
+    if (item.allowedModifiers) card.dataset.allowedModifiers = item.allowedModifiers.join(',');
+    if (item.modifierRequired) card.dataset.modifierRequired = 'true';
+    if (item.modifiersMulti)   card.dataset.modifiersMulti   = 'true';
+    if (item.modifierMax)      card.dataset.modifierMax      = String(item.modifierMax);
+    if (item.img)              card.dataset.img              = item.img;
+    if (item.spiceEnabled)     card.dataset.spiceEnabled     = 'true';
+    if (typeof item.spiceDefault === 'number') {
+      card.dataset.spiceDefault = String(item.spiceDefault);
+    }
+
+    const allergenHTML = renderAllergenIconsCompact(item.allergens || []);
+
+    // small thumbnail if available
+    const thumbHTML = item.img
+      ? `
+        <div class="menu-card-thumb-wrap">
+          <img src="${item.img}" alt="${item.name}">
+        </div>
+      `
+      : '';
+
+// ⭐ Badge handling
+let badgeHTML = '';
+
+if (item.badge === 'chef-special') {
+  badgeHTML = `<div class="special-badge">⭐ Chef's Special</div>`;
+  card.classList.add('menu-item-featured');
+}
+else if (item.badge === 'new') {
+  badgeHTML = `<div class="special-badge">🆕 New Dish</div>`;
+  card.classList.add('menu-item-featured');
+}
+else if (item.badge === 'popular') {
+  badgeHTML = `<div class="special-badge popular">🔥 Popular</div>`;
 }
 
+    card.innerHTML = `
+  ${thumbHTML}
+  <div class="menu-card-main">
+    ${badgeHTML}
+    <div class="menu-card-title">${item.name}</div>
+    <div class="menu-card-desc muted small">${item.desc || ''}</div>
+    ${allergenHTML}
+    <div class="menu-card-bottom">
+      <div class="price">${formatCurrency(item.price)}</div>
+      <button class="btn btn-accent" type="button" data-id="${item.id}">
+        customise
+      </button>
+    </div>
+  </div>
+`;
 
-    // --------- Order rendering ----------
-			function renderOrder(){
-		  const orderListEl  = document.getElementById('order-list');
-		  const orderTotalEl = document.getElementById('order-total');
+    grid.appendChild(card);
+  });
+
+  catSection.appendChild(grid);
+  container.appendChild(catSection);
+});
+
+// ✅ make sure customise buttons still work (one delegated handler)
+if (!container.dataset.bound) {
+  container.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-id]');
+    if (!btn) return;
+    openCustomise(btn.getAttribute('data-id'));
+  });
+  container.dataset.bound = '1';
+}
+}
+
+// --------- Order rendering ----------
+function renderOrder(){
+  const orderListEl  = document.getElementById('order-list');
+  const orderTotalEl = document.getElementById('order-total');
 
 		  orderListEl.innerHTML = '';
 
@@ -4539,7 +4613,7 @@ const discountedSubtotal = disc.discountedSubtotal;
 	
 		
 // ====== CONFIG YOU CAN EDIT ======
-const OPEN_DAYS = [3,4,5,6]; // Sun=0, Mon=1, Tue=2, Wed=3, Thu=4, Fri=5, Sat=6  (open Wed–Sun)
+const OPEN_DAYS = [5,6]; // Sun=0, Mon=1, Tue=2, Wed=3, Thu=4, Fri=5, Sat=6  (open Fri & Sat)
 const OPEN_WINDOW = { start: "17:00", end: "21:00" }; // local time, 24h
 
 // Specific closed dates (all day)
@@ -5674,7 +5748,7 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 
 // ---- Temporary closure override (edit when needed) ----
 const tempClosure = {
-  active: true, // ✅ set true when temporarily closed
+  active: false, // ✅ set true when temporarily closed
   title: "Temporarily closed",
   message: `Just a quick heads up for our lovely local customers — unfortunately we won’t be open Wed/Thurs this week due to car trouble 🚗😒`,
   // Optional reopen time shown to customers (UK local time)
@@ -5685,7 +5759,7 @@ const tempClosure = {
 };
 
 // Returns true if we are between:
-// Saturday 21:00  and  Wednesday 12:00 (midday)
+// Saturday 21:00  and  Friday 12:00 (midday)
 function shouldShowKitchenNotice(now = new Date()) {
   // Temporary override always wins
   if (tempClosure.active) return true;
@@ -5694,8 +5768,8 @@ function shouldShowKitchenNotice(now = new Date()) {
   const hour = now.getHours() + now.getMinutes() / 60;
 
   if (day === 6 && hour >= 21) return true; // Sun after 21:00
-  if (day === 0 || day === 1 || day === 2) return true; // Sun, Mon, Tue
-  if (day === 3 && hour < 12) return true; // Wed before 12:00
+  if (day === 0 || day === 1 || day === 2 || day === 3 || day === 4) return true; // Sun, Mon, Tue, Wed, Thu
+  if (day === 5 && hour < 12) return true; // Wed before 12:00
 
   return false;
 }
@@ -6107,6 +6181,9 @@ document.addEventListener('DOMContentLoaded', () => {
 </body>
 
 </html>
+
+
+
 
 
 
