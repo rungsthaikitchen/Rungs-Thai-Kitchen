@@ -282,6 +282,15 @@ html { 	scroll-behavior: smooth;
 		  overflow: auto;
 		  -webkit-overflow-scrolling: touch;
 		}
+		
+		.checkout-order-summary {
+		  background: #fff6e6;
+		  border: 1px solid #f0c36d;
+		  border-radius: 6px;
+		  padding: 10px 12px;
+		  margin: 10px 0 15px 0;
+		  font-weight: 600;
+		}
 	
     /* Inner modal card */
 		.customise-modal,
@@ -2612,6 +2621,7 @@ body.overlay-open {
         <button id="checkout-close" class="btn btn-ghost">Close</button>
       </div>
 		<div id="checkout-banner" class="checkout-banner" role="status" aria-live="polite"></div>
+		<div id="checkout-order-summary" class="checkout-order-summary"></div>
 
       <form id="checkout-form" class="form-grid">
         <div class="field">
@@ -4581,6 +4591,28 @@ const discountedSubtotal = disc.discountedSubtotal;
   return window.__checkoutTotals;
 }
 
+function updateCheckoutOrderSummary() {
+  const box = document.getElementById('checkout-order-summary');
+  if (!box) return;
+
+  const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+  const address = document.getElementById('cust-address')?.value || '';
+
+  if (orderType === 'delivery') {
+    box.innerHTML = `
+      <strong>ORDER TYPE: DELIVERY</strong><br>
+      Delivering to:<br>
+      ${address || '(enter delivery address)'}
+    `;
+  } else {
+    box.innerHTML = `
+      <strong>ORDER TYPE: COLLECTION</strong><br>
+      Collect from:<br>
+      Rung's Thai Kitchen, Morley
+    `;
+  }
+}
+
 
     orderTypeRadios.forEach(r => r.addEventListener('change', recomputeCheckoutTotals));
 	
@@ -4766,6 +4798,7 @@ function openCheckout(subtotal) {
   checkoutMsg.style.color = '';
   document.querySelector('input[name="order-type"][value="collection"]').checked = true;
   recomputeCheckoutTotals();
+ 
 
   // 2. Preferred time input setup
   const t = document.getElementById('cust-preferred-time');
@@ -4822,8 +4855,10 @@ function openCheckout(subtotal) {
     t.addEventListener('input', onChoose);
   }
 
-  // 3. Show the modal
-  checkoutModal.style.display = 'flex';
+    // 3. Update submit button + show the modal
+	    updateCheckoutSubmitButton();
+		updateCheckoutOrderSummary();
+		checkoutModal.style.display = 'flex';
 }
 
 // Ensure other code can call it
@@ -4846,6 +4881,20 @@ if (checkoutModal) {
     if (e.target === checkoutModal) closeCheckout();
   });
 }
+
+document.addEventListener('change', (e) => {
+  if (e.target && e.target.matches('input[name="order-type"]')) {
+    recomputeCheckoutTotals();
+    updateCheckoutSubmitButton();
+    updateCheckoutOrderSummary();
+  }
+});
+
+document.addEventListener('input', (e) => {
+  if (e.target && e.target.id === 'cust-address') {
+    updateCheckoutOrderSummary();
+  }
+});
 
 // Open checkout (safe)
 if (openCheckoutBtn) {
@@ -5083,6 +5132,24 @@ if (openCheckoutBtn) {
 		  const key = crypto.randomUUID();
 		  localStorage.setItem("checkout_idempotency_key", key);
 		  return key;
+		}
+		
+		function updateCheckoutSubmitButton() {
+		  const submitBtn = checkoutForm?.querySelector('button[type="submit"], input[type="submit"]');
+		  const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+
+		  if (!submitBtn) return;
+
+		  const label =
+			orderType === 'delivery'
+			  ? 'Place Delivery Order'
+			  : 'Place Collection Order';
+
+		  if (submitBtn.tagName === 'INPUT') {
+			submitBtn.value = label;
+		  } else {
+			submitBtn.textContent = label;
+		  }
 		}
 
 
