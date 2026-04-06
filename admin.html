@@ -998,6 +998,7 @@ const PRINT_CATEGORY_LOOKUP = {
 		  "panang-curry": "CURRY",
 		
 		  // Stir Fry
+		  "stir-crispy": "STIR FRY",
 		  "stir-basil": "STIR FRY",
 		  "stir-ginger": "STIR FRY",
 		  "stir-cashew": "STIR FRY",
@@ -1036,6 +1037,18 @@ const PRINT_CATEGORY_LOOKUP = {
 		function getPrintCategory(item) {
 		  return PRINT_CATEGORY_LOOKUP[item.item_id] || "OTHER";
 		}
+		
+				const CONDIMENT_LOOKUP = {
+				  "chicken-satay": ["Peanut Sauce", "Vinegar Sauce"],
+				  "prawn-crackers": ["Sweet Chilli Sauce"],
+				  "veg-spring-rolls": ["Sweet Chilli Sauce"],
+				  "chicken-spring-rolls": ["Sweet Chilli Sauce"],
+				  "pork-dumplings": ["Dumpling Sauce"],
+				  "fried-tofu": ["Sweet Chilli Sauce"],
+				  "fish-cakes": ["Sweet Chilli Sauce"],
+				  "moo-ping": ["Jaew Sauce"],
+				  "fried-prawns": ["Sweet Chilli Sauce"]
+				};
 	  
 	  function printTicket(o) {
   const c = o.customers || {};
@@ -1056,6 +1069,7 @@ const PRINT_CATEGORY_LOOKUP = {
   const delivery = Number(o.delivery_fee || 0);
   const total = subtotal + delivery;
   const itemCount = items.reduce((sum, it) => sum + Number(it.qty || 1), 0);
+  const condimentTotals = {};
   
   function escapeHtml(value) {
     return String(value ?? "")
@@ -1128,9 +1142,7 @@ const itemsHtml = PRINT_CATEGORY_ORDER
 
             if (!modName) return "";
 
-            const delta = "";
-
-            return `<div class="item-mod">- ${escapeHtml(modName)}${escapeHtml(delta)}</div>`;
+            return `<div class="item-mod">- ${escapeHtml(modName)}</div>`;
           })
           .join("");
 
@@ -1139,10 +1151,22 @@ const itemsHtml = PRINT_CATEGORY_ORDER
             ? `<div class="item-mod">- Spice: ${escapeHtml(it.spice)}</div>`
             : "";
 
-        const itemNotesHtml =
-          it.notes
-            ? `<div class="item-mod">- Note: ${escapeHtml(it.notes)}</div>`
-            : "";
+        const itemNotesHtml = it.notes
+          ? `<div class="item-mod">- Note: ${escapeHtml(it.notes)}</div>`
+          : "";
+
+        const condiments =
+          CONDIMENT_LOOKUP[it.item_id] ||
+          CONDIMENT_LOOKUP[it.id] ||
+          [];
+
+        const condimentHtml = condiments
+          .map((c) => `<div class="item-mod">- ${escapeHtml(c)}</div>`)
+          .join("");
+
+        condiments.forEach((c) => {
+          condimentTotals[c] = (condimentTotals[c] || 0) + Number(it.qty || 1);
+        });
 
         return `
           <div class="item">
@@ -1150,20 +1174,33 @@ const itemsHtml = PRINT_CATEGORY_ORDER
             ${modifiersHtml}
             ${spiceHtml}
             ${itemNotesHtml}
+            ${condimentHtml}
           </div>
         `;
       })
       .join("");
 
-   return `
-	  <div class="section">
-	    <div class="section-divider">--------------------------------</div>
-	    <div class="section-title">${escapeHtml(cat)}</div>
-	    ${sectionItemsHtml}
-	  </div>
-	`;
+    return `
+      <div class="section">
+        <div class="section-divider">--------------------------------</div>
+        <div class="section-title">${escapeHtml(cat)}</div>
+        ${sectionItemsHtml}
+      </div>
+    `;
   })
   .join("");
+
+const condimentsHtml = Object.keys(condimentTotals).length
+  ? `
+    <div class="section">
+      <div class="section-divider">--------------------------------</div>
+      <div class="section-title">CONDIMENTS</div>
+      ${Object.entries(condimentTotals)
+        .map(([name, qty]) => `<div class="item-mod">- ${escapeHtml(name)} x ${qty}</div>`)
+        .join("")}
+    </div>
+  `
+  : "";
 
   const html = `
     <!doctype html>
@@ -1298,7 +1335,17 @@ const itemsHtml = PRINT_CATEGORY_ORDER
 		.ticket-end-space {
 		  height: 25mm;
 		}
+		
+		/*.condiments-list {
+		  display: block;
+		  margin-top: 4px;
+		}
 
+		.condiment-line {
+		  display: block;
+		  margin-left: 6px;
+		}*/
+		
 		@media print {
 		  body {
 		    page-break-after: always;
@@ -1323,11 +1370,13 @@ const itemsHtml = PRINT_CATEGORY_ORDER
 		
 		${addressHtml}
 		
-		<div class="section">
-		  <div class="section-title">ITEMS</div>
-		  ${itemsHtml}
-		</div>
-		
+			<div class="section">
+			  <div class="section-title">ITEMS</div>
+			  ${itemsHtml}
+			</div>
+
+			${condimentsHtml}
+
 			${notesHtml}
 			
 			<div class="ticket-buffer">
@@ -1418,6 +1467,7 @@ function render(orders) {
     tr.dataset.preferredTime = o.preferred_time || '';
     tr.dataset.proposedTime = o.proposed_time || '';
     tr.dataset.status = status;
+	tr.dataset.orderType = o.order_type;   // ⭐ IMPORTANT
 
     tr.innerHTML = `
       <td class="mono">${rtkRef}</td>
@@ -1788,17 +1838,18 @@ const NOTIFY_API_BASE = "https://order-backend-production.up.railway.app";
 			return;
 		  }
 
-		  const payload = {
-			order_id: row.dataset.orderId,                 // <-- no Number()
-			order_ref: row.dataset.orderRef,
-			name: row.dataset.name,
-			email: row.dataset.email,
-			phone: row.dataset.phone,
-			asap_requested: row.dataset.asapRequested === "true",
-			total: Number(row.dataset.total || 0),
-			communication_preference: row.dataset.communicationPreference || "email",
-			...extra
-		  };
+			const payload = {
+			  order_id: row.dataset.orderId,
+			  order_ref: row.dataset.orderRef,
+			  name: row.dataset.name,
+			  email: row.dataset.email,
+			  phone: row.dataset.phone,
+			  order_type: row.dataset.orderType,   // ⭐ ADD THIS LINE
+			  asap_requested: row.dataset.asapRequested === "true",
+			  total: Number(row.dataset.total || 0),
+			  communication_preference: row.dataset.communicationPreference || "email",
+			  ...extra
+			};
 
 		  let url = "";
 		  if (mode === "time_confirmed") url = "/notify-time-confirmed";
