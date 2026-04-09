@@ -42,10 +42,11 @@
 				  /* Everything inside here only affects printing */
 				@media print {
 				  body {
-					font-size: 11pt;
-					line-height: 1.1;
-					margin: 0;
-				  }
+					  width: 72mm;
+					  padding: 4mm 3mm 4mm 5mm;
+					  font-size: 11pt;
+					  line-height: 1.15;
+					}
 
 				  .order-print-area {
 					width: 72mm;
@@ -1069,12 +1070,18 @@ const PRINT_CATEGORY_LOOKUP = {
       })
     : "No time set";
 
-  const orderType = (o.order_type || "collection").toUpperCase();
-  const subtotal = Number(o.subtotal || 0);
-  const delivery = Number(o.delivery_fee || 0);
-  const total = subtotal + delivery;
-  const itemCount = items.reduce((sum, it) => sum + Number(it.qty || 1), 0);
-  const condimentTotals = {};
+		const orderType = (o.order_type || "collection").toUpperCase();
+		const subtotal = Number(o.subtotal || 0);
+		const discount = Number(o.discount || 0);
+		const delivery = Number(o.delivery_fee || 0);
+
+		const total =
+		  Number(o.total) > 0
+			? Number(o.total)
+			: Math.round((subtotal - discount + delivery) * 100) / 100;
+
+		const itemCount = items.reduce((sum, it) => sum + Number(it.qty || 1), 0);
+		const condimentTotals = {};
   
   function escapeHtml(value) {
     return String(value ?? "")
@@ -1122,6 +1129,20 @@ const PRINT_CATEGORY_LOOKUP = {
       </div>
     `
     : "";
+	
+	  const moneyHtml = `
+    <div class="section">
+      <div class="section-title">ORDER TOTALS</div>
+      <div class="meta-row"><span class="label">SUBTOTAL:</span> GBP ${subtotal.toFixed(2)}</div>
+      ${
+        discount > 0
+          ? `<div class="meta-row"><span class="label">LOYALTY:</span> -GBP ${discount.toFixed(2)}</div>`
+          : ""
+      }
+      <div class="meta-row"><span class="label">DELIVERY:</span> GBP ${delivery.toFixed(2)}</div>
+      <div class="meta-row"><span class="label">TOTAL:</span> GBP ${total.toFixed(2)}</div>
+    </div>
+  `;
 
   const grouped = {};
 
@@ -1227,12 +1248,12 @@ const condimentsHtml = Object.keys(condimentTotals).length
             font-family: "Courier New", monospace;
           }
 
-         body {
-			  width: 78mm;
-			  padding: 3mm;
-			  font-size: 10.5pt;
-			  line-height: 1.1;
-			}
+        body {
+		  width: 72mm;
+		  padding: 4mm 3mm 4mm 5mm;
+		  font-size: 11pt;
+		  line-height: 1.15;
+		}
 
           .ref {
             font-size: 20pt;
@@ -1247,17 +1268,36 @@ const condimentsHtml = Object.keys(condimentTotals).length
           }
 
           .phone {
-            font-size: 14pt;
-            margin-bottom: 8px;
-          }
+			  font-size: 14pt;
+			  font-weight: 600;
+			  margin-bottom: 8px;
+			}
 
           .meta {
             margin-bottom: 10px;
           }
 
-          .meta-row {
-            margin-bottom: 2px;
-          }
+			.meta-row {
+			  margin-bottom: 2px;
+			  font-weight: 600;
+			}
+
+			.item-mod {
+			  display: block;
+			  margin-left: 8px;
+			  font-size: 11pt;
+			  font-weight: 600;
+			  white-space: normal;
+			  word-break: break-word;
+			  overflow-wrap: anywhere;
+			  clear: both;
+			}
+
+			.text-block {
+			  white-space: normal;
+			  word-break: break-word;
+			  font-weight: 600;
+			}
 
           .label {
             font-weight: 700;
@@ -1295,27 +1335,13 @@ const condimentsHtml = Object.keys(condimentTotals).length
 			  clear: both;
 			}
 			
-			.item-mod {
-			  display: block;
-			  margin-left: 8px;
-			  font-size: 11pt;
-			  white-space: normal;
-			  word-break: break-word;
-			  overflow-wrap: anywhere;
-			  clear: both;
-			}
-
-		  .item-sep {
+			.item-sep {
 		  display: block;
 		  height: 6px;
 		  line-height: 6px;
 		}
 
-          .text-block {
-            white-space: normal;
-            word-break: break-word;
-          }
-
+          
 		  .total-top {
 		  font-size: 16pt;
 		  font-weight: 700;
@@ -1373,6 +1399,7 @@ const condimentsHtml = Object.keys(condimentTotals).length
 		</div>
 		
 		<div class="total-top">TOTAL: GBP ${total.toFixed(2)}</div>
+		${moneyHtml}
 		
 		${addressHtml}
 		
@@ -1438,12 +1465,6 @@ function render(orders) {
     if (isFuture) tr.classList.add('row-attention');
 
     const customer = o.customers || {};
-    console.log('[ADMIN MONEY]', o.order_ref, {
-      subtotal: o.subtotal,
-      discount: o.discount,
-      delivery_fee: o.delivery_fee,
-      total: o.total
-    });
 
     const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
     const status = o.status || 'pending';
@@ -1453,10 +1474,26 @@ function render(orders) {
     const discount = Number(o.discount || 0);
     const delivery = Number(o.delivery_fee || 0);
 
-    const finalTotal =
-      Number(o.total) > 0
-        ? Number(o.total)
-        : Math.round((subtotal - discount + delivery) * 100) / 100;
+    // Prefer DB total when present, otherwise calculate safely
+    const dbTotal = Number(o.total);
+    const hasDbTotal = Number.isFinite(dbTotal);
+
+    const calculatedTotal = Math.round((subtotal - discount + delivery) * 100) / 100;
+    const finalTotal = hasDbTotal ? dbTotal : calculatedTotal;
+
+    const discountLabel =
+      o.discount_label ||
+      (discount > 0 ? 'Loyalty reward / discount' : '');
+
+    console.log('[ADMIN MONEY]', o.order_ref, {
+      subtotal,
+      discount,
+      discountLabel,
+      delivery,
+      dbTotal,
+      calculatedTotal,
+      finalTotal
+    });
 
     tr.dataset.orderId = o.id;
     tr.dataset.orderRef = rtkRef;
@@ -1466,6 +1503,7 @@ function render(orders) {
     tr.dataset.total = String(finalTotal);
     tr.dataset.subtotal = String(subtotal);
     tr.dataset.discount = String(discount);
+    tr.dataset.discountLabel = discountLabel;
     tr.dataset.deliveryFee = String(delivery);
     tr.dataset.asapRequested = o.asap_requested ? 'true' : 'false';
     tr.dataset.communicationPreference = o.communication_preference || 'email';
@@ -1473,7 +1511,18 @@ function render(orders) {
     tr.dataset.preferredTime = o.preferred_time || '';
     tr.dataset.proposedTime = o.proposed_time || '';
     tr.dataset.status = status;
-	tr.dataset.orderType = o.order_type;   // ⭐ IMPORTANT
+    tr.dataset.orderType = o.order_type || 'collection';
+
+    const totalCellHtml = discount > 0
+      ? `
+        <div><strong>${fmtMoney(finalTotal)}</strong></div>
+        <div class="small muted">Subtotal ${fmtMoney(subtotal)}</div>
+        <div class="small" style="color:#b42318">-${fmtMoney(discount)} ${discountLabel ? `(${discountLabel})` : ''}</div>
+        <div class="small muted">Delivery ${fmtMoney(delivery)}</div>
+      `
+      : `
+        <div><strong>${fmtMoney(finalTotal)}</strong></div>
+      `;
 
     tr.innerHTML = `
       <td class="mono">${rtkRef}</td>
@@ -1488,7 +1537,7 @@ function render(orders) {
       <td>${getTimeStatusLabel(o)}</td>
       <td class="nowrap">${fmtMoney(subtotal)}</td>
       <td class="nowrap">${fmtMoney(delivery)}</td>
-      <td class="nowrap"><strong>${fmtMoney(finalTotal)}</strong></td>
+      <td class="nowrap">${totalCellHtml}</td>
       <td class="actions" style="text-align:right">
         <button class="btn-small" data-action="toggle">Details</button>
         <button class="btn-small" data-action="print">Print</button>

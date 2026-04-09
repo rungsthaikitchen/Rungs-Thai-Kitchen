@@ -5513,20 +5513,30 @@ checkoutForm.addEventListener('submit', async (e) => {
       ? paymentPreferenceInput.value
       : 'on_arrival';
 
-		// ---------- Create order ----------
+// ---------- Create order ----------
 
-		// ✅ NEW: generate a fresh idempotency key for THIS submit
-		const idempotencyKey = crypto.randomUUID();
+// ✅ NEW: generate a fresh idempotency key for THIS submit
+const idempotencyKey = crypto.randomUUID();
 
-		const baseOrderPayload = {
+const submitTotals = recomputeCheckoutTotals();
+
+const baseOrderPayload = {
   customer_id: customerId,
 
-  // money fields (discount-aware)
-  subtotal: Number(subtotal.toFixed(2)),                       // pre-discount food subtotal
-  discount: Number((disc.discount || 0).toFixed(2)),           // ✅ needs column in Supabase
-  discount_label: (disc.discount > 0 ? '10% Wed/Thu discount' : null), // ✅ needs column
-  delivery_fee: Number(deliveryFee.toFixed(2)),
-  total: Number(total.toFixed(2)),                              // ✅ needs column
+		subtotal: Number(submitTotals.subtotal.toFixed(2)),
+		discount: Number((submitTotals.loyalty_discount || 0).toFixed(2)),
+		discount_label: submitTotals.loyalty_discount > 0 ? 'Loyalty reward' : null,
+		delivery_fee: Number(submitTotals.delivery_fee.toFixed(2)),
+		total: Number(submitTotals.total.toFixed(2)),
+
+		// loyalty fields
+  loyalty_points_redeem_pending: Number(submitTotals.loyalty_points_redeem_pending || 0),
+  loyalty_points_earned_pending: Number(submitTotals.loyalty_points_earned_pending || 0),
+  loyalty_reward_applied: !!submitTotals.loyalty_reward_applied,
+  loyalty_expected_balance: Number.isFinite(submitTotals.loyalty_expected_balance)
+    ? Number(submitTotals.loyalty_expected_balance)
+    : null,
+  loyalty_settled: false,
 
   order_type: orderType,
   notes,
@@ -5579,7 +5589,6 @@ checkoutForm.addEventListener('submit', async (e) => {
 
 
 			// ✅ Recompute and freeze totals once
-				const submitTotals = recomputeCheckoutTotals();
 				window.__lastOrderTotals = submitTotals;
 				console.log('[CHECKOUT TOTALS @ SUBMIT]', submitTotals);
 
