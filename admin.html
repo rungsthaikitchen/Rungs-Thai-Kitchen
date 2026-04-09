@@ -39,56 +39,57 @@
     .badge{display:inline-flex;gap:6px;align-items:center;padding:4px 8px;border:1px solid #eee;border-radius:999px;background:#fff;font-size:12px}
     .allergens{display:flex;gap:6px;flex-wrap:wrap}
   
-  /* Everything inside here only affects printing */
-  @media print {
+				  /* Everything inside here only affects printing */
+				@media print {
+				  body {
+					font-size: 11pt;
+					line-height: 1.1;
+					margin: 0;
+				  }
 
-    /* General font sizing for print */
-    body {
-      font-size: 14pt;              /* bump this up or down as you like */
-      line-height: 1.4;
-    }
+				  .order-print-area {
+					width: 72mm;
+					max-width: 72mm;
+					margin-left: 4mm;
+				  }
 
-    /* Limit content width to suit 80mm paper */
-    .order-print-area {
-      max-width: 80mm;
-    }
+				  .no-print,
+				  .admin-header,
+				  .sidebar,
+				  .footer,
+				  .buttons-row,
+				  .search-bar {
+					display: none !important;
+				  }
 
-    /* Hide anything that shouldn't appear on the printout */
-    .no-print,
-    .admin-header,
-    .sidebar,
-    .footer,
-    .buttons-row,
-    .search-bar {
-      display: none !important;
-    }
+				  * {
+					background: transparent !important;
+					box-shadow: none !important;
+				  }
 
-    /* Optional: remove background colours and images */
-    * {
-      background: transparent !important;
-      box-shadow: none !important;
-    }
+				  a {
+					text-decoration: none !important;
+				  }
 
-    /* Tidy up links (no underlines / URLs) */
-    a {
-      text-decoration: none !important;
-    }
+				  .order-main-heading {
+					font-size: 16pt;
+					font-weight: 700;
+				  }
 
-    /* Make key sections clearer / bigger */
-    .order-main-heading {
-      font-size: 18pt;
-      font-weight: bold;
-    }
+				  .order-items-table {
+					font-size: inherit;
+				  }
 
-    .order-items-table {
-      font-size: 13pt;
-    }
-
-    .order-totals {
-      font-size: 14pt;
-      font-weight: bold;
-    }
-  }
+				  .order-totals {
+					font-size: 13pt;
+					font-weight: 700;
+				  }
+				  
+				  .section-title {
+				   font-weight: 700;
+				   font-size: 12pt;
+				  }
+				}
   
 		  /* New order toast */
 		.new-order-toast {
@@ -238,6 +239,10 @@
 		.status-completed {
 		  background: #e5e7eb;
 		  color: #111827;
+		}
+		
+		body {
+		  margin-left: 4mm;
 		}
 
 			tr.row-attention td {
@@ -1225,8 +1230,8 @@ const condimentsHtml = Object.keys(condimentTotals).length
          body {
 			  width: 78mm;
 			  padding: 3mm;
-			  font-size: 13pt;
-			  line-height: 1.2;
+			  font-size: 10.5pt;
+			  line-height: 1.1;
 			}
 
           .ref {
@@ -1281,7 +1286,8 @@ const condimentsHtml = Object.keys(condimentTotals).length
 			
 			.item-main {
 			  display: block;
-			  font-size: 13pt;
+			  font-size: 10.5pt;
+			  line-height: 1.1;
 			  font-weight: 700;
 			  white-space: normal;
 			  word-break: break-word;
@@ -1557,6 +1563,28 @@ async function updateOrderStatus(orderId, newStatus) {
       console.error('Error updating status', error);
       alert('Could not update status – please try again.');
       return;
+    }
+
+    if (newStatus === 'completed') {
+      try {
+        const res = await fetch('https://order-backend-production.up.railway.app/settle-loyalty', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_id: orderId })
+        });
+
+        const data = await res.json();
+
+        if (!data.ok) {
+          console.warn('Loyalty settlement failed', data);
+          alert('Order marked completed, but loyalty settlement failed. Please check logs.');
+        } else {
+          console.log('Loyalty settled:', data.loyalty);
+        }
+      } catch (err) {
+        console.error('Loyalty settlement error', err);
+        alert('Order marked completed, but loyalty settlement failed.');
+      }
     }
   } catch (err) {
     console.error('Unexpected error updating status', err);

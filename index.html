@@ -2670,7 +2670,7 @@ body.overlay-open {
 		  </label>-->
 
 		  <div class="muted small">
-			Please select a suitable time. We will either confirm that time once the order has been reviewed, or get in contact with you to suggest an alternative within our opening days (Weds to Sat, 17:00 - 21:00).
+			Please select a suitable time. We will either confirm that time once the order has been reviewed, or get in contact with you to suggest an alternative within our opening days (Fri & Sat, 17:00 - 21:00).
 		  </div>
 		</div>
 
@@ -2719,6 +2719,8 @@ body.overlay-open {
   <div class="muted small">Total</div>
   <div id="checkout-total" style="font-weight:800">£0.00</div>
 </div>
+
+<div id="loyalty-message" class="loyalty-message" hidden></div>
 
 		<!--<div class="checkout-section">
 	  <h3>How would you like to pay?</h3>
@@ -2880,6 +2882,7 @@ body.overlay-open {
   <script>
 
 	document.addEventListener('DOMContentLoaded', () => {
+	
 	// ---------- Allergen registry ----------
   const ALLERGENS = {
 
@@ -3252,7 +3255,9 @@ if (!container.dataset.bound) {
   });
   container.dataset.bound = '1';
 }
+
 }
+
 
 // --------- Order rendering ----------
 function renderOrder(){
@@ -3895,323 +3900,323 @@ function openCustomiseById(itemId) {
   selectedMods.clear();
   selectedExtras = [];
 
-  // NEW: per-item extras control
-  if (Array.isArray(item.allowedExtras) && item.allowedExtras.length > 0) {
-    currentAllowExtras = item.allowedExtras;        // e.g. ['extra-beef']
-  } else {
-    currentAllowExtras = !!item.categoryAllowedExtras; // existing behaviour
-  }
+	  // NEW: per-item extras control
+	  if (Array.isArray(item.allowedExtras) && item.allowedExtras.length > 0) {
+		currentAllowExtras = item.allowedExtras;        // e.g. ['extra-beef']
+	  } else {
+		currentAllowExtras = !!item.categoryAllowedExtras; // existing behaviour
+	  }
 
-  const allowed  = Array.isArray(item.allowedModifiers) ? item.allowedModifiers : null;
-  const requires = !!item.modifierRequired;
-  const isMulti  = !!item.modifierMax || !!item.modifiersMulti;
-  const max      = (typeof item.modifierMax === 'number' && item.modifierMax > 0)
-    ? item.modifierMax
-    : null;
+	  const allowed  = Array.isArray(item.allowedModifiers) ? item.allowedModifiers : null;
+	  const requires = !!item.modifierRequired;
+	  const isMulti  = !!item.modifierMax || !!item.modifiersMulti;
+	  const max      = (typeof item.modifierMax === 'number' && item.modifierMax > 0)
+		? item.modifierMax
+		: null;
 
-  buildModifierChips(allowed, requires, isMulti, max);
-  buildExtraChips();
-  modalTitle.textContent = `Customise — ${item.name}`;
-  modalBase.dataset.price = item.price;
-  modalBase.textContent   = `Base price: ${formatCurrency(item.price)}`;
-  qtyInput.value = 1;
-  updateUnitPricePreview();
+	  buildModifierChips(allowed, requires, isMulti, max);
+	  buildExtraChips();
+	  modalTitle.textContent = `Customise — ${item.name}`;
+	  modalBase.dataset.price = item.price;
+	  modalBase.textContent   = `Base price: ${formatCurrency(item.price)}`;
+	  qtyInput.value = 1;
+	  updateUnitPricePreview();
 
-  if (modalImg) {
-    if (item.img) {
-      modalImg.src = item.img;
-      modalImg.style.display = 'block';
-    } else {
-      modalImg.removeAttribute('src');
-      modalImg.style.display = 'none';
-    }
-  }
+	  if (modalImg) {
+		if (item.img) {
+		  modalImg.src = item.img;
+		  modalImg.style.display = 'block';
+		} else {
+		  modalImg.removeAttribute('src');
+		  modalImg.style.display = 'none';
+		}
+	  }
 
-  if (item.allergens && item.allergens.length) {
-    modalAll.innerHTML = renderAllergenBadges(item.allergens);
-    modalAllWrap.style.display = 'block';
-  } else {
-    modalAll.innerHTML = '';
-    modalAllWrap.style.display = 'none';
-  }
+	  if (item.allergens && item.allergens.length) {
+		modalAll.innerHTML = renderAllergenBadges(item.allergens);
+		modalAllWrap.style.display = 'block';
+	  } else {
+		modalAll.innerHTML = '';
+		modalAllWrap.style.display = 'none';
+	  }
 
-  const defaultSpice = (typeof item.spiceDefault === 'number') ? item.spiceDefault : 0;
-  buildSpiceSelector(!!item.spiceEnabled, defaultSpice);
+	  const defaultSpice = (typeof item.spiceDefault === 'number') ? item.spiceDefault : 0;
+	  buildSpiceSelector(!!item.spiceEnabled, defaultSpice);
 
-  modal.style.display = 'flex';
-}
-function openCustomise(itemId) {
-  // Backwards-compat wrapper so old code still works
-  return openCustomiseById(itemId);
-}
+	  modal.style.display = 'flex';
+	}
+	function openCustomise(itemId) {
+	  // Backwards-compat wrapper so old code still works
+	  return openCustomiseById(itemId);
+	}
 
-// If anything uses it from inline HTML like onclick="openCustomise(...)"
-window.openCustomise = openCustomise;
-
-
-// Optional aliases if other code uses different casing:
-// keep old call sites working
-window.openCustomise  = openCustomise;
-window.openCustomize  = openCustomise;
-window.opencustomise  = openCustomise;
+	// If anything uses it from inline HTML like onclick="openCustomise(...)"
+	window.openCustomise = openCustomise;
 
 
-
-
-    document.getElementById('qty-incr').addEventListener('click', ()=>{ qtyInput.value = Math.max(1, parseInt(qtyInput.value || '1') + 1); });
-    document.getElementById('qty-decr').addEventListener('click', ()=>{ qtyInput.value = Math.max(1, parseInt(qtyInput.value || '1') - 1); });
-
-    document.getElementById('modal-close').addEventListener('click', closeModal);
-    document.getElementById('modal-cancel').addEventListener('click', closeModal);
-    modal.addEventListener('click', (ev) => { if(ev.target === modal) closeModal(); });
-
-    document.getElementById('modal-add').addEventListener('click', () => {
-  // … your existing checks …
-
-  const base = Number(modalBase.dataset.price) || 0;
-
-  let modsTotal = 0;
-  const modsArr = [];
-  selectedMods.forEach(id => {
-    const m = MODIFIERS.find(x => x.id === id);
-    if (m) { modsTotal += m.delta; modsArr.push(m); }
-  });
-
-  const extrasArr = currentAllowExtras
-    ? selectedExtras.map(e => ({ id:e.id, name:e.name, delta:e.delta, type:'extra' }))
-    : [];
-
-  const extrasTotal = currentAllowExtras
-    ? selectedExtras.reduce((s,e)=> s + (e.delta || 0), 0)
-    : 0;
-
-  const unitPrice = roundToTwo(base + modsTotal + extrasTotal);
-  const qty = Math.max(1, parseInt(qtyInput.value || '1'));
-  
-const item = currentItem;
-if (!item) {
-  console.error('[Customise] No currentItem set — modal opened without selecting an item');
-  return;
-}
-const itemId = item.id;
-
-  basket.push({
-    name: item.name,
-    itemId: item.id,
-    mods: [...modsArr, ...extrasArr],   // put extras in mods for downstream reuse
-    unitPrice,
-    qty,
-    img: item.img || '',
-    spice: currentSpice ?? null
-  });
-
-  closeModal();
-  renderOrder();
-});
+	// Optional aliases if other code uses different casing:
+	// keep old call sites working
+	window.openCustomise  = openCustomise;
+	window.openCustomize  = openCustomise;
+	window.opencustomise  = openCustomise;
 
 
 
-// One delegated handler for all customise buttons inside the popup
-(function bindCustomiseClicks() {
-  const container = document.getElementById('menu-list');
-  if (!container || container.dataset.customBound) return;
 
-  container.addEventListener('click', (e) => {
-    // works for either a button or the whole card if we later add data-id there
-    const btn = e.target.closest('[data-id]');
-    if (!btn) return;
+		document.getElementById('qty-incr').addEventListener('click', ()=>{ qtyInput.value = Math.max(1, parseInt(qtyInput.value || '1') + 1); });
+		document.getElementById('qty-decr').addEventListener('click', ()=>{ qtyInput.value = Math.max(1, parseInt(qtyInput.value || '1') - 1); });
 
-    const id = btn.getAttribute('data-id');
-    if (!id) return;
+		document.getElementById('modal-close').addEventListener('click', closeModal);
+		document.getElementById('modal-cancel').addEventListener('click', closeModal);
+		modal.addEventListener('click', (ev) => { if(ev.target === modal) closeModal(); });
 
-    // call our canonical opener
-    if (typeof openCustomise === 'function') {
-      openCustomise(id);
-    } else if (typeof window.openCustomise === 'function') {
-      window.openCustomise(id);
-    }
-  });
+		document.getElementById('modal-add').addEventListener('click', () => {
+	  // … your existing checks …
 
-  container.dataset.customBound = '1';
-})();
+	  const base = Number(modalBase.dataset.price) || 0;
 
-    document.getElementById('order-panel').addEventListener('click', e => {
-      const btn = e.target.closest('button');
-      if(!btn) return;
-      const action = btn.dataset.action;
-      const idx = Number(btn.dataset.idx);
-      if(action === 'inc'){ basket[idx].qty += 1; renderOrder(); }
-      if(action === 'dec'){ basket[idx].qty = Math.max(1, basket[idx].qty - 1); renderOrder(); }
-      if(action === 'remove'){ basket.splice(idx, 1); renderOrder(); }
-    });
+	  let modsTotal = 0;
+	  const modsArr = [];
+	  selectedMods.forEach(id => {
+		const m = MODIFIERS.find(x => x.id === id);
+		if (m) { modsTotal += m.delta; modsArr.push(m); }
+	  });
 
-    // Lightbox
-document.querySelectorAll('#food-grid img').forEach(img => {
-  img.addEventListener('click', ()=> {
-    const lb = document.getElementById('lightbox');
-    const lbImg = document.getElementById('lightbox-img');
-    if (!lb || !lbImg) return;
-    lbImg.src = img.src || '';
-    lb.style.display = 'flex';
-  });
-});
-const lbRoot = document.getElementById('lightbox');
-if (lbRoot) {
-  lbRoot.addEventListener('click', (e) => {
-    if(e.target.id === 'lightbox' || e.target.id === 'lightbox-img') lbRoot.style.display = 'none';
-  });
-};
+	  const extrasArr = currentAllowExtras
+		? selectedExtras.map(e => ({ id:e.id, name:e.name, delta:e.delta, type:'extra' }))
+		: [];
 
-    document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    if (typeof closeModal === 'function' && modal?.style.display === 'flex') closeModal();
-    if (typeof closeCheckout === 'function' && checkoutModal?.style.display === 'flex') closeCheckout();
-    if (typeof hideOrderSuccess === 'function') hideOrderSuccess();
-  }
-});
+	  const extrasTotal = currentAllowExtras
+		? selectedExtras.reduce((s,e)=> s + (e.delta || 0), 0)
+		: 0;
 
-// --- One handler for all "customise" buttons in the popup menu ---
-const menuListEl = document.getElementById('menu-list');
+	  const unitPrice = roundToTwo(base + modsTotal + extrasTotal);
+	  const qty = Math.max(1, parseInt(qtyInput.value || '1'));
+	  
+	const item = currentItem;
+	if (!item) {
+	  console.error('[Customise] No currentItem set — modal opened without selecting an item');
+	  return;
+	}
+	const itemId = item.id;
 
-if (menuListEl) {
-  menuListEl.addEventListener('click', (e) => {
-    const btn = e.target.closest('button[data-id]');
-    if (!btn) return;
+	  basket.push({
+		name: item.name,
+		itemId: item.id,
+		mods: [...modsArr, ...extrasArr],   // put extras in mods for downstream reuse
+		unitPrice,
+		qty,
+		img: item.img || '',
+		spice: currentSpice ?? null
+	  });
 
-    const id = btn.dataset.id;
-    // just open customise – do NOT close menu
-    openCustomise(id);
-  });
-}
-
-function filterMenu(query) {
-  const q = (query || '').trim().toLowerCase();
-  const sections = document.querySelectorAll('#menu-list .popup-category');
-
-  if (!q) {
-    // reset: show all categories & items
-    sections.forEach(sec => {
-      sec.style.display = '';
-      sec.querySelectorAll('.menu-item-card').forEach(card => {
-        card.style.display = '';
-      });
-    });
-    return;
-  }
-
-  sections.forEach(sec => {
-    let anyVisible = false;
-
-    sec.querySelectorAll('.menu-item-card').forEach(card => {
-      const text = card.dataset.searchText || card.textContent.toLowerCase();
-      const match = text.includes(q);
-      card.style.display = match ? '' : 'none';
-      if (match) anyVisible = true;
-    });
-
-    // hide category completely if none of its items match
-    sec.style.display = anyVisible ? '' : 'none';
-  });
-}
-
-const menuSearchInput = document.getElementById('menu-search');
-if (menuSearchInput) {
-  menuSearchInput.addEventListener('input', () => {
-    filterMenu(menuSearchInput.value);
-  });
-}
-
-const searchInput = document.getElementById('menu-search-input');
-
-if (searchInput) {
-  searchInput.addEventListener('input', () => {
-    const term = searchInput.value.trim().toLowerCase();
-
-    // every dish card in the popup
-    const cards = document.querySelectorAll('#menu-list .menu-item-card');
-
-    cards.forEach(card => {
-      const text = (card.textContent || '').toLowerCase();
-      // show card if its text contains the search term
-      if (!term || text.includes(term)) {
-        card.style.display = '';
-      } else {
-        card.style.display = 'none';
-      }
-    });
-  });
-}
+	  closeModal();
+	  renderOrder();
+	});
 
 
 
-// ---------- Build & first render ----------
-buildMenu();
-renderOrder();
+	// One delegated handler for all customise buttons inside the popup
+	(function bindCustomiseClicks() {
+	  const container = document.getElementById('menu-list');
+	  if (!container || container.dataset.customBound) return;
 
-// expose helpers the other script uses
-window.formatCurrency     = formatCurrency;
-window.orderMsg           = document.getElementById('order-msg');
-window.basket             = basket;
-window.renderOrder        = renderOrder;
-window.roundToTwo         = roundToTwo;
-window.chilliIcons        = chilliIcons;
-window.nameWithoutChillies= nameWithoutChillies;
+	  container.addEventListener('click', (e) => {
+		// works for either a button or the whole card if we later add data-id there
+		const btn = e.target.closest('[data-id]');
+		if (!btn) return;
 
-  
-  function openMenuOverlay() {
-  if (!menuOverlay) return;
-  menuOverlay.classList.add('show');
-  document.body.style.overflow = 'hidden';   // stop background scroll
-  document.body.classList.add('menu-open');  // 👈 NEW: flag that menu is open
-}
+		const id = btn.getAttribute('data-id');
+		if (!id) return;
 
-function closeMenuOverlay() {
-  if (!menuOverlay) return;
-  menuOverlay.classList.remove('show');
-  document.body.style.overflow = '';
-  document.body.classList.remove('menu-open'); // 👈 NEW: remove flag
-}
+		// call our canonical opener
+		if (typeof openCustomise === 'function') {
+		  openCustomise(id);
+		} else if (typeof window.openCustomise === 'function') {
+		  window.openCustomise(id);
+		}
+	  });
+
+	  container.dataset.customBound = '1';
+	})();
+
+		document.getElementById('order-panel').addEventListener('click', e => {
+		  const btn = e.target.closest('button');
+		  if(!btn) return;
+		  const action = btn.dataset.action;
+		  const idx = Number(btn.dataset.idx);
+		  if(action === 'inc'){ basket[idx].qty += 1; renderOrder(); }
+		  if(action === 'dec'){ basket[idx].qty = Math.max(1, basket[idx].qty - 1); renderOrder(); }
+		  if(action === 'remove'){ basket.splice(idx, 1); renderOrder(); }
+		});
+
+		// Lightbox
+	document.querySelectorAll('#food-grid img').forEach(img => {
+	  img.addEventListener('click', ()=> {
+		const lb = document.getElementById('lightbox');
+		const lbImg = document.getElementById('lightbox-img');
+		if (!lb || !lbImg) return;
+		lbImg.src = img.src || '';
+		lb.style.display = 'flex';
+	  });
+	});
+	const lbRoot = document.getElementById('lightbox');
+	if (lbRoot) {
+	  lbRoot.addEventListener('click', (e) => {
+		if(e.target.id === 'lightbox' || e.target.id === 'lightbox-img') lbRoot.style.display = 'none';
+	  });
+	};
+
+		document.addEventListener('keydown', (e) => {
+	  if (e.key === 'Escape') {
+		if (typeof closeModal === 'function' && modal?.style.display === 'flex') closeModal();
+		if (typeof closeCheckout === 'function' && checkoutModal?.style.display === 'flex') closeCheckout();
+		if (typeof hideOrderSuccess === 'function') hideOrderSuccess();
+	  }
+	});
+
+	// --- One handler for all "customise" buttons in the popup menu ---
+	const menuListEl = document.getElementById('menu-list');
+
+	if (menuListEl) {
+	  menuListEl.addEventListener('click', (e) => {
+		const btn = e.target.closest('button[data-id]');
+		if (!btn) return;
+
+		const id = btn.dataset.id;
+		// just open customise – do NOT close menu
+		openCustomise(id);
+	  });
+	}
+
+	function filterMenu(query) {
+	  const q = (query || '').trim().toLowerCase();
+	  const sections = document.querySelectorAll('#menu-list .popup-category');
+
+	  if (!q) {
+		// reset: show all categories & items
+		sections.forEach(sec => {
+		  sec.style.display = '';
+		  sec.querySelectorAll('.menu-item-card').forEach(card => {
+			card.style.display = '';
+		  });
+		});
+		return;
+	  }
+
+	  sections.forEach(sec => {
+		let anyVisible = false;
+
+		sec.querySelectorAll('.menu-item-card').forEach(card => {
+		  const text = card.dataset.searchText || card.textContent.toLowerCase();
+		  const match = text.includes(q);
+		  card.style.display = match ? '' : 'none';
+		  if (match) anyVisible = true;
+		});
+
+		// hide category completely if none of its items match
+		sec.style.display = anyVisible ? '' : 'none';
+	  });
+	}
+
+	const menuSearchInput = document.getElementById('menu-search');
+	if (menuSearchInput) {
+	  menuSearchInput.addEventListener('input', () => {
+		filterMenu(menuSearchInput.value);
+	  });
+	}
+
+	const searchInput = document.getElementById('menu-search-input');
+
+	if (searchInput) {
+	  searchInput.addEventListener('input', () => {
+		const term = searchInput.value.trim().toLowerCase();
+
+		// every dish card in the popup
+		const cards = document.querySelectorAll('#menu-list .menu-item-card');
+
+		cards.forEach(card => {
+		  const text = (card.textContent || '').toLowerCase();
+		  // show card if its text contains the search term
+		  if (!term || text.includes(term)) {
+			card.style.display = '';
+		  } else {
+			card.style.display = 'none';
+		  }
+		});
+	  });
+	}
 
 
-  if (menuLink) {
-    menuLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      openMenuOverlay();
-    });
-  }
 
-  if (menuClose) {
-    menuClose.addEventListener('click', () => {
-      closeMenuOverlay();
-    });
-  }
+	// ---------- Build & first render ----------
+	buildMenu();
+	renderOrder();
 
-  if (menuOverlay) {
-    // click outside the inner card closes
-    menuOverlay.addEventListener('click', (e) => {
-      if (e.target === menuOverlay) closeMenuOverlay();
-    });
-  }
+	// expose helpers the other script uses
+	window.formatCurrency     = formatCurrency;
+	window.orderMsg           = document.getElementById('order-msg');
+	window.basket             = basket;
+	window.renderOrder        = renderOrder;
+	window.roundToTwo         = roundToTwo;
+	window.chilliIcons        = chilliIcons;
+	window.nameWithoutChillies= nameWithoutChillies;
 
-  // ESC key closes popup too
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && menuOverlay?.classList.contains('show')) {
-      closeMenuOverlay();
-    }
-  });
+	  
+	  function openMenuOverlay() {
+	  if (!menuOverlay) return;
+	  menuOverlay.classList.add('show');
+	  document.body.style.overflow = 'hidden';   // stop background scroll
+	  document.body.classList.add('menu-open');  // 👈 NEW: flag that menu is open
+	}
 
-function cancelOrder(order, reason, meta = {}) {
-  order.status = 'cancelled';
-  order.cancelReason = reason;            // <- short code/string
-  order.cancelMeta = meta;                // <- optional extra detail
-  order.cancelledAt = new Date().toISOString();
-  console.warn('[ORDER CANCELLED]', reason, meta, order);
-  return order;
-}
+	function closeMenuOverlay() {
+	  if (!menuOverlay) return;
+	  menuOverlay.classList.remove('show');
+	  document.body.style.overflow = '';
+	  document.body.classList.remove('menu-open'); // 👈 NEW: remove flag
+	}
 
 
-// (no extra closers past here)
-}); 
+	  if (menuLink) {
+		menuLink.addEventListener('click', (e) => {
+		  e.preventDefault();
+		  openMenuOverlay();
+		});
+	  }
+
+	  if (menuClose) {
+		menuClose.addEventListener('click', () => {
+		  closeMenuOverlay();
+		});
+	  }
+
+	  if (menuOverlay) {
+		// click outside the inner card closes
+		menuOverlay.addEventListener('click', (e) => {
+		  if (e.target === menuOverlay) closeMenuOverlay();
+		});
+	  }
+
+	  // ESC key closes popup too
+	  document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape' && menuOverlay?.classList.contains('show')) {
+		  closeMenuOverlay();
+		}
+	  });
+
+	function cancelOrder(order, reason, meta = {}) {
+	  order.status = 'cancelled';
+	  order.cancelReason = reason;            // <- short code/string
+	  order.cancelMeta = meta;                // <- optional extra detail
+	  order.cancelledAt = new Date().toISOString();
+	  console.warn('[ORDER CANCELLED]', reason, meta, order);
+	  return order;
+	}
+
+
+	// (no extra closers past here)
+	}); 
 
 // end Loaded
 
@@ -4484,23 +4489,143 @@ if (isClosed) {
 
 
 
-    // Checkout modal helpers
-    const checkoutModal = document.getElementById('checkout-modal');
-    const checkoutClose = document.getElementById('checkout-close');
-    const checkoutCancel = document.getElementById('checkout-cancel');
-    const checkoutForm = document.getElementById('checkout-form');
-    const checkoutMsg = document.getElementById('checkout-msg');
-    const checkoutSubtotalEl = document.getElementById('checkout-subtotal');
-    const checkoutDeliveryEl = document.getElementById('checkout-delivery');
-    const checkoutTotalEl = document.getElementById('checkout-total');
-    const deliveryNote = document.getElementById('delivery-note');
-    const orderMsg = document.getElementById('order-msg');
-    const openCheckoutBtn = document.getElementById('open-checkout');
+// Checkout modal helpers
+const checkoutModal = document.getElementById('checkout-modal');
+const checkoutClose = document.getElementById('checkout-close');
+const checkoutCancel = document.getElementById('checkout-cancel');
+const checkoutForm = document.getElementById('checkout-form');
+const checkoutMsg = document.getElementById('checkout-msg');
+const checkoutSubtotalEl = document.getElementById('checkout-subtotal');
+const checkoutDeliveryEl = document.getElementById('checkout-delivery');
+const checkoutTotalEl = document.getElementById('checkout-total');
+const deliveryNote = document.getElementById('delivery-note');
+const orderMsg = document.getElementById('order-msg');
+const openCheckoutBtn = document.getElementById('open-checkout');
 
-	const orderTypeRadios = document.querySelectorAll('input[name="order-type"]');
-    let checkoutBaseSubtotal = 0;
-	
-	// Recompute totals whenever fulfilment time / ASAP / order type changes
+const orderTypeRadios = document.querySelectorAll('input[name="order-type"]');
+let checkoutBaseSubtotal = 0;
+
+// ---------------- LOYALTY STATE ----------------
+const LOYALTY_REWARD_THRESHOLD = 100;   // 100 points unlocks reward
+const LOYALTY_REWARD_VALUE = 5;    // £5 reward
+
+const loyaltyState = {
+  pointsBalance: 0,
+  lifetimePoints: 0,
+
+  // derived values
+  rewardEligible: false,
+  discountApplied: 0,
+  pointsRedeemedPending: 0,
+  pointsEarnedPending: 0,
+  expectedBalance: 0,
+  pointsToNextReward: LOYALTY_REWARD_THRESHOLD
+};
+// ---------------- END LOYALTY STATE ----------------
+
+function applyLoyaltyToTotals(foodSubtotal) {
+  const points = Number(loyaltyState.pointsBalance || 0);
+  const eligibleSubtotal = Number(foodSubtotal || 0);
+
+  const rewardEligible = points >= LOYALTY_REWARD_THRESHOLD;
+
+  // ✅ Fixed £5 reward
+  const discountApplied = rewardEligible
+    ? Math.min(LOYALTY_REWARD_VALUE, eligibleSubtotal)
+    : 0;
+
+  loyaltyState.rewardEligible = rewardEligible;
+  loyaltyState.discountApplied = discountApplied;
+  loyaltyState.pointsRedeemedPending = rewardEligible ? LOYALTY_REWARD_THRESHOLD : 0;
+
+  return discountApplied;
+}
+
+function updateLoyaltyProjection(foodSubtotalAfterAllDiscounts) {
+  const currentPoints = Number(loyaltyState.pointsBalance || 0);
+  const rewardEligible = !!loyaltyState.rewardEligible;
+  const pointsRedeemedPending = rewardEligible ? LOYALTY_REWARD_THRESHOLD : 0;
+
+  // Earn points only on food actually paid for, after all discounts
+  const pointsEarnedPending = Math.max(0, Math.floor(Number(foodSubtotalAfterAllDiscounts || 0)));
+
+  const expectedBalance = currentPoints - pointsRedeemedPending + pointsEarnedPending;
+  const pointsToNextReward = rewardEligible
+    ? 0
+    : Math.max(0, LOYALTY_REWARD_THRESHOLD - currentPoints);
+
+  loyaltyState.pointsRedeemedPending = pointsRedeemedPending;
+  loyaltyState.pointsEarnedPending = pointsEarnedPending;
+  loyaltyState.expectedBalance = expectedBalance;
+  loyaltyState.pointsToNextReward = pointsToNextReward;
+}
+
+function renderLoyaltyMessage() {
+  const el = document.getElementById('loyalty-message');
+  if (!el) return;
+
+  const points = Number(loyaltyState.pointsBalance || 0);
+  const rewardEligible = !!loyaltyState.rewardEligible;
+  const discountApplied = Number(loyaltyState.discountApplied || 0);
+  const pointsRedeemedPending = Number(loyaltyState.pointsRedeemedPending || 0);
+  const pointsEarnedPending = Number(loyaltyState.pointsEarnedPending || 0);
+  const expectedBalance = Number(loyaltyState.expectedBalance || 0);
+  const needed = Number(loyaltyState.pointsToNextReward || LOYALTY_REWARD_THRESHOLD);
+
+  // Hide if no phone entered / no known balance yet
+  if (points <= 0 && !rewardEligible && pointsEarnedPending <= 0) {
+    el.hidden = true;
+    el.innerHTML = '';
+    return;
+  }
+
+  el.hidden = false;
+
+if (rewardEligible && discountApplied > 0) {
+  el.innerHTML = `
+    <strong>Loyalty reward applied:</strong> You have ${points} points, so <strong>£${discountApplied.toFixed(2)} off</strong> your food subtotal has been applied automatically.<br>
+    Redeeming on fulfilment: -${pointsRedeemedPending} points<br>
+    This order: +${pointsEarnedPending} pending points<br>
+    Expected balance after fulfilment: <strong>${expectedBalance}</strong>
+  `;
+  return;
+}
+
+  el.innerHTML = `
+    <strong>Loyalty points:</strong> You currently have ${points} points.<br>
+    This order: +${pointsEarnedPending} pending points<br>
+    Expected balance after fulfilment: <strong>${expectedBalance}</strong><br>
+    ${needed > 0 ? `Only ${needed} more points until your next £5 reward.` : ''}
+  `;
+}
+
+function normalisePhone(phone) {
+  return (phone || '').trim();
+}
+
+async function fetchLoyaltyBalance(phone) {
+  const cleanPhone = normalisePhone(phone);
+  if (!cleanPhone) return null;
+
+  try {
+    const res = await fetch('https://order-backend-production.up.railway.app/loyalty-balance', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ phone: cleanPhone })
+    });
+
+    const data = await res.json();
+    if (!data.ok) return null;
+
+    return data.loyalty || null;
+  } catch (err) {
+    console.error('Failed to fetch loyalty balance:', err);
+    return null;
+  }
+}
+// Recompute totals whenever fulfilment time / ASAP / order type changes
 (function wireCheckoutTotalRecompute() {
   const timeEl =
     document.getElementById('preferred-time') ||
@@ -4521,7 +4646,6 @@ if (isClosed) {
     asapEl.addEventListener('change', recomputeCheckoutTotals);
   }
 
-  // You already have orderTypeRadios — hook them too
   if (typeof orderTypeRadios !== 'undefined' && orderTypeRadios?.length) {
     orderTypeRadios.forEach(r => r.addEventListener('change', recomputeCheckoutTotals));
   }
@@ -4539,35 +4663,52 @@ function recomputeCheckoutTotals() {
   // Base subtotal (food only)
   const subtotal = Math.round(checkoutBaseSubtotal * 100) / 100;
 
-const preferredTimeRaw =
-  (document.getElementById('preferred-time')?.value ||
-   document.querySelector('input[name="preferred_time"]')?.value ||
-   '').trim();
+  const preferredTimeRaw =
+    (document.getElementById('preferred-time')?.value ||
+     document.querySelector('input[name="preferred_time"]')?.value ||
+     '').trim();
 
-const asapRequested =
-  !!document.querySelector('input[name="asap_requested"]:checked') ||
-  !!document.getElementById('asap')?.checked ||
-  !!document.getElementById('asap-requested')?.checked ||
-  !!document.getElementById('asapRequested')?.checked;
+  const asapRequested =
+    !!document.querySelector('input[name="asap_requested"]:checked') ||
+    !!document.getElementById('asap')?.checked ||
+    !!document.getElementById('asap-requested')?.checked ||
+    !!document.getElementById('asapRequested')?.checked;
 
-const disc = applyWedThuDiscount(subtotal, preferredTimeRaw, asapRequested);
-const discountedSubtotal = disc.discountedSubtotal;
+  // Wed/Thu discount first
+  const disc = applyWedThuDiscount(subtotal, preferredTimeRaw, asapRequested);
+  const discountedSubtotal = disc.discountedSubtotal;
 
+  // Loyalty discount applies AFTER Wed/Thu discount, on food only
+  const loyaltyDiscount = applyLoyaltyToTotals(discountedSubtotal);
+  const foodSubtotalAfterAllDiscounts = Math.max(0, discountedSubtotal - loyaltyDiscount);
 
-  // Delivery fee threshold (USUAL: based on PRE-discount subtotal)
+  // Update loyalty projections based on actual paid food amount
+  updateLoyaltyProjection(foodSubtotalAfterAllDiscounts);
+
+  // Delivery fee threshold stays based on PRE-discount subtotal
   const fee = (orderType === 'delivery' && subtotal < 20) ? 3.00 : 0.00;
 
   // Final total
-  const total = Math.round((discountedSubtotal + fee) * 100) / 100;
+  const total = Math.round((foodSubtotalAfterAllDiscounts + fee) * 100) / 100;
 
   // Update notes + totals UI
-  deliveryNote.style.display = (orderType === 'delivery') ? 'block' : 'none';
+  if (typeof deliveryNote !== 'undefined' && deliveryNote) {
+    deliveryNote.style.display = (orderType === 'delivery') ? 'block' : 'none';
+  }
 
-  checkoutSubtotalEl.textContent = formatCurrency(subtotal);
-  checkoutDeliveryEl.textContent = formatCurrency(fee);
-  checkoutTotalEl.textContent = formatCurrency(total);
+  if (typeof checkoutSubtotalEl !== 'undefined' && checkoutSubtotalEl) {
+    checkoutSubtotalEl.textContent = formatCurrency(subtotal);
+  }
 
-  // Show / hide discount row
+  if (typeof checkoutDeliveryEl !== 'undefined' && checkoutDeliveryEl) {
+    checkoutDeliveryEl.textContent = formatCurrency(fee);
+  }
+
+  if (typeof checkoutTotalEl !== 'undefined' && checkoutTotalEl) {
+    checkoutTotalEl.textContent = formatCurrency(total);
+  }
+
+  // Show / hide Wed/Thu discount row
   const discountRow = document.getElementById('discountRow');
   const discountValue = document.getElementById('discountValue');
 
@@ -4577,15 +4718,48 @@ const discountedSubtotal = disc.discountedSubtotal;
       discountValue.textContent = `-£${disc.discount.toFixed(2)}`;
     } else {
       discountRow.style.display = 'none';
+      discountValue.textContent = '';
     }
   }
 
-  // ✅ Store totals for submit + receipt + confirmations (single source of truth)
+  // Show / hide loyalty discount row
+  const loyaltyRow = document.getElementById('loyaltyDiscountRow');
+  const loyaltyValue = document.getElementById('loyaltyDiscountValue');
+
+  if (loyaltyRow && loyaltyValue) {
+    if (loyaltyDiscount > 0) {
+      loyaltyRow.style.display = 'flex';
+      loyaltyValue.textContent = `-£${loyaltyDiscount.toFixed(2)}`;
+    } else {
+      loyaltyRow.style.display = 'none';
+      loyaltyValue.textContent = '';
+    }
+  }
+
+  // Refresh loyalty message block
+  renderLoyaltyMessage();
+
+  // Single source of truth for submit + confirmations + success page
   window.__checkoutTotals = {
     subtotal,
     discount: (disc.eligible && disc.discount > 0) ? disc.discount : 0,
+    discounted_subtotal: discountedSubtotal,
+
+    loyalty_discount: loyaltyDiscount,
+    loyalty_reward_applied: !!loyaltyState.rewardEligible,
+    loyalty_points_balance: Number(loyaltyState.pointsBalance || 0),
+    loyalty_points_redeem_pending: Number(loyaltyState.pointsRedeemedPending || 0),
+    loyalty_points_earned_pending: Number(loyaltyState.pointsEarnedPending || 0),
+    loyalty_expected_balance: Number(loyaltyState.expectedBalance || 0),
+
     delivery_fee: fee,
-    total
+    total,
+
+    // useful internal values
+    order_type: orderType,
+    preferred_time: preferredTimeRaw,
+    asap_requested: asapRequested,
+    points_earning_food_subtotal: foodSubtotalAfterAllDiscounts
   };
 
   return window.__checkoutTotals;
@@ -4784,6 +4958,35 @@ function findNextAllowedFromNow() {
 				return false;
 			  }
 			}
+			
+			// ---------------- LOYALTY PHONE LOOKUP ----------------
+(function wireLoyaltyPhoneLookup() {
+  const phoneInput = document.getElementById('cust-phone');
+  if (!phoneInput) return;
+
+  async function refreshLoyaltyFromPhone() {
+    const loyalty = await fetchLoyaltyBalance(phoneInput.value);
+	
+	  console.log('LOYALTY RESPONSE:', loyalty); // 👈 ADD THIS
+
+		if (loyalty) {
+		  loyaltyState.pointsBalance = Number(loyalty.points_balance || 0);
+		  loyaltyState.lifetimePoints = Number(loyalty.lifetime_points || 0);
+		  loyaltyState.pointsToNextReward = Number(loyalty.points_to_next_reward || 100);
+		} else {
+		  loyaltyState.pointsBalance = 0;
+		  loyaltyState.lifetimePoints = 0;
+		  loyaltyState.pointsToNextReward = 100;
+		}
+
+    recomputeCheckoutTotals();
+    renderLoyaltyMessage();
+  }
+
+  phoneInput.addEventListener('blur', refreshLoyaltyFromPhone);
+  phoneInput.addEventListener('change', refreshLoyaltyFromPhone);
+})();
+// ---------------- END LOYALTY PHONE LOOKUP ----------------
 
 
 
@@ -5393,12 +5596,20 @@ checkoutForm.addEventListener('submit', async (e) => {
 					  order_type: orderType,
 					  preferred_time: preferredTimeRaw,
 
-					  subtotal: submitTotals.subtotal,
-					  discount: submitTotals.discount,
-					  delivery_fee: submitTotals.delivery_fee,
-					  total: submitTotals.total,
+						subtotal: submitTotals.subtotal,
+						discount: submitTotals.discount,
+						delivery_fee: submitTotals.delivery_fee,
+						total: submitTotals.total,
 
-					  discount_label: submitTotals.discount > 0 ? '10% Wed/Thu discount' : null,
+						discount_label: submitTotals.discount > 0 ? '10% Wed/Thu discount' : null,
+
+						loyalty_discount: submitTotals.loyalty_discount,
+						loyalty_reward_applied: submitTotals.loyalty_reward_applied,
+						loyalty_points_balance: submitTotals.loyalty_points_balance,
+						loyalty_points_redeem_pending: submitTotals.loyalty_points_redeem_pending,
+						loyalty_points_earned_pending: submitTotals.loyalty_points_earned_pending,
+						loyalty_expected_balance: submitTotals.loyalty_expected_balance,
+						points_earning_food_subtotal: submitTotals.points_earning_food_subtotal,
 
 					  communication_preference: communicationPreference,
 					  asap_requested: asapRequested
