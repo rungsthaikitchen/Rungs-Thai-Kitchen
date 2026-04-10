@@ -4524,40 +4524,51 @@ const loyaltyState = {
 // ---------------- END LOYALTY STATE ----------------
 
 function applyLoyaltyToTotals(foodSubtotal) {
-  const points = Number(loyaltyState.pointsBalance || 0);
+  // ✅ USE SETTLED POINTS ONLY
+  	console.log('APPLY LOYALTY CHECK', {
+  pointsBalance: loyaltyState.pointsBalance,
+  settledPointsBalance: loyaltyState.settledPointsBalance,
+  threshold: LOYALTY_REWARD_THRESHOLD
+});
+  const settledPoints = Number(loyaltyState.settledPointsBalance || 0);
   const eligibleSubtotal = Number(foodSubtotal || 0);
 
-  const rewardEligible = points >= LOYALTY_REWARD_THRESHOLD;
+  const rewardEligible = settledPoints >= LOYALTY_REWARD_THRESHOLD;
 
-  // ✅ Fixed £5 reward
   const discountApplied = rewardEligible
     ? Math.min(LOYALTY_REWARD_VALUE, eligibleSubtotal)
     : 0;
 
   loyaltyState.rewardEligible = rewardEligible;
   loyaltyState.discountApplied = discountApplied;
-  loyaltyState.pointsRedeemedPending = rewardEligible ? LOYALTY_REWARD_THRESHOLD : 0;
+
+  // Only redeem if actually eligible from settled balance
+  loyaltyState.pointsRedeemedPending = rewardEligible
+    ? LOYALTY_REWARD_THRESHOLD
+    : 0;
 
   return discountApplied;
 }
 
 function updateLoyaltyProjection(foodSubtotalAfterAllDiscounts) {
-  const currentPoints = Number(loyaltyState.pointsBalance || 0);
+  const settledPoints = Number(loyaltyState.settledPointsBalance || 0);
   const rewardEligible = !!loyaltyState.rewardEligible;
   const pointsRedeemedPending = rewardEligible ? LOYALTY_REWARD_THRESHOLD : 0;
 
   // Earn points only on food actually paid for, after all discounts
   const pointsEarnedPending = Math.max(0, Math.floor(Number(foodSubtotalAfterAllDiscounts || 0)));
 
-  const expectedBalance = currentPoints - pointsRedeemedPending + pointsEarnedPending;
+  const expectedBalance = settledPoints - pointsRedeemedPending + pointsEarnedPending;
   const pointsToNextReward = rewardEligible
-    ? 0
-    : Math.max(0, LOYALTY_REWARD_THRESHOLD - currentPoints);
+  ? 0
+  : Math.max(0, LOYALTY_REWARD_THRESHOLD - settledPoints);
 
   loyaltyState.pointsRedeemedPending = pointsRedeemedPending;
   loyaltyState.pointsEarnedPending = pointsEarnedPending;
   loyaltyState.expectedBalance = expectedBalance;
   loyaltyState.pointsToNextReward = pointsToNextReward;
+  
+  console.log('LOYALTY STATE:', loyaltyState);
 }
 
 function renderLoyaltyMessage() {
@@ -4969,15 +4980,25 @@ function findNextAllowedFromNow() {
 	
 	  console.log('LOYALTY RESPONSE:', loyalty); // 👈 ADD THIS
 
-		if (loyalty) {
-		  loyaltyState.pointsBalance = Number(loyalty.points_balance || 0);
-		  loyaltyState.lifetimePoints = Number(loyalty.lifetime_points || 0);
-		  loyaltyState.pointsToNextReward = Number(loyalty.points_to_next_reward || 100);
-		} else {
-		  loyaltyState.pointsBalance = 0;
-		  loyaltyState.lifetimePoints = 0;
-		  loyaltyState.pointsToNextReward = 100;
-		}
+			if (loyalty) {
+			  loyaltyState.pointsBalance = Number(loyalty.points_balance || 0);
+
+			  // ⭐ NEW — use settled balance if available, fallback safely
+			  loyaltyState.settledPointsBalance = Number(
+				loyalty.settled_points_balance ?? loyalty.points_balance ?? 0
+			  );
+
+			  loyaltyState.lifetimePoints = Number(loyalty.lifetime_points || 0);
+			  loyaltyState.pointsToNextReward = Number(loyalty.points_to_next_reward || 100);
+			} else {
+			  loyaltyState.pointsBalance = 0;
+			  loyaltyState.settledPointsBalance = 0; // ⭐ NEW
+			  loyaltyState.lifetimePoints = 0;
+			  loyaltyState.pointsToNextReward = 100;
+			}
+			
+			console.log('LOYALTY RESPONSE FROM BACKEND:', loyalty);
+			console.log('LOYALTY STATE AFTER LOAD:', loyaltyState);
 
     recomputeCheckoutTotals();
     renderLoyaltyMessage();
@@ -5514,22 +5535,41 @@ checkoutForm.addEventListener('submit', async (e) => {
       : 'on_arrival';
 
 // ---------- Create order ----------
-
 // ✅ NEW: generate a fresh idempotency key for THIS submit
 const idempotencyKey = crypto.randomUUID();
 
 const submitTotals = recomputeCheckoutTotals();
 
+// keep this if disc already exists above in your submit handler
+const totalDiscount =
+  Number(disc?.discount || 0) + Number(submitTotals.loyalty_discount || 0);
+
+console.log('SUBMIT TOTALS:', submitTotals);
+console.log('ORDER PAYLOAD PREVIEW:', {
+  subtotal: submitTotals.subtotal,
+  loyalty_discount: submitTotals.loyalty_discount,
+  loyalty_points_earned_pending: submitTotals.loyalty_points_earned_pending,
+  loyalty_points_redeem_pending: submitTotals.loyalty_points_redeem_pending,
+  loyalty_reward_applied: submitTotals.loyalty_reward_applied,
+  total: submitTotals.total
+});
+
 const baseOrderPayload = {
   customer_id: customerId,
 
-		subtotal: Number(submitTotals.subtotal.toFixed(2)),
-		discount: Number((submitTotals.loyalty_discount || 0).toFixed(2)),
-		discount_label: submitTotals.loyalty_discount > 0 ? 'Loyalty reward' : null,
-		delivery_fee: Number(submitTotals.delivery_fee.toFixed(2)),
-		total: Number(submitTotals.total.toFixed(2)),
+  subtotal: Number(submitTotals.subtotal.toFixed(2)),
+  discount: Number(totalDiscount.toFixed(2)),
+  discount_label:
+    submitTotals.loyalty_discount > 0
+      ? 'Loyalty reward'
+      : Number(disc?.discount || 0) > 0
+        ? 'Wed/Thu discount'
+        : null,
+  delivery_fee: Number(submitTotals.delivery_fee.toFixed(2)),
+  total: Number(submitTotals.total.toFixed(2)),
 
-		// loyalty fields
+  // loyalty fields
+  loyalty_discount: Number((submitTotals.loyalty_discount || 0).toFixed(2)),
   loyalty_points_redeem_pending: Number(submitTotals.loyalty_points_redeem_pending || 0),
   loyalty_points_earned_pending: Number(submitTotals.loyalty_points_earned_pending || 0),
   loyalty_reward_applied: !!submitTotals.loyalty_reward_applied,
@@ -5549,6 +5589,7 @@ const baseOrderPayload = {
   idempotency_key: idempotencyKey,
 };
 
+console.log('BASE ORDER PAYLOAD:', baseOrderPayload);
 
 
 		const { data: orderRow, error: orderUpsertErr } = await sb

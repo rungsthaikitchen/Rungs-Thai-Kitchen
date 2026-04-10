@@ -245,6 +245,117 @@
 		body {
 		  margin-left: 4mm;
 		}
+		
+		.loyalty-dashboard {
+		  margin: 18px 0 22px;
+		}
+
+		.dashboard-grid {
+		  display: grid;
+		  grid-template-columns: repeat(6, minmax(140px, 1fr));
+		  gap: 12px;
+		  margin-bottom: 16px;
+		}
+
+		.dash-card {
+		  background: #fff;
+		  border: 1px solid #e7dcc7;
+		  border-radius: 14px;
+		  padding: 14px 16px;
+		  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+		}
+
+		.dash-label {
+		  font-size: 12px;
+		  color: #7a6f60;
+		  margin-bottom: 6px;
+		}
+
+		.dash-value {
+		  font-size: 24px;
+		  font-weight: 700;
+		  color: #1f2937;
+		}
+
+		.dash-table-wrap {
+		  background: #fff;
+		  border: 1px solid #e7dcc7;
+		  border-radius: 14px;
+		  padding: 14px 16px;
+		  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+		}
+
+		.dash-table-title {
+		  font-size: 15px;
+		  font-weight: 700;
+		  margin-bottom: 10px;
+		  color: #1f2937;
+		}
+
+		.dash-table {
+		  width: 100%;
+		  border-collapse: collapse;
+		}
+
+		.dash-table th,
+		.dash-table td {
+		  text-align: left;
+		  padding: 8px 10px;
+		  border-bottom: 1px solid #eee7db;
+		  font-size: 14px;
+		}
+
+		.dash-table th {
+		  color: #7a6f60;
+		  font-weight: 600;
+		}
+
+		.dash-money {
+		  font-weight: 700;
+		  color: #166534;
+		}
+
+		.dash-muted {
+		  color: #7a6f60;
+		  font-size: 13px;
+		}
+
+		@media (max-width: 1200px) {
+		  .dashboard-grid {
+			grid-template-columns: repeat(3, minmax(140px, 1fr));
+		  }
+		}
+
+		@media (max-width: 700px) {
+		  .dashboard-grid {
+			grid-template-columns: repeat(2, minmax(140px, 1fr));
+		  }
+		}
+		
+		.reward-ready {
+		  display: inline-block;
+		  padding: 4px 8px;
+		  border-radius: 999px;
+		  font-size: 12px;
+		  font-weight: 700;
+		  background: #dcfce7;
+		  color: #166534;
+		}
+
+		.reward-building {
+		  display: inline-block;
+		  padding: 4px 8px;
+		  border-radius: 999px;
+		  font-size: 12px;
+		  font-weight: 700;
+		  background: #fef3c7;
+		  color: #92400e;
+		}
+
+		.balance-strong {
+		  font-weight: 700;
+		  color: #111827;
+		}
 
 			tr.row-attention td {
 			  background-color: #ffe9c6 !important;
@@ -273,6 +384,7 @@
       <div class="controls">
   <button id="refresh" class="btn">Refresh</button>
   <button id="export" class="btn">Export CSV</button>
+  <button id="toggleDashboard" class="btn">Hide dashboard</button>
 
   <label class="filter-today">
     <input type="checkbox" id="filter-today" checked />
@@ -283,6 +395,53 @@
 
     </div>
   </header>
+  <div id="liveDashboard">
+  <div id="loyaltyDashboard" class="loyalty-dashboard" style="display:none;">
+  <div class="dashboard-grid">
+    <div class="dash-card">
+      <div class="dash-label">Orders today</div>
+      <div class="dash-value" id="dashOrdersToday">0</div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-label">Revenue today</div>
+      <div class="dash-value" id="dashRevenueToday">£0.00</div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-label">Discounts today</div>
+      <div class="dash-value" id="dashDiscountsToday">£0.00</div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-label">Rewards used today</div>
+      <div class="dash-value" id="dashRewardsToday">0</div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-label">Points issued today</div>
+      <div class="dash-value" id="dashPointsIssuedToday">0</div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-label">Points redeemed today</div>
+      <div class="dash-value" id="dashPointsRedeemedToday">0</div>
+    </div>
+  </div>
+
+  <div class="dash-table-wrap">
+    <div class="dash-table-title">Recent loyalty activity</div>
+    <div id="dashLoyaltyTable"></div>
+  </div>
+</div>
+
+<div id="customerLoyaltyPanel" class="loyalty-dashboard" style="display:none;">
+  <div class="dash-table-wrap">
+    <div class="dash-table-title">Customer loyalty balances</div>
+    <div id="customerLoyaltyTable"></div>
+  </div>
+</div>
+</div>
 
   <main>
     <div class="wrap">
@@ -572,6 +731,27 @@ function distanceKmBetween(lat1, lon1, lat2, lon2) {
 	  if (banner) banner.remove();
 	}
 	
+	function escapeHtmlForDash(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function fmtDashDate(value) {
+  if (!value) return '—';
+  try {
+    return new Date(value).toLocaleString('en-GB', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
+  } catch {
+    return '—';
+  }
+}
+	
 				// ---- Desktop notification helpers ----
 			async function ensureNotificationPermission() {
 			  try {
@@ -588,6 +768,24 @@ function distanceKmBetween(lat1, lon1, lat2, lon2) {
 				console.error("Notification permission error:", e);
 				return false;
 			  }
+			}
+			
+			function isTodayUk(dateValue) {
+			  if (!dateValue) return false;
+
+			  const orderDate = new Date(dateValue).toLocaleDateString('en-GB', {
+				timeZone: 'Europe/London'
+			  });
+
+			  const todayUk = new Date().toLocaleDateString('en-GB', {
+				timeZone: 'Europe/London'
+			  });
+
+			  return orderDate === todayUk;
+			}
+
+			function fmtWholeNumber(n) {
+			  return String(Math.round(Number(n || 0)));
 			}
 
 			function showNewOrderNotification(order) {
@@ -1425,24 +1623,251 @@ const condimentsHtml = Object.keys(condimentTotals).length
 			</html>
   `;
 
-		  const w = window.open("", `PRINT_${Date.now()}`, "height=800,width=600");
-if (!w) {
-  alert("Pop-up blocked. Please allow pop-ups for printing.");
-  return;
+					  const w = window.open("", `PRINT_${Date.now()}`, "height=800,width=600");
+			if (!w) {
+			  alert("Pop-up blocked. Please allow pop-ups for printing.");
+			  return;
+			}
+
+			w.document.open();
+			w.document.write(html);
+			w.document.close();
+
+			w.onload = function () {
+			  setTimeout(() => {
+				w.focus();
+				w.print();
+			  }, 800);
+			};
+			}
+				
+			function renderLoyaltyDashboard(orders) {
+			  const dashboard = document.getElementById('loyaltyDashboard');
+			  if (!dashboard) return;
+
+			  const todayOrders = (orders || []).filter(o => isTodayUk(o.created_at));
+
+			  const ordersToday = todayOrders.length;
+
+			  const revenueToday = todayOrders.reduce((sum, o) => {
+				const subtotal = Number(o.subtotal || 0);
+				const discount = Number(o.discount || 0);
+				const delivery = Number(o.delivery_fee || 0);
+				const total = Number.isFinite(Number(o.total))
+				  ? Number(o.total)
+				  : Math.round((subtotal - discount + delivery) * 100) / 100;
+
+				return sum + total;
+			  }, 0);
+			  
+			  function isLoyaltyOrder(o) {
+			  return (
+				(o.discount_label || '').toLowerCase() === 'loyalty reward' ||
+				!!o.loyalty_reward_applied ||
+				Number(o.loyalty_points_earned_pending || 0) > 0 ||
+				Number(o.loyalty_points_redeem_pending || 0) > 0
+			  );
+			}
+
+			function isRewardUsed(o) {
+			  return (
+				(o.discount_label || '').toLowerCase() === 'loyalty reward' ||
+				!!o.loyalty_reward_applied ||
+				Number(o.loyalty_points_redeem_pending || 0) > 0
+			  );
+			}
+
+			const loyaltyTodayOrders = todayOrders.filter(isLoyaltyOrder);
+
+			const discountsToday = loyaltyTodayOrders.reduce((sum, o) => {
+			  return sum + Number(o.discount || 0);
+			}, 0);
+
+			const rewardsToday = loyaltyTodayOrders.filter(isRewardUsed).length;
+
+			const pointsIssuedToday = loyaltyTodayOrders.reduce((sum, o) => {
+			  return sum + Number(o.loyalty_points_earned_pending || 0);
+			}, 0);
+
+			const pointsRedeemedToday = loyaltyTodayOrders.reduce((sum, o) => {
+			  return sum + Number(o.loyalty_points_redeem_pending || 0);
+			}, 0);
+
+  document.getElementById('dashOrdersToday').textContent = fmtWholeNumber(ordersToday);
+  document.getElementById('dashRevenueToday').textContent = fmtMoney(revenueToday);
+  document.getElementById('dashDiscountsToday').textContent = fmtMoney(discountsToday);
+  document.getElementById('dashRewardsToday').textContent = fmtWholeNumber(rewardsToday);
+  document.getElementById('dashPointsIssuedToday').textContent = fmtWholeNumber(pointsIssuedToday);
+  document.getElementById('dashPointsRedeemedToday').textContent = fmtWholeNumber(pointsRedeemedToday);
+
+		const loyaltyOrders = (orders || [])
+		  .filter(isLoyaltyOrder)
+		  .slice(0, 20);
+
+  const tableHost = document.getElementById('dashLoyaltyTable');
+
+  if (!loyaltyOrders.length) {
+    tableHost.innerHTML = `<div class="dash-muted">No loyalty activity yet.</div>`;
+    dashboard.style.display = 'block';
+    return;
+  }
+
+  tableHost.innerHTML = `
+    <table class="dash-table">
+      <thead>
+        <tr>
+          <th>Ref</th>
+          <th>Customer</th>
+          <th>Discount</th>
+          <th>Pts issued</th>
+          <th>Pts redeemed</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${loyaltyOrders.map(o => `
+          <tr>
+            <td>${o.order_ref || `RTK-${String(o.id).slice(0, 8)}`}</td>
+            <td>${(o.customers && o.customers.full_name) || '—'}</td>
+            <td class="dash-money">${fmtMoney(Number(o.discount || 0))}</td>
+            <td>${fmtWholeNumber(o.loyalty_points_earned_pending || 0)}</td>
+            <td>${fmtWholeNumber(o.loyalty_points_redeem_pending || 0)}</td>
+            <td>${
+			  isRewardUsed(o)
+				? 'Reward used'
+				: Number(o.loyalty_points_earned_pending || 0) > 0
+				  ? 'Points earned'
+				  : 'Loyalty activity'
+			}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+
+					  dashboard.style.display = 'block';
+					}
+
+					function renderCustomerLoyaltyPanel(orders) {
+					  const panel = document.getElementById('customerLoyaltyPanel');
+					  const host = document.getElementById('customerLoyaltyTable');
+					  if (!panel || !host) return;
+
+					  const allOrders = Array.isArray(orders) ? orders : [];
+					console.log(
+					  'SETTLED ORDERS:',
+					  allOrders.filter(o => o.loyalty_settled)
+					);
+
+					console.log(
+					  'CUSTOMER IDS:',
+					  allOrders.map(o => ({
+						id: o.id,
+						customer_id: o.customer_id,
+						settled: o.loyalty_settled,
+						name: o.customers?.full_name
+					  }))
+					);
+
+  // Use settled orders only for true balances.
+  // If you want to temporarily include unsettled as well, change this filter.
+  const settledOrders = allOrders.filter(o => !!o.loyalty_settled);
+
+  const grouped = new Map();
+
+  settledOrders.forEach(o => {
+    const customerId = o.customer_id;
+    const customer = o.customers || {};
+
+    if (!customerId) return;
+
+    if (!grouped.has(customerId)) {
+      grouped.set(customerId, {
+        customer_id: customerId,
+        name: customer.full_name || '—',
+        phone: customer.phone || '',
+        email: customer.email || '',
+        earned: 0,
+        redeemed: 0,
+        settledOrders: 0,
+        lastOrderAt: null
+      });
+    }
+
+    const row = grouped.get(customerId);
+
+    row.earned += Number(o.loyalty_points_earned_pending || 0);
+    row.redeemed += Number(o.loyalty_points_redeem_pending || 0);
+    row.settledOrders += 1;
+
+    if (!row.lastOrderAt || new Date(o.created_at) > new Date(row.lastOrderAt)) {
+      row.lastOrderAt = o.created_at;
+    }
+  });
+
+  const customers = Array.from(grouped.values())
+    .map(c => {
+      const balance = c.earned - c.redeemed;
+      return {
+        ...c,
+        balance,
+        rewardAvailable: balance >= 100
+      };
+    })
+    .sort((a, b) => {
+      if (b.balance !== a.balance) return b.balance - a.balance;
+      return new Date(b.lastOrderAt || 0) - new Date(a.lastOrderAt || 0);
+    });
+
+  if (!customers.length) {
+    host.innerHTML = `<div class="dash-muted">No settled loyalty balances yet.</div>`;
+    panel.style.display = 'block';
+    return;
+  }
+
+  host.innerHTML = `
+    <table class="dash-table">
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Contact</th>
+          <th>Earned</th>
+          <th>Redeemed</th>
+          <th>Balance</th>
+          <th>Reward status</th>
+          <th>Last settled order</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${customers.map(c => `
+          <tr>
+            <td>
+              <div>${escapeHtmlForDash(c.name)}</div>
+            </td>
+            <td>
+              <div>${escapeHtmlForDash(c.phone || '')}</div>
+              <div class="dash-muted">${escapeHtmlForDash(c.email || '')}</div>
+            </td>
+            <td>${fmtWholeNumber(c.earned)}</td>
+            <td>${fmtWholeNumber(c.redeemed)}</td>
+            <td class="balance-strong">${fmtWholeNumber(c.balance)}</td>
+            <td>
+              ${
+                c.rewardAvailable
+                  ? `<span class="reward-ready">Reward available</span>`
+                  : `<span class="reward-building">${100 - c.balance} to go</span>`
+              }
+            </td>
+            <td>${fmtDashDate(c.lastOrderAt)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+
+  panel.style.display = 'block';
 }
 
-w.document.open();
-w.document.write(html);
-w.document.close();
-
-w.onload = function () {
-  setTimeout(() => {
-    w.focus();
-    w.print();
-  }, 800);
-};
-}
-	
 // ---------- Render ----------
 const tbody = document.getElementById('tbody');
 const empty = document.getElementById('empty');
@@ -1651,6 +2076,7 @@ async function updateOrderStatus(orderId, newStatus) {
 			  .from('orders')
 			  .select(`
 				id,
+				customer_id,
 				order_ref,
 				created_at,
 				proposed_time,
@@ -1662,6 +2088,10 @@ async function updateOrderStatus(orderId, newStatus) {
 				discount_label,
 				delivery_fee,
 				total,
+				loyalty_points_earned_pending,
+				loyalty_points_redeem_pending,
+				loyalty_reward_applied,
+				loyalty_settled,
 				notes,
 				status,
 				communication_preference,
@@ -1722,6 +2152,13 @@ async function updateOrderStatus(orderId, newStatus) {
 
 			// always call, so unacknowledged orders keep triggering alerts
 			handleNewOrders(newOnes);
+			
+			if (newOnes.length && dashboardVisible) {
+			  dashboardVisible = false;
+			  dashboard.style.display = 'none';
+			  toggleBtn.textContent = 'Show dashboard';
+			  localStorage.setItem('dashboardVisible', false);
+			}
 
 			if (orders.length) {
 			  lastSeenCreatedAt = orders[0].created_at;
@@ -1730,6 +2167,9 @@ async function updateOrderStatus(orderId, newStatus) {
 
 		  // 🔹 store the full list
 		  currentOrders = orders;
+		  
+		  renderLoyaltyDashboard(currentOrders);
+		  // renderCustomerLoyaltyPanel(currentOrders);
 
 		  // 🔹 render either today-only or all
 		  render(getFilteredOrders());
@@ -1740,6 +2180,30 @@ async function updateOrderStatus(orderId, newStatus) {
 
 	// Initial load
 	loadAndRender();
+	
+	// ⭐ ADD THIS BELOW
+
+const toggleBtn = document.getElementById('toggleDashboard');
+const dashboard = document.getElementById('liveDashboard');
+
+let dashboardVisible = true;
+
+// Restore saved state
+const saved = localStorage.getItem('dashboardVisible');
+if (saved !== null) {
+  dashboardVisible = saved === 'true';
+  dashboard.style.display = dashboardVisible ? 'block' : 'none';
+  toggleBtn.textContent = dashboardVisible ? 'Hide dashboard' : 'Show dashboard';
+}
+
+toggleBtn.addEventListener('click', () => {
+  dashboardVisible = !dashboardVisible;
+
+  dashboard.style.display = dashboardVisible ? 'block' : 'none';
+  toggleBtn.textContent = dashboardVisible ? 'Hide dashboard' : 'Show dashboard';
+
+  localStorage.setItem('dashboardVisible', dashboardVisible);
+});
 
 	/* Poll every 15 seconds
 	setInterval(loadAndRender, 15000);*/
