@@ -39,56 +39,58 @@
     .badge{display:inline-flex;gap:6px;align-items:center;padding:4px 8px;border:1px solid #eee;border-radius:999px;background:#fff;font-size:12px}
     .allergens{display:flex;gap:6px;flex-wrap:wrap}
   
-  /* Everything inside here only affects printing */
-  @media print {
+				  /* Everything inside here only affects printing */
+				@media print {
+				  body {
+					  width: 72mm;
+					  padding: 4mm 3mm 4mm 5mm;
+					  font-size: 11pt;
+					  line-height: 1.15;
+					}
 
-    /* General font sizing for print */
-    body {
-      font-size: 14pt;              /* bump this up or down as you like */
-      line-height: 1.4;
-    }
+				  .order-print-area {
+					width: 72mm;
+					max-width: 72mm;
+					margin-left: 4mm;
+				  }
 
-    /* Limit content width to suit 80mm paper */
-    .order-print-area {
-      max-width: 80mm;
-    }
+				  .no-print,
+				  .admin-header,
+				  .sidebar,
+				  .footer,
+				  .buttons-row,
+				  .search-bar {
+					display: none !important;
+				  }
 
-    /* Hide anything that shouldn't appear on the printout */
-    .no-print,
-    .admin-header,
-    .sidebar,
-    .footer,
-    .buttons-row,
-    .search-bar {
-      display: none !important;
-    }
+				  * {
+					background: transparent !important;
+					box-shadow: none !important;
+				  }
 
-    /* Optional: remove background colours and images */
-    * {
-      background: transparent !important;
-      box-shadow: none !important;
-    }
+				  a {
+					text-decoration: none !important;
+				  }
 
-    /* Tidy up links (no underlines / URLs) */
-    a {
-      text-decoration: none !important;
-    }
+				  .order-main-heading {
+					font-size: 16pt;
+					font-weight: 700;
+				  }
 
-    /* Make key sections clearer / bigger */
-    .order-main-heading {
-      font-size: 18pt;
-      font-weight: bold;
-    }
+				  .order-items-table {
+					font-size: inherit;
+				  }
 
-    .order-items-table {
-      font-size: 13pt;
-    }
-
-    .order-totals {
-      font-size: 14pt;
-      font-weight: bold;
-    }
-  }
+				  .order-totals {
+					font-size: 13pt;
+					font-weight: 700;
+				  }
+				  
+				  .section-title {
+				   font-weight: 700;
+				   font-size: 12pt;
+				  }
+				}
   
 		  /* New order toast */
 		.new-order-toast {
@@ -239,6 +241,121 @@
 		  background: #e5e7eb;
 		  color: #111827;
 		}
+		
+		body {
+		  margin-left: 4mm;
+		}
+		
+		.loyalty-dashboard {
+		  margin: 18px 0 22px;
+		}
+
+		.dashboard-grid {
+		  display: grid;
+		  grid-template-columns: repeat(6, minmax(140px, 1fr));
+		  gap: 12px;
+		  margin-bottom: 16px;
+		}
+
+		.dash-card {
+		  background: #fff;
+		  border: 1px solid #e7dcc7;
+		  border-radius: 14px;
+		  padding: 14px 16px;
+		  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+		}
+
+		.dash-label {
+		  font-size: 12px;
+		  color: #7a6f60;
+		  margin-bottom: 6px;
+		}
+
+		.dash-value {
+		  font-size: 24px;
+		  font-weight: 700;
+		  color: #1f2937;
+		}
+
+		.dash-table-wrap {
+		  background: #fff;
+		  border: 1px solid #e7dcc7;
+		  border-radius: 14px;
+		  padding: 14px 16px;
+		  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+		}
+
+		.dash-table-title {
+		  font-size: 15px;
+		  font-weight: 700;
+		  margin-bottom: 10px;
+		  color: #1f2937;
+		}
+
+		.dash-table {
+		  width: 100%;
+		  border-collapse: collapse;
+		}
+
+		.dash-table th,
+		.dash-table td {
+		  text-align: left;
+		  padding: 8px 10px;
+		  border-bottom: 1px solid #eee7db;
+		  font-size: 14px;
+		}
+
+		.dash-table th {
+		  color: #7a6f60;
+		  font-weight: 600;
+		}
+
+		.dash-money {
+		  font-weight: 700;
+		  color: #166534;
+		}
+
+		.dash-muted {
+		  color: #7a6f60;
+		  font-size: 13px;
+		}
+
+		@media (max-width: 1200px) {
+		  .dashboard-grid {
+			grid-template-columns: repeat(3, minmax(140px, 1fr));
+		  }
+		}
+
+		@media (max-width: 700px) {
+		  .dashboard-grid {
+			grid-template-columns: repeat(2, minmax(140px, 1fr));
+		  }
+		}
+		
+		.reward-ready {
+		  display: inline-block;
+		  padding: 4px 8px;
+		  border-radius: 999px;
+		  font-size: 12px;
+		  font-weight: 700;
+		  background: #dcfce7;
+		  color: #166534;
+		}
+
+		.reward-building {
+		  display: inline-block;
+		  padding: 4px 8px;
+		  border-radius: 999px;
+		  font-size: 12px;
+		  font-weight: 700;
+		  background: #fef3c7;
+		  color: #92400e;
+		}
+
+		.balance-strong {
+		  font-weight: 700;
+		  color: #111827;
+		}
 
 			tr.row-attention td {
 			  background-color: #ffe9c6 !important;
@@ -267,6 +384,7 @@
       <div class="controls">
   <button id="refresh" class="btn">Refresh</button>
   <button id="export" class="btn">Export CSV</button>
+  <button id="toggleDashboard" class="btn">Hide dashboard</button>
 
   <label class="filter-today">
     <input type="checkbox" id="filter-today" checked />
@@ -277,6 +395,53 @@
 
     </div>
   </header>
+  <div id="liveDashboard">
+  <div id="loyaltyDashboard" class="loyalty-dashboard" style="display:none;">
+  <div class="dashboard-grid">
+    <div class="dash-card">
+      <div class="dash-label">Orders today</div>
+      <div class="dash-value" id="dashOrdersToday">0</div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-label">Revenue today</div>
+      <div class="dash-value" id="dashRevenueToday">£0.00</div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-label">Discounts today</div>
+      <div class="dash-value" id="dashDiscountsToday">£0.00</div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-label">Rewards used today</div>
+      <div class="dash-value" id="dashRewardsToday">0</div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-label">Points issued today</div>
+      <div class="dash-value" id="dashPointsIssuedToday">0</div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-label">Points redeemed today</div>
+      <div class="dash-value" id="dashPointsRedeemedToday">0</div>
+    </div>
+  </div>
+
+  <div class="dash-table-wrap">
+    <div class="dash-table-title">Recent loyalty activity</div>
+    <div id="dashLoyaltyTable"></div>
+  </div>
+</div>
+
+<div id="customerLoyaltyPanel" class="loyalty-dashboard" style="display:none;">
+  <div class="dash-table-wrap">
+    <div class="dash-table-title">Customer loyalty balances</div>
+    <div id="customerLoyaltyTable"></div>
+  </div>
+</div>
+</div>
 
   <main>
     <div class="wrap">
@@ -391,57 +556,80 @@ function distanceKmBetween(lat1, lon1, lat2, lon2) {
 	
 		// ---- Call Edge Function to geocode a single order's address ----
 		async function geocodeOrder(order) {
-		  const type = (order.order_type || "").toLowerCase();
-		  const c = order.customers || {};
+  // 🔒 HARD GUARDS
+  if (!order) {
+    console.log("[geocodeOrder] skip - no order provided");
+    return;
+  }
 
-		  // Prefer customers.address; fall back to orders.delivery_address
-		  const address = c.address || order.delivery_address;
+  const type = (order.order_type || "").toLowerCase();
+  const c = order.customers || {};
 
-		  console.log("[geocodeOrder] start", {
-			id: order.id,
-			type,
-			address,
-			customer_lat: order.customer_lat,
-			customer_lng: order.customer_lng,
-		  });
+  // Prefer customers.address; fall back to orders.delivery_address
+  const address = c.address || order.delivery_address;
 
-		  // Only for delivery orders
-		  if (type !== "delivery") {
-			console.log("[geocodeOrder] not a delivery order, skipping");
-			return;
-		  }
+  const hasCoords =
+    order.customer_lat != null &&
+    order.customer_lng != null;
 
-		  if (!address) {
-			console.warn("[geocodeOrder] No address to geocode for order", order.id);
-			return;
-		  }
+  if (type !== "delivery") {
+    console.log("[geocodeOrder] skip - not a delivery order", order.id);
+    return;
+  }
 
-		  try {
-			const { data, error } = await sb.functions.invoke("geocode-order", {
-			  body: {
-				order_id: order.id,
-				customer_address: address,
-			  },
-			});
+  if (hasCoords) {
+    console.log("[geocodeOrder] skip - already has coords", {
+      id: order.id,
+      lat: order.customer_lat,
+      lng: order.customer_lng,
+    });
+    return;
+  }
 
-			console.log("[geocodeOrder] invoke result", { data, error });
+  if (!address || !String(address).trim()) {
+    console.warn("[geocodeOrder] skip - no address to geocode for order", order.id);
+    return;
+  }
+
+  console.log("[geocodeOrder] start", {
+    id: order.id,
+    type,
+    address,
+    customer_lat: order.customer_lat,
+    customer_lng: order.customer_lng,
+  });
+
+  try {
+    const { data, error } = await sb.functions.invoke("geocode-order", {
+      body: {
+        order_id: order.id,
+        customer_address: address,
+      },
+    });
+
+    console.log("[geocodeOrder] invoke result", { data, error });
 
 			if (error) {
 			  console.error("[geocodeOrder] invoke error", error);
+			  console.error("[geocodeOrder] request payload was", {
+				order_id: order.id,
+				customer_address: address
+			  });
+			  console.error("[geocodeOrder] returned data was", data);
 			  return;
 			}
 
-			if (data) {
-			  console.log(
-				"[geocodeOrder] success, coords saved to DB",
-				data.customer_lat,
-				data.customer_lng
-			  );
-			}
-		  } catch (err) {
-			console.error("[geocodeOrder] Error calling geocode-order:", err);
-		  }
-		}
+    if (data) {
+      console.log(
+        "[geocodeOrder] success, coords saved to DB",
+        data.customer_lat,
+        data.customer_lng
+      );
+    }
+  } catch (err) {
+    console.error("[geocodeOrder] Error calling geocode-order:", err);
+  }
+}
 
 
 
@@ -566,6 +754,27 @@ function distanceKmBetween(lat1, lon1, lat2, lon2) {
 	  if (banner) banner.remove();
 	}
 	
+	function escapeHtmlForDash(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function fmtDashDate(value) {
+  if (!value) return '—';
+  try {
+    return new Date(value).toLocaleString('en-GB', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
+  } catch {
+    return '—';
+  }
+}
+	
 				// ---- Desktop notification helpers ----
 			async function ensureNotificationPermission() {
 			  try {
@@ -582,6 +791,24 @@ function distanceKmBetween(lat1, lon1, lat2, lon2) {
 				console.error("Notification permission error:", e);
 				return false;
 			  }
+			}
+			
+			function isTodayUk(dateValue) {
+			  if (!dateValue) return false;
+
+			  const orderDate = new Date(dateValue).toLocaleDateString('en-GB', {
+				timeZone: 'Europe/London'
+			  });
+
+			  const todayUk = new Date().toLocaleDateString('en-GB', {
+				timeZone: 'Europe/London'
+			  });
+
+			  return orderDate === todayUk;
+			}
+
+			function fmtWholeNumber(n) {
+			  return String(Math.round(Number(n || 0)));
 			}
 
 			function showNewOrderNotification(order) {
@@ -1018,7 +1245,7 @@ const PRINT_CATEGORY_LOOKUP = {
 		  "jasmine-rice": "SIDE DISHES",
 		  "egg-rice": "SIDE DISHES",
 		  "sticky-rice": "SIDE DISHES",
-		  "coconut-ricee": "SIDE DISHES",
+		  "coconut-rice": "SIDE DISHES",
 		  "chips": "SIDE DISHES",
 		  "fried-egg": "SIDE DISHES"
 		};
@@ -1056,20 +1283,26 @@ const PRINT_CATEGORY_LOOKUP = {
 
   const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
 
-  const rawTime = o.preferred_time || o.proposed_time || null;
-  const bookingTime = rawTime
-    ? new Date(rawTime).toLocaleString("en-GB", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      })
-    : "No time set";
+		const rawTime = o.confirmed_time || o.proposed_time || o.preferred_time || null;
+		const bookingTime = rawTime
+		  ? new Date(rawTime).toLocaleString("en-GB", {
+			  dateStyle: "medium",
+			  timeStyle: "short",
+			})
+		  : "No time set";
 
-  const orderType = (o.order_type || "collection").toUpperCase();
-  const subtotal = Number(o.subtotal || 0);
-  const delivery = Number(o.delivery_fee || 0);
-  const total = subtotal + delivery;
-  const itemCount = items.reduce((sum, it) => sum + Number(it.qty || 1), 0);
-  const condimentTotals = {};
+		const orderType = (o.order_type || "collection").toUpperCase();
+		const subtotal = Number(o.subtotal || 0);
+		const discount = Number(o.discount || 0);
+		const delivery = Number(o.delivery_fee || 0);
+
+		const total =
+		  Number(o.total) > 0
+			? Number(o.total)
+			: Math.round((subtotal - discount + delivery) * 100) / 100;
+
+		const itemCount = items.reduce((sum, it) => sum + Number(it.qty || 1), 0);
+		const condimentTotals = {};
   
   function escapeHtml(value) {
     return String(value ?? "")
@@ -1117,6 +1350,20 @@ const PRINT_CATEGORY_LOOKUP = {
       </div>
     `
     : "";
+	
+	  const moneyHtml = `
+    <div class="section">
+      <div class="section-title">ORDER TOTALS</div>
+      <div class="meta-row"><span class="label">SUBTOTAL:</span> GBP ${subtotal.toFixed(2)}</div>
+      ${
+        discount > 0
+          ? `<div class="meta-row"><span class="label">LOYALTY:</span> -GBP ${discount.toFixed(2)}</div>`
+          : ""
+      }
+      <div class="meta-row"><span class="label">DELIVERY:</span> GBP ${delivery.toFixed(2)}</div>
+      <div class="meta-row"><span class="label">TOTAL:</span> GBP ${total.toFixed(2)}</div>
+    </div>
+  `;
 
   const grouped = {};
 
@@ -1222,52 +1469,71 @@ const condimentsHtml = Object.keys(condimentTotals).length
             font-family: "Courier New", monospace;
           }
 
-         body {
-			  width: 78mm;
-			  padding: 3mm;
-			  font-size: 13pt;
-			  line-height: 1.2;
-			}
+        body {
+		  width: 72mm;
+		  padding: 4mm 3mm 4mm 5mm;
+		  font-size: 11pt;
+		  line-height: 1.15;
+		}
 
           .ref {
-            font-size: 20pt;
+            font-size: 14pt;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 2px;
           }
 
           .customer {
-            font-size: 15pt;
+            font-size: 12pt;
             font-weight: 700;
             margin-bottom: 2px;
           }
 
           .phone {
-            font-size: 14pt;
-            margin-bottom: 8px;
-          }
+			  font-size: 12pt;
+			  font-weight: 600;
+			  margin-bottom: 8px;
+			}
 
           .meta {
             margin-bottom: 10px;
           }
 
-          .meta-row {
-            margin-bottom: 2px;
-          }
+			.meta-row {
+			  margin-bottom: 2px;
+			  font-weight: 600;
+			}
+
+			.item-mod {
+			  display: block;
+			  margin-left: 8px;
+			  font-size: 10pt;
+			  font-weight: 600;
+			  white-space: normal;
+			  word-break: break-word;
+			  overflow-wrap: anywhere;
+			  clear: both;
+			}
+
+			.text-block {
+			  white-space: normal;
+			  word-break: break-word;
+			  font-weight: 600;
+			}
 
           .label {
             font-weight: 700;
           }
 
           .section {
-            margin-top: 10px;
-            margin-bottom: 10px;
+            margin-top: 5px;
+            margin-bottom: 5px;
           }
 
           .section-title {
-		  font-size: 15pt;
+		  font-size: 12pt;
 		  font-weight: 700;
 		  margin-top: 0;
-		  margin-bottom: 4px;
+		  margin-bottom: 2px;
 		  text-transform: uppercase;
 		}
 
@@ -1281,7 +1547,8 @@ const condimentsHtml = Object.keys(condimentTotals).length
 			
 			.item-main {
 			  display: block;
-			  font-size: 13pt;
+			  font-size: 10.5pt;
+			  line-height: 1.1;
 			  font-weight: 700;
 			  white-space: normal;
 			  word-break: break-word;
@@ -1289,29 +1556,15 @@ const condimentsHtml = Object.keys(condimentTotals).length
 			  clear: both;
 			}
 			
-			.item-mod {
-			  display: block;
-			  margin-left: 8px;
-			  font-size: 11pt;
-			  white-space: normal;
-			  word-break: break-word;
-			  overflow-wrap: anywhere;
-			  clear: both;
-			}
-
-		  .item-sep {
+			.item-sep {
 		  display: block;
 		  height: 6px;
 		  line-height: 6px;
 		}
 
-          .text-block {
-            white-space: normal;
-            word-break: break-word;
-          }
-
+          
 		  .total-top {
-		  font-size: 16pt;
+		  font-size: 12pt;
 		  font-weight: 700;
 		  margin-top: 6px;
 		  margin-bottom: 8px;
@@ -1319,10 +1572,10 @@ const condimentsHtml = Object.keys(condimentTotals).length
 
 		.section-divider {
 		  display: block;
-		  font-size: 11pt;
+		  font-size: 01pt;
 		  line-height: 1;
-		  margin-top: 6px;
-		  margin-bottom: 4px;
+		  margin-top: 2px;
+		  margin-bottom: 2px;
 		  white-space: pre;
 		}
 		.ticket-buffer {
@@ -1367,6 +1620,7 @@ const condimentsHtml = Object.keys(condimentTotals).length
 		</div>
 		
 		<div class="total-top">TOTAL: GBP ${total.toFixed(2)}</div>
+		${moneyHtml}
 		
 		${addressHtml}
 		
@@ -1392,24 +1646,253 @@ const condimentsHtml = Object.keys(condimentTotals).length
 			</html>
   `;
 
-		  const w = window.open("", `PRINT_${Date.now()}`, "height=800,width=600");
-if (!w) {
-  alert("Pop-up blocked. Please allow pop-ups for printing.");
-  return;
+					  const w = window.open("", `PRINT_${Date.now()}`, "height=800,width=600");
+			if (!w) {
+			  alert("Pop-up blocked. Please allow pop-ups for printing.");
+			  return;
+			}
+
+			w.document.open();
+			w.document.write(html);
+			w.document.close();
+
+			w.onload = function () {
+			  setTimeout(() => {
+				w.focus();
+				w.print();
+			  }, 800);
+			};
+			}
+				
+			function renderLoyaltyDashboard(orders) {
+			  const dashboard = document.getElementById('loyaltyDashboard');
+			  if (!dashboard) return;
+
+			  const todayOrders = (orders || []).filter(o => isTodayUk(o.created_at));
+
+			  const ordersToday = todayOrders.length;
+
+			  const revenueToday = todayOrders.reduce((sum, o) => {
+				const subtotal = Number(o.subtotal || 0);
+				const discount = Number(o.discount || 0);
+				const delivery = Number(o.delivery_fee || 0);
+				const total = Number.isFinite(Number(o.total))
+				  ? Number(o.total)
+				  : Math.round((subtotal - discount + delivery) * 100) / 100;
+
+				return sum + total;
+			  }, 0);
+			  
+			  function isLoyaltyOrder(o) {
+			  return (
+				(o.discount_label || '').toLowerCase() === 'loyalty reward' ||
+				!!o.loyalty_reward_applied ||
+				Number(o.loyalty_points_earned_pending || 0) > 0 ||
+				Number(o.loyalty_points_redeem_pending || 0) > 0
+			  );
+			}
+
+			function isRewardUsed(o) {
+			  return (
+				(o.discount_label || '').toLowerCase() === 'loyalty reward' ||
+				!!o.loyalty_reward_applied ||
+				Number(o.loyalty_points_redeem_pending || 0) > 0
+			  );
+			}
+
+			const loyaltyTodayOrders = todayOrders.filter(isLoyaltyOrder);
+
+			const discountsToday = loyaltyTodayOrders.reduce((sum, o) => {
+			  return sum + Number(o.discount || 0);
+			}, 0);
+
+			const rewardsToday = loyaltyTodayOrders.filter(isRewardUsed).length;
+
+			const pointsIssuedToday = loyaltyTodayOrders.reduce((sum, o) => {
+			  return sum + Number(o.loyalty_points_earned_pending || 0);
+			}, 0);
+
+			const pointsRedeemedToday = loyaltyTodayOrders.reduce((sum, o) => {
+			  return sum + Number(o.loyalty_points_redeem_pending || 0);
+			}, 0);
+
+  document.getElementById('dashOrdersToday').textContent = fmtWholeNumber(ordersToday);
+  document.getElementById('dashRevenueToday').textContent = fmtMoney(revenueToday);
+  document.getElementById('dashDiscountsToday').textContent = fmtMoney(discountsToday);
+  document.getElementById('dashRewardsToday').textContent = fmtWholeNumber(rewardsToday);
+  document.getElementById('dashPointsIssuedToday').textContent = fmtWholeNumber(pointsIssuedToday);
+  document.getElementById('dashPointsRedeemedToday').textContent = fmtWholeNumber(pointsRedeemedToday);
+
+		const loyaltyOrders = (orders || [])
+		  .filter(isLoyaltyOrder)
+		  .slice(0, 20);
+
+  const tableHost = document.getElementById('dashLoyaltyTable');
+
+  if (!loyaltyOrders.length) {
+    tableHost.innerHTML = `<div class="dash-muted">No loyalty activity yet.</div>`;
+    dashboard.style.display = 'block';
+    return;
+  }
+
+  tableHost.innerHTML = `
+    <table class="dash-table">
+      <thead>
+        <tr>
+          <th>Ref</th>
+          <th>Customer</th>
+          <th>Discount</th>
+          <th>Pts issued</th>
+          <th>Pts redeemed</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${loyaltyOrders.map(o => `
+          <tr>
+            <td>${o.order_ref || `RTK-${String(o.id).slice(0, 8)}`}</td>
+            <td>${(o.customers && o.customers.full_name) || '—'}</td>
+            <td class="dash-money">${fmtMoney(Number(o.discount || 0))}</td>
+            <td>${fmtWholeNumber(o.loyalty_points_earned_pending || 0)}</td>
+            <td>${fmtWholeNumber(o.loyalty_points_redeem_pending || 0)}</td>
+            <td>${
+			  isRewardUsed(o)
+				? 'Reward used'
+				: Number(o.loyalty_points_earned_pending || 0) > 0
+				  ? 'Points earned'
+				  : 'Loyalty activity'
+			}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+
+					  dashboard.style.display = 'block';
+					}
+
+					function renderCustomerLoyaltyPanel(orders) {
+					  const panel = document.getElementById('customerLoyaltyPanel');
+					  const host = document.getElementById('customerLoyaltyTable');
+					  if (!panel || !host) return;
+
+					  const allOrders = Array.isArray(orders) ? orders : [];
+					console.log(
+					  'SETTLED ORDERS:',
+					  allOrders.filter(o => o.loyalty_settled)
+					);
+
+					console.log(
+					  'CUSTOMER IDS:',
+					  allOrders.map(o => ({
+						id: o.id,
+						customer_id: o.customer_id,
+						settled: o.loyalty_settled,
+						name: o.customers?.full_name
+					  }))
+					);
+
+  // Use settled orders only for true balances.
+  // If you want to temporarily include unsettled as well, change this filter.
+  const settledOrders = allOrders.filter(o => !!o.loyalty_settled);
+
+  const grouped = new Map();
+
+  settledOrders.forEach(o => {
+    const customerId = o.customer_id;
+    const customer = o.customers || {};
+
+    if (!customerId) return;
+
+    if (!grouped.has(customerId)) {
+      grouped.set(customerId, {
+        customer_id: customerId,
+        name: customer.full_name || '—',
+        phone: customer.phone || '',
+        email: customer.email || '',
+        earned: 0,
+        redeemed: 0,
+        settledOrders: 0,
+        lastOrderAt: null
+      });
+    }
+
+    const row = grouped.get(customerId);
+
+    row.earned += Number(o.loyalty_points_earned_pending || 0);
+    row.redeemed += Number(o.loyalty_points_redeem_pending || 0);
+    row.settledOrders += 1;
+
+    if (!row.lastOrderAt || new Date(o.created_at) > new Date(row.lastOrderAt)) {
+      row.lastOrderAt = o.created_at;
+    }
+  });
+
+  const customers = Array.from(grouped.values())
+    .map(c => {
+      const balance = c.earned - c.redeemed;
+      return {
+        ...c,
+        balance,
+        rewardAvailable: balance >= 100
+      };
+    })
+    .sort((a, b) => {
+      if (b.balance !== a.balance) return b.balance - a.balance;
+      return new Date(b.lastOrderAt || 0) - new Date(a.lastOrderAt || 0);
+    });
+
+  if (!customers.length) {
+    host.innerHTML = `<div class="dash-muted">No settled loyalty balances yet.</div>`;
+    panel.style.display = 'block';
+    return;
+  }
+
+  host.innerHTML = `
+    <table class="dash-table">
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Contact</th>
+          <th>Earned</th>
+          <th>Redeemed</th>
+          <th>Balance</th>
+          <th>Reward status</th>
+          <th>Last settled order</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${customers.map(c => `
+          <tr>
+            <td>
+              <div>${escapeHtmlForDash(c.name)}</div>
+            </td>
+            <td>
+              <div>${escapeHtmlForDash(c.phone || '')}</div>
+              <div class="dash-muted">${escapeHtmlForDash(c.email || '')}</div>
+            </td>
+            <td>${fmtWholeNumber(c.earned)}</td>
+            <td>${fmtWholeNumber(c.redeemed)}</td>
+            <td class="balance-strong">${fmtWholeNumber(c.balance)}</td>
+            <td>
+              ${
+                c.rewardAvailable
+                  ? `<span class="reward-ready">Reward available</span>`
+                  : `<span class="reward-building">${100 - c.balance} to go</span>`
+              }
+            </td>
+            <td>${fmtDashDate(c.lastOrderAt)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+
+  panel.style.display = 'block';
 }
 
-w.document.open();
-w.document.write(html);
-w.document.close();
 
-w.onload = function () {
-  setTimeout(() => {
-    w.focus();
-    w.print();
-  }, 800);
-};
-}
-	
+
 // ---------- Render ----------
 const tbody = document.getElementById('tbody');
 const empty = document.getElementById('empty');
@@ -1432,12 +1915,6 @@ function render(orders) {
     if (isFuture) tr.classList.add('row-attention');
 
     const customer = o.customers || {};
-    console.log('[ADMIN MONEY]', o.order_ref, {
-      subtotal: o.subtotal,
-      discount: o.discount,
-      delivery_fee: o.delivery_fee,
-      total: o.total
-    });
 
     const rtkRef = o.order_ref || `RTK-${String(o.id).slice(0, 8)}`;
     const status = o.status || 'pending';
@@ -1447,10 +1924,26 @@ function render(orders) {
     const discount = Number(o.discount || 0);
     const delivery = Number(o.delivery_fee || 0);
 
-    const finalTotal =
-      Number(o.total) > 0
-        ? Number(o.total)
-        : Math.round((subtotal - discount + delivery) * 100) / 100;
+    // Prefer DB total when present, otherwise calculate safely
+    const dbTotal = Number(o.total);
+    const hasDbTotal = Number.isFinite(dbTotal);
+
+    const calculatedTotal = Math.round((subtotal - discount + delivery) * 100) / 100;
+    const finalTotal = hasDbTotal ? dbTotal : calculatedTotal;
+
+    const discountLabel =
+      o.discount_label ||
+      (discount > 0 ? 'Loyalty reward / discount' : '');
+
+    /* console.log('[ADMIN MONEY]', o.order_ref, {
+      subtotal,
+      discount,
+      discountLabel,
+      delivery,
+      dbTotal,
+      calculatedTotal,
+      finalTotal
+    });*/
 
     tr.dataset.orderId = o.id;
     tr.dataset.orderRef = rtkRef;
@@ -1460,6 +1953,7 @@ function render(orders) {
     tr.dataset.total = String(finalTotal);
     tr.dataset.subtotal = String(subtotal);
     tr.dataset.discount = String(discount);
+    tr.dataset.discountLabel = discountLabel;
     tr.dataset.deliveryFee = String(delivery);
     tr.dataset.asapRequested = o.asap_requested ? 'true' : 'false';
     tr.dataset.communicationPreference = o.communication_preference || 'email';
@@ -1467,7 +1961,18 @@ function render(orders) {
     tr.dataset.preferredTime = o.preferred_time || '';
     tr.dataset.proposedTime = o.proposed_time || '';
     tr.dataset.status = status;
-	tr.dataset.orderType = o.order_type;   // ⭐ IMPORTANT
+    tr.dataset.orderType = o.order_type || 'collection';
+
+    const totalCellHtml = discount > 0
+      ? `
+        <div><strong>${fmtMoney(finalTotal)}</strong></div>
+        <div class="small muted">Subtotal ${fmtMoney(subtotal)}</div>
+        <div class="small" style="color:#b42318">-${fmtMoney(discount)} ${discountLabel ? `(${discountLabel})` : ''}</div>
+        <div class="small muted">Delivery ${fmtMoney(delivery)}</div>
+      `
+      : `
+        <div><strong>${fmtMoney(finalTotal)}</strong></div>
+      `;
 
     tr.innerHTML = `
       <td class="mono">${rtkRef}</td>
@@ -1482,10 +1987,11 @@ function render(orders) {
       <td>${getTimeStatusLabel(o)}</td>
       <td class="nowrap">${fmtMoney(subtotal)}</td>
       <td class="nowrap">${fmtMoney(delivery)}</td>
-      <td class="nowrap"><strong>${fmtMoney(finalTotal)}</strong></td>
+      <td class="nowrap">${totalCellHtml}</td>
       <td class="actions" style="text-align:right">
         <button class="btn-small" data-action="toggle">Details</button>
-        <button class="btn-small" data-action="print">Print</button>
+		<button class="btn-small" data-action="print">Print</button>
+		<button class="btn-small" data-action="print-allergens">Allergens</button>
 
         <div style="display:inline-flex;align-items:center;gap:4px;margin-left:8px">
           <input
@@ -1535,11 +2041,20 @@ function render(orders) {
     }
 
     const printBtn = tr.querySelector('[data-action="print"]');
-    if (printBtn) {
-      printBtn.addEventListener('click', () => {
-        printTicket(o);
-      });
-    }
+if (printBtn) {
+  printBtn.addEventListener('click', () => {
+    printTicket(o);
+  });
+}
+
+const allergenBtn = tr.querySelector('[data-action="print-allergens"]');
+if (allergenBtn) {
+  allergenBtn.addEventListener('click', () => {
+    console.log('[ALLERGEN TEST] order object:', o);
+    console.log('[ALLERGEN TEST] items:', o.order_items);
+    printAllergenTicket(o);
+  });
+}
 
     tbody.appendChild(tr);
     tbody.appendChild(detailsRow);
@@ -1558,6 +2073,28 @@ async function updateOrderStatus(orderId, newStatus) {
       alert('Could not update status – please try again.');
       return;
     }
+
+    if (newStatus === 'completed') {
+      try {
+        const res = await fetch('https://order-backend-production.up.railway.app/settle-loyalty', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_id: orderId })
+        });
+
+        const data = await res.json();
+
+        if (!data.ok) {
+          console.warn('Loyalty settlement failed', data);
+          alert('Order marked completed, but loyalty settlement failed. Please check logs.');
+        } else {
+          console.log('Loyalty settled:', data.loyalty);
+        }
+      } catch (err) {
+        console.error('Loyalty settlement error', err);
+        alert('Order marked completed, but loyalty settlement failed.');
+      }
+    }
   } catch (err) {
     console.error('Unexpected error updating status', err);
     alert('Unexpected error updating status');
@@ -1573,33 +2110,39 @@ async function updateOrderStatus(orderId, newStatus) {
 			  const { data: orders, error } = await sb
 			  .from('orders')
 			  .select(`
-				id,
-				order_ref,
-				created_at,
-				proposed_time,
-				asap_requested,
-				preferred_time,
-				order_type,
-				subtotal,
-				discount,
-				discount_label,
-				delivery_fee,
-				total,
-				notes,
-				status,
-				communication_preference,
-				    customer_lat,
-					customer_lng,
-				customers (
-				  full_name,
-				  phone,
-				  email,
-				  address
-				),
-				order_items (
-				  *
-				)
-			  `)
+					  id,
+					  customer_id,
+					  order_ref,
+					  created_at,
+					  confirmed_time,
+					  proposed_time,
+					  asap_requested,
+					  preferred_time,
+					  order_type,
+					  subtotal,
+					  discount,
+					  discount_label,
+					  delivery_fee,
+					  total,
+					  loyalty_points_earned_pending,
+					  loyalty_points_redeem_pending,
+					  loyalty_reward_applied,
+					  loyalty_settled,
+					  notes,
+					  status,
+					  communication_preference,
+					  customer_lat,
+					  customer_lng,
+					  customers (
+						full_name,
+						phone,
+						email,
+						address
+					  ),
+					  order_items (
+						*
+					  )
+					`)
 			  .eq('is_test', false)
 			  .order('created_at', { ascending: false });
 
@@ -1608,21 +2151,65 @@ async function updateOrderStatus(orderId, newStatus) {
 			console.error('Error loading orders', error);
 			return;
 		  }
-		 if (!orders) return;
+				 if (!orders) return;
 
-		// 🔹 Auto-geocode delivery orders that don't have coords yet
-		for (const o of orders) {
-		  const type = (o.order_type || '').toLowerCase();
-		  console.log('[loadAndRender] order', o.id, 'type=', type, 'lat=', o.customer_lat, 'lng=', o.customer_lng);
+		// Track attempts this session to avoid repeat spam
+		const geocodeAttemptedIds = window.__geocodeAttemptedIds || new Set();
+		window.__geocodeAttemptedIds = geocodeAttemptedIds;
 
-		  if (
-			type === 'delivery' &&
-			(o.customer_lat == null || o.customer_lng == null)
-		  ) {
-			console.log('[loadAndRender] -> calling geocodeOrder for', o.id);
-			geocodeOrder(o); // fire-and-forget; function updates DB
-		  }
+		// 🔹 Helper: UK today or future check
+		function isUkTodayOrFuture(dateValue) {
+		  if (!dateValue) return false;
+
+		  const d = new Date(dateValue);
+		  if (Number.isNaN(d.getTime())) return false;
+
+		  const ukFormatter = new Intl.DateTimeFormat('en-GB', {
+			timeZone: 'Europe/London',
+			year: 'numeric',
+			month: '2-digit',
+			day: '2-digit'
+		  });
+
+		  const getYmd = (parts) => {
+			const day = parts.find(p => p.type === 'day')?.value;
+			const month = parts.find(p => p.type === 'month')?.value;
+			const year = parts.find(p => p.type === 'year')?.value;
+			return `${year}-${month}-${day}`;
+		  };
+
+		  const todayYmd = getYmd(ukFormatter.formatToParts(new Date()));
+		  const dateYmd = getYmd(ukFormatter.formatToParts(d));
+
+		  return dateYmd >= todayYmd;
 		}
+// Geocode active delivery orders that are missing coords
+const inactiveStatuses = new Set([
+  'completed',
+  'cancelled'
+]);
+
+for (const o of orders) {
+  const type = (o.order_type || '').toLowerCase();
+
+  const hasCoords =
+    o.customer_lat != null &&
+    o.customer_lng != null;
+
+  const status = (o.status || '').toLowerCase();
+
+  const shouldGeocode =
+    type === 'delivery' &&
+    !hasCoords &&
+    !inactiveStatuses.has(status) &&
+    !geocodeAttemptedIds.has(o.id);
+
+  if (shouldGeocode) {
+    console.log('[loadAndRender] -> geocoding', o.id, o.order_ref);
+    geocodeAttemptedIds.add(o.id);
+    geocodeOrder(o);
+  }
+}
 
 
 
@@ -1645,6 +2232,13 @@ async function updateOrderStatus(orderId, newStatus) {
 
 			// always call, so unacknowledged orders keep triggering alerts
 			handleNewOrders(newOnes);
+			
+			if (newOnes.length && dashboardVisible) {
+			  dashboardVisible = false;
+			  dashboard.style.display = 'none';
+			  toggleBtn.textContent = 'Show dashboard';
+			  localStorage.setItem('dashboardVisible', false);
+			}
 
 			if (orders.length) {
 			  lastSeenCreatedAt = orders[0].created_at;
@@ -1653,6 +2247,9 @@ async function updateOrderStatus(orderId, newStatus) {
 
 		  // 🔹 store the full list
 		  currentOrders = orders;
+		  
+		  renderLoyaltyDashboard(currentOrders);
+		  // renderCustomerLoyaltyPanel(currentOrders);
 
 		  // 🔹 render either today-only or all
 		  render(getFilteredOrders());
@@ -1663,6 +2260,30 @@ async function updateOrderStatus(orderId, newStatus) {
 
 	// Initial load
 	loadAndRender();
+	
+	// ⭐ ADD THIS BELOW
+
+const toggleBtn = document.getElementById('toggleDashboard');
+const dashboard = document.getElementById('liveDashboard');
+
+let dashboardVisible = true;
+
+// Restore saved state
+const saved = localStorage.getItem('dashboardVisible');
+if (saved !== null) {
+  dashboardVisible = saved === 'true';
+  dashboard.style.display = dashboardVisible ? 'block' : 'none';
+  toggleBtn.textContent = dashboardVisible ? 'Hide dashboard' : 'Show dashboard';
+}
+
+toggleBtn.addEventListener('click', () => {
+  dashboardVisible = !dashboardVisible;
+
+  dashboard.style.display = dashboardVisible ? 'block' : 'none';
+  toggleBtn.textContent = dashboardVisible ? 'Hide dashboard' : 'Show dashboard';
+
+  localStorage.setItem('dashboardVisible', dashboardVisible);
+});
 
 	/* Poll every 15 seconds
 	setInterval(loadAndRender, 15000);*/
@@ -1784,6 +2405,544 @@ async function updateOrderStatus(orderId, newStatus) {
 
 
   </script>
+  
+  <script>
+/* =========================================================
+   ALLERGEN PRINT HELPERS
+   ========================================================= */
+const ADMIN_ALLERGEN_LOOKUP = {
+  'veg-spring-rolls': ['gluten', 'soya','mustard','celery'],
+  'chicken-satay': ['peanuts','soya','mustard'],
+  'prawn-crackers': ['crustaceans','gluten'],
+  'moo-ping': ['fish','soya','dairy'],
+  'chicken-spring-rolls': ['gluten', 'soya','molluscs','mustard','celery'],
+  'fried-tofu': ['soya','peanuts'],
+  'fish-cakes': ['fish','egg','gluten','soya','mustard'],
+  'pork-dumplings': ['gluten','soya','sesame'],
+  'fried-prawns': ['crustaceans','gluten','soya','mustard'],
+  'thai-sausage': [],
+  'spare-ribs': ['soya','gluten','molluscs','sesame'],
+  'tom-yum': ['fish','soya','dairy'],
+  'tom-kha': ['fish','soya'],
+  'dumpling-broth': ['gluten','soya','celery'],
+  'papaya-salad': ['peanuts','fish'],
+  'beef-salad': ['fish','celery','soya'],
+  'pork-salad': ['fish'],
+  'laab': ['fish','soya'],
+  'rung-curry': ['gluten','celery','mustard'],
+  'green-curry': [],
+  'red-curry': [],
+  'massaman-curry': [],
+  'panang-curry': [],
+  'stir-crispy': ['soya','gluten','molluscs'],
+  'stir-basil': ['soya','gluten','molluscs'],
+  'stir-ginger': ['soya','gluten','celery','mustard','crustaceans'],
+  'stir-cashew': ['tree nuts','soya','sesame','celery','mustard','crustaceans'],
+  'stir-sweetsour': ['soya'],
+  'stir-yellow': ['egg','soya','mustard','dairy','crustaceans','celery'],
+  'stir-chilli': ['soya','fish','gluten','mustard','celery'],
+  'stir-pepper': ['soya','sesame','mustard'],
+  'pad-thai': ['egg','fish','peanuts'],
+  'chef-pad-thai': ['egg','fish','peanuts'],
+  'pad-kee-mao': ['soya','gluten','crustaceans'],
+  'pad-see-ew': ['egg','soya','gluten','crustaceans','celery','mustard'],
+  'fried-rice': ['egg','soya','gluten','crustaceans','celery','mustard'],
+  'jasmine-rice': [],
+  'egg-rice': ['egg','soya'],
+  'sticky-rice': [],
+  'coconut-rice': [],
+  'chips': [],
+  'fried-egg': ['egg']
+};
+
+/**
+ * Update this if any modifiers carry allergens.
+ * Empty array = no additional declared allergens from modifier itself.
+ */
+const MODIFIER_ALLERGENS = {
+  chicken: [],
+  tofu: ['soya'],
+  pork: [],
+  beef: [],
+  vegetable: [],
+  prawn: ['crustaceans']
+};
+
+/**
+ * Optional: if you have extras / add-ons that can introduce allergens,
+ * you can extend this later.
+ */
+const ITEM_DEFAULT_CONDIMENTS = {
+  'veg-spring-rolls': ['sweet chilli sauce'],
+  'chicken-spring-rolls': ['sweet chilli sauce'],
+  'chicken-satay': ['peanut sauce','vinegar sauce'],
+  'pork-dumplings': ['dumpling sauce'],
+  'moo-ping': ['jaew sauce'],
+  'fried-prawns': ['sweet chilli sauce'],
+  'fish-cakes': ['sweet chilli sauce'],
+};
+const EXTRA_ALLERGENS = {
+  'peanut sauce': ['peanuts'],
+  'vinegar sauce': [],
+  'sweet chilli sauce': ['soya','mustard'],
+  'dumpling sauce': ['gluten','soya'],
+  'jaew sauce': []
+};
+
+/**
+ * Normalise strings for consistent matching.
+ */
+function normaliseKey(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase();
+}
+
+/**
+ * Turn ['egg','fish','peanuts'] into 'Egg, Fish, Peanuts'
+ */
+function formatAllergenList(list) {
+  const cleaned = Array.from(
+    new Set((list || []).map(x => normaliseKey(x)).filter(Boolean))
+  );
+
+  if (!cleaned.length) return 'No declared allergens';
+
+  return cleaned
+    .map(a => a.charAt(0).toUpperCase() + a.slice(1))
+    .join(', ');
+}
+
+/**
+ * Tries to find the menu item definition for an order item.
+ *
+ * This version checks:
+ * - item.id
+ * - item.item_id
+ *
+ * It expects you to already have a flat menu lookup object available.
+ * If your project uses a different variable name, update getMenuItemLookup().
+ */
+function getMenuItemLookup() {
+  /**
+   * CHANGE THIS PART ONLY if needed.
+   *
+   * If you already have a lookup object like:
+   *   MENU_ITEM_LOOKUP
+   * or
+   *   ITEM_LOOKUP
+   * then return that.
+   */
+
+  if (typeof MENU_ITEM_LOOKUP !== 'undefined') return MENU_ITEM_LOOKUP;
+  if (typeof ITEM_LOOKUP !== 'undefined') return ITEM_LOOKUP;
+  if (typeof MENU_LOOKUP !== 'undefined') return MENU_LOOKUP;
+
+  /**
+   * Fallback: build lookup from MENU_CATEGORIES if present.
+   * Assumes MENU_CATEGORIES = [{ title, items: [...] }, ...]
+   */
+  if (typeof MENU_CATEGORIES !== 'undefined' && Array.isArray(MENU_CATEGORIES)) {
+    const lookup = {};
+    MENU_CATEGORIES.forEach(cat => {
+      (cat.items || []).forEach(menuItem => {
+        if (menuItem && menuItem.id) {
+          lookup[menuItem.id] = menuItem;
+        }
+      });
+    });
+    return lookup;
+  }
+
+  console.warn('[ALLERGENS] No menu lookup found.');
+  return {};
+}
+function extractItemNameText(orderItem) {
+  if (!orderItem) return 'Unknown item';
+
+  if (typeof orderItem.name === 'string') return orderItem.name;
+
+  if (orderItem.name && typeof orderItem.name === 'object') {
+    return orderItem.name.name || orderItem.name.label || orderItem.name.value || 'Unknown item';
+  }
+
+  if (orderItem.item && typeof orderItem.item === 'object') {
+    return orderItem.item.name || orderItem.item.label || orderItem.item.value || 'Unknown item';
+  }
+
+  return 'Unknown item';
+}
+
+function extractModifierText(orderItem) {
+  if (!orderItem) return '';
+
+  if (typeof orderItem.modifier === 'string') return orderItem.modifier;
+  if (typeof orderItem.selectedModifier === 'string') return orderItem.selectedModifier;
+  if (typeof orderItem.protein === 'string') return orderItem.protein;
+
+  if (Array.isArray(orderItem.modifiers) && orderItem.modifiers.length) {
+    return orderItem.modifiers
+      .map(mod => {
+        if (typeof mod === 'string') return mod;
+        if (mod && typeof mod === 'object') {
+          return mod.name || mod.label || mod.value || '';
+        }
+        return '';
+      })
+      .filter(Boolean)
+      .join(', ');
+  }
+
+  if (orderItem.modifier && typeof orderItem.modifier === 'object') {
+    return orderItem.modifier.name || orderItem.modifier.label || orderItem.modifier.value || '';
+  }
+
+  return '';
+}
+
+/**
+ * Resolve allergens for a single order item:
+ * - base item allergens
+ * - modifier allergens
+ * - extra allergens (futureproofed)
+ */
+function getAllergensForOrderItem(orderItem) {
+  const menuItemId = normaliseKey(orderItem?.item_id || '');
+
+  const baseAllergens = Array.isArray(ADMIN_ALLERGEN_LOOKUP[menuItemId])
+    ? ADMIN_ALLERGEN_LOOKUP[menuItemId]
+    : [];
+
+  const modifierRaw = extractModifierText(orderItem);
+  const modifierKeys = modifierRaw
+    ? modifierRaw.split(',').map(x => normaliseKey(x)).filter(Boolean)
+    : [];
+
+  let modifierAllergens = [];
+  let condimentAllergensFromModifiers = [];
+  let condimentNamesFromModifiers = [];
+
+  modifierKeys.forEach(key => {
+    modifierAllergens = modifierAllergens.concat(MODIFIER_ALLERGENS[key] || []);
+
+    if (EXTRA_ALLERGENS[key]) {
+      condimentNamesFromModifiers.push(key);
+      condimentAllergensFromModifiers = condimentAllergensFromModifiers.concat(EXTRA_ALLERGENS[key] || []);
+    }
+  });
+
+  let condimentAllergensFromExtras = [];
+  let condimentNamesFromExtras = [];
+
+  const extras = Array.isArray(orderItem?.extras) ? orderItem.extras : [];
+
+  extras.forEach(extra => {
+    const extraText =
+      typeof extra === 'string'
+        ? extra
+        : extra?.name || extra?.label || extra?.value || '';
+
+    const extraKey = normaliseKey(extraText);
+
+    if (EXTRA_ALLERGENS[extraKey]) {
+      condimentNamesFromExtras.push(extraKey);
+      condimentAllergensFromExtras = condimentAllergensFromExtras.concat(EXTRA_ALLERGENS[extraKey] || []);
+    }
+  });
+
+  const defaultCondiments = Array.isArray(ITEM_DEFAULT_CONDIMENTS[menuItemId])
+    ? ITEM_DEFAULT_CONDIMENTS[menuItemId]
+    : [];
+
+  let defaultCondimentAllergens = [];
+  defaultCondiments.forEach(condiment => {
+    const condimentKey = normaliseKey(condiment);
+    defaultCondimentAllergens = defaultCondimentAllergens.concat(EXTRA_ALLERGENS[condimentKey] || []);
+  });
+
+  const condimentNames = Array.from(
+    new Set(
+      []
+        .concat(defaultCondiments || [])
+        .concat(condimentNamesFromModifiers || [])
+        .concat(condimentNamesFromExtras || [])
+        .map(x => normaliseKey(x))
+        .filter(Boolean)
+    )
+  );
+
+  const condimentAllergens = Array.from(
+    new Set(
+      []
+        .concat(defaultCondimentAllergens || [])
+        .concat(condimentAllergensFromModifiers || [])
+        .concat(condimentAllergensFromExtras || [])
+        .map(x => normaliseKey(x))
+        .filter(Boolean)
+    )
+  ).sort();
+
+  const dishAllergens = Array.from(
+    new Set(
+      []
+        .concat(baseAllergens || [])
+        .concat(modifierAllergens || [])
+        .map(x => normaliseKey(x))
+        .filter(Boolean)
+    )
+  ).sort();
+
+  const merged = Array.from(
+    new Set(
+      []
+        .concat(dishAllergens || [])
+        .concat(condimentAllergens || [])
+        .map(x => normaliseKey(x))
+        .filter(Boolean)
+    )
+  ).sort();
+
+  console.log('[ALLERGEN MATCH]', {
+    itemName: extractItemNameText(orderItem),
+    itemId: menuItemId,
+    dishAllergens,
+    condimentNames,
+    condimentAllergens,
+    merged
+  });
+
+  return {
+    menuItemId,
+    modifier: modifierRaw || '',
+    dishAllergens,
+    condimentNames,
+    condimentAllergens,
+    allergens: merged
+  };
+}
+
+/**
+ * Escape HTML safely for printing.
+ */
+function escapeHtmlSafe(value) {
+  if (typeof escapeHtml === 'function') return escapeHtml(value);
+  return String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+/**
+ * Build printable allergen lines for an order.
+ */
+function buildAllergenPrintRows(order) {
+  const items = Array.isArray(order?.order_items) ? order.order_items : [];
+
+  if (!items.length) {
+    return `<div class="ap-muted">No order items found.</div>`;
+  }
+
+  return items.map(item => {
+    const qty = Number(item?.qty || 1);
+    const itemName = extractItemNameText(item);
+
+    const info = getAllergensForOrderItem(item);
+    const modifierSuffix = info.modifier ? ` (${info.modifier})` : '';
+
+    const dishAllergenText = formatAllergenList(info.dishAllergens);
+    const condimentAllergenText = formatAllergenList(info.condimentAllergens);
+    const condimentText = info.condimentNames.length
+      ? info.condimentNames.map(name =>
+          name
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ')
+        ).join(', ')
+      : '';
+
+    const condimentHtml = info.condimentNames.length
+      ? `
+        <div class="ap-item-condiment"><strong>Condiment:</strong> ${escapeHtmlSafe(condimentText)}</div>
+        <div class="ap-item-condiment-allergens"><strong>Condiment allergens:</strong> ${escapeHtmlSafe(condimentAllergenText)}</div>
+      `
+      : '';
+
+    return `
+      <div class="ap-item">
+        <div class="ap-item-name">${qty} x ${escapeHtmlSafe(itemName)}${escapeHtmlSafe(modifierSuffix)}</div>
+        <div class="ap-item-allergens"><strong>Dish allergens:</strong> ${escapeHtmlSafe(dishAllergenText)}</div>
+        ${condimentHtml}
+      </div>
+    `;
+  }).join('');
+}
+/**
+ * Format order time if you already have a helper.
+ */
+function formatOrderTimeForPrint(value) {
+  if (!value) return '-';
+
+  if (typeof formatUkDateTime === 'function') {
+    return formatUkDateTime(value);
+  }
+
+  try {
+    return new Date(value).toLocaleString('en-GB', {
+      dateStyle: 'short',
+      timeStyle: 'short'
+    });
+  } catch {
+    return String(value);
+  }
+}
+
+/**
+ * Open thermal-style allergen ticket and print it.
+ */
+function printAllergenTicket(order) {
+  const rtkRef = order?.order_ref || `RTK-${order?.id || ''}`;
+  const customerName = order?.customers?.full_name || order?.full_name || 'Customer';
+  const orderType = (order?.order_type || '').toUpperCase() || '-';
+
+  const bookingTime =
+    order?.confirmed_time ||
+    order?.proposed_time ||
+    order?.preferred_time ||
+    order?.created_at ||
+    '';
+
+console.log('[ALLERGEN PRINT] order:', order);
+console.log('[ALLERGEN PRINT] items:', order?.items);
+
+  const itemsHtml = buildAllergenPrintRows(order);
+
+  const disclaimer = `
+    <div class="ap-divider">--------------------------------</div>
+    <div class="ap-disclaimer">
+      Prepared in a kitchen that handles multiple allergens.
+    </div>
+  `;
+
+  const html = `
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${escapeHtmlSafe(rtkRef)} - Allergens</title>
+  <style>
+    @page {
+      size: 80mm auto;
+      margin: 0;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #000;
+      font-family: "Courier New", monospace;
+    }
+
+    body {
+  width: 78mm;
+  padding: 3mm 3mm 3mm 4mm;   /* 👈 slightly more left padding */
+  margin-left: 1mm;           /* 👈 nudges everything right */
+  font-size: 12pt;
+  line-height: 1.25;
+
+  border-left: 1px solid #000;  /* 👈 visible left edge */
+}
+
+    .ap-ref {
+      font-size: 18pt;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .ap-title {
+      font-size: 16pt;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .ap-meta {
+      margin-bottom: 10px;
+    }
+
+    .ap-meta-row {
+      margin-bottom: 2px;
+    }
+
+    .ap-divider {
+      margin: 8px 0;
+    }
+
+    .ap-item {
+      margin-bottom: 10px;
+      page-break-inside: avoid;
+    }
+
+    .ap-item-name {
+      font-weight: 700;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+    }
+
+    .ap-item-allergens {
+      white-space: normal;
+    }
+
+    .ap-muted {
+      opacity: 0.8;
+    }
+
+    .ap-disclaimer {
+      font-size: 10pt;
+      line-height: 1.2;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="ap-ref">${escapeHtmlSafe(rtkRef)}</div>
+  <div class="ap-title">Allergen Information</div>
+
+  <div class="ap-meta">
+    <div class="ap-meta-row"><strong>Customer:</strong> ${escapeHtmlSafe(customerName)}</div>
+    <div class="ap-meta-row"><strong>Type:</strong> ${escapeHtmlSafe(orderType)}</div>
+    <div class="ap-meta-row"><strong>Time:</strong> ${escapeHtmlSafe(formatOrderTimeForPrint(bookingTime))}</div>
+  </div>
+
+  <div class="ap-divider">--------------------------------</div>
+
+  ${itemsHtml}
+
+  ${disclaimer}
+
+  <script>
+    window.onload = function () {
+      window.print();
+      setTimeout(() => window.close(), 300);
+    };
+  <\/script>
+</body>
+</html>
+  `;
+
+  const printWindow = window.open('', '_blank', 'width=420,height=700');
+  if (!printWindow) {
+    alert('Popup blocked. Please allow popups for printing.');
+    return;
+  }
+
+  printWindow.document.open();
+  printWindow.document.write(html);
+  printWindow.document.close();
+}
+</script>
 <script>
   console.log("Admin actions script loaded");
 
