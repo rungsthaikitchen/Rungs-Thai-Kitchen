@@ -1205,6 +1205,8 @@ const PRINT_CATEGORY_LOOKUP = {
 		  "fried-prawns": "STARTER",
 		  "thai-sausage": "STARTER",
 		  "spare-ribs": "STARTER",
+		  "chicken-panang": "STARTER",
+		  "grill-chicken": "STARTER",
 		
 		  // Soup
 		  "tom-yum": "SOUP",
@@ -1216,6 +1218,7 @@ const PRINT_CATEGORY_LOOKUP = {
 		  "beef-salad": "SALAD",
 		  "pork-salad": "SALAD",
 		  "laab": "SALAD",
+		  "mango-salad": "SALAD",
 		
 		  // Curry
 		  "rung-curry": "CURRY",
@@ -1276,6 +1279,8 @@ const PRINT_CATEGORY_LOOKUP = {
 				  "moo-ping": ["Jaew Sauce"],
 				  "fried-prawns": ["Sweet Chilli Sauce"]
 				};
+				
+				const GOOGLE_REVIEW_URL = "https://g.page/r/Ce3aoHonJ9KzEBM/review";
 	  
 	  function printTicket(o) {
   const c = o.customers || {};
@@ -1599,6 +1604,10 @@ const condimentsHtml = Object.keys(condimentTotals).length
 		  margin-left: 6px;
 		}*/
 		
+		img {
+		  max-width: 100%;
+		}
+		
 		@media print {
 		  body {
 		    page-break-after: always;
@@ -1629,14 +1638,25 @@ const condimentsHtml = Object.keys(condimentTotals).length
 			  ${itemsHtml}
 			</div>
 
-			${condimentsHtml}
+				${condimentsHtml}
 
-			${notesHtml}
-			
-			<div class="ticket-buffer">
+				${notesHtml}
+
+				
+
+				<div class="ticket-buffer">
 			--------------------------------
 			END OF ORDER - ${escapeHtml(rtkRef)}
 			--------------------------------
+			<div style="text-align:center; margin-top:10px;">
+				  <div style="font-size:12pt; font-weight:700;">⭐ Enjoyed your food?</div>
+				  <div style="font-size:11pt;">Please leave us a review!</div>
+
+				  <img src="${getQrCodeUrl(GOOGLE_REVIEW_URL)}" style="margin:6px 0; max-width:120px;" />
+
+				  <div style="font-size:10pt;">Scan to leave a Google review</div>
+				</div>
+			
 			</div>
 			
 			<div class="ticket-end-space"></div>
@@ -2802,6 +2822,10 @@ function formatOrderTimeForPrint(value) {
   }
 }
 
+window.getQrCodeUrl = function(text) {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(text)}`;
+};
+
 /**
  * Open thermal-style allergen ticket and print it.
  */
@@ -2809,6 +2833,7 @@ function printAllergenTicket(order) {
   const rtkRef = order?.order_ref || `RTK-${order?.id || ''}`;
   const customerName = order?.customers?.full_name || order?.full_name || 'Customer';
   const orderType = (order?.order_type || '').toUpperCase() || '-';
+  
 
   const bookingTime =
     order?.confirmed_time ||
@@ -2941,7 +2966,7 @@ console.log('[ALLERGEN PRINT] items:', order?.items);
     alert('Popup blocked. Please allow popups for printing.');
     return;
   }
-
+  
   printWindow.document.open();
   printWindow.document.write(html);
   printWindow.document.close();
