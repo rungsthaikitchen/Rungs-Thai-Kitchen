@@ -6097,7 +6097,7 @@ function shouldShowKitchenNotice(now = new Date()) {
   const day = now.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed...
   const hour = now.getHours() + now.getMinutes() / 60;
 
-  if (day === 6 && hour >= 21) return true; // Sat after 21:00
+  if (day === 5 && hour >= 21) return true; // Sat after 21:00 **Temp changing to Fri**
   if (day === 0 || day === 1 || day === 2 /*|| day === 3 || day === 4*/) return true; // Sun, Mon, Tue, Wed, Thu
   // if (day === 5 && hour < 12) return true; // Fri before 12:00
   if (day === 3 && hour < 12) return true; //Wed before 12:00 midday
