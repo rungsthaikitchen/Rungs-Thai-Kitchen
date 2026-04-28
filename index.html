@@ -2234,12 +2234,64 @@ body.overlay-open {
   z-index: 2;
 }
 
+/* 🚫 Delivery error (outside radius) */
+.delivery-error {
+  background: #fff3f3;
+  border: 2px solid #e53935;
+  color: #b71c1c;
+  padding: 10px 12px;
+  margin-top: 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Optional: add subtle icon feel */
+.delivery-error::before {
+  content: "⚠️ ";
+  margin-right: 4px;
+}
+
 .menu-item-card.khao-gaeng-special{
   padding-top: 42px; /* creates space for the badge */
 }
 
+/* Delivery warning / blocked area message */
+.delivery-error {
+  background: #fff3f3;
+  border: 2px solid #d32f2f;
+  color: #9f1d1d;
+  padding: 12px 14px;
+  margin-top: 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.12);
+}
 
+.delivery-error::before {
+  content: "⚠️ ";
+}
 
+.delivery-error {
+  animation: fadeIn 0.25s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.delivery-error a {
+  color: #b71c1c;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.delivery-error a:hover {
+  text-decoration: none;
+}
 
 </style>
 
@@ -2880,6 +2932,11 @@ body.overlay-open {
 
 
   <script>
+  var DELIVERY_FREE_THRESHOLD = 30;
+  function getSelectedOrderType() {
+  const selected = document.querySelector('input[name="order-type"]:checked');
+  return selected ? selected.value : "collection";
+}
 
 	document.addEventListener('DOMContentLoaded', () => {
 	
@@ -3050,6 +3107,281 @@ const EXTRAS = [
     function formatCurrency(n){ const cents = Math.round((n + Number.EPSILON) * 100); return '£' + (cents/100).toFixed(2); }
     function roundToTwo(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
     function chilliIcons(n){ return '🌶️'.repeat(Math.max(0, Math.min(3, n||0))); }
+	
+var deliveryQuoteState = {
+  loading: false,
+  eligible: true,
+  reason: "",
+  straightLineMiles: null,
+  routeMiles: null,
+  fee: 0,
+  usedFallback: false,
+  lastUpdated: null
+};
+
+window.deliveryQuoteState = deliveryQuoteState;
+
+var refreshCheckoutPricingAndRender = async function () {
+  if (getSelectedOrderType() === "delivery") {
+    await window.refreshDeliveryQuote();
+  } else {
+    deliveryQuoteState = {
+      loading: false,
+      eligible: true,
+      reason: "",
+      straightLineMiles: null,
+      routeMiles: null,
+      fee: 0,
+      usedFallback: false,
+      lastUpdated: Date.now()
+    };
+
+    window.deliveryQuoteState = deliveryQuoteState;
+  }
+
+  recomputeCheckoutTotals();
+  updateCheckoutSubmitButton();
+  updateCheckoutOrderSummary();
+};
+
+window.refreshCheckoutPricingAndRender = refreshCheckoutPricingAndRender;
+			
+			
+			// ---------- Delivery pricing (HELPERS) ----------
+var DELIVERY_MAX_STRAIGHT_LINE_MILES = 3;
+var DELIVERY_FREE_THRESHOLD = 30;
+
+var DELIVERY_ROUTE_BANDS = [
+  { maxMiles: 1.5, fee: 2.5 },
+  { maxMiles: 2.5, fee: 3.5 },
+  { maxMiles: 4.0, fee: 4.5 }
+];
+
+var DELIVERY_FALLBACK_FEE = 3.5;
+
+function toRadians(deg) {
+  return deg * (Math.PI / 180);
+}
+
+function haversineMiles(lat1, lng1, lat2, lng2) {
+  const R = 3958.8;
+  const dLat = toRadians(lat2 - lat1);
+  const dLng = toRadians(lng2 - lng1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRadians(lat1)) *
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLng / 2) ** 2;
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function roundMiles(value) {
+  if (value == null || Number.isNaN(value)) return null;
+  return Math.round(value * 10) / 10;
+}
+
+function calculateBandFee(miles, bands) {
+  if (miles == null || Number.isNaN(miles)) return null;
+
+  for (const band of bands) {
+    if (miles <= band.maxMiles) return band.fee;
+  }
+
+  return null;
+}
+
+function getSelectedOrderType() {
+  const selected = document.querySelector('input[name="order-type"]:checked');
+  return selected ? selected.value : "collection";
+}
+
+function getPreDiscountFoodSubtotal() {
+  return Number(checkoutBaseSubtotal || 0);
+}
+
+function getRestaurantLatLng() {
+  return {
+    lat: 53.744437,
+    lng: -1.576570
+  };
+}
+
+function getCustomerLatLng() {
+  const lat = Number(window.customerLat);
+  const lng = Number(window.customerLng);
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  return { lat, lng };
+}
+
+async function refreshDeliveryQuote() {
+  const subtotal = Number(checkoutBaseSubtotal || 0);
+
+  const restaurant = getRestaurantLatLng();
+  const customer = getCustomerLatLng();
+
+  // 🚫 No coords = cannot prove address is in delivery radius
+  if (!restaurant || !customer) {
+    deliveryQuoteState = {
+      loading: false,
+      eligible: false,
+      reason: "We could not confirm this address is within our delivery area. Please check the address or call 0113 469 9564.",
+      straightLineMiles: null,
+      routeMiles: null,
+      fee: null,
+      usedFallback: false,
+      lastUpdated: Date.now()
+    };
+
+    window.deliveryQuoteState = deliveryQuoteState;
+
+    console.warn("[delivery] blocked - missing coords for radius check", {
+      restaurant,
+      customer
+    });
+
+    return deliveryQuoteState;
+  }
+
+  const straightLineMiles = haversineMiles(
+    restaurant.lat,
+    restaurant.lng,
+    customer.lat,
+    customer.lng
+  );
+
+  // 🚫 Hard 3-mile radius gate
+  if (straightLineMiles > DELIVERY_MAX_STRAIGHT_LINE_MILES) {
+    deliveryQuoteState = {
+      loading: false,
+      eligible: false,
+      reason: "Sorry, this address is outside our 3-mile delivery radius. Please call us on 0113 469 9564 and we’ll see what we can do 😊",
+      straightLineMiles,
+      routeMiles: null,
+      fee: null,
+      usedFallback: false,
+      lastUpdated: Date.now()
+    };
+
+    window.deliveryQuoteState = deliveryQuoteState;
+
+    console.warn("[delivery] outside radius", {
+      straightLineMiles
+    });
+
+    return deliveryQuoteState;
+  }
+
+  // ✅ Free delivery only AFTER radius check
+  if (subtotal >= DELIVERY_FREE_THRESHOLD) {
+    deliveryQuoteState = {
+      loading: false,
+      eligible: true,
+      reason: "",
+      straightLineMiles,
+      routeMiles: null,
+      fee: 0,
+      usedFallback: false,
+      lastUpdated: Date.now()
+    };
+
+    window.deliveryQuoteState = deliveryQuoteState;
+
+    console.log("[delivery] free delivery threshold met within radius");
+    return deliveryQuoteState;
+  }
+
+  // ✅ Inside radius, under free delivery threshold: use fallback while route quote loads
+  deliveryQuoteState = {
+    loading: true,
+    eligible: true,
+    reason: "",
+    straightLineMiles,
+    routeMiles: null,
+    fee: DELIVERY_FALLBACK_FEE,
+    usedFallback: true,
+    lastUpdated: Date.now()
+  };
+
+  window.deliveryQuoteState = deliveryQuoteState;
+
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/get-delivery-route-quote`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({
+        origin: restaurant,
+        destination: customer
+      })
+    });
+
+    const data = await resp.json().catch(() => null);
+
+    if (!resp.ok || !data?.ok || !Number.isFinite(data?.routeMiles)) {
+      console.warn("[delivery] route lookup failed, using fallback");
+
+      deliveryQuoteState = {
+        ...deliveryQuoteState,
+        loading: false,
+        eligible: true,
+        fee: DELIVERY_FALLBACK_FEE,
+        usedFallback: true,
+        lastUpdated: Date.now()
+      };
+
+      window.deliveryQuoteState = deliveryQuoteState;
+      return deliveryQuoteState;
+    }
+
+    const routeMiles = Number(data.routeMiles);
+    const routeFee = calculateBandFee(routeMiles, DELIVERY_ROUTE_BANDS);
+
+    deliveryQuoteState = {
+      loading: false,
+      eligible: true,
+      reason: "",
+      straightLineMiles,
+      routeMiles,
+      fee: routeFee ?? DELIVERY_FALLBACK_FEE,
+      usedFallback: routeFee == null,
+      lastUpdated: Date.now()
+    };
+
+    window.deliveryQuoteState = deliveryQuoteState;
+
+    console.log("[delivery] route pricing applied", {
+      straightLineMiles,
+      routeMiles,
+      fee: deliveryQuoteState.fee
+    });
+
+    return deliveryQuoteState;
+
+  } catch (err) {
+    console.warn("[delivery] route fetch exception, using fallback", err);
+
+    deliveryQuoteState = {
+      ...deliveryQuoteState,
+      loading: false,
+      eligible: true,
+      fee: DELIVERY_FALLBACK_FEE,
+      usedFallback: true,
+      lastUpdated: Date.now()
+    };
+
+    window.deliveryQuoteState = deliveryQuoteState;
+    return deliveryQuoteState;
+  }
+}
+
+window.refreshDeliveryQuote = refreshDeliveryQuote;
 
 // Single source of truth for how much space to keep above scrolled content
 // Single source of truth for how much space to keep above targets
@@ -3086,6 +3418,7 @@ applyHeaderOffset();
 	  window.scrollTo({ top, behavior: (isIOS || prefersReduced) ? 'auto' : 'smooth' });
 	}
 	
+					
 	// ---- Holiday / fully-booked ticker ----
 		const tickerEl = document.getElementById('status-ticker');
 		const tickerText = document.getElementById('ticker-text');
@@ -4669,114 +5002,168 @@ async function fetchLoyaltyBalance(phone) {
       if(orderType !== 'delivery') return 0;
       return subtotal < 20 ? 3 : 0;
     }
-function recomputeCheckoutTotals() {
-  const orderType =
-    document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+	
+			function getPreDiscountFoodSubtotal() {
+			  return Number(checkoutBaseSubtotal || 0);
+			}
+			
+			
+			
+			function recomputeCheckoutTotals() {
+			  const orderType = getSelectedOrderType();
 
-  // Base subtotal (food only)
-  const subtotal = Math.round(checkoutBaseSubtotal * 100) / 100;
+			  const quote = window.deliveryQuoteState || deliveryQuoteState || {
+				loading: false,
+				eligible: true,
+				fee: 0
+			  };
 
-  const preferredTimeRaw =
-    (document.getElementById('preferred-time')?.value ||
-     document.querySelector('input[name="preferred_time"]')?.value ||
-     '').trim();
+			  console.log("[totals debug] checkoutBaseSubtotal:", checkoutBaseSubtotal);
+			  console.log("[totals debug] preDiscountSubtotal:", Number(checkoutBaseSubtotal || 0));
+			  console.log("[totals debug] deliveryQuoteState:", quote);
+			  console.log("[totals debug] order type:", orderType);
 
-  const asapRequested =
-    !!document.querySelector('input[name="asap_requested"]:checked') ||
-    !!document.getElementById('asap')?.checked ||
-    !!document.getElementById('asap-requested')?.checked ||
-    !!document.getElementById('asapRequested')?.checked;
+			  let deliveryFee = 0;
+			  let deliveryBlocked = false;
 
-  // Wed/Thu discount first
-  const disc = applyWedThuDiscount(subtotal, preferredTimeRaw, asapRequested);
-  const discountedSubtotal = disc.discountedSubtotal;
+			  if (orderType === "delivery") {
+				if (quote.loading) {
+				  deliveryFee = 0;
+				} else if (quote.eligible === false) {
+				  deliveryFee = 0;
+				  deliveryBlocked = true;
+				} else {
+				  deliveryFee = Number(quote.fee ?? 0);
+				}
+			  }
 
-  // Loyalty discount applies AFTER Wed/Thu discount, on food only
-  const loyaltyDiscount = applyLoyaltyToTotals(discountedSubtotal);
-  const foodSubtotalAfterAllDiscounts = Math.max(0, discountedSubtotal - loyaltyDiscount);
+			  const subtotal = Math.round(Number(checkoutBaseSubtotal || 0) * 100) / 100;
 
-  // Update loyalty projections based on actual paid food amount
-  updateLoyaltyProjection(foodSubtotalAfterAllDiscounts);
+			  const preferredTimeRaw =
+				(document.getElementById('preferred-time')?.value ||
+				 document.querySelector('input[name="preferred_time"]')?.value ||
+				 '').trim();
 
-  // Delivery fee threshold stays based on PRE-discount subtotal
-  const fee = (orderType === 'delivery' && subtotal < 20) ? 3.00 : 0.00;
+			  const asapRequested =
+				!!document.querySelector('input[name="asap_requested"]:checked') ||
+				!!document.getElementById('asap')?.checked ||
+				!!document.getElementById('asap-requested')?.checked ||
+				!!document.getElementById('asapRequested')?.checked;
 
-  // Final total
-  const total = Math.round((foodSubtotalAfterAllDiscounts + fee) * 100) / 100;
+			  const disc = applyWedThuDiscount(subtotal, preferredTimeRaw, asapRequested);
+			  const discountedSubtotal = disc.discountedSubtotal;
 
-  // Update notes + totals UI
-  if (typeof deliveryNote !== 'undefined' && deliveryNote) {
-    deliveryNote.style.display = (orderType === 'delivery') ? 'block' : 'none';
-  }
+			  const loyaltyDiscount = applyLoyaltyToTotals(discountedSubtotal);
+			  const foodSubtotalAfterAllDiscounts = Math.max(0, discountedSubtotal - loyaltyDiscount);
 
-  if (typeof checkoutSubtotalEl !== 'undefined' && checkoutSubtotalEl) {
-    checkoutSubtotalEl.textContent = formatCurrency(subtotal);
-  }
+			  updateLoyaltyProjection(foodSubtotalAfterAllDiscounts);
 
-  if (typeof checkoutDeliveryEl !== 'undefined' && checkoutDeliveryEl) {
-    checkoutDeliveryEl.textContent = formatCurrency(fee);
-  }
+			  const total = Math.round((foodSubtotalAfterAllDiscounts + deliveryFee) * 100) / 100;
 
-  if (typeof checkoutTotalEl !== 'undefined' && checkoutTotalEl) {
-    checkoutTotalEl.textContent = formatCurrency(total);
-  }
+			  const checkoutSubtotalEl = document.getElementById('checkout-subtotal');
+			  const checkoutDeliveryEl = document.getElementById('checkout-delivery');
+			  const checkoutTotalEl = document.getElementById('checkout-total');
 
-  // Show / hide Wed/Thu discount row
-  const discountRow = document.getElementById('discountRow');
-  const discountValue = document.getElementById('discountValue');
+			  if (checkoutSubtotalEl) {
+				checkoutSubtotalEl.textContent = formatCurrency(subtotal);
+			  }
 
-  if (discountRow && discountValue) {
-    if (disc.eligible && disc.discount > 0) {
-      discountRow.style.display = 'flex';
-      discountValue.textContent = `-£${disc.discount.toFixed(2)}`;
-    } else {
-      discountRow.style.display = 'none';
-      discountValue.textContent = '';
-    }
-  }
+			  if (checkoutDeliveryEl) {
+				checkoutDeliveryEl.textContent = deliveryBlocked
+				  ? "Unavailable"
+				  : formatCurrency(deliveryFee);
+			  }
 
-  // Show / hide loyalty discount row
-  const loyaltyRow = document.getElementById('loyaltyDiscountRow');
-  const loyaltyValue = document.getElementById('loyaltyDiscountValue');
+			  if (checkoutTotalEl) {
+				checkoutTotalEl.textContent = formatCurrency(total);
+			  }
 
-  if (loyaltyRow && loyaltyValue) {
-    if (loyaltyDiscount > 0) {
-      loyaltyRow.style.display = 'flex';
-      loyaltyValue.textContent = `-£${loyaltyDiscount.toFixed(2)}`;
-    } else {
-      loyaltyRow.style.display = 'none';
-      loyaltyValue.textContent = '';
-    }
-  }
+			if (typeof deliveryNote !== 'undefined' && deliveryNote) {
+				  deliveryNote.style.display = (orderType === 'delivery') ? 'block' : 'none';
 
-  // Refresh loyalty message block
-  renderLoyaltyMessage();
+				  if (orderType === 'delivery') {
 
-  // Single source of truth for submit + confirmations + success page
-  window.__checkoutTotals = {
-    subtotal,
-    discount: (disc.eligible && disc.discount > 0) ? disc.discount : 0,
-    discounted_subtotal: discountedSubtotal,
+					if (quote.loading) {
+					  deliveryNote.className = "";
+					  deliveryNote.textContent = "Calculating delivery charge…";
 
-    loyalty_discount: loyaltyDiscount,
-    loyalty_reward_applied: !!loyaltyState.rewardEligible,
-    loyalty_points_balance: Number(loyaltyState.pointsBalance || 0),
-    loyalty_points_redeem_pending: Number(loyaltyState.pointsRedeemedPending || 0),
-    loyalty_points_earned_pending: Number(loyaltyState.pointsEarnedPending || 0),
-    loyalty_expected_balance: Number(loyaltyState.expectedBalance || 0),
+					} else if (quote.eligible === false) {
+					  deliveryNote.className = "delivery-error";
+					  deliveryNote.innerHTML =
+					' Sorry, this address is outside our 3-mile delivery radius. Please call us on <a href="tel:01134699564">0113 469 9564</a> and we’ll see what we can do 😊';
 
-    delivery_fee: fee,
-    total,
+					} else if (getPreDiscountFoodSubtotal() >= DELIVERY_FREE_THRESHOLD) {
+					  deliveryNote.className = "";
+					  deliveryNote.textContent = "🎉 Free delivery on orders over £30";
 
-    // useful internal values
-    order_type: orderType,
-    preferred_time: preferredTimeRaw,
-    asap_requested: asapRequested,
-    points_earning_food_subtotal: foodSubtotalAfterAllDiscounts
-  };
+					} else if (quote.usedFallback) {
+					  deliveryNote.className = "";
+					  deliveryNote.textContent =
+						`Delivery ${formatCurrency(Number(quote.fee ?? 0))} (approximate)`;
 
-  return window.__checkoutTotals;
-}
+					} else {
+					  deliveryNote.className = "";
+					  deliveryNote.textContent =
+						`Delivery ${formatCurrency(Number(quote.fee ?? 0))} based on distance`;
+					}
+
+				  }
+				}
+
+			  const discountRow = document.getElementById('discountRow');
+			  const discountValue = document.getElementById('discountValue');
+
+			  if (discountRow && discountValue) {
+				if (disc.eligible && disc.discount > 0) {
+				  discountRow.style.display = 'flex';
+				  discountValue.textContent = `-£${disc.discount.toFixed(2)}`;
+				} else {
+				  discountRow.style.display = 'none';
+				  discountValue.textContent = '';
+				}
+			  }
+
+			  const loyaltyRow = document.getElementById('loyaltyDiscountRow');
+			  const loyaltyValue = document.getElementById('loyaltyDiscountValue');
+
+			  if (loyaltyRow && loyaltyValue) {
+				if (loyaltyDiscount > 0) {
+				  loyaltyRow.style.display = 'flex';
+				  loyaltyValue.textContent = `-£${loyaltyDiscount.toFixed(2)}`;
+				} else {
+				  loyaltyRow.style.display = 'none';
+				  loyaltyValue.textContent = '';
+				}
+			  }
+
+			  renderLoyaltyMessage();
+
+			  window.__checkoutTotals = {
+				subtotal,
+				discount: (disc.eligible && disc.discount > 0) ? disc.discount : 0,
+				discounted_subtotal: discountedSubtotal,
+
+				loyalty_discount: loyaltyDiscount,
+				loyalty_reward_applied: !!loyaltyState.rewardEligible,
+				loyalty_points_balance: Number(loyaltyState.pointsBalance || 0),
+				loyalty_points_redeem_pending: Number(loyaltyState.pointsRedeemedPending || 0),
+				loyalty_points_earned_pending: Number(loyaltyState.pointsEarnedPending || 0),
+				loyalty_expected_balance: Number(loyaltyState.expectedBalance || 0),
+
+				delivery_fee: deliveryBlocked ? null : deliveryFee,
+				delivery_blocked: deliveryBlocked,
+				delivery_block_reason: deliveryBlocked ? quote.reason : "",
+
+				total,
+
+				order_type: orderType,
+				preferred_time: preferredTimeRaw,
+				asap_requested: asapRequested,
+				points_earning_food_subtotal: foodSubtotalAfterAllDiscounts
+			  };
+
+			  return window.__checkoutTotals;
+			}
 
 function updateCheckoutOrderSummary() {
   const box = document.getElementById('checkout-order-summary');
@@ -4803,36 +5190,47 @@ function updateCheckoutOrderSummary() {
 
     orderTypeRadios.forEach(r => r.addEventListener('change', recomputeCheckoutTotals));
 	
-	// ---- Address required only for delivery ----
-	function updateAddressRequirement() {
-	  const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
-	  const addr = document.getElementById('cust-address');
-	  const hint = document.getElementById('addr-required-hint');
+				// ---- Address required only for delivery ----
+				function updateAddressRequirement() {
+				  const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+				  const addr = document.getElementById('cust-address');
+				  const hint = document.getElementById('addr-required-hint');
 
-	  const isDelivery = (orderType === 'delivery');
+				  const isDelivery = (orderType === 'delivery');
 
-	  if (addr) {
-		// Toggle HTML5 required attribute
-		addr.required = isDelivery;
+				  if (addr) {
+					addr.required = isDelivery;
+					if (hint) hint.style.opacity = isDelivery ? '1' : '0.6';
+				  }
+				}
 
-		// Optional: visual cue
-		if (hint) hint.style.opacity = isDelivery ? '1' : '0.6';
+				
+				async function geocodeCustomerAddress(address) {
+				  try {
+					const { data, error } = await sb.functions.invoke("geocode-address", {
+					  body: { customer_address: address },
+					});
 
-		// Optional: show/hide the whole field for collection
-		// (comment out if you prefer to always show it)
-		// addr.closest('.field').style.display = isDelivery ? '' : '';
-	  }
-	}
+					if (error || !data?.ok) {
+					  console.warn("[geocode] failed", error || data);
+					  return;
+					}
 
-	// run when radios change
-	orderTypeRadios.forEach(r => r.addEventListener('change', () => {
-	  recomputeCheckoutTotals();        // you already have this
-	  updateAddressRequirement();       // add this
-	}));
-	
+					window.customerLat = data.customer_lat;
+					window.customerLng = data.customer_lng;
+
+					console.log("[geocode] success", window.customerLat, window.customerLng);
+
+					await window.refreshCheckoutPricingAndRender();
+
+				  } catch (err) {
+					console.error("[geocode] error", err);
+				  }
+				}
+
 		
 // ====== CONFIG YOU CAN EDIT ======
-const OPEN_DAYS = [3,4,5,6]; // Sun=0, Mon=1, Tue=2, Wed=3, Thu=4, Fri=5, Sat=6  (open Fri & Sat)
+const OPEN_DAYS = [3,4,5]; // Sun=0, Mon=1, Tue=2, Wed=3, Thu=4, Fri=5, Sat=6  (open Fri & Sat) **temp changing open days**
 const OPEN_WINDOW = { start: "17:00", end: "21:00" }; // local time, 24h
 
 // Specific closed dates (all day)
@@ -5002,7 +5400,7 @@ function findNextAllowedFromNow() {
 			console.log('LOYALTY RESPONSE FROM BACKEND:', loyalty);
 			console.log('LOYALTY STATE AFTER LOAD:', loyaltyState);
 
-    recomputeCheckoutTotals();
+    refreshCheckoutPricingAndRender();
     renderLoyaltyMessage();
   }
 
@@ -5016,14 +5414,28 @@ function findNextAllowedFromNow() {
 
 
 
-// Single, clean checkout opener
-function openCheckout(subtotal) {
-  // 1. Basic totals housekeeping
-  checkoutBaseSubtotal = Math.round(subtotal * 100) / 100;
-  checkoutMsg.textContent = '';
-  checkoutMsg.style.color = '';
-  document.querySelector('input[name="order-type"][value="collection"]').checked = true;
-  recomputeCheckoutTotals();
+			
+		// Single, clean checkout opener
+			function openCheckout(subtotal) {
+			  console.trace("[checkout] openCheckout called", { subtotal });
+
+			  if (Number(subtotal || 0) <= 0) {
+				console.warn("[checkout] openCheckout blocked - empty basket", { subtotal });
+				return;
+			  }
+
+			  checkoutBaseSubtotal = Math.round(subtotal * 100) / 100;
+			  checkoutMsg.textContent = '';
+			  checkoutMsg.style.color = '';
+
+			  document.querySelector('input[name="order-type"][value="collection"]').checked = true;
+
+			  recomputeCheckoutTotals();
+			  updateCheckoutSubmitButton();
+			  updateCheckoutOrderSummary();
+
+			  checkoutModal.style.display = 'flex';
+			}
  
 
   // 2. Preferred time input setup
@@ -5082,10 +5494,9 @@ function openCheckout(subtotal) {
   }
 
     // 3. Update submit button + show the modal
-	    updateCheckoutSubmitButton();
-		updateCheckoutOrderSummary();
-		checkoutModal.style.display = 'flex';
-}
+	// updateCheckoutSubmitButton();
+	//updateCheckoutOrderSummary();
+	//checkoutModal.style.display = 'flex';
 
 // Ensure other code can call it
 window.openCheckout = openCheckout;
@@ -5108,11 +5519,27 @@ if (checkoutModal) {
   });
 }
 
-document.addEventListener('change', (e) => {
+document.addEventListener('change', async (e) => {
   if (e.target && e.target.matches('input[name="order-type"]')) {
-    recomputeCheckoutTotals();
+
     updateCheckoutSubmitButton();
     updateCheckoutOrderSummary();
+
+    await refreshCheckoutPricingAndRender();
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const addressInput = document.getElementById('cust-address');
+
+  if (addressInput) {
+    addressInput.addEventListener('blur', (e) => {
+      const address = e.target.value;
+
+      if (address && address.length > 5) {
+        geocodeCustomerAddress(address);
+      }
+    });
   }
 });
 
@@ -5360,23 +5787,51 @@ if (openCheckoutBtn) {
 		  return key;
 		}
 		
-		function updateCheckoutSubmitButton() {
-		  const submitBtn = checkoutForm?.querySelector('button[type="submit"], input[type="submit"]');
-		  const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+			function updateCheckoutSubmitButton() {
+			  const submitBtn = checkoutForm?.querySelector('button[type="submit"], input[type="submit"]');
+			  const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+			  const quote = window.deliveryQuoteState || deliveryQuoteState;
 
-		  if (!submitBtn) return;
+			  if (!submitBtn) return;
 
-		  const label =
-			orderType === 'delivery'
-			  ? 'Place Delivery Order'
-			  : 'Place Collection Order';
+			  let label =
+				orderType === 'delivery'
+				  ? 'Place Delivery Order'
+				  : 'Place Collection Order';
 
-		  if (submitBtn.tagName === 'INPUT') {
-			submitBtn.value = label;
-		  } else {
-			submitBtn.textContent = label;
-		  }
-		}
+			  let disabled = false;
+
+			  if (orderType === 'delivery') {
+				if (quote?.loading) {
+				  label = 'Checking delivery…';
+				  disabled = true;
+				} else if (quote?.eligible === false) {
+				  label = 'Outside delivery area';
+				  disabled = true;
+				}
+			  }
+
+			  // Apply label
+			  if (submitBtn.tagName === 'INPUT') {
+				submitBtn.value = label;
+			  } else {
+				submitBtn.textContent = label;
+			  }
+
+			  // Apply disabled state
+			  submitBtn.disabled = disabled;
+
+			  // Optional visual styling
+			  submitBtn.style.opacity = disabled ? '0.6' : '1';
+			  submitBtn.style.cursor = disabled ? 'not-allowed' : 'pointer';
+			  
+			  // After setting disabled state
+			if (disabled && orderType === 'delivery' && quote?.eligible === false) {
+			  submitBtn.title = "This address is outside our delivery area. Please call (on 0113 469 9564) to discuss";
+			} else {
+			  submitBtn.title = "";
+			}
+			}
 
 
    // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
@@ -5535,12 +5990,75 @@ checkoutForm.addEventListener('submit', async (e) => {
     const payment_preference = paymentPreferenceInput
       ? paymentPreferenceInput.value
       : 'on_arrival';
+	  
+				  if (getSelectedOrderType === "delivery") {
+				  const quote = window.deliveryQuoteState || deliveryQuoteState;
 
-// ---------- Create order ----------
-// ✅ NEW: generate a fresh idempotency key for THIS submit
-const idempotencyKey = crypto.randomUUID();
+				  // ✅ Outside radius wins over free-delivery messaging
+				  if (quote && quote.eligible === false) {
+					deliveryMessageEl.textContent =
+					  quote.reason || "Sorry, this address is outside our 3-mile delivery area. Please call us on 0113 469 9564 and we’ll see what we can do 😊";
+					deliveryMessageEl.className = "delivery-message delivery-error";
+					return;
+				  }
 
-const submitTotals = recomputeCheckoutTotals();
+				  // ✅ Only show free delivery upsell if still eligible / not yet known to be ineligible
+				  if (checkoutBaseSubtotal < 30) {
+					deliveryMessageEl.textContent = "🎉 Free delivery on orders over £30";
+					deliveryMessageEl.className = "delivery-message delivery-info";
+					return;
+				  }
+
+				  if (checkoutBaseSubtotal >= 30) {
+					deliveryMessageEl.textContent = "🎉 Free delivery applied";
+					deliveryMessageEl.className = "delivery-message delivery-success";
+					return;
+				  }
+				}
+
+			// 🚫 Block delivery orders outside delivery area
+				const latestTotals = recomputeCheckoutTotals();
+				const latestQuote = window.deliveryQuoteState || deliveryQuoteState;
+
+				if (getSelectedOrderType() === "delivery") {
+				  if (latestQuote?.loading) {
+					alert("Please wait while we check your delivery address.");
+					return;
+				  }
+
+				  if (latestQuote?.eligible === false || latestTotals?.delivery_blocked === true) {
+					alert(
+					  latestQuote?.reason ||
+					  "Sorry, this address is outside our 3-mile delivery radius. Please call us on 0113 469 9564 and we’ll see what we can do 😊"
+					);
+					return;
+				  }
+
+				  if (latestTotals.delivery_fee === null || latestTotals.delivery_fee === undefined) {
+					alert("We could not calculate delivery for this address. Please check the address or choose collection.");
+					return;
+				  }
+				}
+			
+			// ---------- Create order ----------
+			// ✅ NEW: generate a fresh idempotency key for THIS submit
+
+			// 🚚 DELIVERY VALIDATION — stop submit if delivery price/radius is not ready
+			if (getSelectedOrderType() === "delivery" && deliveryQuoteState.loading) {
+			  alert("Please wait a moment while we calculate the delivery charge.");
+			  return;
+			}
+
+			if (getSelectedOrderType() === "delivery" && !deliveryQuoteState.eligible) {
+			  alert(deliveryQuoteState.reason || "Sorry, you're outside our delivery area.");
+			  return;
+			}
+
+			const idempotencyKey = crypto.randomUUID();
+
+			// ✅ keep this as recomputeCheckoutTotals()
+			// We want final exact totals synchronously at submit time
+			const submitTotals = recomputeCheckoutTotals();
 
 // keep this if disc already exists above in your submit handler
 const totalDiscount =
@@ -6097,7 +6615,7 @@ function shouldShowKitchenNotice(now = new Date()) {
   const day = now.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed...
   const hour = now.getHours() + now.getMinutes() / 60;
 
-  if (day === 6 && hour >= 21) return true; // Sat after 21:00
+  if (day === 5 && hour >= 21) return true; // Sat after 21:00
   if (day === 0 || day === 1 || day === 2 /*|| day === 3 || day === 4*/) return true; // Sun, Mon, Tue, Wed, Thu
   // if (day === 5 && hour < 12) return true; // Fri before 12:00
   if (day === 3 && hour < 12) return true; //Wed before 12:00 midday
