@@ -750,6 +750,77 @@ function fmtDashDate(value) {
 }
 	
 				// ---- Desktop notification helpers ----
+				
+			async function retryMissingStaffNotification(order) {
+			  if (!order) return;
+
+			  // Only retry real orders
+			  if (order.is_test === true) return;
+
+			  // Only retry recent orders (last 30 mins)
+			  const created = new Date(order.created_at);
+			  const now = new Date();
+			  if (!order.created_at || Number.isNaN(created.getTime())) return;
+			  if ((now - created) > (30 * 60 * 1000)) return;
+
+			  // Only active orders
+			  const status = String(order.status || "").toLowerCase();
+			  if (!["pending", "confirmed"].includes(status)) return;
+
+			  // Already notified
+			  if (order.staff_notified_at) return;
+
+			  // Limit retries
+			  const attempts = Number(order.staff_notify_attempts || 0);
+			  if (attempts >= 1) return;
+
+			  const retryKey = `staff_notify_retry_${order.id}`;
+			  if (sessionStorage.getItem(retryKey)) return;
+			  sessionStorage.setItem(retryKey, "1");
+
+			  console.warn("[staff_notify_retry] Missing staff notification, retrying for", order.order_ref || order.id);
+
+			  // keep the rest of your payload/fetch code exactly as it is
+
+				  const payload = {
+					order_id: order.id,
+					order_ref: order.order_ref,
+					name: order.customer_name || order.name || order.full_name || "Customer",
+					email: order.email || "",
+					phone: order.phone || "",
+					order_type: order.order_type || "collection",
+					asap_requested: order.asap_requested || false,
+					preferred_time: order.preferred_time || null,
+					communication_preference: order.communication_preference || "email",
+
+					subtotal: Number(order.subtotal || 0),
+					discount: Number(order.discount || 0),
+					discount_label: order.discount_label || "",
+					delivery_fee: Number(order.delivery_fee || 0),
+					total: Number(order.total || 0),
+
+					loyalty_discount: Number(order.loyalty_discount || 0),
+					loyalty_points_earned_pending: Number(order.loyalty_points_earned_pending || 0),
+					loyalty_points_redeem_pending: Number(order.loyalty_points_redeem_pending || 0),
+					loyalty_reward_applied: !!order.loyalty_reward_applied,
+					loyalty_expected_balance: Number(order.loyalty_expected_balance || 0)
+				  };
+
+				  try {
+					const res = await fetch("https://order-backend-production.up.railway.app/send-order-confirmation", {
+					  method: "POST",
+					  headers: {
+						"Content-Type": "application/json"
+					  },
+					  body: JSON.stringify(payload)
+					});
+
+					console.log("[staff_notify_retry] response", res.status, order.order_ref || order.id);
+				  } catch (err) {
+					console.error("[staff_notify_retry] failed", order.order_ref || order.id, err);
+				  }
+				}
+				
 			async function ensureNotificationPermission() {
 			  try {
 				if (!("Notification" in window)) {
@@ -2137,6 +2208,9 @@ async function updateOrderStatus(orderId, newStatus) {
 					  loyalty_settled,
 					  notes,
 					  status,
+					  staff_notified_at,
+ 					  staff_notify_attempts,
+					  staff_notify_error,
 					  communication_preference,
 					  customer_lat,
 					  customer_lng,
@@ -2159,6 +2233,11 @@ async function updateOrderStatus(orderId, newStatus) {
 			return;
 		  }
 				 if (!orders) return;
+				 
+				 // Safety net: retry missing staff notifications
+					for (const o of orders) {
+					  retryMissingStaffNotification(o);
+					}
 
 		// Track attempts this session to avoid repeat spam
 		const geocodeAttemptedIds = window.__geocodeAttemptedIds || new Set();
@@ -2418,11 +2497,11 @@ toggleBtn.addEventListener('click', () => {
    ALLERGEN PRINT HELPERS
    ========================================================= */
 const ADMIN_ALLERGEN_LOOKUP = {
-  'veg-spring-rolls': ['gluten', 'soya','mustard','celery'],
+  'veg-spring-rolls': ['dairy','gluten', 'soya','mustard','celery'],
   'chicken-satay': ['peanuts','soya','mustard'],
   'prawn-crackers': ['crustaceans','gluten'],
   'moo-ping': ['fish','soya','dairy'],
-  'chicken-spring-rolls': ['gluten', 'soya','molluscs','mustard','celery'],
+  'chicken-spring-rolls': ['dairy','gluten', 'soya','molluscs','mustard','celery'],
   'fried-tofu': ['soya','peanuts'],
   'fish-cakes': ['fish','egg','gluten','soya','mustard'],
   'pork-dumplings': ['gluten','soya','sesame'],
