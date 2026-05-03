@@ -751,32 +751,35 @@ function fmtDashDate(value) {
 	
 				// ---- Desktop notification helpers ----
 				
-			async function retryMissingStaffNotification(order) {
-			  if (!order) return;
+				async function retryMissingStaffNotification(order) {
+				  return; // TEMP DISABLED - duplicate Pushover issue
 
-			  // Only retry real orders
-			  if (order.is_test === true) return;
+				  if (!order) return;
 
-			  // Only retry recent orders (last 30 mins)
-			  const created = new Date(order.created_at);
-			  const now = new Date();
-			  if (!order.created_at || Number.isNaN(created.getTime())) return;
-			  if ((now - created) > (30 * 60 * 1000)) return;
+				  // Only retry real orders
+				  if (order.is_test === true) return;
 
-			  // Only active orders
-			  const status = String(order.status || "").toLowerCase();
-			  if (!["pending", "confirmed"].includes(status)) return;
+				  // ⛔ Grace period to avoid duplicate notifications
+				  const created = new Date(order.created_at);
+				  const now = new Date();
+				  if (!order.created_at || Number.isNaN(created.getTime())) return;
 
-			  // Already notified
-			  if (order.staff_notified_at) return;
+				  // Skip orders created in last 2 minutes
+				  if ((now - created) < (2 * 60 * 1000)) return;
 
-			  // Limit retries
-			  const attempts = Number(order.staff_notify_attempts || 0);
-			  if (attempts >= 1) return;
+				  // Only retry recent orders (last 30 mins)
+				  if ((now - created) > (30 * 60 * 1000)) return;
 
-			  const retryKey = `staff_notify_retry_${order.id}`;
-			  if (sessionStorage.getItem(retryKey)) return;
-			  sessionStorage.setItem(retryKey, "1");
+				  // Only active orders
+				  const status = String(order.status || "").toLowerCase();
+				  if (!["pending", "confirmed"].includes(status)) return;
+
+				  // Already notified
+				  if (order.staff_notified_at) return;
+
+				  // Limit retries
+				  const attempts = Number(order.staff_notify_attempts || 0);
+				  if (attempts >= 1) return;
 
 			  console.warn("[staff_notify_retry] Missing staff notification, retrying for", order.order_ref || order.id);
 
@@ -2235,9 +2238,9 @@ async function updateOrderStatus(orderId, newStatus) {
 				 if (!orders) return;
 				 
 				 // Safety net: retry missing staff notifications
-					for (const o of orders) {
-					  retryMissingStaffNotification(o);
-					}
+				 //	for (const o of orders) {
+				 //	  retryMissingStaffNotification(o);
+				 //	}
 
 		// Track attempts this session to avoid repeat spam
 		const geocodeAttemptedIds = window.__geocodeAttemptedIds || new Set();
