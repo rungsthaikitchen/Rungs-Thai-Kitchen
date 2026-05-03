@@ -527,32 +527,6 @@ function syncTodayOnlyCheckbox() {
 const RESTAURANT_LAT = 53.74433548441447;  // <--- your real latitude
 const RESTAURANT_LNG = -1.5766076562010034;  // <--- your real longitude
 
-// ---- Haversine distance helper (returns km) ----
-function distanceKmBetween(lat1, lon1, lat2, lon2) {
-  if (
-    lat1 == null || lon1 == null ||
-    lat2 == null || lon2 == null
-  ) {
-    return null;
-  }
-
-  const R = 6371; // Earth radius in km
-  const toRad = (deg) => (deg * Math.PI) / 180;
-
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  return R * c; // distance in km
-}
-
 	
 		// ---- Call Edge Function to geocode a single order's address ----
 		async function geocodeOrder(order) {
@@ -776,6 +750,80 @@ function fmtDashDate(value) {
 }
 	
 				// ---- Desktop notification helpers ----
+				
+				async function retryMissingStaffNotification(order) {
+				  return; // TEMP DISABLED - duplicate Pushover issue
+
+				  if (!order) return;
+
+				  // Only retry real orders
+				  if (order.is_test === true) return;
+
+				  // ⛔ Grace period to avoid duplicate notifications
+				  const created = new Date(order.created_at);
+				  const now = new Date();
+				  if (!order.created_at || Number.isNaN(created.getTime())) return;
+
+				  // Skip orders created in last 2 minutes
+				  if ((now - created) < (2 * 60 * 1000)) return;
+
+				  // Only retry recent orders (last 30 mins)
+				  if ((now - created) > (30 * 60 * 1000)) return;
+
+				  // Only active orders
+				  const status = String(order.status || "").toLowerCase();
+				  if (!["pending", "confirmed"].includes(status)) return;
+
+				  // Already notified
+				  if (order.staff_notified_at) return;
+
+				  // Limit retries
+				  const attempts = Number(order.staff_notify_attempts || 0);
+				  if (attempts >= 1) return;
+
+			  console.warn("[staff_notify_retry] Missing staff notification, retrying for", order.order_ref || order.id);
+
+			  // keep the rest of your payload/fetch code exactly as it is
+
+				  const payload = {
+					order_id: order.id,
+					order_ref: order.order_ref,
+					name: order.customer_name || order.name || order.full_name || "Customer",
+					email: order.email || "",
+					phone: order.phone || "",
+					order_type: order.order_type || "collection",
+					asap_requested: order.asap_requested || false,
+					preferred_time: order.preferred_time || null,
+					communication_preference: order.communication_preference || "email",
+
+					subtotal: Number(order.subtotal || 0),
+					discount: Number(order.discount || 0),
+					discount_label: order.discount_label || "",
+					delivery_fee: Number(order.delivery_fee || 0),
+					total: Number(order.total || 0),
+
+					loyalty_discount: Number(order.loyalty_discount || 0),
+					loyalty_points_earned_pending: Number(order.loyalty_points_earned_pending || 0),
+					loyalty_points_redeem_pending: Number(order.loyalty_points_redeem_pending || 0),
+					loyalty_reward_applied: !!order.loyalty_reward_applied,
+					loyalty_expected_balance: Number(order.loyalty_expected_balance || 0)
+				  };
+
+				  try {
+					const res = await fetch("https://order-backend-production.up.railway.app/send-order-confirmation", {
+					  method: "POST",
+					  headers: {
+						"Content-Type": "application/json"
+					  },
+					  body: JSON.stringify(payload)
+					});
+
+					console.log("[staff_notify_retry] response", res.status, order.order_ref || order.id);
+				  } catch (err) {
+					console.error("[staff_notify_retry] failed", order.order_ref || order.id, err);
+				  }
+				}
+				
 			async function ensureNotificationPermission() {
 			  try {
 				if (!("Notification" in window)) {
@@ -1077,24 +1125,21 @@ function buildDetailsHTML(o) {
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(rawAddress)}`
     : '';
 
-  // ---- Distance text for delivery orders ----
-  let distanceHTML = '';
-  if (
-    (o.order_type || '').toLowerCase() === 'delivery' &&
-    o.customer_lat != null &&
-    o.customer_lng != null
-  ) {
-    const km = distanceKmBetween(
-      RESTAURANT_LAT,
-      RESTAURANT_LNG,
-      o.customer_lat,
-      o.customer_lng
-    );
+// ---- Distance text for delivery orders (use stored values) ----
+let distanceHTML = '';
 
-    if (km != null && !Number.isNaN(km)) {
-      distanceHTML = `<div class="small">Approx distance: ${km.toFixed(1)} km</div>`;
-    }
+if ((o.order_type || '').toLowerCase() === 'delivery') {
+  const routeMiles = Number(o.delivery_route_miles);
+  const straightMiles = Number(o.delivery_straight_line_miles);
+	
+	let deliveryLabel = `£${Number(o.delivery_fee || 0).toFixed(2)}`;
+
+  if (Number.isFinite(routeMiles)) {
+    distanceHTML = `<div class="small">Route distance: ${routeMiles.toFixed(1)} miles</div>`;
+  } else if (Number.isFinite(straightMiles)) {
+    distanceHTML = `<div class="small">Approx distance: ${straightMiles.toFixed(1)} miles</div>`;
   }
+}
 
   // ---- Money (discount-aware) ----
   const subtotal = Number(o.subtotal || 0);
@@ -1982,13 +2027,24 @@ function render(orders) {
     tr.dataset.proposedTime = o.proposed_time || '';
     tr.dataset.status = status;
     tr.dataset.orderType = o.order_type || 'collection';
+	const routeMiles = Number(o.delivery_route_miles);
+	const straightMiles = Number(o.delivery_straight_line_miles);
 
+	let deliveryLabel = fmtMoney(delivery);
+
+	if ((o.order_type || '').toLowerCase() === 'delivery') {
+	  if (Number.isFinite(routeMiles)) {
+		deliveryLabel += ` (${routeMiles.toFixed(1)} miles)`;
+	  } else if (Number.isFinite(straightMiles)) {
+		deliveryLabel += ` (~${straightMiles.toFixed(1)} miles)`;
+	  }
+	}
     const totalCellHtml = discount > 0
       ? `
         <div><strong>${fmtMoney(finalTotal)}</strong></div>
         <div class="small muted">Subtotal ${fmtMoney(subtotal)}</div>
         <div class="small" style="color:#b42318">-${fmtMoney(discount)} ${discountLabel ? `(${discountLabel})` : ''}</div>
-        <div class="small muted">Delivery ${fmtMoney(delivery)}</div>
+        <div class="small muted">Delivery ${deliveryLabel}</div>
       `
       : `
         <div><strong>${fmtMoney(finalTotal)}</strong></div>
@@ -2043,7 +2099,7 @@ function render(orders) {
         const orderId = e.target.dataset.orderId;
 
         await updateOrderStatus(orderId, newStatus);
-        loadAndRender();
+        loadAndx();
       });
     }
 
@@ -2143,6 +2199,11 @@ async function updateOrderStatus(orderId, newStatus) {
 					  discount,
 					  discount_label,
 					  delivery_fee,
+
+					  delivery_straight_line_miles,
+					  delivery_route_miles,
+					  delivery_distance_source,
+
 					  total,
 					  loyalty_points_earned_pending,
 					  loyalty_points_redeem_pending,
@@ -2150,6 +2211,9 @@ async function updateOrderStatus(orderId, newStatus) {
 					  loyalty_settled,
 					  notes,
 					  status,
+					  staff_notified_at,
+ 					  staff_notify_attempts,
+					  staff_notify_error,
 					  communication_preference,
 					  customer_lat,
 					  customer_lng,
@@ -2172,6 +2236,11 @@ async function updateOrderStatus(orderId, newStatus) {
 			return;
 		  }
 				 if (!orders) return;
+				 
+				 // Safety net: retry missing staff notifications
+				 //	for (const o of orders) {
+				 //	  retryMissingStaffNotification(o);
+				 //	}
 
 		// Track attempts this session to avoid repeat spam
 		const geocodeAttemptedIds = window.__geocodeAttemptedIds || new Set();
