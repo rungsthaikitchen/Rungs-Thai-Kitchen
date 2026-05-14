@@ -3722,6 +3722,73 @@ body {
   }
 }
 
+/* =========================================================
+   Mobile basket bar
+========================================================= */
+
+.mobile-basket-bar {
+  position: sticky;
+  bottom: 0;
+
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 12px 14px;
+  margin-top: 16px;
+
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(12px);
+
+  border-top: 1px solid rgba(0,0,0,0.08);
+
+  z-index: 40;
+}
+
+.mobile-basket-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mobile-basket-info strong {
+  font-size: 0.95rem;
+}
+
+.mobile-basket-info span {
+  font-size: 0.88rem;
+  color: #666;
+}
+
+/* Mobile menu layout */
+@media (max-width: 760px) {
+
+  /* Hide desktop summary */
+  .menu-summary-panel,
+  .order-summary-panel,
+  #menu-order-summary {
+    display: none !important;
+  }
+
+  /* Show mobile basket bar */
+  .mobile-basket-bar {
+    display: flex;
+  }
+
+  /* Single-column cards */
+  .menu-grid,
+  .menu-items-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Full-width cards */
+  .menu-card,
+  .dish-card {
+    max-width: 100%;
+  }
+}
+
 </style>
 
 
@@ -4382,6 +4449,20 @@ function changeQty(btn, delta) {
   <div id="menu-order-summary-items" class="menu-order-summary-items">
     <p class="muted small">No items added yet.</p>
   </div>
+  <div class="mobile-basket-bar" id="mobile-basket-bar">
+  <div class="mobile-basket-info">
+    <strong>Your order</strong>
+    <span id="mobile-basket-summary">0 items · £0.00</span>
+  </div>
+
+  <button
+    id="mobile-checkout-btn"
+    class="btn btn-accent"
+    type="button"
+  >
+    Checkout
+  </button>
+</div>
   <button
   id="menu-summary-checkout-btn"
   class="menu-summary-checkout-btn"
@@ -7595,6 +7676,19 @@ if (openCheckoutBtn) {
     document.getElementById("open-checkout")?.click();
   });
 }
+
+document.getElementById('mobile-checkout-btn')?.addEventListener('click', () => {
+
+  if (!window.basket || window.basket.length === 0) {
+    if (orderMsg) {
+      orderMsg.textContent = 'Your basket is empty.';
+      orderMsg.style.color = '#b02a2a';
+    }
+    return;
+  }
+
+  document.getElementById("open-checkout")?.click();
+});
 
 	
 		// ---------- Helpers to call Supabase RPC & REST ----------
