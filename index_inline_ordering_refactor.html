@@ -3727,23 +3727,29 @@ body {
 ========================================================= */
 
 .mobile-basket-bar {
-  position: sticky;
-  bottom: 0;
+  position: fixed;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+
+  width: calc(100vw - 28px);
+  max-width: 520px;
 
   display: none;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  
 
   padding: 12px 14px;
-  margin-top: 16px;
-
   background: rgba(255,255,255,0.96);
   backdrop-filter: blur(12px);
 
-  border-top: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid rgba(122, 72, 32, 0.14);
+  border-radius: 999px;
+  box-shadow: 0 14px 34px rgba(54,33,17,.22);
 
-  z-index: 40;
+  z-index: 5000;
 }
 
 .mobile-basket-info {
@@ -3787,6 +3793,10 @@ body {
   .dish-card {
     max-width: 100%;
   }
+  
+    #menu-overlay .modal,
+  .menu-overlay .modal {
+    padding-bottom: 96px !important;
 }
 
 </style>
