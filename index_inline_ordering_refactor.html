@@ -3770,7 +3770,7 @@ body {
 }
 
 /* Mobile/tablet menu layout */
-@media (max-width: 1024px) {
+@media (max-width: 900px) {
   .menu-summary-panel,
   .order-summary-panel,
   #menu-order-summary {
@@ -3798,6 +3798,34 @@ body {
   #menu-overlay .menu-sheet,
   .menu-overlay .menu-sheet {
     padding-bottom: 104px !important;
+  }
+}
+
+/* Default: mobile basket bar never appears on desktop */
+#mobile-basket-bar {
+  display: none !important;
+}
+
+/* Only show basket bar on mobile/tablet overlay */
+@media (max-width: 900px) {
+  #menu-overlay.show #mobile-basket-bar,
+  #menu-overlay[aria-hidden="false"] #mobile-basket-bar {
+    display: flex !important;
+    position: fixed !important;
+    left: 50% !important;
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    transform: translateX(-50%) !important;
+    width: calc(100vw - 28px) !important;
+    max-width: 520px !important;
+    z-index: 99999 !important;
+  }
+
+  #menu-order-summary {
+    display: none !important;
+  }
+
+  #menu-overlay .menu-sheet {
+    padding-bottom: 110px !important;
   }
 }
 
@@ -5201,8 +5229,9 @@ function quickAddFromMenuCard(card) {
     }
   }
 
-  const qtyInput = card.querySelector(".menu-inline-qty");
-  const qty = Math.max(1, parseInt(qtyInput?.value || "1", 10));
+  const inlineQtyInput = card.querySelector(".menu-inline-qty");
+const qty = Math.max(1, parseInt(inlineQtyInput?.value || "1", 10));
+
 
   const spiceBtn = card.querySelector(".menu-inline-spice-btn.active");
   const spice = spiceBtn ? Number(spiceBtn.dataset.spice) : null;
@@ -5219,8 +5248,20 @@ function quickAddFromMenuCard(card) {
     spice: spice ?? null
   });
 
-  renderOrder();
-  renderMenuOrderSummary();
+renderOrder();
+renderMenuOrderSummary();
+
+const mobileBasketSummary = document.getElementById("mobile-basket-summary");
+
+if (mobileBasketSummary && window.innerWidth <= 900) {
+  mobileBasketSummary.textContent = "Added to basket ✅";
+
+  clearTimeout(window.__basketToastTimer);
+
+  window.__basketToastTimer = setTimeout(() => {
+    renderMenuOrderSummary();
+  }, 900);
+}
 }
 
 document.addEventListener("click", function (e) {
