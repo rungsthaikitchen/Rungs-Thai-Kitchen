@@ -3729,7 +3729,8 @@ body {
 .mobile-basket-bar {
   position: fixed;
   left: 50%;
-  bottom: 12px;
+  right: auto;
+  bottom: max(12px, env(safe-area-inset-bottom));
   transform: translateX(-50%);
 
   width: calc(100vw - 28px);
@@ -3739,7 +3740,6 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  
 
   padding: 12px 14px;
   background: rgba(255,255,255,0.96);
@@ -3749,13 +3749,14 @@ body {
   border-radius: 999px;
   box-shadow: 0 14px 34px rgba(54,33,17,.22);
 
-  z-index: 5000;
+  z-index: 99999;
 }
 
 .mobile-basket-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .mobile-basket-info strong {
@@ -3765,62 +3766,38 @@ body {
 .mobile-basket-info span {
   font-size: 0.88rem;
   color: #666;
+  white-space: nowrap;
 }
 
-/* Mobile menu layout */
-@media (max-width: 760px) {
-
-  /* Hide desktop summary */
+/* Mobile/tablet menu layout */
+@media (max-width: 1024px) {
   .menu-summary-panel,
   .order-summary-panel,
   #menu-order-summary {
     display: none !important;
   }
 
-  /* Show mobile basket bar */
-  .mobile-basket-bar {
-    display: flex;
+  #mobile-basket-bar.mobile-basket-bar {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
-  /* Single-column cards */
   .menu-grid,
   .menu-items-grid {
     grid-template-columns: 1fr !important;
   }
 
-  /* Full-width cards */
   .menu-card,
   .dish-card {
     max-width: 100%;
   }
-  
-    #menu-overlay .modal,
-  .menu-overlay .modal {
-    padding-bottom: 96px !important;
-}
 
-/* Force mobile basket bar on phones/tablets */
-@media (max-width: 900px) {
-  #mobile-basket-bar.mobile-basket-bar {
-    position: fixed !important;
-    left: 50% !important;
-    right: auto !important;
-    bottom: max(12px, env(safe-area-inset-bottom)) !important;
-    transform: translateX(-50%) !important;
-
-    width: calc(100vw - 28px) !important;
-    max-width: 520px !important;
-
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-
-    z-index: 99999 !important;
-  }
-
-  #menu-overlay[aria-hidden="false"] #mobile-basket-bar,
-  #menu-overlay.show #mobile-basket-bar {
-    display: flex !important;
+  #menu-overlay .modal,
+  .menu-overlay .modal,
+  #menu-overlay .menu-sheet,
+  .menu-overlay .menu-sheet {
+    padding-bottom: 104px !important;
   }
 }
 
@@ -5447,6 +5424,18 @@ function renderOrder(){
   }).join("");
 
   totalEl.textContent = formatCurrency(subtotal);
+
+const mobileBasketSummary = document.getElementById("mobile-basket-summary");
+
+if (mobileBasketSummary) {
+  const itemCount = basket.reduce(
+    (sum, item) => sum + Number(item.qty || 0),
+    0
+  );
+
+  mobileBasketSummary.textContent =
+    `${itemCount} item${itemCount === 1 ? "" : "s"} · ${formatCurrency(subtotal)}`;
+}
 }
 
 function bindActiveMenuCategoryHighlight() {
