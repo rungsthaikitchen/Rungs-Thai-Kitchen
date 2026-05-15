@@ -3829,6 +3829,11 @@ body {
   }
 }
 
+.mobile-basket-bar.just-added {
+  transform: translateX(-50%) scale(1.03);
+  box-shadow: 0 18px 42px rgba(216, 67, 21, 0.34);
+}
+
 </style>
 
 
@@ -5252,15 +5257,18 @@ renderOrder();
 renderMenuOrderSummary();
 
 const mobileBasketSummary = document.getElementById("mobile-basket-summary");
+const mobileBasketBar = document.getElementById("mobile-basket-bar");
 
-if (mobileBasketSummary && window.innerWidth <= 900) {
-  mobileBasketSummary.textContent = "Added to basket ✅";
-
+if (mobileBasketSummary && mobileBasketBar && window.innerWidth <= 900) {
   clearTimeout(window.__basketToastTimer);
 
+  mobileBasketBar.classList.add("just-added");
+  mobileBasketSummary.textContent = "Added to basket ✅";
+
   window.__basketToastTimer = setTimeout(() => {
+    mobileBasketBar.classList.remove("just-added");
     renderMenuOrderSummary();
-  }, 900);
+  }, 1100);
 }
 }
 
