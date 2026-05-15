@@ -3799,6 +3799,31 @@ body {
     padding-bottom: 96px !important;
 }
 
+/* Force mobile basket bar on phones/tablets */
+@media (max-width: 900px) {
+  #mobile-basket-bar.mobile-basket-bar {
+    position: fixed !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    transform: translateX(-50%) !important;
+
+    width: calc(100vw - 28px) !important;
+    max-width: 520px !important;
+
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    z-index: 99999 !important;
+  }
+
+  #menu-overlay[aria-hidden="false"] #mobile-basket-bar,
+  #menu-overlay.show #mobile-basket-bar {
+    display: flex !important;
+  }
+}
+
 </style>
 
 
@@ -4459,6 +4484,21 @@ function changeQty(btn, delta) {
   <div id="menu-order-summary-items" class="menu-order-summary-items">
     <p class="muted small">No items added yet.</p>
   </div>
+
+  <button
+  id="menu-summary-checkout-btn"
+  class="menu-summary-checkout-btn"
+  type="button"
+>
+  Proceed to checkout
+</button>
+  <div class="menu-order-summary-total">
+    <span>Subtotal</span>
+    <strong id="menu-order-summary-total">£0.00</strong>
+  </div>
+</aside>
+</div>
+
   <div class="mobile-basket-bar" id="mobile-basket-bar">
   <div class="mobile-basket-info">
     <strong>Your order</strong>
@@ -4472,19 +4512,6 @@ function changeQty(btn, delta) {
   >
     Checkout
   </button>
-</div>
-  <button
-  id="menu-summary-checkout-btn"
-  class="menu-summary-checkout-btn"
-  type="button"
->
-  Proceed to checkout
-</button>
-  <div class="menu-order-summary-total">
-    <span>Subtotal</span>
-    <strong id="menu-order-summary-total">£0.00</strong>
-  </div>
-</aside>
 </div>
 
 			<!-- ✅ Floating checkout button -->
