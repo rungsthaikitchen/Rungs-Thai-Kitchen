@@ -3729,7 +3729,8 @@ body {
 .mobile-basket-bar {
   position: fixed;
   left: 50%;
-  bottom: 12px;
+  right: auto;
+  bottom: max(12px, env(safe-area-inset-bottom));
   transform: translateX(-50%);
 
   width: calc(100vw - 28px);
@@ -3739,7 +3740,6 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  
 
   padding: 12px 14px;
   background: rgba(255,255,255,0.96);
@@ -3749,13 +3749,14 @@ body {
   border-radius: 999px;
   box-shadow: 0 14px 34px rgba(54,33,17,.22);
 
-  z-index: 5000;
+  z-index: 99999;
 }
 
 .mobile-basket-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .mobile-basket-info strong {
@@ -3765,38 +3766,72 @@ body {
 .mobile-basket-info span {
   font-size: 0.88rem;
   color: #666;
+  white-space: nowrap;
 }
 
-/* Mobile menu layout */
-@media (max-width: 760px) {
-
-  /* Hide desktop summary */
+/* Mobile/tablet menu layout */
+@media (max-width: 900px) {
   .menu-summary-panel,
   .order-summary-panel,
   #menu-order-summary {
     display: none !important;
   }
 
-  /* Show mobile basket bar */
-  .mobile-basket-bar {
-    display: flex;
+  #mobile-basket-bar.mobile-basket-bar {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
-  /* Single-column cards */
   .menu-grid,
   .menu-items-grid {
     grid-template-columns: 1fr !important;
   }
 
-  /* Full-width cards */
   .menu-card,
   .dish-card {
     max-width: 100%;
   }
-  
-    #menu-overlay .modal,
-  .menu-overlay .modal {
-    padding-bottom: 96px !important;
+
+  #menu-overlay .modal,
+  .menu-overlay .modal,
+  #menu-overlay .menu-sheet,
+  .menu-overlay .menu-sheet {
+    padding-bottom: 104px !important;
+  }
+}
+
+/* Default: mobile basket bar never appears on desktop */
+#mobile-basket-bar {
+  display: none !important;
+}
+
+/* Only show basket bar on mobile/tablet overlay */
+@media (max-width: 900px) {
+  #menu-overlay.show #mobile-basket-bar,
+  #menu-overlay[aria-hidden="false"] #mobile-basket-bar {
+    display: flex !important;
+    position: fixed !important;
+    left: 50% !important;
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    transform: translateX(-50%) !important;
+    width: calc(100vw - 28px) !important;
+    max-width: 520px !important;
+    z-index: 99999 !important;
+  }
+
+  #menu-order-summary {
+    display: none !important;
+  }
+
+  #menu-overlay .menu-sheet {
+    padding-bottom: 110px !important;
+  }
+}
+
+.mobile-basket-bar.just-added {
+  transform: translateX(-50%) scale(1.03);
+  box-shadow: 0 18px 42px rgba(216, 67, 21, 0.34);
 }
 
 </style>
@@ -4459,6 +4494,21 @@ function changeQty(btn, delta) {
   <div id="menu-order-summary-items" class="menu-order-summary-items">
     <p class="muted small">No items added yet.</p>
   </div>
+
+  <button
+  id="menu-summary-checkout-btn"
+  class="menu-summary-checkout-btn"
+  type="button"
+>
+  Proceed to checkout
+</button>
+  <div class="menu-order-summary-total">
+    <span>Subtotal</span>
+    <strong id="menu-order-summary-total">£0.00</strong>
+  </div>
+</aside>
+</div>
+
   <div class="mobile-basket-bar" id="mobile-basket-bar">
   <div class="mobile-basket-info">
     <strong>Your order</strong>
@@ -4472,19 +4522,6 @@ function changeQty(btn, delta) {
   >
     Checkout
   </button>
-</div>
-  <button
-  id="menu-summary-checkout-btn"
-  class="menu-summary-checkout-btn"
-  type="button"
->
-  Proceed to checkout
-</button>
-  <div class="menu-order-summary-total">
-    <span>Subtotal</span>
-    <strong id="menu-order-summary-total">£0.00</strong>
-  </div>
-</aside>
 </div>
 
 			<!-- ✅ Floating checkout button -->
@@ -5197,8 +5234,9 @@ function quickAddFromMenuCard(card) {
     }
   }
 
-  const qtyInput = card.querySelector(".menu-inline-qty");
-  const qty = Math.max(1, parseInt(qtyInput?.value || "1", 10));
+  const inlineQtyInput = card.querySelector(".menu-inline-qty");
+const qty = Math.max(1, parseInt(inlineQtyInput?.value || "1", 10));
+
 
   const spiceBtn = card.querySelector(".menu-inline-spice-btn.active");
   const spice = spiceBtn ? Number(spiceBtn.dataset.spice) : null;
@@ -5215,8 +5253,23 @@ function quickAddFromMenuCard(card) {
     spice: spice ?? null
   });
 
-  renderOrder();
-  renderMenuOrderSummary();
+renderOrder();
+renderMenuOrderSummary();
+
+const mobileBasketSummary = document.getElementById("mobile-basket-summary");
+const mobileBasketBar = document.getElementById("mobile-basket-bar");
+
+if (mobileBasketSummary && mobileBasketBar && window.innerWidth <= 900) {
+  clearTimeout(window.__basketToastTimer);
+
+  mobileBasketBar.classList.add("just-added");
+  mobileBasketSummary.textContent = "Added to basket ✅";
+
+  window.__basketToastTimer = setTimeout(() => {
+    mobileBasketBar.classList.remove("just-added");
+    renderMenuOrderSummary();
+  }, 1100);
+}
 }
 
 document.addEventListener("click", function (e) {
@@ -5420,6 +5473,18 @@ function renderOrder(){
   }).join("");
 
   totalEl.textContent = formatCurrency(subtotal);
+
+const mobileBasketSummary = document.getElementById("mobile-basket-summary");
+
+if (mobileBasketSummary) {
+  const itemCount = basket.reduce(
+    (sum, item) => sum + Number(item.qty || 0),
+    0
+  );
+
+  mobileBasketSummary.textContent =
+    `${itemCount} item${itemCount === 1 ? "" : "s"} · ${formatCurrency(subtotal)}`;
+}
 }
 
 function bindActiveMenuCategoryHighlight() {

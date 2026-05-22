@@ -283,6 +283,44 @@ html { 	scroll-behavior: smooth;
 		  -webkit-overflow-scrolling: touch;
 		}
 		
+		.discount-code-box {
+  margin: 14px 0;
+  padding: 12px;
+  border: 1px solid #ead8c8;
+  border-radius: 12px;
+  background: #fffaf6;
+}
+
+.discount-code-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+#discount-code-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #d8c2ae;
+  border-radius: 8px;
+}
+
+#apply-discount-code-btn {
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.discount-code-message.success {
+  margin-top: 6px;
+  color: #217a38;
+}
+
+.discount-code-message.error {
+  margin-top: 6px;
+  color: #b02a2a;
+}
+		
 		.checkout-order-summary {
 		  background: #fff6e6;
 		  border: 1px solid #f0c36d;
@@ -2709,6 +2747,25 @@ body.overlay-open {
             Delivery is £3 for orders under £20, free for £20 and above.
           </div>
         </div>
+		
+		<!--Discount Code-->
+		<div class="discount-code-box">
+  <label for="discount-code-input">Discount code</label>
+
+  <div class="discount-code-row">
+    <input
+      id="discount-code-input"
+      type="text"
+      placeholder="Enter discount code"
+      autocomplete="off"
+    >
+    <button type="button" id="apply-discount-code-btn">
+      Apply
+    </button>
+  </div>
+
+  <div id="discount-code-message"></div>
+</div>
 
         <!-- Preferred time -->
         <div class="field">
@@ -2758,7 +2815,7 @@ body.overlay-open {
 </div>
 
 <div class="totals" id="discountRow" style="display:none;">
-  <div class="muted small">10% Wed/Thu discount</div>
+  <div class="muted small label" id="discount-label">Discount</div>
   <div id="discountValue" style="font-weight:800; color:#2e7d32">-£0.00</div>
 </div>
 
@@ -3236,8 +3293,8 @@ async function refreshDeliveryQuote() {
 			  reason: "",
 			  straightLineMiles,
 			  routeMiles: null,
-			  fee: 0,
-			  usedFallback: false,
+			  fee: DELIVERY_FALLBACK_FEE,
+			  usedFallback: true,
 			  freeDeliveryRemaining,
 			  freeDeliveryMessage,
 			  lastUpdated: Date.now()
@@ -4355,6 +4412,7 @@ function openCustomiseById(itemId) {
 
 	  closeModal();
 	  renderOrder();
+	  refreshAppliedDiscountCode();
 	});
 
 
@@ -4383,15 +4441,31 @@ function openCustomiseById(itemId) {
 	  container.dataset.customBound = '1';
 	})();
 
-		document.getElementById('order-panel').addEventListener('click', e => {
-		  const btn = e.target.closest('button');
-		  if(!btn) return;
-		  const action = btn.dataset.action;
-		  const idx = Number(btn.dataset.idx);
-		  if(action === 'inc'){ basket[idx].qty += 1; renderOrder(); }
-		  if(action === 'dec'){ basket[idx].qty = Math.max(1, basket[idx].qty - 1); renderOrder(); }
-		  if(action === 'remove'){ basket.splice(idx, 1); renderOrder(); }
-		});
+document.getElementById('order-panel').addEventListener('click', async e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+
+  const action = btn.dataset.action;
+  const idx = Number(btn.dataset.idx);
+
+  if (action === 'inc') {
+    basket[idx].qty += 1;
+    renderOrder();
+    await refreshAppliedDiscountCode();
+  }
+
+  if (action === 'dec') {
+    basket[idx].qty = Math.max(1, basket[idx].qty - 1);
+    renderOrder();
+    await refreshAppliedDiscountCode();
+  }
+
+  if (action === 'remove') {
+    basket.splice(idx, 1);
+    renderOrder();
+    await refreshAppliedDiscountCode();
+  }
+});
 
 		// Lightbox
 	document.querySelectorAll('#food-grid img').forEach(img => {
@@ -4495,6 +4569,7 @@ function openCustomiseById(itemId) {
 	// ---------- Build & first render ----------
 	buildMenu();
 	renderOrder();
+	refreshAppliedDiscountCode();
 
 	// expose helpers the other script uses
 	window.formatCurrency     = formatCurrency;
@@ -4847,6 +4922,136 @@ const openCheckoutBtn = document.getElementById('open-checkout');
 const orderTypeRadios = document.querySelectorAll('input[name="order-type"]');
 let checkoutBaseSubtotal = 0;
 
+// Discount code state
+let appliedDiscountCode = null;
+let appliedDiscountAmount = 0;
+
+// Discount code validation
+async function validateDiscountCode(code, foodSubtotal) {
+  const cleanCode = String(code || "").trim().toUpperCase();
+
+  if (!cleanCode) {
+    return { valid: false, reason: "Please enter a discount code." };
+  }
+
+  const { data, error } = await sb
+    .from("discount_codes")
+    .select("*")
+    .eq("code", cleanCode)
+    .eq("active", true)
+    .maybeSingle();
+
+  if (error || !data) {
+    return {
+      valid: false,
+      reason: "Sorry, that discount code was not recognised."
+    };
+  }
+
+  const now = new Date();
+
+  if (data.starts_at && new Date(data.starts_at) > now) {
+    return {
+      valid: false,
+      reason: "This discount code is not active yet."
+    };
+  }
+
+  if (data.expires_at && new Date(data.expires_at) < now) {
+    return {
+      valid: false,
+      reason: "Sorry, this discount code has expired."
+    };
+  }
+
+  if (
+    data.max_uses !== null &&
+    Number(data.used_count || 0) >= Number(data.max_uses)
+  ) {
+    return {
+      valid: false,
+      reason: "Sorry, this discount code has already been used."
+    };
+  }
+
+  if (foodSubtotal < Number(data.min_food_subtotal || 0)) {
+    return {
+      valid: false,
+      reason:
+        `This code requires a minimum food spend of £${Number(data.min_food_subtotal).toFixed(2)}.`
+    };
+  }
+
+  let discountAmount = 0;
+
+  if (data.discount_type === "fixed") {
+    discountAmount = Math.min(
+      Number(data.discount_value || 0),
+      foodSubtotal
+    );
+  }
+
+  if (data.discount_type === "percent") {
+    discountAmount =
+      foodSubtotal *
+      (Number(data.discount_value || 0) / 100);
+  }
+
+  discountAmount =
+    Math.round(discountAmount * 100) / 100;
+
+  return {
+    valid: true,
+    code: cleanCode,
+    discountAmount,
+    discount: data
+  };
+}
+
+async function refreshAppliedDiscountCode() {
+  if (!appliedDiscountCode) return;
+
+  // Recalculate current basket subtotal directly
+  const foodSubtotal = window.basket.reduce(
+    (sum, item) => sum + Number(item.unitPrice || 0) * Number(item.qty || 0),
+    0
+  );
+
+  // Keep checkout subtotal in sync
+  checkoutBaseSubtotal = foodSubtotal;
+
+  const result = await validateDiscountCode(
+    appliedDiscountCode,
+    foodSubtotal
+  );
+
+  const message = document.getElementById("discount-code-message");
+
+  if (!result.valid) {
+    appliedDiscountCode = null;
+    appliedDiscountAmount = 0;
+
+    if (message) {
+      message.textContent =
+        "Discount code removed — this voucher needs a minimum food spend of £25.";
+      message.className = "discount-code-message error";
+    }
+
+    recomputeCheckoutTotals();
+    return;
+  }
+
+  appliedDiscountAmount = result.discountAmount;
+
+  if (message) {
+    message.textContent =
+      `${appliedDiscountCode} applied: £${appliedDiscountAmount.toFixed(2)} off`;
+    message.className = "discount-code-message success";
+  }
+
+  recomputeCheckoutTotals();
+}
+
 // ---------------- LOYALTY STATE ----------------
 const LOYALTY_REWARD_THRESHOLD = 100;   // 100 points unlocks reward
 const LOYALTY_REWARD_VALUE = 5;    // £5 reward
@@ -5082,13 +5287,16 @@ async function fetchLoyaltyBalance(phone) {
 
 			  const disc = applyWedThuDiscount(subtotal, preferredTimeRaw, asapRequested);
 			  const discountedSubtotal = disc.discountedSubtotal;
+			  
 
 			  const loyaltyDiscount = applyLoyaltyToTotals(discountedSubtotal);
 			  const foodSubtotalAfterAllDiscounts = Math.max(0, discountedSubtotal - loyaltyDiscount);
 
 			  updateLoyaltyProjection(foodSubtotalAfterAllDiscounts);
 
-			  const total = Math.round((foodSubtotalAfterAllDiscounts + deliveryFee) * 100) / 100;
+			  const discountCodeAmount = Number(appliedDiscountAmount || 0);
+				const total = Math.round(
+					(foodSubtotalAfterAllDiscounts + deliveryFee - discountCodeAmount) * 100) / 100;
 
 			  const checkoutSubtotalEl = document.getElementById('checkout-subtotal');
 			  const checkoutDeliveryEl = document.getElementById('checkout-delivery');
@@ -5147,15 +5355,44 @@ async function fetchLoyaltyBalance(phone) {
 			  const discountRow = document.getElementById('discountRow');
 			  const discountValue = document.getElementById('discountValue');
 
-			  if (discountRow && discountValue) {
-				if (disc.eligible && disc.discount > 0) {
-				  discountRow.style.display = 'flex';
-				  discountValue.textContent = `-£${disc.discount.toFixed(2)}`;
-				} else {
-				  discountRow.style.display = 'none';
-				  discountValue.textContent = '';
+				if (discountRow && discountValue) {
+
+				  const existingDiscount =
+					Number(disc.discount || 0);
+
+				  const voucherDiscount =
+					Number(appliedDiscountAmount || 0);
+
+				  const totalDiscount =
+					existingDiscount + voucherDiscount;
+
+				  if (totalDiscount > 0) {
+
+					discountRow.style.display = 'flex';
+
+					let label = 'Discount';
+
+					if (appliedDiscountCode) {
+					  label += ` (${appliedDiscountCode})`;
+					}
+
+					const labelEl =
+					  discountRow.querySelector('.label');
+
+					if (labelEl) {
+					  labelEl.textContent = label;
+					}
+
+					discountValue.textContent =
+					  `-£${totalDiscount.toFixed(2)}`;
+
+				  } else {
+
+					discountRow.style.display = 'none';
+					discountValue.textContent = '';
+
+				  }
 				}
-			  }
 
 			  const loyaltyRow = document.getElementById('loyaltyDiscountRow');
 			  const loyaltyValue = document.getElementById('loyaltyDiscountValue');
@@ -5608,6 +5845,56 @@ if (openCheckoutBtn) {
     openCheckout(subtotal);
   });
 }
+
+
+// 👇 ADD THE DISCOUNT CODE LISTENER HERE
+
+document.getElementById("apply-discount-code-btn")?.addEventListener("click", async () => {
+
+  const input = document.getElementById("discount-code-input");
+  const message = document.getElementById("discount-code-message");
+
+  const foodSubtotal = Number(checkoutBaseSubtotal || 0);
+
+  const result = await validateDiscountCode(
+    input.value,
+    foodSubtotal
+  );
+
+  if (!result.valid) {
+
+    appliedDiscountCode = null;
+    appliedDiscountAmount = 0;
+
+    if (message) {
+      message.textContent = result.reason;
+      message.className = "discount-code-message error";
+    }
+
+    recomputeCheckoutTotals();
+    return;
+	
+	  appliedDiscountAmount =
+    result.discountAmount;
+
+  // 👇 ADD THIS
+  recomputeCheckoutTotals();
+  }
+
+  appliedDiscountCode = result.code;
+  appliedDiscountAmount = result.discountAmount;
+
+  if (message) {
+    message.textContent =
+      `${result.code} applied: £${result.discountAmount.toFixed(2)} off`;
+
+    message.className =
+      "discount-code-message success";
+  }
+
+  recomputeCheckoutTotals();
+
+});
 
 	
 		// ---------- Helpers to call Supabase RPC & REST ----------
@@ -6126,7 +6413,12 @@ const baseOrderPayload = {
       : Number(disc?.discount || 0) > 0
         ? 'Wed/Thu discount'
         : null,
-delivery_fee: Number(submitTotals.delivery_fee.toFixed(2)),
+
+  discount_code: appliedDiscountCode,
+  discount_amount: Number(appliedDiscountAmount || 0),
+  discount_label: appliedDiscountCode ? `Discount code ${appliedDiscountCode}` : null,
+
+  delivery_fee: Number(submitTotals.delivery_fee.toFixed(2)),
 
 delivery_straight_line_miles:
   submitTotals.delivery_straight_line_miles != null
@@ -6142,7 +6434,6 @@ delivery_distance_source:
   submitTotals.delivery_distance_source,
 
 total: Number(submitTotals.total.toFixed(2)),
-  total: Number(submitTotals.total.toFixed(2)),
 
   // loyalty fields
   loyalty_discount: Number((submitTotals.loyalty_discount || 0).toFixed(2)),
@@ -6227,7 +6518,14 @@ console.log('BASE ORDER PAYLOAD:', baseOrderPayload);
 						delivery_fee: submitTotals.delivery_fee,
 						total: submitTotals.total,
 
-						discount_label: submitTotals.discount > 0 ? '10% Wed/Thu discount' : null,
+						discount_label:
+						  appliedDiscountCode
+							? `Discount code ${appliedDiscountCode}`
+							: submitTotals.loyalty_discount > 0
+							  ? 'Loyalty reward'
+							  : submitTotals.discount > 0
+								? '10% Wed/Thu discount'
+								: null,
 
 						loyalty_discount: submitTotals.loyalty_discount,
 						loyalty_reward_applied: submitTotals.loyalty_reward_applied,
@@ -6254,6 +6552,7 @@ console.log('BASE ORDER PAYLOAD:', baseOrderPayload);
     // clear basket + re-render
     basket.length = 0;
     renderOrder();
+	refreshAppliedDiscountCode();
 
     // pretty time string
     const prefPretty = preferredTimeRaw
@@ -6319,15 +6618,28 @@ window.downloadReceipt = function downloadReceipt(summary, items, preferredTimeS
   lines.push('----------------------------------------');
   lines.push(`Order ref: ${summary?.ref || 'RTK-???'}`);
 
-  // 💰 Totals section
-  if (totals.discount && totals.discount > 0) {
-    lines.push(`Subtotal: ${pound}${totals.subtotal.toFixed(2)}`);
-    lines.push(`10% Wed/Thu discount: -${pound}${totals.discount.toFixed(2)}`);
-    if (totals.delivery_fee > 0) {
-      lines.push(`Delivery: ${pound}${totals.delivery_fee.toFixed(2)}`);
-    }
-    lines.push(`Total: ${pound}${totals.total.toFixed(2)}`);
-  } else {
+// 💰 Totals section
+const receiptDiscountAmount =
+  Number(totals.discount_amount || totals.discount || 0);
+
+const receiptDiscountLabel =
+  totals.discount_code
+    ? `Discount code ${totals.discount_code}`
+    : totals.discount_label || 'Discount';
+
+if (receiptDiscountAmount > 0) {
+  lines.push(`Subtotal: ${pound}${Number(totals.subtotal || 0).toFixed(2)}`);
+  lines.push(`${receiptDiscountLabel}: -${pound}${receiptDiscountAmount.toFixed(2)}`);
+
+  if (Number(totals.delivery_fee || 0) > 0) {
+    lines.push(`Delivery: ${pound}${Number(totals.delivery_fee || 0).toFixed(2)}`);
+  }
+
+  lines.push(`Total: ${pound}${Number(totals.total || summary?.total || 0).toFixed(2)}`);
+} else {
+  const fallbackTotal = totals.total ?? summary?.total ?? 0;
+  lines.push(`Total: ${pound}${Number(fallbackTotal || 0).toFixed(2)}`);
+} else {
     // Non-discount fallback
     const fallbackTotal = totals.total ?? summary?.total ?? 0;
     lines.push(`Total: ${pound}${fallbackTotal.toFixed(2)}`);
