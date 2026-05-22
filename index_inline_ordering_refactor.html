@@ -4164,6 +4164,16 @@ body {
   }
 }
 
+@media (max-width: 900px) {
+  #menu-overlay-close,
+  .menu-overlay-close {
+    position: fixed !important;
+    top: max(14px, env(safe-area-inset-top)) !important;
+    right: 16px !important;
+    z-index: 100001 !important;
+  }
+}
+
 </style>
 
 
