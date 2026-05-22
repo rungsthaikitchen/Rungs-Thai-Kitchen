@@ -5635,17 +5635,15 @@ if (mobileBasketSummary && mobileBasketBar && window.innerWidth <= 900) {
 }
 }
 
+// 1. Inline menu card click listener
 document.addEventListener("click", function (e) {
 
   const addBtn = e.target.closest(".menu-inline-add-btn");
-
   if (addBtn) {
-
     const card = addBtn.closest(".menu-item-card");
 
     quickAddFromMenuCard(card);
 
-    // ✅ Success animation
     const originalText = addBtn.textContent;
 
     addBtn.classList.add("added");
@@ -5656,14 +5654,11 @@ document.addEventListener("click", function (e) {
       addBtn.textContent = originalText;
     }, 1200);
 
-    // ✅ Basket pulse
     const basketBar = document.getElementById("mobile-basket-bar");
 
     if (basketBar) {
       basketBar.classList.remove("just-added");
-
       void basketBar.offsetWidth;
-
       basketBar.classList.add("just-added");
 
       setTimeout(() => {
@@ -5674,12 +5669,56 @@ document.addEventListener("click", function (e) {
     return;
   }
 
+  const qtyPlus = e.target.closest(".menu-inline-qty-plus");
+  if (qtyPlus) {
+    const card = qtyPlus.closest(".menu-item-card");
+    const input = card.querySelector(".menu-inline-qty");
+
+    if (input) {
+      input.value = Math.max(1, parseInt(input.value || "1", 10) + 1);
+    }
+
+    return;
+  }
+
+  const qtyMinus = e.target.closest(".menu-inline-qty-minus");
+  if (qtyMinus) {
+    const card = qtyMinus.closest(".menu-item-card");
+    const input = card.querySelector(".menu-inline-qty");
+
+    if (input) {
+      input.value = Math.max(1, parseInt(input.value || "1", 10) - 1);
+    }
+
+    return;
+  }
+
+  const spiceBtn = e.target.closest(".menu-inline-spice-btn");
+  if (spiceBtn) {
+    const card = spiceBtn.closest(".menu-item-card");
+
+    if (card) {
+      card
+        .querySelectorAll(".menu-inline-spice-btn")
+        .forEach(btn => btn.classList.remove("active"));
+    }
+
+    spiceBtn.classList.add("active");
+    return;
+  }
+
+  const moreBtn = e.target.closest(".menu-more-options-btn");
+  if (moreBtn) {
+    openCustomise(moreBtn.dataset.id);
+    return;
+  }
+
 });
 
+// 2. Modifier price change listener
 document.addEventListener("change", function (e) {
 
   const select = e.target.closest(".menu-inline-modifier");
-
   if (!select) return;
 
   const card = select.closest(".menu-item-card");
@@ -5689,49 +5728,16 @@ document.addEventListener("change", function (e) {
   if (!priceEl) return;
 
   const basePrice = Number(priceEl.dataset.basePrice || 0);
-
   const mod = MODIFIERS.find(m => m.id === select.value);
-
   const delta = mod ? Number(mod.delta || 0) : 0;
 
   priceEl.textContent = formatCurrency(basePrice + delta);
 
 });
 
-  const qtyPlus = e.target.closest(".menu-inline-qty-plus");
-  if (qtyPlus) {
-    const card = qtyPlus.closest(".menu-item-card");
-    const input = card.querySelector(".menu-inline-qty");
-    input.value = Math.max(1, parseInt(input.value || "1", 10) + 1);
-    return;
-  }
-
-  const qtyMinus = e.target.closest(".menu-inline-qty-minus");
-  if (qtyMinus) {
-    const card = qtyMinus.closest(".menu-item-card");
-    const input = card.querySelector(".menu-inline-qty");
-    input.value = Math.max(1, parseInt(input.value || "1", 10) - 1);
-    return;
-  }
-
-  const spiceBtn = e.target.closest(".menu-inline-spice-btn");
-  if (spiceBtn) {
-    const card = spiceBtn.closest(".menu-item-card");
-    card
-      .querySelectorAll(".menu-inline-spice-btn")
-      .forEach(btn => btn.classList.remove("active"));
-
-    spiceBtn.classList.add("active");
-    return;
-  }
-
-  const moreBtn = e.target.closest(".menu-more-options-btn");
-  if (moreBtn) {
-    openCustomise(moreBtn.dataset.id);
-  }
-});
-
+// 3. Category nav click listener
 document.addEventListener("click", function (e) {
+
   const btn = e.target.closest(".menu-category-nav button");
   if (!btn) return;
 
@@ -5745,23 +5751,21 @@ document.addEventListener("click", function (e) {
     return;
   }
 
-		const menuSheet = document.querySelector(".menu-sheet");
-		const nav = document.querySelector(".menu-category-nav");
+  const menuSheet = document.querySelector(".menu-sheet");
+  const nav = document.querySelector(".menu-category-nav");
 
-		if (!menuSheet || !nav) return;
+  if (!menuSheet || !nav) return;
 
-		const extraGap = 18;
+  const extraGap = 18;
 
-		const targetTop =
-		  target.offsetTop - nav.offsetHeight - extraGap;
+  const targetTop = target.offsetTop - nav.offsetHeight - extraGap;
 
-		menuSheet.scrollTo({
-		  top: targetTop,
-		  behavior: "smooth"
-		});
-		
-		});
+  menuSheet.scrollTo({
+    top: targetTop,
+    behavior: "smooth"
+  });
 
+});
 // --------- Order rendering ----------
 function renderOrder(){
   const orderListEl  = document.getElementById('order-list');
