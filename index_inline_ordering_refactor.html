@@ -4174,6 +4174,27 @@ body {
   }
 }
 
+.menu-inline-add-btn {
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.menu-inline-add-btn.added {
+  background: linear-gradient(
+    135deg,
+    #16a34a,
+    #15803d
+  ) !important;
+
+  transform: scale(1.04);
+
+  box-shadow:
+    0 10px 22px rgba(22,163,74,0.24);
+}
+
 </style>
 
 
@@ -5615,15 +5636,50 @@ if (mobileBasketSummary && mobileBasketBar && window.innerWidth <= 900) {
 }
 
 document.addEventListener("click", function (e) {
+
   const addBtn = e.target.closest(".menu-inline-add-btn");
+
   if (addBtn) {
+
     const card = addBtn.closest(".menu-item-card");
+
     quickAddFromMenuCard(card);
+
+    // ✅ Success animation
+    const originalText = addBtn.textContent;
+
+    addBtn.classList.add("added");
+    addBtn.textContent = "Added ✓";
+
+    setTimeout(() => {
+      addBtn.classList.remove("added");
+      addBtn.textContent = originalText;
+    }, 1200);
+
+    // ✅ Basket pulse
+    const basketBar = document.getElementById("mobile-basket-bar");
+
+    if (basketBar) {
+      basketBar.classList.remove("just-added");
+
+      void basketBar.offsetWidth;
+
+      basketBar.classList.add("just-added");
+
+      setTimeout(() => {
+        basketBar.classList.remove("just-added");
+      }, 450);
+    }
+
     return;
   }
-  
-  document.addEventListener("change", function (e) {
+
+});
+
+document.addEventListener("change", function (e) {
+
   const select = e.target.closest(".menu-inline-modifier");
+
   if (!select) return;
 
   const card = select.closest(".menu-item-card");
@@ -5633,10 +5689,13 @@ document.addEventListener("click", function (e) {
   if (!priceEl) return;
 
   const basePrice = Number(priceEl.dataset.basePrice || 0);
+
   const mod = MODIFIERS.find(m => m.id === select.value);
+
   const delta = mod ? Number(mod.delta || 0) : 0;
 
   priceEl.textContent = formatCurrency(basePrice + delta);
+
 });
 
   const qtyPlus = e.target.closest(".menu-inline-qty-plus");
