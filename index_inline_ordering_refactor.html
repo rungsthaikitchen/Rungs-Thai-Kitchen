@@ -4007,6 +4007,29 @@ body {
   }
 }
 
+@media (max-width: 900px) {
+  #mobile-basket-bar.mobile-basket-bar {
+    left: 14px !important;
+    right: 14px !important;
+    transform: none !important;
+    width: auto !important;
+    max-width: none !important;
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    border-radius: 20px !important;
+  }
+
+  .mobile-basket-info {
+    padding-left: 2px;
+    overflow: hidden;
+  }
+
+  #mobile-basket-summary {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 </style>
 
 
