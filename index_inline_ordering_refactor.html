@@ -4152,6 +4152,18 @@ body {
   }
 }
 
+@media (max-width: 900px) {
+  body #menu-overlay.show #mobile-basket-bar.mobile-basket-bar,
+  body #menu-overlay[aria-hidden="false"] #mobile-basket-bar.mobile-basket-bar {
+    width: 320px !important;
+    max-width: 320px !important;
+    min-width: 0 !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+  }
+}
+
 </style>
 
 
