@@ -4030,6 +4030,47 @@ body {
   }
 }
 
+.mobile-basket-info {
+  padding-left: 8px;
+}
+
+.menu-card-heading-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.menu-card-title-wrap {
+  min-width: 0;
+}
+
+.menu-card-price {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-size: 1rem;
+  line-height: 1.2;
+  color: #008a34;
+  margin-top: 1px;
+}
+
+@media (max-width: 768px) {
+  .menu-card-heading-row {
+    gap: 8px;
+  }
+
+  .menu-card-price {
+    font-size: 1rem;
+  }
+}
+
+.menu-inline-controls {
+  margin-top: 8px;
+}
+.menu-card-desc {
+  margin-bottom: 4px;
+}
+
 </style>
 
 
@@ -5323,9 +5364,18 @@ else if (item.badge === 'popular') {
     card.innerHTML = `
   ${thumbHTML}
   <div class="menu-card-main">
+<div class="menu-card-heading-row">
+  <div class="menu-card-title-wrap">
     ${badgeHTML}
     <div class="menu-card-title">${item.name}</div>
-    <div class="menu-card-desc muted small">${item.desc || ''}</div>
+  </div>
+
+  <div class="price menu-inline-price menu-card-price" data-base-price="${item.price}">
+    ${formatCurrency(item.price)}
+  </div>
+</div>
+
+<div class="menu-card-desc muted small">${item.desc || ''}</div>
     ${allergenHTML}
 <div class="menu-card-bottom">
   <div class="menu-inline-controls">
@@ -5364,13 +5414,6 @@ else if (item.badge === 'popular') {
 		<button class="menu-more-options-btn" type="button" data-id="${item.id}">
 		  More options (spice, extras) →
 		</button>
-
-		<div class="menu-inline-footer">
-		  <div></div>
-		  <div class="price menu-inline-price" data-base-price="${item.price}">
-		  ${formatCurrency(item.price)}
-		</div>
-		</div>
   </div>
 </div>
   </div>
