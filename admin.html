@@ -787,6 +787,7 @@ function fmtDashDate(value) {
 
 				  const payload = {
 					order_id: order.id,
+					order_id: order.id,
 					order_ref: order.order_ref,
 					name: order.customer_name || order.name || order.full_name || "Customer",
 					email: order.email || "",
@@ -799,6 +800,8 @@ function fmtDashDate(value) {
 					subtotal: Number(order.subtotal || 0),
 					discount: Number(order.discount || 0),
 					discount_label: order.discount_label || "",
+					discount_code: order.discount_code || "",
+					discount_amount: Number(order.discount_amount || 0),
 					delivery_fee: Number(order.delivery_fee || 0),
 					total: Number(order.total || 0),
 
@@ -1152,10 +1155,26 @@ if ((o.order_type || '').toLowerCase() === 'delivery') {
       ? Number(o.total)
       : Math.round((subtotal - discount + delivery) * 100) / 100;
 
-  const discountLine =
-    (discount > 0)
-      ? `<div class="small">${o.discount_label || 'Discount'}: <span style="color:#198754"><strong>-£${discount.toFixed(2)}</strong></span></div>`
-      : '';
+console.log("ADMIN DISCOUNT DEBUG", {
+  ref: o.order_ref,
+  discount: o.discount,
+  discount_label: o.discount_label,
+  discount_code: o.discount_code,
+  discount_amount: o.discount_amount
+});
+
+const displayDiscountAmount =
+  Number(o.discount_amount || o.discount || 0);
+
+const displayDiscountLabel =
+  o.discount_code
+    ? `Discount code ${o.discount_code}`
+    : o.discount_label || 'Discount';
+
+const discountLine =
+  (displayDiscountAmount > 0)
+    ? `<div class="small">${displayDiscountLabel}: <span style="color:#198754"><strong>-£${displayDiscountAmount.toFixed(2)}</strong></span></div>`
+    : '';
 
   return `
     <div class="grid" style="margin-bottom:8px">
@@ -1343,8 +1362,14 @@ const PRINT_CATEGORY_LOOKUP = {
 
 		const orderType = (o.order_type || "collection").toUpperCase();
 		const subtotal = Number(o.subtotal || 0);
-		const discount = Number(o.discount || 0);
-		const delivery = Number(o.delivery_fee || 0);
+		const discount = Number(o.discount_amount || o.discount || 0);
+
+		const discountLabel =
+		  o.discount_code
+			? `DISCOUNT CODE ${String(o.discount_code).toUpperCase()}:`
+			: o.discount_label
+			  ? `${String(o.discount_label).toUpperCase()}:`
+			  : "DISCOUNT:";		const delivery = Number(o.delivery_fee || 0);
 
 		const total =
 		  Number(o.total) > 0
@@ -1406,10 +1431,10 @@ const PRINT_CATEGORY_LOOKUP = {
       <div class="section-title">ORDER TOTALS</div>
       <div class="meta-row"><span class="label">SUBTOTAL:</span> GBP ${subtotal.toFixed(2)}</div>
       ${
-        discount > 0
-          ? `<div class="meta-row"><span class="label">LOYALTY:</span> -GBP ${discount.toFixed(2)}</div>`
-          : ""
-      }
+  discount > 0
+    ? `<div class="meta-row"><span class="label">${discountLabel}</span> -GBP ${discount.toFixed(2)}</div>`
+    : ""
+}
       <div class="meta-row"><span class="label">DELIVERY:</span> GBP ${delivery.toFixed(2)}</div>
       <div class="meta-row"><span class="label">TOTAL:</span> GBP ${total.toFixed(2)}</div>
     </div>
@@ -1996,8 +2021,10 @@ function render(orders) {
     const calculatedTotal = Math.round((subtotal - discount + delivery) * 100) / 100;
     const finalTotal = hasDbTotal ? dbTotal : calculatedTotal;
 
-    const discountLabel =
-      o.discount_label ||
+const discountLabel =
+  o.discount_code
+    ? `Discount code ${o.discount_code}`
+    : o.discount_label ||
       (discount > 0 ? 'Loyalty reward / discount' : '');
 
     /* console.log('[ADMIN MONEY]', o.order_ref, {
@@ -2198,6 +2225,8 @@ async function updateOrderStatus(orderId, newStatus) {
 					  subtotal,
 					  discount,
 					  discount_label,
+					  discount_code,
+					  discount_amount,
 					  delivery_fee,
 
 					  delivery_straight_line_miles,
