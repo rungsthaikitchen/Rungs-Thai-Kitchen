@@ -4071,6 +4071,71 @@ body {
   margin-bottom: 4px;
 }
 
+@media (max-width: 900px) {
+
+  #mobile-basket-bar.mobile-basket-bar {
+    left: 14px !important;
+    right: 14px !important;
+    width: auto !important;
+    max-width: none !important;
+    transform: none !important;
+
+    padding: 10px 10px 10px 14px !important;
+
+    border-radius: 22px !important;
+
+    background: rgba(255,255,255,0.82) !important;
+    backdrop-filter: blur(18px) saturate(1.2) !important;
+
+    border: 1px solid rgba(255,255,255,0.5) !important;
+
+    box-shadow:
+      0 10px 30px rgba(15,23,42,0.12),
+      0 2px 8px rgba(15,23,42,0.08) !important;
+  }
+
+  .mobile-basket-info {
+    gap: 1px;
+  }
+
+  .mobile-basket-info strong {
+    font-size: 0.92rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  #mobile-basket-summary {
+    font-size: 0.82rem;
+    color: #6b7280;
+  }
+
+  #mobile-basket-bar .btn,
+  #mobile-basket-checkout {
+    min-height: 46px;
+
+    padding: 0 20px;
+
+    border-radius: 16px;
+
+    font-weight: 800;
+
+    background: linear-gradient(
+      135deg,
+      #ef4444,
+      #dc2626
+    );
+
+    box-shadow:
+      0 8px 20px rgba(220,38,38,0.24);
+
+    border: 0;
+  }
+
+  #mobile-basket-bar.just-added {
+    transform: scale(1.015) !important;
+  }
+}
+
 </style>
 
 
