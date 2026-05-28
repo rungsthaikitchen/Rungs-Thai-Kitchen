@@ -4245,6 +4245,26 @@ body {
   }
 }
 
+@media (max-width: 900px) {
+  body #menu-overlay.show #mobile-basket-bar.mobile-basket-bar,
+  body #menu-overlay[aria-hidden="false"] #mobile-basket-bar.mobile-basket-bar {
+    width: min(460px, calc(100vw - 56px)) !important;
+    max-width: 460px !important;
+  }
+
+  body #mobile-basket-bar.mobile-basket-bar.just-added {
+    box-shadow:
+      0 14px 34px rgba(22, 163, 74, 0.32),
+      0 0 0 4px rgba(22, 163, 74, 0.18) !important;
+  }
+
+  body #mobile-basket-summary.basket-updated {
+    display: inline-block !important;
+    animation: basketSummaryPop 0.5s ease !important;
+    color: #15803d !important;
+  }
+}
+
 </style>
 
 
