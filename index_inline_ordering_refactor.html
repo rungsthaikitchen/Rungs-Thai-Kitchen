@@ -4265,6 +4265,87 @@ body {
   }
 }
 
+.allergen-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.allergen-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 24px;
+  height: 24px;
+
+  padding: 0 8px;
+
+  border-radius: 999px;
+
+  background: #f4f4f5;
+  border: 1px solid #e5e7eb;
+
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+
+  color: #444;
+}
+
+.allergen-chip.vegan {
+  background: #ecfdf3;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+
+.allergen-chip.vegetarian {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.allergen-chip.spicy {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #be123c;
+}
+
+.allergen-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  margin-top: 8px;
+  margin-bottom: 2px;
+}
+
+.allergen-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 32px;
+  height: 24px;
+
+  padding: 0 10px;
+
+  border-radius: 999px;
+
+  background: #f8fafc;
+  border: 1px solid #dbe3ea;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+
+  color: #475569;
+
+  box-shadow:
+    0 1px 2px rgba(15,23,42,0.04);
+}
+
 </style>
 
 
@@ -4450,53 +4531,6 @@ body {
         </div>
 
       </section>
-
-      
-<div class="menu-wrapper">
-<div class="menu-card-v1">
-  <div class="card-image">
-    <img src="padthai.jpg" alt="Pad Thai">
-  </div>
-
-  <div class="card-body">
-    <div class="card-header">
-      <h3>Pad Thai</h3>
-      <span class="price">£10.95</span>
-    </div>
-
-    <select class="protein-select">
-      <option>Chicken</option>
-      <option>Prawns</option>
-      <option>Tofu</option>
-    </select>
-
-    <div class="spice-row">
-      🌶️🌶️🌶️ <span>Medium</span>
-    </div>
-
-    <div class="card-footer">
-      <div class="qty-row">
-        <button onclick="changeQty(this, -1)">−</button>
-        <span class="qty">1</span>
-        <button onclick="changeQty(this, 1)">+</button>
-      </div>
-
-      <button class="add-btn">Add</button>
-    </div>
-
-    <button class="customise-btn">More options (spice, extras) →</button>
-  </div>
-</div>
-</div>
-<script>
-function changeQty(btn, delta) {
-  const qtyEl = btn.parentElement.querySelector(".qty");
-  let qty = parseInt(qtyEl.innerText);
-  qty = Math.max(1, qty + delta);
-  qtyEl.innerText = qty;
-}
-</script>
-
 
 	  <!-- Right column: Order -->
       <aside>
@@ -5027,46 +5061,124 @@ function changeQty(btn, delta) {
 	// ---------- Allergen registry ----------
   const ALLERGENS = {
 
-      peanuts:   { icon:'🥜',        label:'Peanuts' },
-      tree_nuts: { icon:'🌰',        label:'Tree Nuts' },
-      gluten:    { icon:'🌾',        label:'Gluten (Cereals)' },
-      shellfish: { icon:'🦐',        label:'Crustaceans (Shellfish)' },
-      molluscs:  { icon:'🦪',        label:'Molluscs' },
-      dairy:     { icon:'🥛',        label:'Milk / Dairy' },
-      egg:       { icon:'🍳',        label:'Egg' },
-      fish:      { icon:'🐟',        label:'Fish' },
-      celery:    { icon:'🌿',        label:'Celery' },
-      lupin:     { icon:'🌼',        label:'Lupin' },
-      mustard:   { icon:'&#x1F331;', label:'Mustard' },
-      sesame:    { icon:'⚫',        label:'Sesame Seeds' },
-      soya:      { icon:'🫘',        label:'Soya' },
-      sulphites: { icon:'💨',        label:'Sulphur Dioxide / Sulphites' },
-      spicy:     { icon:'🌶️',       label:'Spicy (heat)' }
-    };
+  peanuts: {
+    code: 'PN',
+    label: 'Peanuts'
+  },
+
+  tree_nuts: {
+    code: 'TN',
+    label: 'Tree Nuts'
+  },
+
+  gluten: {
+    code: 'GL',
+    label: 'Gluten (Cereals)'
+  },
+
+  shellfish: {
+    code: 'CR',
+    label: 'Crustaceans (Shellfish)'
+  },
+
+  molluscs: {
+    code: 'MO',
+    label: 'Molluscs'
+  },
+
+  dairy: {
+    code: 'D',
+    label: 'Milk / Dairy'
+  },
+
+  egg: {
+    code: 'E',
+    label: 'Egg'
+  },
+
+  fish: {
+    code: 'F',
+    label: 'Fish'
+  },
+
+  celery: {
+    code: 'CE',
+    label: 'Celery'
+  },
+
+  lupin: {
+    code: 'LU',
+    label: 'Lupin'
+  },
+
+  mustard: {
+    code: 'MU',
+    label: 'Mustard'
+  },
+
+  sesame: {
+    code: 'SE',
+    label: 'Sesame Seeds'
+  },
+
+  soya: {
+    code: 'SO',
+    label: 'Soya'
+  },
+
+  sulphites: {
+    code: 'SU',
+    label: 'Sulphur Dioxide / Sulphites'
+  },
+
+  spicy: {
+    code: 'HOT',
+    label: 'Spicy (heat)'
+  }
+
+};
     function normalizeAllergens(list){
       const out = [];
       (list || []).forEach(k => { if (k === 'nuts') out.push('peanuts','tree_nuts'); else out.push(k); });
       return [...new Set(out)];
     }
-    function renderAllergenIconsCompact(list){
-      const normalized = normalizeAllergens(list);
-      if(!normalized.length) return '';
-      const spans = normalized.map(key => {
-        const a = ALLERGENS[key]; if(!a) return '';
-        return `<span class="allergen-icon" title="${a.label}" aria-label="${a.label}">${a.icon}</span>`;
-      }).join(' ');
-      return `<div class="muted small">${spans}</div>`;
-    }
-    function renderAllergenBadges(list){
-      const normalized = normalizeAllergens(list);
-      if(!normalized.length) return '';
-      return normalized.map(key => {
-        const a = ALLERGENS[key]; if(!a) return '';
-        return `<span class="allergen-badge" title="${a.label}" aria-label="${a.label}">
-                 <span class="allergen-icon">${a.icon}</span><span>${a.label}</span>
-               </span>`;
-      }).join('');
-    }
+function renderAllergenIconsCompact(list) {
+  const normalized = normalizeAllergens(list);
+  if (!normalized.length) return '';
+
+  const chips = normalized.map(key => {
+    const a = ALLERGENS[key];
+    if (!a) return '';
+
+    const code = a.code || key.slice(0, 2).toUpperCase();
+
+    return `
+      <span class="allergen-chip" title="${a.label}" aria-label="${a.label}">
+        ${code}
+      </span>
+    `;
+  }).join('');
+
+  return `<div class="allergen-badges">${chips}</div>`;
+}
+
+function renderAllergenBadges(list) {
+  const normalized = normalizeAllergens(list);
+  if (!normalized.length) return '';
+
+  return normalized.map(key => {
+    const a = ALLERGENS[key];
+    if (!a) return '';
+
+    const code = a.code || key.slice(0, 2).toUpperCase();
+
+    return `
+      <span class="allergen-chip" title="${a.label}" aria-label="${a.label}">
+        ${code}
+      </span>
+    `;
+  }).join('');
+}
 	
 	// Paid EXTRAS (per dish)
 const EXTRAS = [
