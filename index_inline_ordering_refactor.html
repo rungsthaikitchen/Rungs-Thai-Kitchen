@@ -4476,6 +4476,34 @@ body {
   gap: 6px;
 }
 
+.allergen-tooltip {
+  position: fixed;
+  z-index: 999999;
+
+  background: #1f2937;
+  color: #fff;
+
+  padding: 8px 12px;
+  border-radius: 999px;
+
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  pointer-events: none;
+
+  opacity: 0;
+  transform: translateY(4px);
+
+  transition:
+    opacity .18s ease,
+    transform .18s ease;
+}
+
+.allergen-tooltip.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 </style>
 
 
@@ -5287,11 +5315,15 @@ function renderAllergenIconsCompact(list) {
 
     const code = a.code || key.slice(0, 2).toUpperCase();
 
-    return `
-      <span class="allergen-chip" title="${a.label}" aria-label="${a.label}">
-        ${code}
-      </span>
-    `;
+			return `
+			  <span
+				class="allergen-chip"
+				data-allergen="${a.label}"
+				title="${a.label}"
+				aria-label="${a.label}">
+				${code}
+			  </span>
+			`;
   }).join('');
 
   return `<div class="allergen-badges">${chips}</div>`;
@@ -6097,6 +6129,46 @@ document.addEventListener("click", function (e) {
     top: targetTop,
     behavior: "smooth"
   });
+
+});
+
+document.addEventListener("click", function(e) {
+
+  const chip = e.target.closest(".allergen-chip");
+  if (!chip) return;
+
+  const text = chip.dataset.allergen;
+  if (!text) return;
+
+  const existing = document.querySelector(".allergen-tooltip");
+  if (existing) existing.remove();
+
+  const tooltip = document.createElement("div");
+  tooltip.className = "allergen-tooltip";
+  tooltip.textContent = text;
+
+  document.body.appendChild(tooltip);
+
+  const rect = chip.getBoundingClientRect();
+
+  tooltip.style.left =
+    (rect.left + rect.width / 2 - tooltip.offsetWidth / 2) + "px";
+
+  tooltip.style.top =
+    (rect.top - 42 + window.scrollY) + "px";
+
+  requestAnimationFrame(() => {
+    tooltip.classList.add("show");
+  });
+
+  setTimeout(() => {
+    tooltip.classList.remove("show");
+
+    setTimeout(() => {
+      tooltip.remove();
+    }, 200);
+
+  }, 1800);
 
 });
 // --------- Order rendering ----------
