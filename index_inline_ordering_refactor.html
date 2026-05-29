@@ -4346,6 +4346,21 @@ body {
     0 1px 2px rgba(15,23,42,0.04);
 }
 
+.allergen-guide-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px 16px;
+}
+
+.allergen-guide-grid > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.4;
+  font-size: 0.95rem;
+}
+
 </style>
 
 
@@ -4506,28 +4521,33 @@ body {
         <!-- Allergens -->
         <!--<div class="card-spacer">-->
 		<div class="card" id="allergens" style="margin-top:14px">
-          <h3 style="margin-bottom:10px">Allergens & Ingredients</h3>
+          <h3 style="margin-bottom:10px">Allergen Information</h3>
           <p class="muted">
             We take food allergies seriously. Many of our dishes can be prepared without certain allergens — please
-            mention any allergies when placing your order. The icons below indicate that dishes contain:
+            mention any allergies when placing your order. The codes below indicate ingredients commonly associated with each allergen category:
           </p>
-          <div style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;line-height:1.5">
-            <div><span class="allergen-icon">🥜</span> Peanuts</div>
-            <div><span class="allergen-icon">🌰</span> Tree Nuts</div>
-            <div><span class="allergen-icon">🌾</span> Gluten (Cereals)</div>
-            <div><span class="allergen-icon">🦐</span> Crustaceans (Shellfish)</div>
-            <div><span class="allergen-icon">🦪</span> Molluscs (e.g. squid, mussels)</div>
-            <div><span class="allergen-icon">🥛</span> Milk / Dairy</div>
-            <div><span class="allergen-icon">🍳</span> Egg</div>
-            <div><span class="allergen-icon">🐟</span> Fish</div>
-            <div><span class="allergen-icon">🌿</span> Celery</div>
-            <div><span class="allergen-icon">🌼</span> Lupin</div>
-            <div><span class="allergen-icon">&#x1F331;</span> Mustard</div>
-            <div><span class="allergen-icon">⚫</span> Sesame Seeds</div>
-            <div><span class="allergen-icon">🫘</span> Soya</div>
-            <div><span class="allergen-icon">💨</span> Sulphur Dioxide / Sulphites</div>
-            <div><span class="allergen-icon">🌶️</span> Spice Level (heat indicator)</div>
-          </div>
+			<div class="allergen-guide-grid">
+
+			  <div><span class="allergen-chip">PN</span> Peanuts</div>
+			  <div><span class="allergen-chip">TN</span> Tree Nuts</div>
+			  <div><span class="allergen-chip">GL</span> Gluten (Cereals)</div>
+			  <div><span class="allergen-chip">CR</span> Crustaceans (Shellfish)</div>
+
+			  <div><span class="allergen-chip">MO</span> Molluscs</div>
+			  <div><span class="allergen-chip">D</span> Milk / Dairy</div>
+			  <div><span class="allergen-chip">E</span> Egg</div>
+			  <div><span class="allergen-chip">F</span> Fish</div>
+
+			  <div><span class="allergen-chip">CE</span> Celery</div>
+			  <div><span class="allergen-chip">LU</span> Lupin</div>
+			  <div><span class="allergen-chip">MU</span> Mustard</div>
+			  <div><span class="allergen-chip">SE</span> Sesame Seeds</div>
+
+			  <div><span class="allergen-chip">SO</span> Soya</div>
+			  <div><span class="allergen-chip">SU</span> Sulphites</div>
+			  <div><span class="allergen-chip">HOT</span> Spice Level</div>
+
+			</div>
         </div>
 
       </section>
