@@ -4504,6 +4504,134 @@ body {
   transform: translateY(0);
 }
 
+.rtk-reviews-section {
+  margin-top: 18px;
+}
+
+.rtk-section-kicker {
+  color: #f97316;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  margin-bottom: 6px;
+}
+
+.rtk-review-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.rtk-review-card {
+  border: 1px solid #f1e3df;
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 4px 14px rgba(15,23,42,0.05);
+}
+
+.rtk-review-stars {
+  color: #f59e0b;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+.rtk-review-card p {
+  margin: 0;
+  line-height: 1.45;
+  color: #374151;
+  font-weight: 600;
+}
+
+.rtk-review-card span {
+  display: block;
+  margin-top: 12px;
+  color: #6b7280;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .rtk-review-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rtk-review-card {
+    padding: 15px;
+  }
+}
+
+.rtk-reviews-section {
+  margin-top: 18px !important;
+}
+
+.allergen-icon-grid {
+  gap: 14px 24px;
+}
+
+.allergen-guide-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: #2f3542;
+}
+
+.allergen-guide-item img {
+    width: 52px !important;
+    height: 52px !important;
+}
+
+@media (max-width: 700px) {
+  .allergen-guide-item img {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.allergen-guide-item {
+    gap: 8px;
+}
+
+#allergens .muted {
+    max-width: 1100px;
+    line-height: 1.6;
+}
+
+.menu-allergen-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 12px;
+}
+
+.menu-allergen-icon {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-allergen-icon img {
+  width: 34px !important;
+  height: 34px !important;
+  object-fit: contain;
+  display: block;
+  max-width: 34px;
+  max-height: 34px;
+}
+
+.allergen-placeholder {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
 </style>
 
 
@@ -4660,38 +4788,70 @@ body {
           </div>
         </div>
 		<!--</div>-->
+		
+		<section class="card rtk-reviews-section" id="reviews">
+  <div class="rtk-section-kicker">Customer love</div>
+  <h3>What our customers are saying</h3>
 
-        <!-- Allergens -->
-        <!--<div class="card-spacer">-->
-		<div class="card" id="allergens" style="margin-top:14px">
-          <h3 style="margin-bottom:10px">Allergen Information</h3>
-          <p class="muted">
-            We take food allergies seriously. Many of our dishes can be prepared without certain allergens — please
-            mention any allergies when placing your order. The codes below indicate ingredients commonly associated with each allergen category:
-          </p>
-			<div class="allergen-guide-grid">
+  <div class="rtk-review-grid">
+    <article class="rtk-review-card">
+      <div class="rtk-review-stars">★★★★★</div>
+      <p>
+        “Best spring rolls ever......you need to get chicken ones OMG!”
+      </p>
+      <span>First-time customer</span>
+    </article>
 
-			  <div><span class="allergen-chip">PN</span> Peanuts</div>
-			  <div><span class="allergen-chip">TN</span> Tree Nuts</div>
-			  <div><span class="allergen-chip">GL</span> Gluten (Cereals)</div>
-			  <div><span class="allergen-chip">CR</span> Crustaceans (Shellfish)</div>
+    <article class="rtk-review-card">
+      <div class="rtk-review-stars">★★★★★</div>
+      <p>
+        “We had a takeaway from here last night and it was delicious! Loads of it too. Highly recommend”
+      </p>
+      <span>Local customer</span>
+    </article>
 
-			  <div><span class="allergen-chip">MO</span> Molluscs</div>
-			  <div><span class="allergen-chip">D</span> Milk / Dairy</div>
-			  <div><span class="allergen-chip">E</span> Egg</div>
-			  <div><span class="allergen-chip">F</span> Fish</div>
+    <article class="rtk-review-card">
+      <div class="rtk-review-stars">★★★★★</div>
+      <p>
+        “We had a delivery again tonight. Full on 10/10! Tom Yum Soup, Beef Massaman, DEEEEEEEE-LICIOUS ❤️”
+      </p>
+      <span>Regular customer</span>
+    </article>
+  </div>
+</section>
 
-			  <div><span class="allergen-chip">CE</span> Celery</div>
-			  <div><span class="allergen-chip">LU</span> Lupin</div>
-			  <div><span class="allergen-chip">MU</span> Mustard</div>
-			  <div><span class="allergen-chip">SE</span> Sesame Seeds</div>
+<!-- Allergens -->
+<div class="card allergen-card" id="allergens" style="margin-top:14px">
+  <h3 style="margin-bottom:10px">Allergen Information</h3>
 
-			  <div><span class="allergen-chip">SO</span> Soya</div>
-			  <div><span class="allergen-chip">SU</span> Sulphites</div>
-			  <div><span class="allergen-chip">HOT</span> Spice Level</div>
+  <p class="muted">
+    We use the standard UK allergen categories to help identify ingredients commonly associated with each dish.
+    If you have a food allergy or intolerance, please contact us before ordering, as food is prepared in a kitchen
+    where allergens are present.
+  </p>
 
-			</div>
-        </div>
+  <div class="allergen-guide-grid allergen-icon-grid">
+
+    <div class="allergen-guide-item"><img src="images/allergens/peanut.png" alt=""> Peanuts</div>
+    <div class="allergen-guide-item"><img src="images/allergens/treenuts.png" alt=""> Tree Nuts</div>
+    <div class="allergen-guide-item"><img src="images/allergens/gluten.png" alt=""> Gluten</div>
+    <div class="allergen-guide-item"><img src="images/allergens/crustaceans.png" alt=""> Crustaceans</div>
+
+    <div class="allergen-guide-item"><img src="images/allergens/molluscs.png" alt=""> Molluscs</div>
+    <div class="allergen-guide-item"><img src="images/allergens/milk.png" alt=""> Milk</div>
+    <div class="allergen-guide-item"><img src="images/allergens/egg.png" alt=""> Egg</div>
+    <div class="allergen-guide-item"><img src="images/allergens/fish.png" alt=""> Fish</div>
+
+    <div class="allergen-guide-item"><img src="images/allergens/celery.png" alt=""> Celery</div>
+    <div class="allergen-guide-item"><img src="images/allergens/lupin.png" alt=""> Lupin</div>
+    <div class="allergen-guide-item"><img src="images/allergens/mustard.png" alt=""> Mustard</div>
+    <div class="allergen-guide-item"><img src="images/allergens/sesame.png" alt=""> Sesame</div>
+
+    <div class="allergen-guide-item"><img src="images/allergens/soybean.png" alt=""> Soya</div>
+    <div class="allergen-guide-item"><img src="images/allergens/so2.png" alt=""> Sulphites</div>
+
+  </div>
+</div>
 
       </section>
 
@@ -4862,7 +5022,7 @@ body {
 
 
       <div id="modal-allergens-wrap" style="margin-top:10px;display:none">
-        <div class="small">Allergens in this dish</div>
+        <div class="small">Contains allergens:</div>
         <div id="modal-allergens" class="allergen-badges"></div>
       </div>
 
@@ -5226,72 +5386,86 @@ body {
 
   peanuts: {
     code: 'PN',
-    label: 'Peanuts'
+    label: 'Peanuts',
+	icon: 'images/allergens/peanut.png'
   },
 
   tree_nuts: {
     code: 'TN',
-    label: 'Tree Nuts'
+    label: 'Tree Nuts',
+	icon: 'images/allergens/treenuts.png'
   },
 
   gluten: {
     code: 'GL',
-    label: 'Gluten (Cereals)'
+    label: 'Gluten (Cereals)',
+	icon: 'images/allergens/gluten.png'
   },
 
   shellfish: {
     code: 'CR',
-    label: 'Crustaceans (Shellfish)'
+    label: 'Crustaceans (Shellfish)',
+	icon: 'images/allergens/crustaceans.png'
   },
 
   molluscs: {
     code: 'MO',
-    label: 'Molluscs'
+    label: 'Molluscs',
+	icon: 'images/allergens/molluscs.png'
   },
 
   dairy: {
     code: 'D',
-    label: 'Milk / Dairy'
+    label: 'Milk / Dairy',
+	icon: 'images/allergens/milk.png'
   },
 
   egg: {
     code: 'E',
-    label: 'Egg'
+    label: 'Egg',
+	icon: 'images/allergens/egg.png'
   },
 
   fish: {
     code: 'F',
-    label: 'Fish'
+    label: 'Fish',
+	icon: 'images/allergens/fish.png'
   },
 
   celery: {
     code: 'CE',
-    label: 'Celery'
+    label: 'Celery',
+	icon: 'images/allergens/celery.png'
   },
 
   lupin: {
     code: 'LU',
-    label: 'Lupin'
+    label: 'Lupin',
+	icon: 'images/allergens/lupin.png'
   },
 
   mustard: {
     code: 'MU',
-    label: 'Mustard'
+    label: 'Mustard',
+	icon: 'images/allergens/mustard.png'
   },
 
   sesame: {
     code: 'SE',
-    label: 'Sesame Seeds'
+    label: 'Sesame Seeds',
+	icon: 'images/allergens/sesame.png'
   },
 
   soya: {
     code: 'SO',
-    label: 'Soya'
+    label: 'Soya',
+	icon: 'images/allergens/soybean.png'
   },
 
   sulphites: {
     code: 'SU',
-    label: 'Sulphur Dioxide / Sulphites'
+    label: 'Sulphur Dioxide / Sulphites',
+	icon: 'images/allergens/so2.png'
   },
 
   spicy: {
@@ -5300,11 +5474,25 @@ body {
   }
 
 };
+
+		const PROTEIN_ALLERGENS = {
+		  prawn: ['shellfish'],
+		  tofu: ['soya'],
+		  egg: ['egg']
+		};
     function normalizeAllergens(list){
       const out = [];
       (list || []).forEach(k => { if (k === 'nuts') out.push('peanuts','tree_nuts'); else out.push(k); });
       return [...new Set(out)];
     }
+	
+		function getCombinedAllergens(baseAllergens = [], selectedModifierId = '') {
+		  const proteinAllergens =
+			PROTEIN_ALLERGENS[String(selectedModifierId || '').toLowerCase()] || [];
+
+		  return [...new Set([...baseAllergens, ...proteinAllergens])];
+		}
+
 function renderAllergenIconsCompact(list) {
   const normalized = normalizeAllergens(list);
   if (!normalized.length) return '';
@@ -5345,6 +5533,29 @@ function renderAllergenBadges(list) {
       </span>
     `;
   }).join('');
+}
+
+function renderAllergenIcons(list) {
+  const normalized = normalizeAllergens(list);
+  if (!normalized.length) return '';
+
+  return `
+    <div class="menu-allergen-icons">
+      ${normalized.map(key => {
+        const a = ALLERGENS[key];
+        if (!a || !a.icon) return '';
+
+        return `
+          <span
+            class="menu-allergen-icon"
+            title="${a.label}"
+            aria-label="${a.label}">
+            <img src="${a.icon}" alt="${a.label}">
+          </span>
+        `;
+      }).join('')}
+    </div>
+  `;
 }
 	
 	// Paid EXTRAS (per dish)
@@ -5406,19 +5617,19 @@ const EXTRAS = [
       { id:'stir-fry', title:'Stir Fry',allowExtras:true,  items:[
         { id: 'stir-crispy', name: 'Stir Fried Crispy Chicken (Pad Kra Pao Gai Krob)🌶️🌶️', desc: 'Crispy chicken stir-fried with vegetables, in a spicy Kra Pao sauce', price: 10.00, img: 'images/crispy-chicken.jpeg', spiceEnabled: true, spiceDefault: 2, allergens: ['soya','gluten','molluscs'], allowedExtras: ['extra-bchicken'], badge: 'new' },
 		{ id: 'stir-basil', name: 'Stir Fried Chilli & Basil (Pad Kra Pao)🌶️🌶️', desc: 'Street food classic, its a spicy, savoury Thai stir-fry of usually minced meat with garlic, chilies, and holy basil', price: 8.50, img: 'images/padgrapow_new.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','gluten','molluscs'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-tofu','extra-veg','extra-egg'] },
-        { id: 'stir-ginger', name: 'Stir Fried Ginger (Pad Khing)🌶️', desc: 'A stir-fried dish flavoured with fresh ginger, spring onions, onions, mushrooms and chilli.', price: 8.00, img: 'images/padkhing.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['soya','gluten','celery','mustard','shellfish'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'stir-cashew', name: 'Stir Fried Cashew Nuts', desc: 'A vibrant and flavorful stir-fry featuring crisp vegetables tossed in a savoury sauce. Finished with the rich, buttery crunch of toasted cashew nuts', price: 8.50, img: 'images/cashew.jpg', allowedModifiers: ['batter-chicken','tofu','vegetable' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['tree_nuts','soya','sesame','celery','mustard','shellfish'], allowedExtras: ['extra-bchicken','extra-tofu','extra-veg'] },
+        { id: 'stir-ginger', name: 'Stir Fried Ginger (Pad Khing)🌶️', desc: 'A stir-fried dish flavoured with fresh ginger, spring onions, onions, mushrooms and chilli.', price: 8.00, img: 'images/padkhing.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['soya','gluten','celery','mustard','molluscs'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'stir-cashew', name: 'Stir Fried Cashew Nuts', desc: 'A vibrant and flavorful stir-fry featuring crisp vegetables tossed in a savoury sauce. Finished with the rich, buttery crunch of toasted cashew nuts', price: 8.50, img: 'images/cashew.jpg', allowedModifiers: ['batter-chicken','tofu','vegetable' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['tree_nuts','soya','sesame','celery','mustard','molluscs','shellfish'], allowedExtras: ['extra-bchicken','extra-tofu','extra-veg'] },
         { id: 'stir-sweetsour', name: 'Sweet & Sour (Pad Priew Wan)', desc: 'Thai sweet and sour stir-fry dish featuring vegetables such as cucumber, tomatoes, onions, and bell peppers in a tangy, sweet, and savoury sauce.', price: 8.00, img: 'images/sweetsour.jpg', allowedModifiers: ['batter-chicken','tofu','vegetable' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['soya'], allowedExtras: ['extra-bchicken','extra-tofu','extra-veg'] },
-        { id: 'stir-yellow', name: 'Stir Fried Yellow Curry (Pad Pong Karee)', desc: 'Thai stir-fry dish made with a flavourful, savoury sauce of yellow curry powder, coconut milk, and egg, mixed with vegetables such as onions, bell peppers, and green onions', price: 8.50, img: 'images/padpong.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','soya','mustard','dairy','shellfish','celery'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'stir-yellow', name: 'Stir Fried Yellow Curry (Pad Pong Karee)', desc: 'Thai stir-fry dish made with a flavourful, savoury sauce of yellow curry powder, coconut milk, and egg, mixed with vegetables such as onions, bell peppers, and green onions', price: 8.50, img: 'images/padpong.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','soya','mustard','dairy','molluscs','celery'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
         { id: 'stir-chilli', name: 'Stir Fried Chilli Paste (Pad Nam Prik Pao)🌶️🌶️', desc: 'A medium stir-fry, but dont let the chilli paste alarm you, it is not too spicy!', price: 8.00, img: 'images/padnamprikpao.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','fish','gluten','mustard','celery'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
         { id: 'stir-pepper', name: 'Stir Fried Black Pepper Sauce', desc: 'A bold and aromatic Thai-style stir-fry featuring crisp vegetables wok-tossed in a black pepper sauce. ', price: 7.50, img: 'images/blackpepper.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['soya','sesame','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] }
       ]},
       { id:'noodles',  title:'Noodles & Rice', allowExtras:true, items:[
         { id: 'pad-thai', name: 'Pad Thai', desc: 'Balanced flavours using tamarind, fish sauce, and palm sugar accompanying bean sprouts, garlic and chives.', price: 8.00, img: 'images/padthai.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: false, spiceDefault: 0, allergens: ['egg','fish','peanuts'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'], badge: 'popular' },
 		{ id: 'chef-pad-thai', name: 'Chef Rungs Special Pad Thai🌶️🌶️', desc: 'Just like the traditional Pad Thai, but with a little extra heat!', price: 8.00, img: 'images/spicypadthai.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','fish','peanuts'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },  
-		{ id: 'pad-kee-mao', name: 'Pad Kee Mao🌶️🌶️', desc: 'Drunken Noodles is a spicy and savory Thai stir-fried noodle dish. It is made with wide rice noodles and a variety of vegetables, stir-fried with a flavorful sauce made from soy, oyster, and fish sauces, and heavily flavored with fresh chilies.', price: 8.00, img: 'images/padkeemao.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','gluten','shellfish'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-		{ id: 'pad-see-ew', name: 'Thai Stir Fried Noodles (Pad See Ew)', desc: 'Thai stir-fried noodle dish featuring wide, flat rice noodles, Chinese broccoli, and egg, all coated in a savoury, salty-sweet soy sauce', price: 8.00, img: 'images/newpadseeew.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya','gluten','shellfish','celery','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'fried-rice', name: 'Thai Special Fried Rice (Khao Pad)', desc: 'A classic Thai street food staple. Fragrant jasmine rice wok-fried with egg, onions, and tomatoes, seasoned with fish sauce, soy sauce, and oyster sauce.', price: 7.50, img: 'images/khaopad.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya','gluten','shellfish','celery','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] }
+		{ id: 'pad-kee-mao', name: 'Pad Kee Mao🌶️🌶️', desc: 'Drunken Noodles is a spicy and savory Thai stir-fried noodle dish. It is made with wide rice noodles and a variety of vegetables, stir-fried with a flavorful sauce made from soy, oyster, and fish sauces, and heavily flavored with fresh chilies.', price: 8.00, img: 'images/padkeemao.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','gluten','molluscs','fish'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+		{ id: 'pad-see-ew', name: 'Thai Stir Fried Noodles (Pad See Ew)', desc: 'Thai stir-fried noodle dish featuring wide, flat rice noodles, Chinese broccoli, and egg, all coated in a savoury, salty-sweet soy sauce', price: 8.00, img: 'images/newpadseeew.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya','gluten','molluscs','celery','mustard','sesame'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
+        { id: 'fried-rice', name: 'Thai Special Fried Rice (Khao Pad)', desc: 'A classic Thai street food staple. Fragrant jasmine rice wok-fried with egg, onions, and tomatoes, seasoned with fish sauce, soy sauce, and oyster sauce.', price: 7.50, img: 'images/khaopad.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 0, allergens: ['egg','soya','gluten','celery','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] }
       ]},
 	  { id:'sides',    title:'Side Dishes', allowExtras:false, items:[
         { id: 'jasmine-rice', name: 'Jasmine Rice (Khao Suay)', desc: 'Fragrant, long-grain rice.', price: 2.00, img: 'images/rice.jpg', allergens: [] },
@@ -5797,9 +6008,10 @@ sortedItems.forEach(item => {
     card.dataset.id = item.id;
     card.dataset.price = item.price;
     card.dataset.allowExtras = categoryAllowExtras ? '1' : '0';
+	card.dataset.baseAllergens = JSON.stringify(item.allergens || []);
+	card.dataset.hasRequiredModifier = item.modifierRequired ? 'true' : 'false';
+	card.dataset.modifierChoices = JSON.stringify(item.allowedModifiers || []);
 
-    if (item.allowedModifiers) card.dataset.allowedModifiers = item.allowedModifiers.join(',');
-    if (item.modifierRequired) card.dataset.modifierRequired = 'true';
     if (item.modifiersMulti)   card.dataset.modifiersMulti   = 'true';
     if (item.modifierMax)      card.dataset.modifierMax      = String(item.modifierMax);
     if (item.img)              card.dataset.img              = item.img;
@@ -5808,7 +6020,23 @@ sortedItems.forEach(item => {
       card.dataset.spiceDefault = String(item.spiceDefault);
     }
 
-    const allergenHTML = renderAllergenIconsCompact(item.allergens || []);
+				let allergenHTML = '';
+
+				if (item.allergens && item.allergens.length) {
+				  allergenHTML = renderAllergenIconsCompact(item.allergens);
+				} else if (item.modifierRequired && item.allowedModifiers && item.allowedModifiers.length) {
+				  allergenHTML = `
+					<div class="allergen-placeholder js-card-allergens">
+					  Select a protein to view allergens
+					</div>
+				  `;
+				} else {
+				  allergenHTML = `
+					<div class="allergen-placeholder js-card-allergens">
+					  No declared allergens
+					</div>
+				  `;
+				}
 
     // small thumbnail if available
     const thumbHTML = item.img
@@ -6080,7 +6308,7 @@ return;
 
 });
 
-// 2. Modifier price change listener
+// 2. Modifier price + allergen change listener
 document.addEventListener("change", function (e) {
 
   const select = e.target.closest(".menu-inline-modifier");
@@ -6097,6 +6325,43 @@ document.addEventListener("change", function (e) {
   const delta = mod ? Number(mod.delta || 0) : 0;
 
   priceEl.textContent = formatCurrency(basePrice + delta);
+
+// ✅ Update allergen display when protein changes
+const allergenTarget =
+  card.querySelector(".allergen-badges") ||
+  card.querySelector(".js-card-allergens");
+
+if (!allergenTarget) return;
+
+let baseAllergens = [];
+
+try {
+  baseAllergens = JSON.parse(card.dataset.baseAllergens || "[]");
+} catch {
+  baseAllergens = [];
+}
+
+const combinedAllergens = getCombinedAllergens(baseAllergens, select.value);
+const hasRequiredModifier = card.dataset.hasRequiredModifier === 'true';
+const modifierChoices = JSON.parse(card.dataset.modifierChoices || "[]");
+
+const hasSelectedModifier = !!select.value;
+
+if (combinedAllergens.length) {
+  allergenTarget.outerHTML = renderAllergenIconsCompact(combinedAllergens);
+} else if (hasRequiredModifier && modifierChoices.length && !hasSelectedModifier) {
+  allergenTarget.outerHTML = `
+    <div class="allergen-placeholder js-card-allergens">
+      Select a protein to view allergens
+    </div>
+  `;
+} else {
+  allergenTarget.outerHTML = `
+    <div class="allergen-placeholder js-card-allergens">
+      No declared allergens
+    </div>
+  `;
+}
 
 });
 
@@ -6660,13 +6925,13 @@ function handleExtraClick(opt) {
     }
   }
 
-  if (item.allergens && item.allergens.length) {
-    modalAll.innerHTML = renderAllergenBadges(item.allergens);
-    modalAllWrap.style.display = 'block';
-  } else {
-    modalAll.innerHTML = '';
-    modalAllWrap.style.display = 'none';
-  }
+if (item.allergens && item.allergens.length) {
+  modalAll.innerHTML = renderAllergenIcons(item.allergens);
+  modalAllWrap.style.display = 'block';
+} else {
+  modalAll.innerHTML = '';
+  modalAllWrap.style.display = 'none';
+}
 
   const defaultSpice = (typeof item.spiceDefault === 'number') ? item.spiceDefault : 0;
   buildSpiceSelector(!!item.spiceEnabled, defaultSpice);
@@ -6970,13 +7235,13 @@ function openCustomiseById(itemId) {
 		}
 	  }
 
-	  if (item.allergens && item.allergens.length) {
-		modalAll.innerHTML = renderAllergenBadges(item.allergens);
-		modalAllWrap.style.display = 'block';
-	  } else {
-		modalAll.innerHTML = '';
-		modalAllWrap.style.display = 'none';
-	  }
+if (item.allergens && item.allergens.length) {
+  modalAll.innerHTML = renderAllergenIcons(item.allergens);
+  modalAllWrap.style.display = 'block';
+} else {
+  modalAll.innerHTML = '';
+  modalAllWrap.style.display = 'none';
+}
 
 	  const defaultSpice = (typeof item.spiceDefault === 'number') ? item.spiceDefault : 0;
 	  buildSpiceSelector(!!item.spiceEnabled, defaultSpice);
