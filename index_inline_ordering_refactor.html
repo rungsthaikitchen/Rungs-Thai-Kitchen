@@ -225,6 +225,7 @@ main {
   position: static;
   width: 100%;
   margin-top: 40px;
+  margin-bottom: 40px;
 }
 
     .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:var(--shadow)}
@@ -629,7 +630,6 @@ main {
     .allergen-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #eee;border-radius:999px;background:#fff;font-size:12px}
 
 footer {
-  margin: 40px auto 90px !important;
   max-width: 1100px !important;
   text-align: center !important;
   padding: 30px 18px !important;
@@ -834,7 +834,7 @@ footer * {
   #order-panel {
     position: static;
     width: 100%;
-    margin-top: 20px;
+    margin-top: 40px;
   }*/
 
 	  #order-success .order-line {
@@ -883,11 +883,6 @@ footer * {
 		/* extra spacing between sections so we *see* the background */
 		.card {
 		  margin-bottom: 175px;   /* was 14–18px in places */
-		}
-
-		/* give main a bit more vertical rhythm */
-		main > section > .card + .card {
-		  margin-top: 250px;
 		}
 
 		/* keep footer off the bottom a little so background shows */
@@ -1067,7 +1062,7 @@ footer * {
 		#order-panel{
 		  position:static !important;
 		  width:100% !important;
-		  margin-top:20px !important;
+		  margin-top:40px !important;
 		}
 
 		/* Divider (already added earlier, keeping for context) */
@@ -1829,7 +1824,6 @@ footer * {
   color: #000;
   padding: 24px 16px;
   border-radius: 10px;
-  margin-bottom: 200px
 }
 
 .location-inner {
@@ -1891,6 +1885,44 @@ footer * {
 #location-card .muted a {
   color: inherit;
   text-decoration: underline;
+}
+
+/* Consistent section spacing */
+.container > section,
+.container > main,
+.container > aside,
+#order-panel,
+#location-card,
+.payment-section {
+  margin-top: 40px;
+  margin-bottom: 0;
+}
+
+/* First section should not get extra top spacing */
+.container > section:first-child,
+.container > main:first-child {
+  margin-top: 0;
+}
+
+/* Standard card widths */
+#order-panel,
+#location-card,
+.payment-card {
+  box-sizing: border-box;
+  max-width: 1060px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Payment section should match other sections */
+.payment-section {
+  max-width: 1060px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.payment-card {
+  width: 100%;
 }
 
 /* Remove the outer card effect from the footer wrapper */
@@ -2285,8 +2317,8 @@ body.overlay-open {
 
 /* Outer spacing */
 .payment-section {
-  padding: 40px 16px;
-  margin-bottom: 200px;
+  padding: 18px 16px;
+  margin-bottom: 20px;
 }
 
 /* Matches your FIND US card container */
@@ -2770,7 +2802,6 @@ body {
 }
 
 body footer {
-  margin: 40px auto 100px !important;
   max-width: 1100px !important;
   text-align: center !important;
   padding: 30px 18px !important;
@@ -3175,6 +3206,7 @@ body {
 
 .rtk-hero {
   margin-top:40px !important;
+  margin-bottom:40px !important;
 }
 
 .menu-category-nav {
@@ -4565,7 +4597,8 @@ body {
 }
 
 .rtk-reviews-section {
-  margin-top: 18px !important;
+  margin-top: 40px !important;
+  margin-bottom: 40px !important;
 }
 
 .allergen-icon-grid {
@@ -4630,6 +4663,74 @@ body {
   font-size: 0.85rem;
   color: #6b7280;
   font-style: italic;
+}
+
+#order-panel {
+  max-width: 1060px;
+  margin: 0 auto 18px;
+}
+
+#location-card {
+  max-width: 1060px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+main aside {
+  max-width: 1060px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.card,
+#location-card,
+.payment-card {
+  box-sizing: border-box;
+}
+
+:root {
+  --rtk-section-width: 1060px;
+  --rtk-section-gap: 18px;
+}
+
+.rtk-hero,
+.card,
+#location-card,
+.payment-section,
+footer#contact {
+  box-sizing: border-box;
+  max-width: var(--rtk-section-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/*.card,
+#location-card,
+.payment-section {
+  margin-top: var(--rtk-section-gap);
+}*/
+
+.payment-card {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--rtk-section-width);
+  margin: 0 auto;
+}
+
+/*#location-card {
+  margin-bottom: var(--rtk-section-gap);
+}*/
+
+footer#contact {
+  margin-top: 40px;
+}
+
+.payment-card {
+  padding: 24px 24px;
+}
+
+.allergen-card {
+	margin-bottom: 40px;
 }
 
 </style>
@@ -4763,7 +4864,7 @@ body {
 
         <!-- Our Food -->
         <!--<div class="card-spacer">-->
-		<div class="card" id="our-food" style="margin-top:8px">
+		<div class="card" id="our-food" style="margin-top:40px">
           <h3>Our Food</h3>
           <div style="display:flex;gap:1px;align-items:flex-start;flex-wrap:wrap">
             <div style="flex:1 1 320px;min-width:240px">
@@ -4789,7 +4890,7 @@ body {
         </div>
 		<!--</div>-->
 		
-		<section class="card rtk-reviews-section" id="reviews">
+		<section class="card rtk-reviews-section" id="reviews" style="margin-top:60px">
   <div class="rtk-section-kicker">Customer love</div>
   <h3>What our customers are saying</h3>
 
@@ -4821,7 +4922,7 @@ body {
 </section>
 
 <!-- Allergens -->
-<div class="card allergen-card" id="allergens" style="margin-top:14px">
+<div class="card allergen-card" id="allergens">
   <h3 style="margin-bottom:10px">Allergen Information</h3>
 
   <p class="muted">
@@ -4862,7 +4963,7 @@ body {
           <div id="order-list" class="order-list" style="margin-top:12px">
             <div class="muted small">No items yet — add something from the menu.</div>
           </div>
-          <div class="totals" style="margin-top:14px">
+          <div class="totals">
             <div class="muted small">Total</div>
             <div id="order-total" style="font-weight:800">£0.00</div>
           </div>
@@ -4915,8 +5016,6 @@ body {
     </div>
   </div>
 </section>
-
-<footer id="contact">
 
 <footer id="contact">
   <div class="footer-inner">
