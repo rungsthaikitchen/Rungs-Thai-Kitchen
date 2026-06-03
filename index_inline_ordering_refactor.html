@@ -4767,6 +4767,26 @@ footer#contact {
   }
 }
 
+@media (max-width: 768px) {
+  .checkout-layout {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .checkout-form-panel,
+  .checkout-summary-panel {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .checkout-summary-sticky {
+    position: static !important;
+    width: 100% !important;
+  }
+}
+
 </style>
 
 
