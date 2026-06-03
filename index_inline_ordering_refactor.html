@@ -4733,6 +4733,40 @@ footer#contact {
 	margin-bottom: 40px;
 }
 
+@media (max-width: 760px) {
+  .checkout-modal,
+  .checkout-modal-content,
+  .checkout-panel {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+    margin: 12px auto !important;
+  }
+
+  .checkout-grid,
+  .checkout-body,
+  .checkout-columns {
+    display: block !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .checkout-card,
+  .checkout-details,
+  .checkout-summary,
+  .checkout-order-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin-bottom: 14px;
+  }
+
+  #checkout-modal input,
+  #checkout-modal textarea,
+  #checkout-modal select {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
 </style>
 
 
