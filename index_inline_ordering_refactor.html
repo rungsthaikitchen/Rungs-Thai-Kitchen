@@ -8289,11 +8289,6 @@ function recomputeCheckoutTotals() {
     fee: 0
   };
 
-  console.log("[totals debug] checkoutBaseSubtotal:", checkoutBaseSubtotal);
-  console.log("[totals debug] preDiscountSubtotal:", Number(checkoutBaseSubtotal || 0));
-  console.log("[totals debug] deliveryQuoteState:", quote);
-  console.log("[totals debug] order type:", orderType);
-
   let deliveryFee = 0;
   let deliveryBlocked = false;
 
@@ -8357,10 +8352,11 @@ if (typeof deliveryNote !== 'undefined' && deliveryNote) {
       deliveryNote.className = "muted small checkout-help-note";
       deliveryNote.textContent = "Calculating delivery charge…";
 
-    } else if (quote.eligible === false) {
-      deliveryNote.className = "delivery-error checkout-help-note";
-      deliveryNote.innerHTML =
-        'Sorry, this address is outside our 3-mile delivery radius. Please call us on <a href="tel:01134699564">0113 469 9564</a> and we’ll see what we can do 😊';
+		} else if (quote.eligible === false) {
+		  deliveryNote.className = "delivery-error checkout-help-note";
+		  deliveryNote.innerHTML =
+			quote.reason ||
+			'Sorry, we could not calculate delivery for this address. Please call us on <a href="tel:01134699564">0113 469 9564</a> and we’ll see what we can do 😊';
 
     } else if (!quote.straightLineMiles && !quote.routeMiles) {
       deliveryNote.className = "muted small checkout-help-note";
@@ -8748,6 +8744,16 @@ function getCustomerLatLng() {
   return { lat, lng };
 }
 
+function looksLikeFullAddress(address = '') {
+  const s = String(address).trim();
+
+  const hasPostcode = /[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}/i.test(s);
+  const hasHouseNumber = /\d+/.test(s);
+  const hasTownOrCity = /tingley|morley|leeds|wakefield/i.test(s);
+
+  return hasPostcode && hasHouseNumber && hasTownOrCity;
+}
+
 async function refreshDeliveryQuote() {
   const subtotal = Number(checkoutBaseSubtotal || 0);
 	const freeDeliveryRemaining = Math.max(0, DELIVERY_FREE_THRESHOLD - subtotal);
@@ -8790,18 +8796,20 @@ async function refreshDeliveryQuote() {
     customer.lng
   );
 
-  // 🚫 Hard 3-mile radius gate
-  if (straightLineMiles > DELIVERY_MAX_STRAIGHT_LINE_MILES) {
-    deliveryQuoteState = {
-      loading: false,
-      eligible: false,
-      reason: "Sorry, this address is outside our 3-mile delivery radius. Please call us on 0113 469 9564 and we’ll see what we can do 😊",
-      straightLineMiles,
-      routeMiles: null,
-      fee: null,
-      usedFallback: false,
-      lastUpdated: Date.now()
-    };
+			// 🚫 Hard delivery radius gate based on max route band
+			const maxDeliveryMiles = Math.max(...DELIVERY_ROUTE_BANDS.map(b => Number(b.maxMiles || 0)));
+
+		/*	if (straightLineMiles > maxDeliveryMiles) {
+			deliveryQuoteState = {
+			  loading: false,
+			  eligible: false,
+			  reason: `Sorry, this address is outside our ${maxDeliveryMiles}-mile delivery radius. Please call us on 0113 469 9564 and we’ll see what we can do 😊`,
+			  straightLineMiles,
+			  routeMiles: null,
+			  fee: null,
+			  usedFallback: false,
+			  lastUpdated: Date.now()
+			};
 
     window.deliveryQuoteState = deliveryQuoteState;
 
@@ -8810,7 +8818,7 @@ async function refreshDeliveryQuote() {
     });
 
     return deliveryQuoteState;
-  }
+  } */
 
   // ✅ Free delivery only AFTER radius check
   if (subtotal >= DELIVERY_FREE_THRESHOLD) {
@@ -8878,6 +8886,44 @@ async function refreshDeliveryQuote() {
     }
 
     const routeMiles = Number(data.routeMiles);
+	
+	const maxDeliveryMiles = Math.max(
+  ...DELIVERY_ROUTE_BANDS.map(b => Number(b.maxMiles || 0))
+);
+
+if (routeMiles > maxDeliveryMiles) {
+  const address = document.getElementById('cust-address')?.value || '';
+
+  if (!looksLikeFullAddress(address)) {
+    deliveryQuoteState = {
+      loading: false,
+      eligible: false,
+      reason: "Please enter your full delivery address including house number, street, town and postcode so we can calculate delivery accurately.",
+      straightLineMiles,
+      routeMiles,
+      fee: null,
+      usedFallback: false,
+      lastUpdated: Date.now()
+    };
+
+    window.deliveryQuoteState = deliveryQuoteState;
+    return deliveryQuoteState;
+  }
+
+  deliveryQuoteState = {
+    loading: false,
+    eligible: false,
+    reason: `Sorry, this address is outside our ${maxDeliveryMiles}-mile delivery radius. Please call us on 0113 469 9564 and we’ll see what we can do 😊`,
+    straightLineMiles,
+    routeMiles,
+    fee: null,
+    usedFallback: false,
+    lastUpdated: Date.now()
+  };
+
+  window.deliveryQuoteState = deliveryQuoteState;
+  return deliveryQuoteState;
+}
     const routeFee = calculateBandFee(routeMiles, DELIVERY_ROUTE_BANDS);
 
     deliveryQuoteState = {
