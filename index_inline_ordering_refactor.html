@@ -4995,25 +4995,25 @@ footer#contact {
 </script>
 
 
-    <main>
-      <!-- Left column -->
-      <section class="rtk-hero">
-  <div class="rtk-hero-media">
-    <img src="images/padthai.jpg" alt="Fresh Thai food from Rung's Thai Kitchen">
-    <!-- Later, replace img with video -->
-  </div>
+				<main>
+				  <!-- Left column -->
+				  <section class="rtk-hero">
+			  <div class="rtk-hero-media">
+				<img src="images/padthai.jpg" alt="Fresh Thai food from Rung's Thai Kitchen">
+				<!-- Later, replace img with video -->
+			  </div>
 
-  <div class="rtk-hero-overlay">
-    <p class="rtk-kicker">Rung’s Thai Kitchen</p>
-    <h1>Authentic Thai takeaway in Morley</h1>
-    <p class="rtk-hero-text">Freshly cooked to order by Chef Rung, with bold Thai flavours and proper home-kitchen heart.</p>
+			  <div class="rtk-hero-overlay">
+				<p class="rtk-kicker">Rung’s Thai Kitchen</p>
+				<h1>Authentic Thai takeaway in Morley</h1>
+				<p class="rtk-hero-text">Freshly cooked to order by Chef Rung, with bold Thai flavours and proper home-kitchen heart.</p>
 
-    <div class="rtk-hero-actions">
-      <a href="#menu" class="hero-btn hero-btn-primary">View Menu</a>
-      <a href="#order" class="hero-btn hero-btn-secondary">Order Now</a>
-    </div>
-  </div>
-</section>
+			<div class="rtk-hero-actions">
+			  <a href="#menu" id="hero-view-menu" class="hero-btn hero-btn-primary">View Menu</a>
+			  <a href="#menu" id="hero-order-now" class="hero-btn hero-btn-secondary">Order Now</a>
+			</div>
+			  </div>
+			</section>
 	  
 	  <section>
         <!-- About -->
@@ -9052,6 +9052,49 @@ await window.refreshCheckoutPricingAndRender?.();
 		checkoutModal.style.display = 'flex';
 }
 
+function wirePhase2Buttons() {
+  const heroViewMenu = document.getElementById('hero-view-menu');
+  const heroOrderNow = document.getElementById('hero-order-now');
+  const openCheckoutBtn = document.getElementById('open-checkout');
+
+  const openMenuFromHero = (e) => {
+    e.preventDefault();
+
+    if (typeof openMenuOverlay === 'function') {
+      openMenuOverlay();
+      return;
+    }
+
+    const menuOverlay = document.getElementById('menu-overlay');
+    if (menuOverlay) {
+      menuOverlay.classList.add('show');
+      menuOverlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+  };
+
+  heroViewMenu?.addEventListener('click', openMenuFromHero);
+  heroOrderNow?.addEventListener('click', openMenuFromHero);
+
+  openCheckoutBtn?.addEventListener('click', () => {
+    const subtotal = basket.reduce((sum, item) => {
+      return sum + Number(item.unitPrice || 0) * Number(item.qty || 1);
+    }, 0);
+
+    if (subtotal <= 0) {
+      const orderMsg = document.getElementById('order-msg');
+      if (orderMsg) {
+        orderMsg.textContent = 'Please add something to your order first.';
+      }
+      return;
+    }
+
+    openCheckout(subtotal);
+  });
+}
+
+wirePhase2Buttons();
+
 // Ensure other code can call it
 window.openCheckout = openCheckout;
 
@@ -10108,7 +10151,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <script>
 console.info('Console levels forced');
-console.log = console.info = console.debug = console.warn = console.error = console.log.bind(console);
 </script>
 
 <script>
