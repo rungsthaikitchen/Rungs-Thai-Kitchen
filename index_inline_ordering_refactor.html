@@ -5643,7 +5643,6 @@ footer#contact {
   
   window.sb = window.sb || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  console.log('Supabase ready:', window.supabaseClient);
 </script>
 
 
@@ -6036,14 +6035,12 @@ window.getKitchenLoadForSlot = async function(slotStart, supabase) {
     .lte('created_at', dayEnd.toISOString());
 
   console.log('[SLOT CHECK] slotStart =', slotStart.toISOString());
-  console.log('[SLOT CHECK] slotEnd =', slotEnd.toISOString());
 
   if (error) {
     console.error('[SLOT CHECK] query error =', error);
     throw error;
   }
 
-  console.log('[SLOT CHECK] today raw orders =', data);
 
   const ordersInSlot = (data || []).filter(order => {
     const t = order.preferred_time ? new Date(order.preferred_time) : null;
@@ -6057,8 +6054,6 @@ window.getKitchenLoadForSlot = async function(slotStart, supabase) {
     console.log('[SLOT CHECK] order', order.id, 'preferred_time=', order.preferred_time, 'load=', orderLoad);
     return total + orderLoad;
   }, 0);
-
-  console.log('[SLOT CHECK] existingLoad =', existingLoad);
 
   return existingLoad;
 };
@@ -6087,13 +6082,6 @@ window.findNextAvailableKitchenSlot = async function(requestedTime, orderItems, 
       0,
       window.MAX_KITCHEN_LOAD_PER_SLOT - existingLoad
     );
-
-    console.log('[CAPACITY FLOW]', {
-      slot: candidate.toISOString(),
-      existingLoad,
-      freeCapacity,
-      remainingBefore: remainingLoad
-    });
 
     // consume capacity from this slot
     remainingLoad -= freeCapacity;
@@ -6186,13 +6174,6 @@ applyHeaderOffset();
 
 		};
 		
-		// ✅ Add this line:
-			console.log('TICKER INIT', { 
-			  active: siteStatus.active, 
-			  hasTickerEl: !!tickerEl, 
-			  hasTickerText: !!tickerText 
-			});
-
 		if (siteStatus.active && tickerEl && tickerText) {
 		  tickerText.textContent = siteStatus.message;
 		  tickerEl.classList.remove('hidden');
@@ -6643,8 +6624,6 @@ document.addEventListener("click", function (e) {
 
   const targetId = btn.dataset.target;
   const target = document.getElementById(targetId);
-
-  console.log("[menu nav] clicked:", targetId, target);
 
   if (!target) {
     console.warn("[menu nav] No category found for:", targetId);
@@ -7300,7 +7279,6 @@ if (item.allergens && item.allergens.length) {
 					  const el = document.getElementById('order-success-total');
 					  if (el) {
 						const obs = new MutationObserver(() => {
-						  console.log('[SUCCESS TOTAL MUTATION] now =', el.textContent);
 						  console.trace('[SUCCESS TOTAL MUTATION TRACE]');
 						});
 						obs.observe(el, { childList: true, characterData: true, subtree: true });
@@ -7583,9 +7561,7 @@ if (item.allergens && item.allergens.length) {
 		spice: currentSpice ?? null
 	  });
 	  
-	  console.log("[quick add] basket now:", basket);
-
-		closeModal();
+	  	closeModal();
 		renderOrder();
 		renderMenuOrderSummary();
 	});
@@ -8108,11 +8084,7 @@ const loyaltyState = {
 
 function applyLoyaltyToTotals(foodSubtotal) {
   // ✅ USE SETTLED POINTS ONLY
-  	console.log('APPLY LOYALTY CHECK', {
-  pointsBalance: loyaltyState.pointsBalance,
-  settledPointsBalance: loyaltyState.settledPointsBalance,
-  threshold: LOYALTY_REWARD_THRESHOLD
-});
+
   const settledPoints = Number(loyaltyState.settledPointsBalance || 0);
   const eligibleSubtotal = Number(foodSubtotal || 0);
 
@@ -8151,8 +8123,7 @@ function updateLoyaltyProjection(foodSubtotalAfterAllDiscounts) {
   loyaltyState.expectedBalance = expectedBalance;
   loyaltyState.pointsToNextReward = pointsToNextReward;
   
-  console.log('LOYALTY STATE:', loyaltyState);
-}
+  }
 
 function renderLoyaltyMessage() {
   const el = document.getElementById('loyalty-message');
@@ -8698,8 +8669,6 @@ function findNextAllowedFromNow() {
   async function refreshLoyaltyFromPhone() {
     const loyalty = await fetchLoyaltyBalance(phoneInput.value);
 	
-	  console.log('LOYALTY RESPONSE:', loyalty); // 👈 ADD THIS
-
 			if (loyalty) {
 			  loyaltyState.pointsBalance = Number(loyalty.points_balance || 0);
 
@@ -9563,13 +9532,6 @@ const capacityItems = itemsSnapshot.map(line => ({
   qty: line.qty
 }));
 
-console.log('[CAPACITY] mapped items =', capacityItems);
-console.log('[CAPACITY] mapped items with categories =', capacityItems.map(x => ({
-  ...x,
-  category: window.ITEM_CATEGORY_LOOKUP[x.id]
-})));
-console.log('[CAPACITY] newOrderLoad =', window.countKitchenLoadItems(capacityItems));
-
 const requestedTime = preferredTimeISO ? new Date(preferredTimeISO) : null;
 
 let finalPreferredTimeISO = preferredTimeISO;
@@ -9631,9 +9593,6 @@ console.log('ORDER PAYLOAD PREVIEW:', {
   loyalty_reward_applied: submitTotals.loyalty_reward_applied,
   total: submitTotals.total
 });
-
-console.log('[PAYLOAD CHECK] preferredTimeISO original =', preferredTimeISO);
-console.log('[PAYLOAD CHECK] preferred_time being saved =', finalPreferredTimeISO);
 
 const baseOrderPayload = {
   customer_id: customerId,
@@ -9712,7 +9671,6 @@ console.log('BASE ORDER PAYLOAD:', baseOrderPayload);
 
 			// ✅ Recompute and freeze totals once
 				window.__lastOrderTotals = submitTotals;
-				console.log('[CHECKOUT TOTALS @ SUBMIT]', submitTotals);
 
 				try {
 				  await fetch('https://order-backend-production.up.railway.app/send-order-confirmation', {
@@ -10244,7 +10202,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!btn) return;
 
   btn.addEventListener('click', () => {
-    console.log('[DEBUG] checkout submit clicked');
   });
 });
 
