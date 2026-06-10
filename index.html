@@ -5341,9 +5341,9 @@ async function fetchLoyaltyBalance(phone) {
 					  deliveryNote.textContent = "🎉 Free delivery on orders over £30";
 
 					} else if (quote.usedFallback) {
-					  deliveryNote.className = "";
-					  deliveryNote.textContent =
-						`Delivery ${formatCurrency(Number(quote.fee ?? 0))} (approximate)`;
+					  deliveryNote.className = "delivery-error";
+					  deliveryNote.innerHTML =
+						'We could not confidently find your delivery address. Please enter your full address including street, town and postcode, for example: 30 Topcliffe Mews, Morley, LS27 8UL.';
 
 					} else {
 					  deliveryNote.className = "";
