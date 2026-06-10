@@ -5322,41 +5322,36 @@ async function fetchLoyaltyBalance(phone) {
 				checkoutTotalEl.textContent = formatCurrency(total);
 			  }
 
-			if (typeof deliveryNote !== 'undefined' && deliveryNote) {
-				  deliveryNote.style.display = (orderType === 'delivery') ? 'block' : 'none';
+if (typeof deliveryNote !== 'undefined' && deliveryNote) {
+  deliveryNote.style.display = (orderType === 'delivery') ? 'block' : 'none';
 
-				  if (orderType === 'delivery') {
+  if (orderType === 'delivery') {
+    const fullAddressMessage =
+      'Sorry, we could not confirm this delivery address. Please enter your full address including street, town and postcode, for example: 30 Topcliffe Mews, Morley, LS27 8UL. If you are still having problems, please call us on <a href="tel:01134699564">0113 469 9564</a> and we’ll see what we can do 😊';
 
-					if (quote.loading) {
-					  deliveryNote.className = "";
-					  deliveryNote.textContent = "Calculating delivery charge…";
+    if (quote.loading) {
+      deliveryNote.className = "";
+      deliveryNote.textContent = "Calculating delivery charge…";
 
-					} else if (quote.eligible === false) {
-					  deliveryNote.className = "delivery-error";
-					  deliveryNote.innerHTML =
-						'Sorry, we could not confirm this delivery address. Please enter your full address including street, town and postcode (for example: 30 Topcliffe Mews, Morley, LS27 8UL). If you are still having problems, please call us on <a href="tel:01134699564">0113 469 9564</a> and we’ll see what we can do 😊';
+    } else if (quote.eligible === false || quote.usedFallback) {
+      deliveryNote.className = "delivery-error";
+      deliveryNote.innerHTML = fullAddressMessage;
 
-					} else if (getPreDiscountFoodSubtotal() >= DELIVERY_FREE_THRESHOLD) {
-					  deliveryNote.className = "";
-					  deliveryNote.textContent = "🎉 Free delivery on orders over £30";
+    } else if (getPreDiscountFoodSubtotal() >= DELIVERY_FREE_THRESHOLD) {
+      deliveryNote.className = "";
+      deliveryNote.textContent = "🎉 Free delivery on orders over £30";
 
-					} else if (quote.usedFallback) {
-					  deliveryNote.className = "delivery-error";
-					  deliveryNote.innerHTML =
-						'We could not confidently find your delivery address. Please enter your full address including street, town and postcode, for example: 30 Topcliffe Mews, Morley, LS27 8UL.';
-
-					} else {
-					  deliveryNote.className = "";
-					  deliveryNote.textContent =
-						`Delivery ${formatCurrency(Number(quote.fee ?? 0))}${
-						  Number.isFinite(quote.routeMiles)
-							? ` based on approx. route distance of ${quote.routeMiles.toFixed(1)} miles`
-							: ' based on approximate distance'
-						}`;
-					}
-
-				  }
-				}
+    } else {
+      deliveryNote.className = "";
+      deliveryNote.textContent =
+        `Delivery ${formatCurrency(Number(quote.fee ?? 0))}${
+          Number.isFinite(quote.routeMiles)
+            ? ` based on approx. route distance of ${quote.routeMiles.toFixed(1)} miles`
+            : ' based on approximate distance'
+        }`;
+    }
+  }
+}
 
 			  const discountRow = document.getElementById('discountRow');
 			  const discountValue = document.getElementById('discountValue');
