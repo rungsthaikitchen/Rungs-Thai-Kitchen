@@ -3287,28 +3287,28 @@ async function refreshDeliveryQuote() {
 
 			  // 🚫 No coords = cannot prove address is in delivery radius
 			  if (!restaurant || !customer) {
-				deliveryQuoteState = {
-			  loading: false,
-			  eligible: true,
-			  reason: "",
-			  straightLineMiles,
-			  routeMiles: null,
-			  fee: DELIVERY_FALLBACK_FEE,
-			  usedFallback: true,
-			  freeDeliveryRemaining,
-			  freeDeliveryMessage,
-			  lastUpdated: Date.now()
-			};
+			  deliveryQuoteState = {
+				loading: false,
+				eligible: true,
+				reason: "",
+				straightLineMiles: null,
+				routeMiles: null,
+				fee: DELIVERY_FALLBACK_FEE,
+				usedFallback: true,
+				freeDeliveryRemaining,
+				freeDeliveryMessage,
+				lastUpdated: Date.now()
+			  };
 
-    window.deliveryQuoteState = deliveryQuoteState;
+			  window.deliveryQuoteState = deliveryQuoteState;
 
-    console.warn("[delivery] blocked - missing coords for radius check", {
-      restaurant,
-      customer
-    });
+			  console.warn("[delivery] blocked - missing coords for radius check", {
+				restaurant,
+				customer
+			  });
 
-    return deliveryQuoteState;
-  }
+			  return deliveryQuoteState;
+			}
 
   const straightLineMiles = haversineMiles(
     restaurant.lat,
@@ -6254,39 +6254,30 @@ checkoutForm.addEventListener('submit', async (e) => {
   );
 
   if (quote.loading || quote.status === 'loading') {
-    checkoutMsg.style.color = '#b02a2a';
-    checkoutMsg.textContent =
-      'We are still checking your delivery address. Please wait a moment and try again.';
-    return;
-  }
-
-  if (subtotalNow < DELIVERY_FREE_THRESHOLD && deliveryFeeNow <= 0) {
-    checkoutMsg.style.color = '#b02a2a';
-    checkoutMsg.textContent =
-      'Sorry, we could not calculate your delivery fee. Please check your address and try again.';
-    document.getElementById('cust-address').focus();
-    return;
-  }
-
-  if (!routeMilesNow || routeMilesNow <= 0) {
-    checkoutMsg.style.color = '#b02a2a';
-    checkoutMsg.textContent =
-      'Sorry, we could not confirm your delivery distance. Please check your address and try again.';
-    document.getElementById('cust-address').focus();
-    return;
-  }
+  checkoutMsg.style.color = '#b02a2a';
+  checkoutMsg.textContent =
+    'We are still checking your delivery address. Please wait a moment and try again.';
+  return;
 }
 
-    // Only enforce time if NOT ASAP
-    if (!asapRequested) {
-      if (!selectedLocal || !isAllowed(roundTo5Min(selectedLocal))) {
-        checkoutMsg.style.color = '#b02a2a';
-        checkoutMsg.textContent =
-          'Please choose an available date/time during our opening hours.';
-        return;
-      }
-    }
+const hasFreeDelivery = subtotalNow >= DELIVERY_FREE_THRESHOLD;
 
+if (!hasFreeDelivery && deliveryFeeNow <= 0) {
+  checkoutMsg.style.color = '#b02a2a';
+  checkoutMsg.textContent =
+    'Sorry, we could not calculate your delivery fee. Please check your address and try again.';
+  document.getElementById('cust-address').focus();
+  return;
+}
+
+if (!hasFreeDelivery && (!routeMilesNow || routeMilesNow <= 0)) {
+  checkoutMsg.style.color = '#b02a2a';
+  checkoutMsg.textContent =
+    'Sorry, we could not confirm your delivery distance. Please check your address and try again.';
+  document.getElementById('cust-address').focus();
+  return;
+}
+}
 			// ---------- Basket + totals ----------
 			const itemsSnapshot = basket.map(i => ({ ...i }));
 			const subtotal = Math.round(itemsSnapshot.reduce((s,i)=> s + i.unitPrice * i.qty, 0) * 100) / 100;
@@ -6550,12 +6541,14 @@ if (orderType === 'delivery') {
     );
   }
 
-  if (!routeMiles || routeMiles <= 0) {
-    return fail(
-      'Delivery distance',
-      'Sorry, we could not confirm your delivery distance. Please enter your full address including street, town and postcode, then try again.'
-    );
-  }
+const hasFreeDelivery = Number(subtotal || checkoutBaseSubtotal || 0) >= DELIVERY_FREE_THRESHOLD;
+
+if (!hasFreeDelivery && (!routeMiles || routeMiles <= 0)) {
+  return fail(
+    'Delivery distance',
+    'Sorry, we could not confirm your delivery distance. Please enter your full address including street, town and postcode, then try again.'
+  );
+}
 }
 
 if (orderType === 'delivery') {
@@ -6570,12 +6563,14 @@ if (orderType === 'delivery') {
     );
   }
 
-  if (!routeMiles || routeMiles <= 0) {
-    return fail(
-      'Delivery distance',
-      'Sorry, we could not confirm your delivery distance. Please enter your full address including street, town and postcode, then try again.'
-    );
-  }
+  const hasFreeDelivery = Number(subtotal || checkoutBaseSubtotal || 0) >= DELIVERY_FREE_THRESHOLD;
+
+if (!hasFreeDelivery && (!routeMiles || routeMiles <= 0)) {
+  return fail(
+    'Delivery distance',
+    'Sorry, we could not confirm your delivery distance. Please enter your full address including street, town and postcode, then try again.'
+  );
+}
 }
 
 console.log('BASE ORDER PAYLOAD:', baseOrderPayload);
