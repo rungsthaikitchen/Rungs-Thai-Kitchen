@@ -4326,11 +4326,11 @@ function openCustomiseById(itemId) {
   selectedExtras = [];
 
 	  // NEW: per-item extras control
-	  if (Array.isArray(item.allowedExtras) && item.allowedExtras.length > 0) {
-		currentAllowExtras = item.allowedExtras;        // e.g. ['extra-beef']
-	  } else {
-		currentAllowExtras = !!item.categoryAllowedExtras; // existing behaviour
-	  }
+if (Array.isArray(item.allowedExtras)) {
+  currentAllowExtras = item.allowedExtras;        // [] means no extras
+} else {
+  currentAllowExtras = !!item.categoryAllowedExtras; // existing behaviour
+}
 
 	  const allowed  = Array.isArray(item.allowedModifiers) ? item.allowedModifiers : null;
 	  const requires = !!item.modifierRequired;
