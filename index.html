@@ -4989,6 +4989,33 @@ async function validateDiscountCode(code, foodSubtotal) {
     };
   }
 
+// Restrict discount codes to selected order weekdays, where configured
+if (
+  Array.isArray(data.allowed_weekdays) &&
+  data.allowed_weekdays.length > 0
+) {
+  const selectedDateTimeValue =
+    document.getElementById("cust-preferred-time")?.value;
+
+  if (!selectedDateTimeValue) {
+    return {
+      valid: false,
+      reason: "Please select your collection or delivery time first."
+    };
+  }
+
+  const selectedDateTime = new Date(selectedDateTimeValue);
+  const selectedWeekday = selectedDateTime.getDay();
+  const allowedWeekdays = data.allowed_weekdays.map(Number);
+
+  if (!allowedWeekdays.includes(selectedWeekday)) {
+    return {
+      valid: false,
+      reason: "This discount code is only valid for Wednesday and Thursday orders."
+    };
+  }
+}
+
   if (
     data.max_uses !== null &&
     Number(data.used_count || 0) >= Number(data.max_uses)
@@ -5057,10 +5084,10 @@ async function refreshAppliedDiscountCode() {
     appliedDiscountAmount = 0;
 
     if (message) {
-      message.textContent =
-        "Discount code removed — this voucher needs a minimum food spend of £25.";
-      message.className = "discount-code-message error";
-    }
+  message.textContent =
+    `Discount code removed — ${result.reason}`;
+  message.className = "discount-code-message error";
+}
 
     recomputeCheckoutTotals();
     return;
@@ -5076,6 +5103,13 @@ async function refreshAppliedDiscountCode() {
 
   recomputeCheckoutTotals();
 }
+
+// ← ADD THIS HERE
+document
+  .getElementById("cust-preferred-time")
+  ?.addEventListener("change", async () => {
+    await refreshAppliedDiscountCode();
+  });
 
 // ---------------- LOYALTY STATE ----------------
 const LOYALTY_REWARD_THRESHOLD = 100;   // 100 points unlocks reward
@@ -5546,7 +5580,7 @@ function updateCheckoutOrderSummary() {
 		
 // ====== CONFIG YOU CAN EDIT ======
 const OPEN_DAYS = [3,4,5,6]; // Sun=0, Mon=1, Tue=2, Wed=3, Thu=4, Fri=5, Sat=6  (open Fri & Sat) **temp changing open days**
-const OPEN_WINDOW = { start: "17:00", end: "21:00" }; // local time, 24h
+const OPEN_WINDOW = { start: "17:00", end: "20:30" }; // local time, 24h
 
 // Specific closed dates (all day)
 const CLOSED_DATES = [
