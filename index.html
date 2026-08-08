@@ -4874,43 +4874,55 @@ loadBlackouts().then(() => {
 
 // 2) When opening checkout, keep your existing min (+30m) and step=300
 //    Just add an input change listener to live-validate the chosen time.
-const preferredTimeInput = document.getElementById('cust-preferred-time');
-if (preferredTimeInput) {
-  preferredTimeInput.addEventListener('change', () => {
-    hideCheckoutBanner();
-    const raw = preferredTimeInput.value; // 'YYYY-MM-DDTHH:mm'
-    if (!raw) return;
+const preferredTimeInput =
+  document.getElementById('cust-preferred-time');
 
-    const chosen = new Date(raw);
-    const isClosed = inAnyWindow(chosen, CLOSED_RANGES);
-    const isFull   = inAnyWindow(chosen, FULLY_BOOKED);
+function validatePreferredTime() {
+  hideCheckoutBanner();
 
-const submitBtn = document.getElementById('checkout-submit');
+  const raw = preferredTimeInput?.value;
+  if (!raw) return true;
 
-if (isClosed) {
-  showCheckoutBanner(
-    'closed',
-    isClosed.message || 'We’re closed at the selected time.'
-  );
+  const chosen = new Date(raw);
 
-  if (submitBtn) {
-    submitBtn.disabled = true;
+  const isClosed = inAnyWindow(chosen, CLOSED_RANGES);
+  const isFull   = inAnyWindow(chosen, FULLY_BOOKED);
 
-    // 🔁 re-enable after short delay
-    setTimeout(() => {
-      submitBtn.disabled = false;
-    }, 2000);
+  const submitBtn =
+    document.getElementById('checkout-submit');
+
+  if (isClosed) {
+    showCheckoutBanner(
+      'closed',
+      isClosed.message ||
+        'We’re closed at the selected time.'
+    );
+
+    if (submitBtn) submitBtn.disabled = true;
+    return false;
   }
 
-  return;
+  if (isFull) {
+    showCheckoutBanner(
+      'fully_booked',
+      isFull.message ||
+        'We’re fully booked at the selected time.'
+    );
+
+    if (submitBtn) submitBtn.disabled = true;
+    return false;
+  }
+
+  if (submitBtn) submitBtn.disabled = false;
+
+  return true;
 }
-    if (isFull) {
-      showCheckoutBanner('fully_booked', isFull.message || 'We’re fully booked at the selected time.');
-      if (submitBtn) submitBtn.disabled = true;
-      return;
-    }
-    if (submitBtn) submitBtn.disabled = false;
-  });
+
+if (preferredTimeInput) {
+  preferredTimeInput.addEventListener(
+    'change',
+    validatePreferredTime
+  );
 }
 
 // 3) Guard your submit handler (fail fast if invalid)
