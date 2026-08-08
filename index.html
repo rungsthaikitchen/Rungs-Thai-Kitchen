@@ -4864,7 +4864,13 @@ function hideCheckoutBanner() {
 ---------------------------------*/
 
 // 1) Load blackouts early (don’t block UI)
-loadBlackouts();
+loadBlackouts().then(() => {
+  const t = document.getElementById('cust-preferred-time');
+
+  if (t && t.value) {
+    t.dispatchEvent(new Event('change'));
+  }
+});
 
 // 2) When opening checkout, keep your existing min (+30m) and step=300
 //    Just add an input change listener to live-validate the chosen time.
@@ -5631,15 +5637,10 @@ function isClosedDate(d){
   }
   return false;
 }
-function isFullyBooked(d){
-  const ymd = toYMD(d);
-  const slots = FULLY_BOOKED[ymd];
-  if (!slots) return false;
-  return slots.some(([a,b]) => {
-    const s = parseHm(d, a);
-    const e = parseHm(d, b);
-    return isBetween(d, s, e);
-  });
+function isFullyBooked(d) {
+  return FULLY_BOOKED.some(win =>
+    d >= win.start && d < win.end
+  );
 }
 function isAllowed(dt){
   return withinOpenHours(dt) && !isClosedDate(dt) && !isFullyBooked(dt);
@@ -6234,9 +6235,16 @@ document.getElementById("apply-discount-code-btn")?.addEventListener("click", as
 
 
    // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
+// Submit checkout → Supabase
 checkoutForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-    if (isSubmittingOrder) return;
+
+  // Final safety check against closures / fully-booked windows
+  if (!validatePreferredTime()) {
+    return;
+  }
+
+  if (isSubmittingOrder) return;
   isSubmittingOrder = true;
 
   const submitBtn = checkoutForm.querySelector('button[type="submit"], input[type="submit"]');
