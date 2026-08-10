@@ -5902,16 +5902,6 @@ kitchenSlotMap = buildKitchenProductionMap(schedule);
     kitchenSlotMap
   );
 
-	console.log(
-  '[kitchen-debug] schedule:',
-  schedule.map(order => ({
-    id: order.id,
-    preferred_time: order.preferred_time,
-    load: getExistingOrderKitchenLoad(order),
-    items: order.order_items
-  }))
-);
-
   return kitchenSlotMap;
 }
 
@@ -5959,17 +5949,6 @@ async function loadKitchenScheduleForDate(serviceDate) {
 
   const end = new Date(start);
   end.setDate(end.getDate() + 1);
-
-  console.log(
-    '[kitchen-debug] load date range:',
-    {
-      serviceDate,
-      start: start.toString(),
-      startISO: start.toISOString(),
-      end: end.toString(),
-      endISO: end.toISOString()
-    }
-  );
 
   const { data, error } = await sb
     .from('orders')    .select(`
