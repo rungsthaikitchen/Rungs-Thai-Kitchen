@@ -5911,6 +5911,16 @@ kitchenSlotMap = buildKitchenProductionMap(schedule);
     kitchenSlotMap
   );
 
+	console.log(
+  '[kitchen-debug] schedule:',
+  schedule.map(order => ({
+    id: order.id,
+    preferred_time: order.preferred_time,
+    load: getExistingOrderKitchenLoad(order),
+    items: order.order_items
+  }))
+);
+
   return kitchenSlotMap;
 }
 
