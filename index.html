@@ -4977,7 +4977,8 @@ if (preferredTimeInput) {
         searchFrom = new Date(`${newDate}T00:00:00`);
       }
 
-      const nextAvailable = nextAllowed(searchFrom);
+      const nextAvailable =
+  await nextAllowedWithKitchenSchedule(searchFrom);
 
       if (nextAvailable) {
         preferredTimeInput.value =
@@ -4992,7 +4993,8 @@ if (preferredTimeInput) {
       // Same date, customer merely changed the time.
       // Respect their chosen time unless unavailable.
       if (!isAllowed(chosen)) {
-        const nextAvailable = nextAllowed(chosen);
+  const nextAvailable =
+    await nextAllowedWithKitchenSchedule(chosen);
 
         if (nextAvailable) {
           preferredTimeInput.value =
@@ -6017,7 +6019,7 @@ async function refreshKitchenScheduleForDateTime(dt) {
 
   if (!isAllowed(currentlySelected)) {
     const nextAvailable =
-      nextAllowed(currentlySelected);
+  await nextAllowedWithKitchenSchedule(currentlySelected);
 
     if (nextAvailable) {
       preferredTimeEl.value =
@@ -6049,6 +6051,38 @@ function nextAllowed(from) {
   while (t <= cap) {
     if (isAllowed(t)) return t;
     t = new Date(t.getTime() + 5 * 60 * 1000);
+  }
+
+  return null;
+}
+
+// Date-aware version for kitchen-capacity searches
+async function nextAllowedWithKitchenSchedule(from) {
+  const cap = new Date(from);
+  cap.setDate(cap.getDate() + 30);
+
+  let t = new Date(from);
+  t = roundTo5Min(t);
+
+  let loadedDateKey = null;
+
+  while (t <= cap) {
+    const dateKey = toYMD(t);
+
+    // Whenever the search moves onto another day,
+    // load that day's actual kitchen commitments.
+    if (dateKey !== loadedDateKey) {
+      await refreshKitchenSlotMap(t);
+      loadedDateKey = dateKey;
+    }
+
+    if (isAllowed(t)) {
+      return t;
+    }
+
+    t = new Date(
+      t.getTime() + 5 * 60 * 1000
+    );
   }
 
   return null;
@@ -6262,8 +6296,8 @@ if (preferredTimeEl?.value) {
     new Date(preferredTimeEl.value);
 
   if (!isAllowed(currentlySelected)) {
-    const nextAvailable =
-      nextAllowed(currentlySelected);
+  const nextAvailable =
+    await nextAllowedWithKitchenSchedule(currentlySelected);
 
     if (nextAvailable) {
   submitPreferredTimeEl.value =
@@ -6780,8 +6814,8 @@ if (submitPreferredTimeEl?.value) {
   // Is the customer's selected slot still available?
   if (!isAllowed(selectedTime)) {
 
-    const nextAvailable =
-      nextAllowed(selectedTime);
+   const nextAvailable =
+  await nextAllowedWithKitchenSchedule(selectedTime);
 
     if (nextAvailable) {
       submitPreferredTimeEl.value =
