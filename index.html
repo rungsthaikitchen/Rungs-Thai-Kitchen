@@ -2426,7 +2426,12 @@ body.overlay-open {
 </header>
 
 <!-- Header spacer (for sticky header script, if you’re still using it) -->
-<div id="header-spacer"></div>
+<!--<div id="header-spacer"></div>
+
+<div class="site-notice">
+  <strong>🏖️ Holiday Notice</strong><br>
+Rung's Thai Kitchen will be taking a short summer break and will be closed from <strong>Saturday 11th July until Friday 17th July (inclusive)</strong>. We look forward to welcoming you back from <strong>Saturday 18th July</strong>. Thank you for your continued support! ❤️
+</div>-->
 
 <!--<div class="site-notice">
   <strong>🏖️ Holiday Notice</strong><br>
@@ -2787,19 +2792,31 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
 
         <!-- Preferred time -->
         <div class="field">
-		  <label for="cust-preferred-time">Preferred collection/delivery time</label>
-		  <input id="cust-preferred-time" name="preferred_time" type="datetime-local" class="input" step="300">
+  <label for="cust-preferred-time">Preferred collection/delivery time</label>
 
-		
-		<!--<label style="display:flex;align-items:center;gap:6px;margin-top:4px;">
-			<input type="checkbox" id="cust-asap" name="asap_requested">
-			As soon as possible
-		  </label>-->
+  <input
+    id="cust-preferred-time"
+    name="preferred_time"
+    type="datetime-local"
+    class="input"
+    step="300"
+  >
 
-		  <div class="muted small">
-			Please select a suitable time. We will either confirm that time once the order has been reviewed, or get in contact with you to suggest an alternative within our opening days (Fri & Sat, 17:00 - 21:00).
-		  </div>
-		</div>
+  <div
+    id="preferred-time-message"
+    class="preferred-time-message"
+    style="display:none;">
+  </div>
+
+  <!--<label style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+    <input type="checkbox" id="cust-asap" name="asap_requested">
+    As soon as possible
+  </label>-->
+
+  <div class="muted small">
+    Please select a suitable time. We will either confirm that time once the order has been reviewed, or get in contact with you to suggest an alternative within our opening days (Fri & Sat, 17:00 - 21:00).
+  </div>
+</div>
 
 
         <div class="field">
@@ -3098,7 +3115,7 @@ const EXTRAS = [
 		/*{ id: 'chicken-panang', name: 'Chicken Paneng Skewers🌶️🌶️', desc: 'A flavorful Thai-inspired dish combining tender chicken marinated in creamy, spicy Panang curry paste, coconut milk, and fish sauce.', price: 6.50, img: 'images/paneng_chicken.jpg', allergens: ['fish','soya'], badge: 'new' },
 		{ id: 'grill-chicken', name: 'Grilled Chicken Thigh (Gai Yang)', desc: 'A popular Thai street food dish consisting of marinated chicken thighs (skin-on, bone-in), grilled to a smoky, charred finish and topped with crispy onions', price: 7.50, img: 'images/grill_chicken.jpg', allergens: ['gluten','molluscs','soya'], badge: 'new' },
 		{ id: 'salt-wings', name: 'Thai-style Salt & Pepper Chicken Wings', desc: 'Tender, bite-sized pieces of battered chicken, stir-fried with fresh vegetales and chilli in oyster sauce.',  price: 7.50, img: 'images/salt-wings.jpeg', allergens: ['soya','gluten','molluscs','sesame'], badge: 'new' },*/
-		{ id: 'salt-chicken', name: 'Thai-style Salt & Pepper Crispy Chicken🌶️', desc: 'Tender, bite-sized pieces of battered chicken, stir-fried with fresh vegetales and chilli in oyster sauce.',  price: 6.50, img: 'images/salt-chicken.jpeg', spiceEnabled: true, spiceDefault: 1, allergens: ['soya','gluten','molluscs'], badge: 'new' },		
+		{ id: 'salt-chicken', name: 'Thai-style Salt & Pepper Crispy Chicken🌶️', desc: 'Tender, bite-sized pieces of battered chicken, stir-fried with fresh vegetales and chilli in oyster sauce.',  price: 6.50, img: 'images/salt-chicken.jpeg', spiceEnabled: true, spiceDefault: 1, allergens: ['soya','gluten','molluscs'], kitchenLoad: 1,  badge: 'new' },		
 		{ id: 'spare-ribs', name: 'Thai Spare Ribs (Sii Khrong Moo Yang)', desc: 'Tender ribs with a sweet, salty and savoury flavour. Served with a sticky carmelised glaze.', price: 7.50, img: 'images/spareribs.jpg', allergens: ['soya','gluten','molluscs','sesame'] }
       ]},
       { id:'soup', title:'Soup', allowExtras:true, items:[
@@ -3107,7 +3124,7 @@ const EXTRAS = [
         /*{ id: 'dumpling-broth', name: 'Pork Steamed Dumplings Broth (Gaew Naam)', desc: 'A savoury and flavourful broth with fragrant pork-stuffed wontons.', price: 6.00, img: 'images/GaewNam.jpg', allergens: ['gluten','soya','celery'], allowedExtras: [''] }*/
       ]},
       { id:'salad',    title:'Salad',   allowExtras:true,  items:[
-        { id: 'papaya-salad', name: 'Green Papaya Salad (Som Tam)🌶️🌶️🌶️', desc: 'A spicy, savoury, and sweet Thai salad made primarily of shredded green papaya.', price: 7.00, img: 'images/somtam.jpg', spiceEnabled: true, spiceDefault: 3, allergens: ['peanuts','fish'], allowedExtras: ['extra-prawn'] },
+      { id: 'papaya-salad', name: 'Green Papaya Salad (Som Tam)🌶️🌶️🌶️', desc: 'A spicy, savoury, and sweet Thai salad made primarily of shredded green papaya.', price: 7.00, img: 'images/somtam.jpg', spiceEnabled: true, spiceDefault: 3, allergens: ['peanuts','fish'], allowedExtras: ['extra-prawn'] },
         { id: 'beef-salad', name: 'Spicy Beef Salad (Yum Nuea)🌶️🌶️', desc: 'A classic Thai salad with grilled sirloin steak (cooked mediu - please advise in the checkout comments if you would prefer it cooked differently), tossed with crisp vegetables, fresh mint, coriander, and a tangy lime-fish sauce dressing.', price: 9.50, img: 'images/ymbeef.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish','celery','soya'], allowedExtras: ['extra-beef'] },
         { id: 'pork-salad', name: 'Grilled Pork Salad (Nam Tok)🌶️', desc: 'This classic North-eastern Thai salad features smoky, charred grilled pork slices tossed with a fiery dressing of lime, fish sauce, and chili flakes.', price: 8.50, img: 'images/porksalad.jpg', spiceEnabled: true, spiceDefault: 1, allergens: ['fish'], allowedExtras: ['extra-pork'] },
 		/*{ id: 'mango-salad', name: 'Crispy Chicken with Mango Salad🌶️🌶️', desc: 'A vibrant, contrasting dish featuring golden, crunchy fried chicken, paired with a fresh, zesty salad of fresh  mango, herbs, and chilies.', price: 8.50, img: 'images/mango_salad.jpg', spiceEnabled: true, spiceDefault: 1, allergens: ['gluten','fish','celery','soya'], allowedExtras: ['extra-bchicken'], badge: 'new'  },*/
@@ -3148,7 +3165,7 @@ const EXTRAS = [
         { id: 'coconut-rice', name: 'Coconut Rice (Khao Man)', desc: 'Jasmine rice simmered in coconut milk.', price: 3.00, img: 'images/coconutrice.jpg', allergens: [] },
 		 { id: 'chips', name: 'Chips', desc: 'Deep fried chips. Because sometimes you just need them!', price: 3.00, img: 'images/chips.jpg', allergens: [] },
 		 { id: 'fried-egg', name: 'Fried egg', desc: 'Thai style fried eggs have crispy whites with a soft yolk. But please let us know how you like yours', price: 1.00, img: 'images/egg.jpg', allergens: ['egg'] },
-		 { id: 'salt-chips', name: 'Thai Style Salt & Pepper Chips🌶️', desc: 'Deep fried chips, stir-fried  with vegetables, chilli and oyster sauce', price: 4.00, img: 'images/salt-chips.jpeg', allergens: ['molluscs','gluten','soya'], spiceEnabled: true, spiceDefault: 1, badge: 'new' }
+		 { id: 'salt-chips', name: 'Thai Style Salt & Pepper Chips🌶️', desc: 'Deep fried chips, stir-fried  with vegetables, chilli and oyster sauce', price: 4.00, img: 'images/salt-chips.jpeg', allergens: ['molluscs','gluten','soya'], spiceEnabled: true, spiceDefault: 1, kitchenLoad: 1, badge: 'new' }
       ]},
       /*{ id:'drinks',    title:'Soft Drinks', allowExtras:false, items:[
         { id: 'pepsi-max', name: 'Pepsi Max', price: 1.00, img: 'images/pepsimax1.jpg', allergens: [] },
@@ -3556,7 +3573,7 @@ applyHeaderOffset();
 
 
 // === Customise globals (place near top, before buildMenu) ===
-const ITEMS_BY_ID = new Map();   // lookup from item.id → item object
+window.ITEMS_BY_ID = window.ITEMS_BY_ID || new Map();
 let currentItem = null;          // the item currently being customised
 let selectedMods = new Set();    // your existing modifier selection
 let selectedExtras = [];         // extras (added proteins)
@@ -3600,10 +3617,11 @@ MENU_CATEGORIES.forEach(cat => {
 
 sortedItems.forEach(item => {
     // enrich + store for customise logic
-    ITEMS_BY_ID.set(item.id, {
-      ...item,
-      categoryAllowedExtras: categoryAllowExtras
-    });
+    window.ITEMS_BY_ID.set(item.id, {
+  ...item,
+  categoryAllowedExtras: categoryAllowExtras,
+  categoryTitle: cat.title
+});
 
     // item card
     const card = document.createElement('div');
@@ -4010,7 +4028,7 @@ function handleExtraClick(opt) {
     }
 	
 	function openCustomiseById(itemId) {
-  const item = ITEMS_BY_ID.get(String(itemId));
+  const item = window.ITEMS_BY_ID.get(String(itemId));
   if (!item || !modal) {
     console.warn('openCustomiseById: item not found', itemId);
     return;
@@ -4315,7 +4333,7 @@ function opencustomise(id){ openCustomize(id); }
 
 // Canonical customise opener
 function openCustomiseById(itemId) {
-  const item = ITEMS_BY_ID.get(String(itemId));
+  const item = window.ITEMS_BY_ID.get(String(itemId));
   if (!item || !modal) {
     console.warn('openCustomiseById: item not found', itemId);
     return;
@@ -4813,6 +4831,10 @@ async function loadBlackouts() {
     if (row.kind === 'closed')       CLOSED_RANGES.push(win);
     if (row.kind === 'fully_booked') FULLY_BOOKED.push(win);
   });
+  
+  console.log('[blackouts] loaded rows:', data);
+console.log('[blackouts] CLOSED_RANGES:', CLOSED_RANGES);
+console.log('[blackouts] FULLY_BOOKED:', FULLY_BOOKED);
 }
 
 // Helpers
@@ -4863,7 +4885,7 @@ function hideCheckoutBanner() {
    Wire into your existing flow
 ---------------------------------*/
 
-// 1) Load blackouts early (don’t block UI)
+// 1) Load blackouts, then re-check the preferred time
 loadBlackouts().then(() => {
   const t = document.getElementById('cust-preferred-time');
 
@@ -4876,9 +4898,14 @@ loadBlackouts().then(() => {
 //    Just add an input change listener to live-validate the chosen time.
 const preferredTimeInput =
   document.getElementById('cust-preferred-time');
+  
+  let lastPreferredDate = null;
 
 function validatePreferredTime() {
   hideCheckoutBanner();
+
+  const submitBtn =
+    document.getElementById('checkout-submit');
 
   const raw = preferredTimeInput?.value;
   if (!raw) return true;
@@ -4888,14 +4915,11 @@ function validatePreferredTime() {
   const isClosed = inAnyWindow(chosen, CLOSED_RANGES);
   const isFull   = inAnyWindow(chosen, FULLY_BOOKED);
 
-  const submitBtn =
-    document.getElementById('checkout-submit');
-
   if (isClosed) {
     showCheckoutBanner(
       'closed',
       isClosed.message ||
-        'We’re closed at the selected time.'
+        'Sorry, we are closed at the selected time.'
     );
 
     if (submitBtn) submitBtn.disabled = true;
@@ -4919,10 +4943,70 @@ function validatePreferredTime() {
 }
 
 if (preferredTimeInput) {
-  preferredTimeInput.addEventListener(
-    'change',
-    validatePreferredTime
-  );
+  preferredTimeInput.addEventListener('change', async () => {
+    const raw = preferredTimeInput.value;
+    if (!raw) return;
+
+    const newDate = raw.slice(0, 10);
+    const dateChanged =
+      lastPreferredDate !== null &&
+      newDate !== lastPreferredDate;
+
+    const chosen = new Date(raw);
+
+    // Load the kitchen commitments for the newly selected date
+    await refreshKitchenSlotMap(chosen);
+
+    if (dateChanged) {
+      // Customer changed DAY:
+      // start again from the earliest possible time on that date.
+      let searchFrom;
+
+      const today = new Date();
+      const todayKey = toYMD(today);
+
+      if (newDate === todayKey) {
+        // Today: respect minimum lead time
+        searchFrom = new Date();
+        searchFrom.setMinutes(
+          searchFrom.getMinutes() + LEAD_MINUTES
+        );
+      } else {
+        // Future date: begin at midnight;
+        // nextAllowed() will walk forward to opening time.
+        searchFrom = new Date(`${newDate}T00:00:00`);
+      }
+
+      const nextAvailable = nextAllowed(searchFrom);
+
+      if (nextAvailable) {
+        preferredTimeInput.value =
+          toLocalInputValue(nextAvailable);
+
+        console.log(
+          '[kitchen-schedule] date changed; earliest available:',
+          preferredTimeInput.value
+        );
+      }
+    } else {
+      // Same date, customer merely changed the time.
+      // Respect their chosen time unless unavailable.
+      if (!isAllowed(chosen)) {
+        const nextAvailable = nextAllowed(chosen);
+
+        if (nextAvailable) {
+          preferredTimeInput.value =
+            toLocalInputValue(nextAvailable);
+        }
+      }
+    }
+
+    // Remember whichever date we have now finished processing
+    lastPreferredDate =
+      preferredTimeInput.value.slice(0, 10);
+
+    validatePreferredTime();
+  });
 }
 
 // 3) Guard your submit handler (fail fast if invalid)
@@ -4987,7 +5071,7 @@ async function validateDiscountCode(code, foodSubtotal) {
   if (error || !data) {
     return {
       valid: false,
-      reason: "Sorry, that discount code was not recognised."
+      reason: "That discount code was not recognised."
     };
   }
 
@@ -5003,7 +5087,22 @@ async function validateDiscountCode(code, foodSubtotal) {
   if (data.expires_at && new Date(data.expires_at) < now) {
     return {
       valid: false,
-      reason: "Sorry, this discount code has expired."
+      reason: "This discount code has expired."
+    };
+  }
+  
+// Restrict discount codes to selected order weekdays, where configured
+if (
+  Array.isArray(data.allowed_weekdays) &&
+  data.allowed_weekdays.length > 0
+) {
+  const selectedDateTimeValue =
+    document.getElementById("cust-preferred-time")?.value;
+
+  if (!selectedDateTimeValue) {
+    return {
+      valid: false,
+      reason: "Please select your collection or delivery time first."
     };
   }
 
@@ -5605,9 +5704,9 @@ const CLOSED_DATES = [
  "2025-12-25", "2025-12-26", "2026-06-17"
 ];
 
-// Closed ranges (start/end local)
+// //Closed ranges (start/end local)
 //const CLOSED_RANGES = [
-  // { start:"2025-11-08T00:00", end:"2025-11-11T23:59" }
+ //{ start:"2026-07-11T00:00", end:"2026-07-17T23:59" }
 //];
 
 // Fully booked windows by date: { "YYYY-MM-DD": [ ["HH:MM","HH:MM"], ... ] }
@@ -5616,6 +5715,205 @@ const CLOSED_DATES = [
 //};
 
 // ====== HELPERS ======
+const SLOT_MINUTES = 15;
+const MAX_KITCHEN_LOAD_PER_SLOT = 3;
+
+// Kitchen production can begin before customer opening time
+const KITCHEN_START_HOUR = 16;
+const KITCHEN_START_MINUTE = 30;
+
+// Kitchen scheduling:
+// 1 Chef Rung workload unit = 5 continuous minutes
+const KITCHEN_STEP_MINUTES = 5;
+
+let kitchenSlotMap = new Map();
+
+function getSlotStart(dt) {
+  const slot = new Date(dt);
+
+  const minutes = slot.getMinutes();
+  const floored =
+    Math.floor(minutes / SLOT_MINUTES) * SLOT_MINUTES;
+
+  slot.setMinutes(floored, 0, 0);
+
+  return slot;
+}
+
+function buildKitchenSlotMap(orders) {
+  const slotMap = new Map();
+
+  for (const order of orders) {
+    if (!order.preferred_time) continue;
+
+    const orderTime = new Date(order.preferred_time);
+    const slotStart = getSlotStart(orderTime);
+
+    const key = slotStart.toISOString();
+
+    const orderLoad =
+      getExistingOrderKitchenLoad(order);
+
+    slotMap.set(
+      key,
+      (slotMap.get(key) || 0) + orderLoad
+    );
+  }
+
+  return slotMap;
+}
+
+function getKitchenStartForDate(dt) {
+  const start = new Date(dt);
+
+  start.setHours(
+    KITCHEN_START_HOUR,
+    KITCHEN_START_MINUTE,
+    0,
+    0
+  );
+
+  return start;
+}
+
+function getLatestProductionSlotStart(readyTime) {
+  // Find the latest COMPLETE 15-minute kitchen slot
+  // that finishes on or before the customer's ready time.
+  const t = new Date(
+    readyTime.getTime() -
+    SLOT_MINUTES * 60 * 1000
+  );
+
+  const minutes = t.getMinutes();
+
+  t.setMinutes(
+    Math.floor(minutes / SLOT_MINUTES) * SLOT_MINUTES,
+    0,
+    0
+  );
+
+  return t;
+}
+
+function allocateLoadBackwards(
+  readyTime,
+  load,
+  slotMap
+) {
+  const requiredSteps = Number(load || 0);
+
+  if (requiredSteps <= 0) {
+    return {
+      success: true,
+      slotMap
+    };
+  }
+
+  const kitchenStart =
+    getKitchenStartForDate(readyTime);
+
+  // Work backwards in continuous 5-minute steps
+  let slot = new Date(
+    readyTime.getTime() -
+    KITCHEN_STEP_MINUTES * 60 * 1000
+  );
+
+  const slotsNeeded = [];
+
+  for (let i = 0; i < requiredSteps; i++) {
+
+    // Would this push production before the kitchen starts?
+    if (slot < kitchenStart) {
+      return {
+        success: false,
+        slotMap
+      };
+    }
+
+    const key = slot.toISOString();
+
+    // Any occupied step breaks the continuous run
+    if ((slotMap.get(key) || 0) > 0) {
+      return {
+        success: false,
+        slotMap
+      };
+    }
+
+    slotsNeeded.push(key);
+
+    slot = new Date(
+      slot.getTime() -
+      KITCHEN_STEP_MINUTES * 60 * 1000
+    );
+  }
+
+  // Only reserve the slots once we've proved the
+  // ENTIRE continuous run is available.
+  for (const key of slotsNeeded) {
+    slotMap.set(key, 1);
+  }
+
+  return {
+    success: true,
+    slotMap
+  };
+}
+
+function buildKitchenProductionMap(orders) {
+  const productionMap = new Map();
+
+  const sortedOrders = [...orders].sort(
+    (a, b) =>
+      new Date(a.preferred_time) -
+      new Date(b.preferred_time)
+  );
+
+  for (const order of sortedOrders) {
+    if (!order.preferred_time) continue;
+
+    const load =
+      getExistingOrderKitchenLoad(order);
+
+    if (load <= 0) continue;
+
+    const readyTime =
+      new Date(order.preferred_time);
+
+    const result = allocateLoadBackwards(
+      readyTime,
+      load,
+      productionMap
+    );
+
+    if (!result.success) {
+      console.warn(
+        '[kitchen-schedule] existing order exceeds available capacity:',
+        {
+          orderId: order.id,
+          readyTime: order.preferred_time,
+          load,
+          remainingLoad: result.remainingLoad
+        }
+      );
+    }
+  }
+
+  return productionMap;
+}
+
+async function refreshKitchenSlotMap(serviceDate) {
+  const schedule = await loadKitchenScheduleForDate(serviceDate);
+kitchenSlotMap = buildKitchenProductionMap(schedule);
+
+  console.log(
+    '[kitchen-schedule] refreshed slot map:',
+    kitchenSlotMap
+  );
+
+  return kitchenSlotMap;
+}
+
 function toYMD(d){
   const pad = n => String(n).padStart(2,'0');
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
@@ -5654,31 +5952,189 @@ function isFullyBooked(d) {
     d >= win.start && d < win.end
   );
 }
-function isAllowed(dt){
-  return withinOpenHours(dt) && !isClosedDate(dt) && !isFullyBooked(dt);
+async function loadKitchenScheduleForDate(serviceDate) {
+  const start = new Date(serviceDate);
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+
+  const { data, error } = await sb
+    .from('orders')
+    .select(`
+      id,
+      preferred_time,
+      status,
+      is_test,
+      order_items (
+        qty,
+        kitchen_load
+      )
+    `)
+    .gte('preferred_time', start.toISOString())
+    .lt('preferred_time', end.toISOString())
+    .eq('is_test', false);
+
+  if (error) {
+    console.warn('[kitchen-schedule] fetch failed', error);
+    return [];
+  }
+
+  return (data || []).filter(order =>
+    order.preferred_time &&
+    order.status !== 'cancelled'
+  );
 }
-function nextAllowed(from){
+
+function getExistingOrderKitchenLoad(order) {
+  return (order.order_items || []).reduce(
+    (total, line) =>
+      total +
+      Number(line.kitchen_load || 0) *
+      Number(line.qty || 0),
+    0
+  );
+}
+
+async function refreshKitchenScheduleForDateTime(dt) {
+  if (!dt) return;
+
+  await refreshKitchenSlotMap(dt);
+
+  const preferredTimeEl =
+    document.getElementById('cust-preferred-time');
+
+  if (!preferredTimeEl?.value) return;
+
+  const currentlySelected =
+    new Date(preferredTimeEl.value);
+
+  if (!isAllowed(currentlySelected)) {
+    const nextAvailable =
+      nextAllowed(currentlySelected);
+
+    if (nextAvailable) {
+      preferredTimeEl.value =
+        toLocalInputValue(nextAvailable);
+
+      console.log(
+        '[kitchen-schedule] preferred time moved to:',
+        preferredTimeEl.value
+      );
+    }
+  }
+}
+
+function isAllowed(dt){
+  return withinOpenHours(dt) &&
+         !isClosedDate(dt) &&
+         !isFullyBooked(dt) &&
+         canBasketFitInSlot(dt);
+}
+
+function nextAllowed(from) {
   // walk forward in 5-minute steps until we find an allowed slot (cap at +30 days)
-  const cap = new Date(from); cap.setDate(cap.getDate() + 30);
+  const cap = new Date(from);
+  cap.setDate(cap.getDate() + 30);
+
   let t = new Date(from);
   t = roundTo5Min(t);
-  while (t <= cap){
+
+  while (t <= cap) {
     if (isAllowed(t)) return t;
-    t = new Date(t.getTime() + 5*60*1000);
+    t = new Date(t.getTime() + 5 * 60 * 1000);
   }
+
   return null;
+}
+
+function showPreferredTimeMessage(message) {
+  const el =
+    document.getElementById('preferred-time-message');
+
+  if (!el) return;
+
+  el.textContent = message;
+  el.style.display = 'block';
+}
+
+function hidePreferredTimeMessage() {
+  const el =
+    document.getElementById('preferred-time-message');
+
+  if (!el) return;
+
+  el.textContent = '';
+  el.style.display = 'none';
 }
 
 // ---- Preferred time helpers ----
 
 // How many minutes from "now" before the earliest slot is allowed
-const LEAD_MINUTES = 10;
+const LEAD_MINUTES = 20;
 
 /** Convert a Date to the value format of datetime-local input */
 function toLocalInputValue(d) {
   const pad = n => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
          `T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+const KITCHEN_LOAD_BY_CATEGORY = {
+  "Starter": 0,
+  "Soup": 1,
+  "Salad": 1,
+  "Curry": 1,
+  "Stir Fry": 1,
+  "Noodles & Rice": 1,
+  "Side Dishes": 0,
+  "Soft Drinks": 0
+};
+
+function getItemKitchenLoad(item) {
+  if (item.kitchenLoad !== undefined) {
+    return Number(item.kitchenLoad);
+  }
+
+  return KITCHEN_LOAD_BY_CATEGORY[item.categoryTitle] ?? 0;
+}
+
+function getBasketKitchenLoad() {
+  const basket = Array.isArray(window.basket)
+    ? window.basket
+    : [];
+
+  return basket.reduce((total, line) => {
+    const item = window.ITEMS_BY_ID.get(line.itemId);
+
+    if (!item) return total;
+
+    return total +
+      getItemKitchenLoad(item) *
+      Number(line.qty || 0);
+  }, 0);
+}
+
+function canBasketFitInSlot(readyTime) {
+  const basketLoad =
+    getBasketKitchenLoad();
+
+  if (basketLoad <= 0) {
+    return true;
+  }
+
+  // Work on a copy - don't actually reserve capacity yet
+  const testMap =
+    new Map(kitchenSlotMap);
+
+  const result =
+    allocateLoadBackwards(
+      readyTime,
+      basketLoad,
+      testMap
+    );
+
+  return result.success;
 }
 
 /**
@@ -5778,8 +6234,60 @@ function findNextAllowedFromNow() {
 
 			
 		// Single, clean checkout opener
-			function openCheckout(subtotal) {
+			async function openCheckout(subtotal) {
 			  console.trace("[checkout] openCheckout called", { subtotal });
+			  
+const preferredTimeEl =
+  document.getElementById('cust-preferred-time');
+
+if (preferredTimeEl?.value) {
+  await refreshKitchenScheduleForDateTime(
+    new Date(preferredTimeEl.value)
+  );
+}
+
+console.log(
+  '[kitchen-capacity] basket load at checkout:',
+  getBasketKitchenLoad()
+);
+
+if (preferredTimeEl?.value) {
+  const currentlySelected =
+    new Date(preferredTimeEl.value);
+
+  if (!isAllowed(currentlySelected)) {
+    const nextAvailable =
+      nextAllowed(currentlySelected);
+
+    if (nextAvailable) {
+  submitPreferredTimeEl.value =
+    toLocalInputValue(nextAvailable);
+
+  const newTime =
+    nextAvailable.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+  showPreferredTimeMessage(
+    `Your selected time is no longer available due to kitchen capacity. ` +
+    `We've moved your order to the next available time at ${newTime}. ` +
+    `Please check the new time and press Place Order again.`
+  );
+
+  console.log(
+    '[kitchen-schedule] submit blocked; moved to:',
+    submitPreferredTimeEl.value
+  );
+}
+  }
+}
+
+// Remember the date checkout has settled on
+if (preferredTimeEl?.value) {
+  lastPreferredDate =
+    preferredTimeEl.value.slice(0, 10);
+}
 
 			  if (Number(subtotal || 0) <= 0) {
 				console.warn("[checkout] openCheckout blocked - empty basket", { subtotal });
@@ -5814,11 +6322,13 @@ function findNextAllowedFromNow() {
       checkoutMsg.style.color = '#b02a2a';
       checkoutMsg.textContent = 'No available time slots found. Please choose a different date.';
       t.value = '';
-      t.min = '';
+		t.removeAttribute('min');
     } else {
-      const val = toLocalInputValue(firstAllowed);
-      t.min = val;
-      t.value = val;
+      const earliest = new Date();
+		earliest.setMinutes(earliest.getMinutes() + LEAD_MINUTES);
+
+		t.removeAttribute('min');
+		t.value = toLocalInputValue(firstAllowed);
     }
 
     // Live validation + snapping on change
@@ -5831,11 +6341,11 @@ function findNextAllowedFromNow() {
         const next = nextAllowed(rounded);
         if (next) {
           const nv = toLocalInputValue(next);
-          t.value = nv;
-          t.min = nv;
-          checkoutMsg.style.color = '#b02a2a';
-          checkoutMsg.textContent =
-            'That time is unavailable; we’ve moved you to the next available slot.';
+			t.value = nv;
+			t.removeAttribute('min');
+			checkoutMsg.style.color = '#b02a2a';
+			checkoutMsg.textContent =
+			  'That time is unavailable; we’ve moved you to the next available slot.';
         } else {
           checkoutMsg.style.color = '#b02a2a';
           checkoutMsg.textContent =
@@ -6246,10 +6756,54 @@ document.getElementById("apply-discount-code-btn")?.addEventListener("click", as
 			}
 
 
-   // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
-// Submit checkout → Supabase
+// Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
 checkoutForm.addEventListener('submit', async (e) => {
   e.preventDefault();
+    
+  const submitPreferredTimeEl =
+  document.getElementById('cust-preferred-time');
+
+if (submitPreferredTimeEl?.value) {
+
+  const selectedTime =
+    new Date(submitPreferredTimeEl.value);
+
+  // Get the very latest kitchen commitments
+  await refreshKitchenSlotMap(selectedTime);
+
+  // Is the customer's selected slot still available?
+  if (!isAllowed(selectedTime)) {
+
+    const nextAvailable =
+      nextAllowed(selectedTime);
+
+    if (nextAvailable) {
+      submitPreferredTimeEl.value =
+        toLocalInputValue(nextAvailable);
+		
+		  const newTime =
+    nextAvailable.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+  showPreferredTimeMessage(
+    `Your selected time is no longer available due to kitchen capacity. ` +
+    `We've moved your order to the next available time at ${newTime}. ` +
+    `Please check the new time and press Place Order again.`
+  );
+
+      console.log(
+        '[kitchen-schedule] submit blocked; moved to:',
+        submitPreferredTimeEl.value
+      );
+    }
+
+    // IMPORTANT:
+    // Don't submit after changing the customer's time.
+    return;
+  }
+}
 
   // Final safety check against closures / fully-booked windows
   if (!validatePreferredTime()) {
@@ -6676,16 +7230,26 @@ console.log('BASE ORDER PAYLOAD:', baseOrderPayload);
 				throw new Error('Basket item missing itemId (cannot save order items).');
 			  }
 
-			  return {
-				order_id: orderId,
-				item_id,
-				name: line.name,
-				unit_price: Number(line.unitPrice.toFixed(2)),
-				qty: line.qty,
-				modifiers: (line.mods ?? []).map(m => ({ id: m.id, name: m.name, delta: m.delta })),
-				spice: (typeof line.spice === 'number') ? line.spice : null,
-				img: line.img || null
-			  };
+			  const menuItem = window.ITEMS_BY_ID.get(item_id);
+				const kitchenLoad = menuItem
+				  ? getItemKitchenLoad(menuItem)
+				  : 0;
+
+				return {
+				  order_id: orderId,
+				  item_id,
+				  name: line.name,
+				  unit_price: Number(line.unitPrice.toFixed(2)),
+				  qty: line.qty,
+				  modifiers: (line.mods ?? []).map(m => ({
+					id: m.id,
+					name: m.name,
+					delta: m.delta
+				  })),
+				  spice: (typeof line.spice === 'number') ? line.spice : null,
+				  img: line.img || null,
+				  kitchen_load: kitchenLoad
+				};
 			});
 
 			const { error: itemsErr } = await window.sb.from('order_items').insert(rows);
