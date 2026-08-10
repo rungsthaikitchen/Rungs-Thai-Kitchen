@@ -5094,9 +5094,29 @@ async function validateDiscountCode(code, foodSubtotal) {
   }
  
 
-  const selectedDateTime = new Date(selectedDateTimeValue);
-  const selectedWeekday = selectedDateTime.getDay();
-  const allowedWeekdays = data.allowed_weekdays.map(Number);
+ // Restrict discount codes to selected order weekdays, where configured
+if (
+  Array.isArray(data.allowed_weekdays) &&
+  data.allowed_weekdays.length > 0
+) {
+  const selectedDateTimeValue =
+    document.getElementById("cust-preferred-time")?.value;
+
+  if (!selectedDateTimeValue) {
+    return {
+      valid: false,
+      reason: "Please select your collection or delivery time first."
+    };
+  }
+
+  const selectedDateTime =
+    new Date(selectedDateTimeValue);
+
+  const selectedWeekday =
+    selectedDateTime.getDay();
+
+  const allowedWeekdays =
+    data.allowed_weekdays.map(Number);
 
   if (!allowedWeekdays.includes(selectedWeekday)) {
     return {
