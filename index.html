@@ -5094,7 +5094,7 @@ async function validateDiscountCode(code, foodSubtotal) {
   }
  
 
-// Restrict discount codes to selected order weekdays, where configured
+ // Restrict discount codes to selected order weekdays, where configured
 if (
   Array.isArray(data.allowed_weekdays) &&
   data.allowed_weekdays.length > 0
@@ -5109,9 +5109,14 @@ if (
     };
   }
 
-  const selectedDateTime = new Date(selectedDateTimeValue);
-  const selectedWeekday = selectedDateTime.getDay();
-  const allowedWeekdays = data.allowed_weekdays.map(Number);
+  const selectedDateTime =
+    new Date(selectedDateTimeValue);
+
+  const selectedWeekday =
+    selectedDateTime.getDay();
+
+  const allowedWeekdays =
+    data.allowed_weekdays.map(Number);
 
   if (!allowedWeekdays.includes(selectedWeekday)) {
     return {
