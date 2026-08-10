@@ -4977,7 +4977,8 @@ if (preferredTimeInput) {
         searchFrom = new Date(`${newDate}T00:00:00`);
       }
 
-      const nextAvailable = nextAllowed(searchFrom);
+      const nextAvailable =
+  await nextAllowedWithKitchenSchedule(searchFrom);
 
       if (nextAvailable) {
         preferredTimeInput.value =
@@ -4992,7 +4993,8 @@ if (preferredTimeInput) {
       // Same date, customer merely changed the time.
       // Respect their chosen time unless unavailable.
       if (!isAllowed(chosen)) {
-        const nextAvailable = nextAllowed(chosen);
+  const nextAvailable =
+    await nextAllowedWithKitchenSchedule(chosen);
 
         if (nextAvailable) {
           preferredTimeInput.value =
@@ -5090,21 +5092,7 @@ async function validateDiscountCode(code, foodSubtotal) {
       reason: "This discount code has expired."
     };
   }
-  
-// Restrict discount codes to selected order weekdays, where configured
-if (
-  Array.isArray(data.allowed_weekdays) &&
-  data.allowed_weekdays.length > 0
-) {
-  const selectedDateTimeValue =
-    document.getElementById("cust-preferred-time")?.value;
-
-  if (!selectedDateTimeValue) {
-    return {
-      valid: false,
-      reason: "Please select your collection or delivery time first."
-    };
-  }
+ 
 
   const selectedDateTime = new Date(selectedDateTimeValue);
   const selectedWeekday = selectedDateTime.getDay();
@@ -5707,6 +5695,9 @@ const MAX_KITCHEN_LOAD_PER_SLOT = 3;
 const KITCHEN_START_HOUR = 16;
 const KITCHEN_START_MINUTE = 30;
 
+const KITCHEN_END_HOUR = 22;
+const KITCHEN_END_MINUTE = 0;
+
 // Kitchen scheduling:
 // 1 Chef Rung workload unit = 5 continuous minutes
 const KITCHEN_STEP_MINUTES = 5;
@@ -5945,8 +5936,7 @@ async function loadKitchenScheduleForDate(serviceDate) {
   end.setDate(end.getDate() + 1);
 
   const { data, error } = await sb
-    .from('orders')
-    .select(`
+    .from('orders')    .select(`
       id,
       preferred_time,
       status,
@@ -5996,7 +5986,7 @@ async function refreshKitchenScheduleForDateTime(dt) {
 
   if (!isAllowed(currentlySelected)) {
     const nextAvailable =
-      nextAllowed(currentlySelected);
+  await nextAllowedWithKitchenSchedule(currentlySelected);
 
     if (nextAvailable) {
       preferredTimeEl.value =
@@ -6017,6 +6007,33 @@ function isAllowed(dt){
          canBasketFitInSlot(dt);
 }
 
+	function isAllowedForKitchenScheduler(dt) {
+  // Must still be one of our normal trading days
+  if (!OPEN_DAYS.includes(dt.getDay())) {
+    return false;
+  }
+
+  // Scheduler may fulfil later than normal closing,
+  // but never later than the kitchen cut-off.
+  const kitchenEnd = new Date(dt);
+  kitchenEnd.setHours(
+    KITCHEN_END_HOUR,
+    KITCHEN_END_MINUTE,
+    0,
+    0
+  );
+
+  if (dt > kitchenEnd) {
+    return false;
+  }
+
+  return (
+    !isClosedDate(dt) &&
+    !isFullyBooked(dt) &&
+    canBasketFitInSlot(dt)
+  );
+}
+
 function nextAllowed(from) {
   // walk forward in 5-minute steps until we find an allowed slot (cap at +30 days)
   const cap = new Date(from);
@@ -6028,6 +6045,38 @@ function nextAllowed(from) {
   while (t <= cap) {
     if (isAllowed(t)) return t;
     t = new Date(t.getTime() + 5 * 60 * 1000);
+  }
+
+  return null;
+}
+
+// Date-aware version for kitchen-capacity searches
+async function nextAllowedWithKitchenSchedule(from) {
+  const cap = new Date(from);
+  cap.setDate(cap.getDate() + 30);
+
+  let t = new Date(from);
+  t = roundTo5Min(t);
+
+  let loadedDateKey = null;
+
+  while (t <= cap) {
+    const dateKey = toYMD(t);
+
+    // Whenever the search moves onto another day,
+    // load that day's actual kitchen commitments.
+    if (dateKey !== loadedDateKey) {
+      await refreshKitchenSlotMap(t);
+      loadedDateKey = dateKey;
+    }
+
+    if (isAllowedForKitchenScheduler(t)) {
+  return t;
+}
+
+    t = new Date(
+      t.getTime() + 5 * 60 * 1000
+    );
   }
 
   return null;
@@ -6241,11 +6290,11 @@ if (preferredTimeEl?.value) {
     new Date(preferredTimeEl.value);
 
   if (!isAllowed(currentlySelected)) {
-    const nextAvailable =
-      nextAllowed(currentlySelected);
+  const nextAvailable =
+    await nextAllowedWithKitchenSchedule(currentlySelected);
 
-    if (nextAvailable) {
-  submitPreferredTimeEl.value =
+  if (nextAvailable) {
+  preferredTimeEl.value =
     toLocalInputValue(nextAvailable);
 
   const newTime =
@@ -6262,7 +6311,7 @@ if (preferredTimeEl?.value) {
 
   console.log(
     '[kitchen-schedule] submit blocked; moved to:',
-    submitPreferredTimeEl.value
+    preferredTimeEl.value
   );
 }
   }
@@ -6757,10 +6806,10 @@ if (submitPreferredTimeEl?.value) {
   await refreshKitchenSlotMap(selectedTime);
 
   // Is the customer's selected slot still available?
-  if (!isAllowed(selectedTime)) {
+  if (!isAllowedForKitchenScheduler(selectedTime)) {
 
-    const nextAvailable =
-      nextAllowed(selectedTime);
+   const nextAvailable =
+  await nextAllowedWithKitchenSchedule(selectedTime);
 
     if (nextAvailable) {
       submitPreferredTimeEl.value =
