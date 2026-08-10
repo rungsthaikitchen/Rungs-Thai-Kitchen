@@ -5710,6 +5710,9 @@ const MAX_KITCHEN_LOAD_PER_SLOT = 3;
 const KITCHEN_START_HOUR = 16;
 const KITCHEN_START_MINUTE = 30;
 
+const KITCHEN_END_HOUR = 22;
+const KITCHEN_END_MINUTE = 0;
+
 // Kitchen scheduling:
 // 1 Chef Rung workload unit = 5 continuous minutes
 const KITCHEN_STEP_MINUTES = 5;
@@ -6040,6 +6043,33 @@ function isAllowed(dt){
          canBasketFitInSlot(dt);
 }
 
+	function isAllowedForKitchenScheduler(dt) {
+  // Must still be one of our normal trading days
+  if (!OPEN_DAYS.includes(dt.getDay())) {
+    return false;
+  }
+
+  // Scheduler may fulfil later than normal closing,
+  // but never later than the kitchen cut-off.
+  const kitchenEnd = new Date(dt);
+  kitchenEnd.setHours(
+    KITCHEN_END_HOUR,
+    KITCHEN_END_MINUTE,
+    0,
+    0
+  );
+
+  if (dt > kitchenEnd) {
+    return false;
+  }
+
+  return (
+    !isClosedDate(dt) &&
+    !isFullyBooked(dt) &&
+    canBasketFitInSlot(dt)
+  );
+}
+
 function nextAllowed(from) {
   // walk forward in 5-minute steps until we find an allowed slot (cap at +30 days)
   const cap = new Date(from);
@@ -6076,9 +6106,9 @@ async function nextAllowedWithKitchenSchedule(from) {
       loadedDateKey = dateKey;
     }
 
-    if (isAllowed(t)) {
-      return t;
-    }
+    if (isAllowedForKitchenScheduler(t)) {
+  return t;
+}
 
     t = new Date(
       t.getTime() + 5 * 60 * 1000
@@ -6812,7 +6842,7 @@ if (submitPreferredTimeEl?.value) {
   await refreshKitchenSlotMap(selectedTime);
 
   // Is the customer's selected slot still available?
-  if (!isAllowed(selectedTime)) {
+  if (!isAllowedForKitchenScheduler(selectedTime)) {
 
    const nextAvailable =
   await nextAllowedWithKitchenSchedule(selectedTime);
