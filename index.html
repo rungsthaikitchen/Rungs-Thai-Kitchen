@@ -6329,8 +6329,8 @@ if (preferredTimeEl?.value) {
   const nextAvailable =
     await nextAllowedWithKitchenSchedule(currentlySelected);
 
-    if (nextAvailable) {
-  submitPreferredTimeEl.value =
+  if (nextAvailable) {
+  preferredTimeEl.value =
     toLocalInputValue(nextAvailable);
 
   const newTime =
@@ -6347,7 +6347,7 @@ if (preferredTimeEl?.value) {
 
   console.log(
     '[kitchen-schedule] submit blocked; moved to:',
-    submitPreferredTimeEl.value
+    preferredTimeEl.value
   );
 }
   }
