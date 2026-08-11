@@ -3317,6 +3317,60 @@ function getCustomerLatLng() {
   return { lat, lng };
 }
 
+function resetCheckoutForNextOrder() {
+  console.log('[checkout] resetting state for next order');
+
+  // Clear customer-entered checkout fields
+  const fieldsToClear = [
+    'cust-name',
+    'cust-email',
+    'cust-phone',
+    'cust-address',
+    'cust-notes',
+    'cust-preferred-time'
+  ];
+
+  fieldsToClear.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  // Clear discount state
+  appliedDiscountCode = null;
+  appliedDiscountAmount = 0;
+
+  const discountMessage =
+    document.getElementById('discount-code-message');
+
+  if (discountMessage) {
+    discountMessage.textContent = '';
+    discountMessage.className = 'discount-code-message';
+  }
+
+  // Try to clear the discount-code input without assuming one exact ID
+  const discountInput =
+    document.getElementById('discount-code') ||
+    document.querySelector('input[name="discount_code"]');
+
+  if (discountInput) {
+    discountInput.value = '';
+  }
+
+  // Clear preferred-time scheduler state
+  lastPreferredDate = null;
+
+  hidePreferredTimeMessage();
+
+  // Clear delivery calculation from previous customer
+  window.deliveryQuoteState = {};
+
+  // IMPORTANT:
+  // next order must get a brand-new idempotency key
+  localStorage.removeItem('checkout_idempotency_key');
+
+  console.log('[checkout] reset complete');
+}
+
 async function refreshDeliveryQuote() {
   const subtotal = Number(checkoutBaseSubtotal || 0);
 	const freeDeliveryRemaining = Math.max(0, DELIVERY_FREE_THRESHOLD - subtotal);
@@ -6809,6 +6863,54 @@ document.getElementById("apply-discount-code-btn")?.addEventListener("click", as
 			}
 			}
 
+	  function resetCheckoutForNextOrder() {
+  console.log('[checkout] resetting state for next order');
+
+  const fieldsToClear = [
+    'cust-name',
+    'cust-email',
+    'cust-phone',
+    'cust-address',
+    'cust-notes',
+    'cust-preferred-time'
+  ];
+
+  fieldsToClear.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  appliedDiscountCode = null;
+  appliedDiscountAmount = 0;
+
+  const discountMessage =
+    document.getElementById('discount-code-message');
+
+  if (discountMessage) {
+    discountMessage.textContent = '';
+    discountMessage.className = 'discount-code-message';
+  }
+
+  const discountInput =
+    document.getElementById('discount-code') ||
+    document.querySelector('input[name="discount_code"]');
+
+  if (discountInput) {
+    discountInput.value = '';
+  }
+
+  lastPreferredDate = null;
+
+  if (typeof hidePreferredTimeMessage === 'function') {
+    hidePreferredTimeMessage();
+  }
+
+  window.deliveryQuoteState = {};
+
+  localStorage.removeItem('checkout_idempotency_key');
+
+  console.log('[checkout] reset complete');
+}
 
 // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
 checkoutForm.addEventListener('submit', async (e) => {
@@ -7366,7 +7468,6 @@ console.log('BASE ORDER PAYLOAD:', baseOrderPayload);
     // clear basket + re-render
     basket.length = 0;
     renderOrder();
-	refreshAppliedDiscountCode();
 
     // pretty time string
     const prefPretty = preferredTimeRaw
@@ -7380,7 +7481,18 @@ console.log('BASE ORDER PAYLOAD:', baseOrderPayload);
 
 			// numeric total
 			const grandTotal = total;
-			showOrderSuccess(refText, itemsSnapshot, grandTotal, orderType, prefPretty);
+
+showOrderSuccess(
+  refText,
+  itemsSnapshot,
+  grandTotal,
+  orderType,
+  prefPretty
+);
+
+// Order is safely complete.
+// Prepare checkout for the next customer.
+resetCheckoutForNextOrder();
 
 
   } catch (err) {
