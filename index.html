@@ -2343,6 +2343,131 @@ body.overlay-open {
   font-weight:600;
 }
 
+/* =========================================================
+   RTK REFACTORED HEADER
+   ========================================================= */
+
+.rtk-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.rtk-logo-link {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  text-decoration: none;
+}
+
+.rtk-header-logo {
+  height: 88px !important;
+  width: auto !important;
+  max-width: none !important;
+  display: block;
+}
+
+.rtk-main-nav {
+  flex: 1;
+}
+
+.rtk-main-nav ul {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  list-style: none;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex-wrap: wrap;
+}
+
+.rtk-main-nav li {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.rtk-main-nav a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 36px;
+  padding: 0 12px;
+
+  border-radius: 999px;
+
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1;
+  text-decoration: none !important;
+
+  color: #5f3820 !important;
+  background: rgba(255, 255, 255, 0.68);
+
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.14s ease;
+}
+
+.rtk-main-nav a:hover {
+  background: #fff4f1;
+  color: #8b1e16 !important;
+  transform: translateY(-1px);
+}
+
+.rtk-main-nav #menu-link {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: #fff !important;
+}
+
+.rtk-main-nav #menu-link:hover {
+  background: linear-gradient(135deg, #fb923c, #f97316);
+  color: #fff !important;
+}
+
+
+/* =========================================================
+   RTK REFACTORED HEADER - MOBILE/TABLET
+   ========================================================= */
+
+@media (max-width: 820px) {
+
+  .rtk-header-inner {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .rtk-header-logo {
+    height: 82px !important;
+  }
+
+  .rtk-main-nav {
+    width: 100%;
+    overflow: visible;
+  }
+
+  .rtk-main-nav ul {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .rtk-main-nav a {
+    width: 100%;
+    min-height: 40px;
+    padding: 0 10px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+}
+
 </style>
 
 
@@ -2386,7 +2511,7 @@ body.overlay-open {
 
 <!-- Header -->
 <header class="site-header xmas wrap">
-  <div class="header-inner centered">
+  <div class="header-inner centered rtk-header-inner">
     <div class="brand-block" style="margin-top: 1px">
       <img src="images/logotransparent2.png?v=3"
            alt="Rung's Thai Kitchen Logo"
@@ -2398,30 +2523,25 @@ body.overlay-open {
 			<strong>As promised, we will be re-opening on Weds 21st Jan at 17:00, refreshed and ready to serve!</strong>
 		  </div>
 
-		  <div class="banner-slide">
-  🕒 <strong>Christmas & New Year Opening Hours</strong> —
-		<a href="christmas-hours.html" class="banner-link" id="openHoursModal">
-		  View full schedule →
-		</a>
+		  <a href="./"
+   class="rtk-logo-link"
+   aria-label="Rung's Thai Kitchen home">
+  <img src="images/hero.png"
+       alt="Rung's Thai Kitchen Logo"
+       class="brand-logo rtk-header-logo">
+</a>
 
-
-  </a>
-</div>-->
-
-		</div>
-
-
-    <nav class="main-nav">
-      <ul>
-        <li><a href="#about">About</a></li>
-        <li><a href="#our-food">Our Food</a></li>
-        <li><a href="#allergens">Allergens</a></li>
-        <!-- IMPORTANT: id="menu-link" for the popup JS -->
-        <li><a href="#menu" id="menu-link">Menu</a></li>
-		<li><a href="#payments">Payments</a></li>
-        <li><a href="#contact">Contact</a></li>
-      </ul>
-    </nav>
+<nav class="main-nav rtk-main-nav" aria-label="Main navigation">
+  <ul>
+    <li><a href="#about">About</a></li>
+    <li><a href="#our-food">Our Food</a></li>
+    <li><a href="#allergens">Allergens</a></li>
+    <li><a href="#menu" id="menu-link">Menu</a></li>
+    <li><a href="#payments">Payments</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+	  
   </div>
 </header>
 
