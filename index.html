@@ -2468,6 +2468,200 @@ body.overlay-open {
   }
 }
 
+/* =========================================================
+   RTK VIDEO HERO
+   ========================================================= */
+
+.rtk-hero {
+  position: relative;
+  min-height: 540px;
+  margin: 40px auto;
+  border-radius: 28px;
+  overflow: hidden;
+
+  box-sizing: border-box;
+  max-width: var(--rtk-section-width, 1240px);
+
+  box-shadow: 0 14px 34px rgba(0,0,0,0.14);
+}
+
+.rtk-hero-media {
+  position: absolute;
+  inset: 0;
+}
+
+.rtk-hero-media img,
+.rtk-hero-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Dark gradient keeps copy readable over moving footage */
+.rtk-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,0,0,0.68) 0%,
+      rgba(0,0,0,0.42) 42%,
+      rgba(0,0,0,0.12) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,0.08),
+      rgba(0,0,0,0.32)
+    );
+}
+
+.rtk-hero-overlay {
+  position: relative;
+  z-index: 1;
+
+  min-height: 540px;
+  max-width: 760px;
+  padding: 56px 28px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  box-sizing: border-box;
+  color: #fff;
+}
+
+.rtk-kicker {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffb347;
+}
+
+.rtk-hero h1 {
+  margin: 0;
+  max-width: 620px;
+
+  font-size: clamp(2rem, 6vw, 4rem);
+  line-height: 0.98;
+  font-weight: 900;
+
+  color: #fff;
+}
+
+.rtk-hero-text {
+  max-width: 520px;
+  margin: 18px 0 0;
+
+  font-size: 1.08rem;
+  line-height: 1.45;
+  color: rgba(255,255,255,0.92);
+}
+
+.rtk-hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.hero-btn {
+  position: relative;
+  overflow: hidden;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 46px;
+  padding: 12px 20px;
+  border-radius: 999px;
+
+  color: #fff !important;
+  text-decoration: none !important;
+  font-weight: 800;
+
+  box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+}
+
+.hero-btn-primary {
+  background: linear-gradient(135deg, #D84315, #FF8F00);
+}
+
+.hero-btn-secondary {
+  background: linear-gradient(135deg, #1B5E20, #2E7D32);
+}
+
+.hero-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+
+  width: 50%;
+  height: 100%;
+
+  background: linear-gradient(
+    120deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.35) 50%,
+    rgba(255,255,255,0) 100%
+  );
+
+  transform: skewX(-20deg);
+}
+
+.hero-btn:hover::after,
+.hero-btn:active::after {
+  animation: sheen 0.8s ease;
+}
+
+
+/* =========================================================
+   RTK VIDEO HERO - MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+  .rtk-hero {
+    min-height: 420px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+    border-radius: 22px;
+  }
+
+  .rtk-hero-overlay {
+    min-height: 420px;
+    padding: 42px 18px 24px;
+    justify-content: flex-end;
+  }
+
+  .rtk-hero h1 {
+    font-size: clamp(2rem, 11vw, 3rem);
+  }
+
+  .rtk-hero-actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 14px;
+    align-items: stretch;
+  }
+
+  .hero-btn {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+  }
+}
+
 </style>
 
 
