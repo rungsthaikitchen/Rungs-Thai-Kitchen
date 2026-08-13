@@ -2641,10 +2641,12 @@ body.overlay-open {
     background: #000;
   }
 
+  @media (max-width: 640px) {
+
   .rtk-hero-media {
     position: relative;
     inset: auto;
-    height: 440px;
+    height: 330px;
     background: #000;
   }
 
@@ -2652,7 +2654,7 @@ body.overlay-open {
   .rtk-hero-media img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center;
   }
 
@@ -2803,14 +2805,16 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
 <section class="rtk-hero">
   <div class="rtk-hero-media">
     <video
-      autoplay
-      muted
-      loop
-      playsinline
-      poster="images/padthai.jpg"
-      aria-label="Chef Rung cooking fresh Thai food">
-      <source src="Videos/stirfry-hero.mp4" type="video/mp4">
-    </video>
+  id="rtk-hero-video"
+  autoplay
+  muted
+  loop
+  playsinline
+  poster="images/padthai.jpg"
+  aria-label="Chef Rung cooking fresh Thai food"
+  data-desktop-src="Videos/stirfry-hero.mp4"
+  data-mobile-src="Videos/stirfry-hero-mobile.mp4">
+</video>
   </div>
 
   <div class="rtk-hero-overlay">
@@ -8749,7 +8753,43 @@ document.addEventListener('DOMContentLoaded', () => {
 })();*/
 </script>-->
 
+<script>
 
+(() => {
+  const video = document.getElementById('rtk-hero-video');
+  if (!video) return;
+
+  const mobileQuery = window.matchMedia('(max-width: 640px)');
+
+  function setHeroVideo() {
+    const desiredSrc = mobileQuery.matches
+      ? video.dataset.mobileSrc
+      : video.dataset.desktopSrc;
+
+    const currentSrc = video.getAttribute('src');
+
+    if (currentSrc !== desiredSrc) {
+      video.src = desiredSrc;
+      video.load();
+
+      video.play().catch(() => {
+        // Autoplay may be deferred by the browser.
+      });
+
+      console.log(
+        '[hero-video]',
+        mobileQuery.matches ? 'mobile' : 'desktop',
+        desiredSrc
+      );
+    }
+  }
+
+  setHeroVideo();
+
+  mobileQuery.addEventListener('change', setHeroVideo);
+})();
+
+</script>
 
 </body>
 
