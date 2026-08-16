@@ -263,7 +263,7 @@ html { 	scroll-behavior: smooth;
     .item-thumb{width:54px;height:54px;object-fit:cover;border-radius:8px;border:1px solid #eee;background:#f8f8f8}
 
     /* Our Food gallery */
-    .food-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .food-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
     .food-grid img{width:100%;height:140px;object-fit:cover;border-radius:8px;box-shadow:0 6px 16px rgba(15,23,42,0.06);cursor:pointer}
     .food-grid img:hover{transform:translateY(-4px);transition:transform .18s ease,box-shadow .18s ease}
 
@@ -1783,7 +1783,7 @@ body.menu-open .menu-fab {
     padding: 12px 16px;
     font-size: 0.98rem;
   }
-}git status
+}
 
 
 /* --- Z-INDEX STACKING MAP ----------------------------------- */
@@ -2641,8 +2641,6 @@ body.overlay-open {
     background: #000;
   }
 
-  @media (max-width: 640px) {
-
   .rtk-hero-media {
     position: relative;
     inset: auto;
@@ -2698,6 +2696,130 @@ body.overlay-open {
     max-width: 100%;
     box-sizing: border-box;
     margin: 0;
+  }
+}
+
+/* =========================================================
+   About section
+   ========================================================= */
+
+#about {
+  box-sizing: border-box;
+  max-width: var(--rtk-section-width);
+  margin-left: auto;
+  margin-right: auto;
+
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+#about .about-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 18px;
+}
+
+#about .about-grid img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+
+  display: block;
+}
+
+#about .about-grid img:hover {
+  transform: translateY(-4px);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+#about {
+  padding-bottom: 24px;
+}
+
+@media (max-width: 640px) {
+  #about .about-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #about .about-grid img {
+    height: 160px;
+  }
+}
+
+/* =========================================================
+   Customer Reviews
+   ========================================================= */
+
+.rtk-reviews-section {
+  box-sizing: border-box;
+  max-width: var(--rtk-section-width);
+  margin-left: auto;
+  margin-right: auto;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.rtk-section-kicker {
+  color: #f97316;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  margin-bottom: 6px;
+}
+
+.rtk-review-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.rtk-review-card {
+  border: 1px solid #f1e3df;
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+}
+
+.rtk-review-stars {
+  color: #f59e0b;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+.rtk-review-card p {
+  margin: 0;
+  line-height: 1.45;
+  color: #374151;
+  font-weight: 600;
+}
+
+.rtk-review-card span {
+  display: block;
+  margin-top: 12px;
+  color: #6b7280;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .rtk-review-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rtk-review-card {
+    padding: 15px;
   }
 }
 </style>
@@ -2887,6 +3009,37 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
           </div>
         </div>
 		<!--</div>-->
+
+    <section class="card rtk-reviews-section" id="reviews">
+  <div class="rtk-section-kicker">Customer love</div>
+  <h3>What our customers are saying</h3>
+
+  <div class="rtk-review-grid">
+    <article class="rtk-review-card">
+      <div class="rtk-review-stars">★★★★★</div>
+      <p>
+        “Best spring rolls ever......you need to get chicken ones OMG!”
+      </p>
+      <span>First-time customer</span>
+    </article>
+
+    <article class="rtk-review-card">
+      <div class="rtk-review-stars">★★★★★</div>
+      <p>
+        “We had a takeaway from here last night and it was delicious! Loads of it too. Highly recommend”
+      </p>
+      <span>Local customer</span>
+    </article>
+
+    <article class="rtk-review-card">
+      <div class="rtk-review-stars">★★★★★</div>
+      <p>
+        “We had a delivery again tonight. Full on 10/10! Tom Yum Soup, Beef Massaman, DEEEEEEEE-LICIOUS ❤️”
+      </p>
+      <span>Regular customer</span>
+    </article>
+  </div>
+</section>
 
         <!-- Allergens -->
         <!--<div class="card-spacer">-->
