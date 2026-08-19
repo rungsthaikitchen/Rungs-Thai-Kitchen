@@ -20,7 +20,15 @@
     }
     *{box-sizing:border-box}
     body{margin:0;background:linear-gradient(180deg,#fff 0%,#fff8f6 100%);color:#111;}
-    .container{max-width:1100px;margin:0 auto;padding:20px;}
+    .container {
+    max-width: 1100px;
+    margin: 0 auto;
+
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
 
     /* Header */
     /* Header */
@@ -623,24 +631,19 @@ footer {
     gap: 8px;
   }
 }
-		/* === Parallax background layer === */
-		.bg-parallax {
-		  position: fixed;
-		  inset: 0;
-		  z-index: -1;
-		  pointer-events: none;
-		  overflow: hidden;
-		  background:
-			/* top image */
-			url("./images/bg-top6.jpg") center top / cover no-repeat,
-			/* bottom image */
-			url("images/bg-bottom.jpg") center 120vh / cover no-repeat,
-			/* fallback colour under both */
-			#0b1120;
-		  background-attachment: fixed, fixed, scroll;
-		  /* dim it a bit so text stays readable */
-		  filter: brightness(.55);
-		}
+		/* === Page background === */
+
+body {
+  background: linear-gradient(
+    180deg,
+    #fff8f2 0%,
+    #fbeee8 100%
+  );
+}
+
+.bg-parallax {
+  display: none;
+}
 
 		/* extra spacing between sections so we *see* the background */
 		.card {
@@ -657,13 +660,6 @@ footer {
 		  margin-top: 30px;
 		}
 
-		/* mobile fallback: iOS hates background-attachment:fixed */
-		@media (max-width: 768px) {
-		  .bg-parallax {
-			background-attachment: scroll, scroll, scroll;
-			background-size: cover, cover, auto;
-		  }
-		}
 		.card {
 		  background: rgba(255,255,255,0.9);
 		  backdrop-filter: blur(2px);
@@ -744,6 +740,13 @@ footer {
 		#order-panel .order-row .item-thumb {
 		  width: 64px; height: 64px; object-fit: cover; border-radius: 8px;
 		}
+
+    @media (max-width: 640px) {
+  #order-panel .order-row .title {
+    font-size: 0.95rem;
+    line-height: 1.25;
+  }
+}
 
 		/* let the middle column actually grow */
 		#order-panel .order-row .meta { min-width: 0; max-width: 100%; overflow: hidden; }
@@ -972,25 +975,27 @@ footer {
 		}
 
 		/* Subtle dividers between order items */
-		.order-row:not(:last-child),
-		.order-item:not(:last-child) {
-		  border-bottom: 1px dashed rgba(0, 0, 0, 0.15);
-		  padding-bottom: 10px;
-		  margin-bottom: 10px;
-		}
+.order-row:not(:last-child),
+.order-item:not(:last-child) {
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.15);
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
 
-		/* Optional: lighter feel for dark backgrounds */
-		body.dark-mode .order-row:not(:last-child),
-		body.dark-mode .order-item:not(:last-child) {
-		  border-bottom: 1px dashed; rgba(17, 70, 74, 0.35); /* soft accent red */);
-			padding-bottom: 10px;
-		  margin-bottom: 10px;
-		}
-		/* Space before totals and checkout button */
-		.order-summary-totals,
-		#checkout-button {
-		  margin-top: 1rem;
-		}
+/* Optional: lighter feel for dark backgrounds */
+body.dark-mode .order-row:not(:last-child),
+body.dark-mode .order-item:not(:last-child) {
+  border-bottom: 1px dashed rgba(17, 70, 74, 0.35);
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+/* Space before totals and checkout button */
+.order-summary-totals,
+#checkout-button {
+  margin-top: 1rem;
+}
+
 		.order-row:hover,
 		.order-item:hover {
 		  background: rgba(255,255,255,0.4);
@@ -1211,36 +1216,56 @@ footer {
 		/* (optional) if you still see a gap, remove top margin on the first section entirely */
 		main > section:first-of-type { margin-top: 0; }
 
-		/* --- Back to Top Button --- */
-		#backToTop {
-		  position: fixed;
-		  bottom: 24px;
-		  left: 16px;
-		  background: linear-gradient(135deg, #16205B 0%, #b02a2a 100%);
-		  color: white;
-		  border: none;
-		  border-radius: 10%;
-		  width: 56px;
-		  height: 56px;
-		  font-size: 22px;
-		  font-weight: bold;
-		  cursor: pointer;
-		  opacity: 0;
-		  visibility: hidden;
-		  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
-		  z-index: 9999;
-		}
+		/* =========================================================
+   Back to Top Button
+   ========================================================= */
 
-		#backToTop:hover {
-		  background: #16205B;             /* your accent red */
-		  transform: scale(1.1);
-		}
+#backToTop {
+    position: fixed;
 
-		/* when visible */
-		#backToTop.show {
-		  opacity: 0.9;
-		  visibility: visible;
-		}
+    bottom: 24px;
+    left: 16px;
+
+    width: 56px;
+    height: 56px;
+
+    border: none;
+    border-radius: 18px;
+
+    background: linear-gradient(135deg, #F97316, #FF9800);
+
+    color: #ffffff;
+
+    font-size: 28px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    opacity: 0;
+    visibility: hidden;
+
+    box-shadow: 0 10px 24px rgba(249, 115, 22, 0.35);
+
+    transition:
+        opacity 0.3s ease,
+        transform 0.2s ease,
+        visibility 0.3s ease;
+
+    z-index: 9999;
+}
+
+#backToTop:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 14px 30px rgba(249, 115, 22, 0.45);
+}
+
+#backToTop.show {
+    opacity: 1;
+
+    visibility: visible;
+}
 
 		/* === Customise modal image: fit without zoom === */
 		/* Customise modal image: show full photo, not zoomed */
@@ -1321,6 +1346,56 @@ footer {
 		  font-weight: 800;
 		  color: #16205B;
 		}
+
+    /* =========================================================
+   Menu Category Quick Navigation
+   ========================================================= */
+
+.menu-category-nav {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  overflow-x: auto;
+
+  padding: 12px 4px 14px;
+  margin: 0 0 14px;
+
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+
+  border-bottom: 1px solid #f3e7e6;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+.menu-category-nav button {
+  flex: 0 0 auto;
+
+  border: 1px solid #f0d8d5;
+  background: #fff4f3;
+  color: #3b2b2b;
+
+  border-radius: 999px;
+  padding: 8px 12px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.menu-category-nav button:hover,
+.menu-category-nav button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
 
 		/* Two-column grid per category */
 		.popup-items-grid {
@@ -1405,7 +1480,7 @@ footer {
 		}
 
 		.menu-grid .category-header h3 {
-		  margin: 0
+		  margin: 0;
 		  font-size: 16px;
 		}
 
@@ -1524,8 +1599,6 @@ footer {
   border-color: #d9464a;
   box-shadow: 0 0 0 2px rgba(217,70,74,0.2);
 }
-}
-
 
 .social-links .icon {
   width: 22px !important;
@@ -1797,13 +1870,6 @@ footer#contact .footer-inner {
   z-index: 1;
 }
 
-/* Background parallax stays behind everything */
-.bg-parallax {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-}
-
 /* Ticker at the very top of normal content */
 #status-ticker {
   position: relative;
@@ -1870,7 +1936,6 @@ header,
   z-index: 13001 !important;
 }
 
-<style>
  html, body {
   margin: 0;
   padding: 0;
@@ -2485,18 +2550,33 @@ body.overlay-open {
   box-shadow: 0 14px 34px rgba(0,0,0,0.14);
 }
 
-.rtk-hero-media {
-  position: absolute;
-  inset: 0;
-}
+@media (min-width: 641px) {
+  .rtk-hero-media {
+    display: grid;
+    grid-template-columns: 0.65fr 1.2fr 0.65fr;
+    background: #000;
+  }
 
-.rtk-hero-media img,
-.rtk-hero-media video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
+  .rtk-hero-side {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .rtk-hero-side img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    filter: brightness(0.72) saturate(0.9);
+  }
+
+  .rtk-hero-media video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
 }
 
 /* Dark gradient keeps copy readable over moving footage */
@@ -2697,6 +2777,47 @@ body.overlay-open {
     box-sizing: border-box;
     margin: 0;
   }
+
+  .rtk-hero-side {
+  display: none;
+  }
+
+}
+
+/* =========================================================
+   HERO SIDE IMAGES - DESKTOP
+   ========================================================= */
+
+@media (min-width: 641px) {
+
+  .rtk-hero-media {
+    display: grid;
+    grid-template-columns: 1fr 0.9fr 1fr;
+    background: #000;
+  }
+
+  .rtk-hero-side,
+  .rtk-hero-media video {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+  }
+
+  .rtk-hero-side {
+    overflow: hidden;
+  }
+
+  .rtk-hero-side img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .rtk-hero-media video {
+    object-fit: cover;
+    object-position: center;
+  }
 }
 
 /* =========================================================
@@ -2822,9 +2943,949 @@ body.overlay-open {
     padding: 15px;
   }
 }
-</style>
 
+/* =========================================================
+   Allergen information
+   ========================================================= */
 
+.allergen-card {
+  box-sizing: border-box;
+  max-width: var(--rtk-section-width);
+  margin-left: auto;
+  margin-right: auto;
+
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.allergen-guide-grid {
+  margin-top: 12px;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+
+  gap: 14px 24px;
+}
+
+.allergen-guide-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  line-height: 1.4;
+  font-size: 0.95rem;
+  color: #2f3542;
+}
+
+.allergen-guide-item img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 700px) {
+  .allergen-guide-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 14px;
+  }
+
+  .allergen-guide-item {
+    font-size: 0.9rem;
+  }
+
+  .allergen-guide-item img {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* =========================================================
+   Payments
+   ========================================================= */
+
+.payment-section {
+  box-sizing: border-box;
+  max-width: var(--rtk-section-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 18px 16px;
+}
+
+.payment-card {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 auto;
+
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  padding: 24px;
+
+  border-top: 20px solid rgba(255, 255, 255, 0.25);
+  border-bottom: 20px solid rgba(255, 255, 255, 0.25);
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.payment-title {
+  font-size: 1.17rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+.payment-message {
+  margin: 0 0 22px;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.payment-icons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.payment-icon {
+  width: 80px;
+  height: 50px;
+  padding: 4px;
+
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-icon img {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .payment-section {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .payment-card {
+    padding: 18px 16px;
+  }
+
+  .payment-icon {
+    width: 68px;
+    height: 44px;
+  }
+}
+
+/* =========================================================
+   Footer / Contact
+   ========================================================= */
+
+footer#contact {
+  box-sizing: border-box;
+  max-width: var(--rtk-section-width);
+  margin-left: auto;
+  margin-right: auto;
+
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+footer#contact .footer-inner {
+  max-width: 900px;
+  margin: 0 auto 24px;
+  padding: 26px 18px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+  background: rgba(176, 42, 42, 0.5);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 12px 30px rgba(0,0,0,0.25);
+
+  color: #fff;
+}
+
+.footer-section {
+  width: 100%;
+}
+
+footer#contact .footer-section {
+  width: 100%;
+  text-align: center;
+}
+
+footer#contact .footer-section > p {
+  text-align: center;
+}
+
+.footer-contact-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.contact-inline {
+  margin: 0;
+  text-align: center;
+}
+
+footer#contact h4 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+  color: #fff;
+}
+
+.footer-section .muted {
+  color: rgba(255,248,242,0.78) !important;
+}
+
+.contact-inline {
+  margin: 0;
+}
+
+.footer-section a,
+.footer-links a {
+  color: #FFB74D !important;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footer-section a:hover,
+.footer-links a:hover {
+  color: #FF8F00 !important;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.social-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.social-links .icon {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
+.footer-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(255,248,242,0.16);
+  margin: 10px 0;
+}
+
+.footer-legal {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+
+  color: rgba(255,248,242,0.72);
+  font-size: 0.9rem;
+}
+
+.footer-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-links .dot,
+.footer-section .dot {
+  color: rgba(255,248,242,0.45);
+  margin: 0 6px;
+}
+
+@media (max-width: 640px) {
+  footer#contact .footer-inner {
+    padding: 20px 16px;
+  }
+
+  .footer-contact-row {
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+  .social-links {
+    gap: 6px;
+  }
+
+  .footer-legal {
+    text-align: center;
+  }
+}
+
+/* =========================================================
+   Your Order
+   ========================================================= */
+
+#order-panel {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--rtk-section-width);
+  margin-left: auto;
+  margin-right: auto;
+
+  position: static;
+  z-index: 1;
+
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+
+  border-radius: 18px;
+  padding: 20px;
+
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+
+#order-panel .order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: visible;
+}
+
+#order-panel .order-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  padding: 10px;
+  border: 1px dashed rgba(122, 72, 32, 0.18);
+  border-radius: 10px;
+}
+
+#order-panel .order-row .item-thumb {
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+
+  object-fit: cover;
+  border-radius: 8px;
+
+  border: 1px solid #eee;
+  background: #f8f8f8;
+}
+
+#order-panel .order-row .meta {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+#order-panel .order-row .meta .title {
+  font-weight: 700;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+#order-panel .order-row .price,
+#order-panel .order-row .order-price {
+  flex: 0 0 auto;
+  margin-left: auto;
+  white-space: nowrap;
+  text-align: right;
+  font-weight: 700;
+}
+
+#order-panel .totals {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 12px;
+  margin-top: 14px;
+
+  padding-top: 12px;
+  border-top: 1px solid rgba(122, 72, 32, 0.12);
+}
+
+@media (max-width: 640px) {
+  #order-panel {
+    padding: 16px;
+  }
+
+  #order-panel .order-row {
+    gap: 10px;
+  }
+
+  #order-panel .order-row .item-thumb {
+    flex-basis: 54px;
+    width: 54px;
+    height: 54px;
+  }
+}
+
+#open-checkout {
+  background: linear-gradient(135deg, #1B5E20, #2E7D32) !important;
+  color: #ffffff !important;
+
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 12px 18px !important;
+
+  font-weight: 700 !important;
+  letter-spacing: 0.3px;
+
+  box-shadow: 0 8px 20px rgba(46,125,50,0.28) !important;
+  cursor: pointer;
+}
+
+#open-checkout:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(46,125,50,0.35) !important;
+}
+
+#open-checkout:active {
+  transform: scale(0.98);
+}
+
+/* =========================================================
+   Find Us / Location
+   ========================================================= */
+
+#location-card {
+  box-sizing: border-box;
+  max-width: var(--rtk-section-width);
+  margin-left: auto;
+  margin-right: auto;
+
+  background: rgba(255, 255, 255, 0.8);
+  color: #000;
+
+  padding: 24px 16px;
+  border-radius: 18px;
+
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+
+.location-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.location-map-wrapper {
+  width: 100%;
+}
+
+#delivery-map {
+  width: 100%;
+  height: 260px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+#location-card .muted a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* Custom branded map marker */
+.brand-marker {
+  background: transparent;
+  border: none;
+}
+
+.brand-marker-inner {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+
+  background: linear-gradient(135deg, #16205B 0%, #b02a2a 100%);
+  border: 2px solid #ffffff;
+
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
+  position: relative;
+}
+
+.brand-marker-inner::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+
+  transform: translateX(-50%);
+
+  width: 8px;
+  height: 8px;
+
+  background: #b02a2a;
+  border-radius: 50%;
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+@media (max-width: 768px) {
+  .location-inner {
+    grid-template-columns: 1fr;
+  }
+
+  #location-card {
+    padding: 18px 14px;
+  }
+
+  #delivery-map {
+    height: 220px;
+  }
+}
+ 
+    
+/* =========================================================
+   FINAL HEADER LAYOUT
+   ========================================================= */
+
+/* Desktop: logo left, navigation centred alongside it */
+.header-inner.centered.rtk-header-inner {
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  text-align: left;
+}
+
+.rtk-logo-link {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  text-decoration: none;
+}
+
+.rtk-header-logo {
+  width: 85px !important;
+  height: auto !important;
+  max-width: none !important;
+  display: block;
+}
+
+.rtk-main-nav {
+  flex: 1;
+  margin-top: 0 !important;
+}
+
+.rtk-main-nav ul {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.rtk-main-nav a {
+  font-size: 1.08rem !important;
+  font-weight: 800;
+}
+
+/* Mobile/tablet: return to stacked header */
+@media (max-width: 820px) {
+
+  .header-inner.centered.rtk-header-inner {
+    flex-direction: column !important;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .rtk-header-logo {
+    width: 92px !important;
+    height: auto !important;
+  }
+
+  .rtk-main-nav {
+    width: 100%;
+  }
+
+  .rtk-main-nav ul {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+  }
+
+  .rtk-main-nav a {
+    width: 100%;
+    min-height: 40px;
+    font-size: 0.95rem !important;
+  }
+}
+
+/* =========================================================
+   FINAL SECTION SPACING
+   ========================================================= */
+
+/* Header to hero */
+.site-header {
+  margin-bottom: 24px !important;
+}
+
+/* Hero to first content card */
+.rtk-hero {
+  margin-top: 0 !important;
+  margin-bottom: 32px !important;
+}
+
+/* Main content cards */
+#about,
+#our-food,
+#reviews,
+#allergens,
+#order-panel,
+.payment-section,
+#location-card,
+footer#contact {
+  margin-top: 32px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Footer gets a little breathing room at the very bottom */
+footer#contact {
+  margin-bottom: 32px !important;
+}
+
+/* Pull header closer to top of page */
+.site-header {
+  margin-top: 1px !important;
+}
+
+/* =========================================================
+   FINAL FOOTER COLOURS
+   ========================================================= */
+
+footer#contact {
+  background: linear-gradient(180deg, #2B2B2B, #242424) !important;
+  border-radius: 22px !important;
+  padding: 20px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16) !important;
+}
+
+footer#contact .footer-inner {
+  background: rgba(255, 248, 242, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 18px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 12px 30px rgba(0,0,0,0.25) !important;
+}
+
+/* =========================================================
+   HERO THREE-PANEL LAYOUT - DESKTOP
+   ========================================================= */
+
+@media (min-width: 641px) {
+
+  .rtk-hero {
+    position: relative;
+    height: 540px;
+    min-height: 540px;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .rtk-hero-media {
+    position: absolute !important;
+    inset: 0 !important;
+
+    width: 100%;
+    height: 540px;
+
+    display: grid;
+    grid-template-columns: 0.7fr 1.35fr 0.7fr;
+
+    background: #000;
+    z-index: 0;
+  }
+
+  .rtk-hero-side,
+  .rtk-hero-media video {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .rtk-hero-side img,
+  .rtk-hero-media video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .rtk-hero-side img {
+    filter: brightness(0.72) saturate(0.9);
+  }
+
+  .rtk-hero-overlay {
+    position: absolute !important;
+    inset: 0 auto 0 0;
+
+    width: 100%;
+    max-width: 680px;
+    min-height: 0;
+    height: 540px;
+
+    padding: 56px 44px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    z-index: 2;
+  }
+
+  .rtk-hero::after {
+    z-index: 1;
+  }
+
+.rtk-hero-side img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    object-position: center;
+
+    display: block;
+}
+
+.rtk-hero-side-left img {
+  object-position: 48% center;
+  filter: brightness(0.82) saturate(0.95);
+  }
+
+.rtk-hero-side-right img {
+    object-position: center;
+    transform: scale(0.92);
+  filter: brightness(0.78) saturate(0.95);
+  }
+
+  .rtk-hero-side-right {
+    position: relative;
+    overflow: hidden;
+  }
+
+.hero-rotating-image {
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+    object-position: center;
+
+    opacity: 0;
+
+    transition: opacity 2s ease;
+  }
+
+.hero-rotating-image.active {
+    opacity: 1;
+  }
+  
+}
+
+/* Final desktop hero containment */
+@media (min-width: 641px) {
+  section.rtk-hero {
+    display: block !important;
+    position: relative !important;
+    height: 540px !important;
+    min-height: 540px !important;
+    max-height: 540px !important;
+    overflow: hidden !important;
+  }
+}
+
+/* =========================================================
+   Menu - Desktop Order Summary
+   ========================================================= */
+
+.menu-content-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+  align-items: start;
+}
+
+.menu-order-summary {
+  position: sticky;
+  top: 96px;
+  border-left: 3px solid rgba(22, 32, 91, 0.08);
+  width: auto;
+
+  background: #fff;
+  border: 1px solid #dfe5f2;
+  border-radius: 16px;
+  padding: 14px;
+
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.10);
+
+  z-index: 4;
+}
+
+.menu-order-summary h3 {
+  margin: 0 0 10px;
+  color: #08145f;
+}
+
+.menu-order-summary-items {
+  display: grid;
+  gap: 8px;
+
+  max-height: 360px;
+  overflow: auto;
+}
+
+.menu-order-summary-line {
+  display: grid;
+  gap: 2px;
+  font-size: 13px;
+}
+
+.menu-order-summary-line strong {
+  color: #111827;
+}
+
+.menu-order-summary-line span {
+  color: var(--muted);
+}
+
+.menu-order-summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  border-top: 1px solid #eef2f7;
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
+.menu-order-summary-total strong {
+  color: #2E7D32;
+  font-size: 18px;
+}
+
+.menu-summary-checkout-btn {
+  width: 100%;
+  margin-top: 14px;
+
+  border: none;
+  border-radius: 14px;
+
+  background: linear-gradient(135deg, #b3262e, #8f1f26);
+  color: #fff;
+
+  padding: 14px 16px;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow: 0 10px 24px rgba(179, 38, 46, 0.22);
+
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.menu-summary-checkout-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(179, 38, 46, 0.28);
+}
+
+/* Collapse the order summary below the menu on narrower screens */
+@media (max-width: 1200px) {
+  .menu-content-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .popup-items-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1201px) {
+  .menu-checkout-btn {
+    display: none;
+  }
+}
+
+.menu-summary-line-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.menu-summary-qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.menu-summary-qty-controls button {
+  min-width: 30px;
+  height: 30px;
+  border: 1px solid #e5d7d3;
+  border-radius: 9px;
+  background: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.menu-summary-remove {
+  width: auto !important;
+  padding: 0 7px !important;
+  color: #b02a2a;
+  border: none !important;
+  background: transparent !important;
+}
 		  </style>
 		</head>
 		<body>
@@ -2870,7 +3931,7 @@ body.overlay-open {
     <a href="./"
        class="rtk-logo-link"
        aria-label="Rung's Thai Kitchen home">
-      <img src="images/logotransparent2.png?v=3"
+      <img src="images/hero.png"
            alt="Rung's Thai Kitchen Logo"
            class="brand-logo rtk-header-logo">
     </a>
@@ -2922,22 +3983,47 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
 </script>
 
 
-    <main>
-		<!-- Hero -->
+<main>
+
+<!-- Hero -->
 <section class="rtk-hero">
+
   <div class="rtk-hero-media">
-    <video
-  id="rtk-hero-video"
-  autoplay
-  muted
-  loop
-  playsinline
-  poster="images/padthai.jpg"
-  aria-label="Chef Rung cooking fresh Thai food"
-  data-desktop-src="Videos/stirfry-hero.mp4"
-  data-mobile-src="Videos/stirfry-hero-mobile.mp4">
-</video>
-  </div>
+
+  <div class="rtk-hero-side rtk-hero-side-left">
+    <img src="images/hero/fresh.png" alt="Fresh Thai ingredients">
+</div>
+
+  <video
+    id="rtk-hero-video"
+    autoplay
+    muted
+    loop
+    playsinline
+    poster="images/padthai.jpg"
+    aria-label="Chef Rung cooking fresh Thai food"
+    data-desktop-src="Videos/stirfry-hero.mp4"
+    data-mobile-src="Videos/stirfry-hero-mobile.mp4">
+  </video>
+
+  <div class="rtk-hero-side rtk-hero-side-right">
+
+    <img
+        id="hero-right-image-a"
+        class="hero-rotating-image active"
+        src="images/hero/thai-sausage.png"
+        alt="Thai food">
+
+    <img
+        id="hero-right-image-b"
+        class="hero-rotating-image"
+        src="images/hero/yum-beef.png"
+        alt="Thai food">
+
+</div>
+
+</div>
+</section>
 
   <div class="rtk-hero-overlay">
     <p class="rtk-kicker">Rung’s Thai Kitchen</p>
@@ -3042,31 +4128,89 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
 </section>
 
         <!-- Allergens -->
-        <!--<div class="card-spacer">-->
-		<div class="card" id="allergens" style="margin-top:14px">
-          <h3 style="margin-bottom:10px">Allergens & Ingredients</h3>
-          <p class="muted">
-            We take food allergies seriously. Many of our dishes can be prepared without certain allergens — please
-            mention any allergies when placing your order. The icons below indicate that dishes contain:
-          </p>
-          <div style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;line-height:1.5">
-            <div><span class="allergen-icon">🥜</span> Peanuts</div>
-            <div><span class="allergen-icon">🌰</span> Tree Nuts</div>
-            <div><span class="allergen-icon">🌾</span> Gluten (Cereals)</div>
-            <div><span class="allergen-icon">🦐</span> Crustaceans (Shellfish)</div>
-            <div><span class="allergen-icon">🦪</span> Molluscs (e.g. squid, mussels)</div>
-            <div><span class="allergen-icon">🥛</span> Milk / Dairy</div>
-            <div><span class="allergen-icon">🍳</span> Egg</div>
-            <div><span class="allergen-icon">🐟</span> Fish</div>
-            <div><span class="allergen-icon">🌿</span> Celery</div>
-            <div><span class="allergen-icon">🌼</span> Lupin</div>
-            <div><span class="allergen-icon">&#x1F331;</span> Mustard</div>
-            <div><span class="allergen-icon">⚫</span> Sesame Seeds</div>
-            <div><span class="allergen-icon">🫘</span> Soya</div>
-            <div><span class="allergen-icon">💨</span> Sulphur Dioxide / Sulphites</div>
-            <div><span class="allergen-icon">🌶️</span> Spice Level (heat indicator)</div>
-          </div>
-        </div>
+<div class="card allergen-card" id="allergens">
+  <h3 style="margin-bottom:10px">Allergen Information</h3>
+
+  <p class="muted">
+    We use the standard UK allergen categories to help identify ingredients commonly associated with each dish.
+    If you have a food allergy or intolerance, please contact us before ordering, as food is prepared in a kitchen
+    where allergens are present.
+  </p>
+
+  <div class="allergen-guide-grid allergen-icon-grid">
+
+    <div class="allergen-guide-item">
+      <img src="images/allergens/peanut.png" alt="">
+      Peanuts
+    </div>
+
+    <div class="allergen-guide-item">
+      <img src="images/allergens/treenuts.png" alt="">
+      Tree Nuts
+    </div>
+
+    <div class="allergen-guide-item">
+      <img src="images/allergens/gluten.png" alt="">
+      Gluten
+    </div>
+
+    <div class="allergen-guide-item">
+      <img src="images/allergens/crustaceans.png" alt="">
+      Crustaceans
+    </div>
+
+    <div class="allergen-guide-item">
+      <img src="images/allergens/molluscs.png" alt="">
+      Molluscs
+    </div>
+
+    <div class="allergen-guide-item">
+      <img src="images/allergens/milk.png" alt="">
+      Milk
+    </div>
+
+    <div class="allergen-guide-item">
+      <img src="images/allergens/egg.png" alt="">
+      Egg
+    </div>
+
+    <div class="allergen-guide-item">
+      <img src="images/allergens/fish.png" alt="">
+      Fish
+    </div>
+
+    <div class="allergen-guide-item">
+      <img src="images/allergens/celery.png" alt="">
+      Celery
+    </div>
+
+    <div class="allergen-guide-item">
+      <img src="images/allergens/lupin.png" alt="">
+      Lupin
+    </div>
+
+    <div class="allergen-guide-item">
+      <img src="images/allergens/mustard.png" alt="">
+      Mustard
+    </div>
+
+    <div class="allergen-guide-item">
+      <img src="images/allergens/sesame.png" alt="">
+      Sesame
+    </div>
+
+    <div class="allergen-guide-item">
+      <img src="images/allergens/soybean.png" alt="">
+      Soya
+    </div>
+
+    <div class="allergen-guide-item">
+      <img src="images/allergens/so2.png" alt="">
+      Sulphites
+    </div>
+
+  </div>
+</div>
 
       </section>
 
@@ -3143,8 +4287,6 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
 </section>
 
 <footer id="contact">
-
-<footer id="contact">
   <div class="footer-inner">
 
     <!-- Contact + Social Section -->
@@ -3162,7 +4304,7 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
 
       <!-- Opening Hours -->
       <h4>Opening Hours</h4>
-      <p class="muted">Opening Hours: 🕒 Fri–Sat: 17:00 – 21:00</p>
+      <p class="muted">Opening Hours: 🕒 Wed–Sat: 17:00 – 21:30 (last order by 21:30)</p>
 
       <!-- New Social Media Section -->
       <h4>Social Media</h4>
@@ -3501,9 +4643,50 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
 			autocomplete="off"
 		  />
 		</div>
+
+    <!-- Menu category quick nav -->
+<div class="menu-category-nav" id="menu-category-nav">
+  <button type="button" data-target="starters">Starters</button>
+  <button type="button" data-target="soup">Soups</button>
+  <button type="button" data-target="salad">Salads</button>
+  <button type="button" data-target="curry">Curries</button>
+  <button type="button" data-target="stir-fry">Stir-Fry</button>
+  <button type="button" data-target="noodles">Noodles & Rice</button>
+  <button type="button" data-target="sides">Side Dishes</button>
+</div>
 		
 			<!-- two-column menu grid -->
-			<div id="menu-list"></div>
+			<div class="menu-content-layout">
+
+  <div id="menu-list"></div>
+
+  <aside id="menu-order-summary" class="menu-order-summary">
+
+    <h3>Your order</h3>
+
+    <div
+      id="menu-order-summary-items"
+      class="menu-order-summary-items"
+    >
+      <p class="muted small">No items added yet.</p>
+    </div>
+
+    <div class="menu-order-summary-total">
+      <span>Subtotal</span>
+      <strong id="menu-order-summary-total">£0.00</strong>
+    </div>
+
+    <button
+      id="menu-summary-checkout-btn"
+      class="menu-summary-checkout-btn"
+      type="button"
+    >
+      Proceed to checkout
+    </button>
+
+  </aside>
+
+</div>
 
 			<!-- ✅ Floating checkout button -->
 			<button
@@ -4190,7 +5373,8 @@ function buildMenu() {
 MENU_CATEGORIES.forEach(cat => {
   // outer wrapper per category
   const catSection = document.createElement('section');
-  catSection.className = 'popup-category';
+catSection.className = 'popup-category';
+catSection.id = cat.id;
 
   // category heading
   const h = document.createElement('h3');
@@ -4305,10 +5489,15 @@ function renderOrder(){
 		  orderListEl.innerHTML = '';
 
 		  if (basket.length === 0){
-			orderListEl.innerHTML = '<div class="muted small">No items yet — add something from the menu.</div>';
-			orderTotalEl.textContent = formatCurrency(0);
-			return;
-		  }
+  orderListEl.innerHTML =
+    '<div class="muted small">No items yet — add something from the menu.</div>';
+
+  orderTotalEl.textContent = formatCurrency(0);
+
+  renderMenuOrderSummary();
+
+  return;
+}
 
 		  basket.forEach((row, idx) => {
 			const r = document.createElement('div');
@@ -4372,9 +5561,116 @@ function renderOrder(){
 			orderListEl.appendChild(r);
 		  });
 
-		  const total = basket.reduce((s, i) => s + i.unitPrice * i.qty, 0);
-		  orderTotalEl.textContent = formatCurrency(roundToTwo(total));
-		}
+		  const total = basket.reduce(
+  (s, i) => s + i.unitPrice * i.qty,
+  0
+);
+
+orderTotalEl.textContent =
+  formatCurrency(roundToTwo(total));
+
+renderMenuOrderSummary();
+}
+
+function renderMenuOrderSummary() {
+  const itemsEl = document.getElementById("menu-order-summary-items");
+  const totalEl = document.getElementById("menu-order-summary-total");
+
+  if (!itemsEl || !totalEl) return;
+
+  if (!basket.length) {
+    itemsEl.innerHTML =
+      '<p class="muted small">No items added yet.</p>';
+
+    totalEl.textContent = formatCurrency(0);
+    return;
+  }
+
+  let subtotal = 0;
+
+  itemsEl.innerHTML = basket.map(function (line, idx) {
+    const lineTotal =
+      Number(line.unitPrice || 0) *
+      Number(line.qty || 1);
+
+    subtotal += lineTotal;
+
+    const modsText = (line.mods || [])
+      .map(function (m) {
+        return m.name;
+      })
+      .filter(Boolean)
+      .join(", ");
+
+    const modsHtml = modsText
+      ? "<span>" + modsText + "</span>"
+      : "";
+
+    const spiceHtml =
+      typeof line.spice === "number"
+        ? "<span>" + chilliIcons(line.spice) + "</span>"
+        : "";
+
+    const noteHtml = line.itemNote
+      ? '<div class="menu-basket-note">' +
+          "<strong>Special instructions</strong><br>" +
+          line.itemNote +
+        "</div>"
+      : "";
+
+    return (
+      '<div class="menu-order-summary-line" data-basket-idx="' +
+        idx +
+      '">' +
+
+        "<strong>" +
+          line.qty +
+          " × " +
+          nameWithoutChillies(line.name) +
+        "</strong>" +
+
+        modsHtml +
+        spiceHtml +
+        noteHtml +
+
+        '<div class="menu-summary-line-footer">' +
+
+          "<strong>" +
+            formatCurrency(lineTotal) +
+          "</strong>" +
+
+          '<div class="menu-summary-qty-controls">' +
+
+            '<button type="button" ' +
+              'data-summary-action="dec" ' +
+              'data-idx="' + idx + '" ' +
+              'aria-label="Decrease quantity">−</button>' +
+
+            "<span>" + line.qty + "</span>" +
+
+            '<button type="button" ' +
+              'data-summary-action="inc" ' +
+              'data-idx="' + idx + '" ' +
+              'aria-label="Increase quantity">+</button>' +
+
+            '<button type="button" ' +
+              'class="menu-summary-remove" ' +
+              'data-summary-action="remove" ' +
+              'data-idx="' + idx + '">' +
+              "Remove" +
+            "</button>" +
+
+          "</div>" +
+
+        "</div>" +
+
+      "</div>"
+    );
+  }).join("");
+
+  totalEl.textContent =
+    formatCurrency(subtotal);
+}
 		
 		// ---------- Menu popup open / close ----------
 const menuOverlay     = document.getElementById('menu-overlay');
@@ -4453,9 +5749,37 @@ if (menuCheckoutBtn) {
       (sum, line) => sum + line.unitPrice * line.qty,
       0
     );
+
     openCheckout(subtotal);
   });
 }
+
+const menuSummaryCheckoutBtn =
+  document.getElementById('menu-summary-checkout-btn');
+
+if (menuSummaryCheckoutBtn) {
+  menuSummaryCheckoutBtn.addEventListener('click', () => {
+
+    if (!basket || basket.length === 0) {
+      alert('Please add at least one dish before proceeding to checkout.');
+      return;
+    }
+
+    // Close the menu overlay first
+    closeMenuOverlay();
+
+    // Calculate basket subtotal
+    const subtotal = basket.reduce(
+      (sum, line) => sum + line.unitPrice * line.qty,
+      0
+    );
+
+    // Reuse the existing checkout flow
+    openCheckout(subtotal);
+  });
+}
+
+
 
 // ESC key closes popup too
 document.addEventListener('keydown', (e) => {
@@ -4464,18 +5788,18 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// ---------- Modal (customise) ----------
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modal-title');
+const modalBase = document.getElementById('modal-base');
+const qtyInput = document.getElementById('qty-input');
+const qtyIncr = document.getElementById('qty-incr');
+const qtyDecr = document.getElementById('qty-decr');
+const modsEl = document.getElementById('mods');
+const unitPriceEl = document.getElementById('unit-price');
 
-    // ---------- Modal (customise) ----------
-    const modal = document.getElementById('modal');
-    const modalTitle = document.getElementById('modal-title');
-    const modalBase = document.getElementById('modal-base');
-    const qtyInput = document.getElementById('qty-input');
-    const qtyIncr = document.getElementById('qty-incr');
-    const qtyDecr = document.getElementById('qty-decr');
-    const modsEl = document.getElementById('mods');
-    const unitPriceEl = document.getElementById('unit-price');
-	// if any older code still uses `modalPrice`, point it at #unit-price
-	const modalPrice = unitPriceEl;
+// if any older code still uses modalPrice, point it at #unit-price
+const modalPrice = unitPriceEl;
     const modalClose = document.getElementById('modal-close');
     const modalCancel = document.getElementById('modal-cancel');
     const modalAdd = document.getElementById('modal-add');
@@ -4536,7 +5860,8 @@ function buildExtraChips() {
     const isSelected = selectedExtras.some(x => x.id === opt.id);
     if (isSelected) btn.classList.add('selected');
 
-    btn.textContent = `${opt.name} ${formatCurrency(opt.delta)}`;
+    btn.textContent =
+  opt.name + ' ' + formatCurrency(opt.delta);
 
     btn.addEventListener('click', () => {
       // we’ll handle the "only 1 extra" rule in the next section
@@ -4575,8 +5900,12 @@ function handleExtraClick(opt) {
       if(currentRequires && currentAllowedMods){ modRequiredNote.style.display = 'block'; modalAdd.disabled = true; }
       else { modRequiredNote.style.display = 'none'; modalAdd.disabled = false; }
 
-      if(currentMulti && currentMax){ modLimitNote.style.display = 'block'; modLimitNote.textContent = `Choose up to ${currentMax} options`; }
-      else { modLimitNote.style.display = 'none'; }
+     if (currentMulti && currentMax) {
+  modLimitNote.style.display = 'block';
+  modLimitNote.textContent = 'Choose up to ' + currentMax + ' options';
+} else {
+  modLimitNote.style.display = 'none';
+}
 
       if(!currentAllowedMods){ modsEl.style.display = 'none'; return; }
       modsEl.style.display = 'flex';
@@ -4586,38 +5915,74 @@ function handleExtraClick(opt) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'chip';
-        btn.innerHTML = `${m.name}${m.delta ? ` (+${formatCurrency(m.delta)})` : ''}`;
+       btn.innerHTML =
+  m.name +
+  (m.delta ? ' (+' + formatCurrency(m.delta) + ')' : '');
         btn.dataset.id = m.id;
 
         btn.addEventListener('click', () => {
-          if(currentMulti){
-            if(selectedMods.has(m.id)){
-              selectedMods.delete(m.id);
-              btn.classList.remove('selected');
-            } else {
-              if(currentMax && selectedMods.size >= currentMax){
-                btn.animate([{transform:'translateY(-2px)'},{transform:'translateY(0)'}],{duration:140});
-                return;
-              }
-              selectedMods.add(m.id);
-              btn.classList.add('selected');
-            }
-            if(currentRequires) modalAdd.disabled = (selectedMods.size === 0);
-            if(currentMax && currentMulti){ modLimitNote.textContent = `Selected ${selectedMods.size}/${currentMax}`; }
-          } else {
-            if(selectedMods.has(m.id)){
-              selectedMods.delete(m.id);
-              btn.classList.remove('selected');
-            } else {
-              selectedMods.clear();
-              modsEl.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
-              selectedMods.add(m.id);
-              btn.classList.add('selected');
-            }
-            if(currentRequires) modalAdd.disabled = (selectedMods.size === 0);
-          }
-          updateUnitPricePreview();
-        });
+
+  if (currentMulti) {
+
+    if (selectedMods.has(m.id)) {
+      selectedMods.delete(m.id);
+      btn.classList.remove('selected');
+
+    } else {
+
+      if (currentMax && selectedMods.size >= currentMax) {
+        btn.animate(
+          [
+            { transform: 'translateY(-2px)' },
+            { transform: 'translateY(0)' }
+          ],
+          { duration: 140 }
+        );
+
+        return;
+      }
+
+      selectedMods.add(m.id);
+      btn.classList.add('selected');
+    }
+
+    if (currentRequires) {
+      modalAdd.disabled = (selectedMods.size === 0);
+    }
+
+    if (currentMax) {
+      modLimitNote.textContent =
+        'Selected ' +
+        selectedMods.size +
+        '/' +
+        currentMax;
+    }
+
+  } else {
+
+    if (selectedMods.has(m.id)) {
+      selectedMods.delete(m.id);
+      btn.classList.remove('selected');
+
+    } else {
+
+      selectedMods.clear();
+
+      modsEl
+        .querySelectorAll('.chip')
+        .forEach(c => c.classList.remove('selected'));
+
+      selectedMods.add(m.id);
+      btn.classList.add('selected');
+    }
+
+    if (currentRequires) {
+      modalAdd.disabled = (selectedMods.size === 0);
+    }
+  }
+
+  updateUnitPricePreview();
+});
 
         modsEl.appendChild(btn);
       });
@@ -4645,9 +6010,13 @@ function handleExtraClick(opt) {
 
   buildModifierChips(allowed, requires, isMulti, max);
   buildExtraChips();
-  modalTitle.textContent = `Customise — ${item.name}`;
-  modalBase.dataset.price = item.price;
-  modalBase.textContent   = `Base price: ${formatCurrency(item.price)}`;
+  modalTitle.textContent =
+  'Customise — ' + item.name;
+
+modalBase.dataset.price = item.price;
+
+modalBase.textContent =
+  'Base price: ' + formatCurrency(item.price);
   qtyInput.value = 1;
   updateUnitPricePreview();
 
@@ -4683,7 +6052,7 @@ function handleExtraClick(opt) {
 
 	function showOrderSuccessNew(summary, items, preferredTimeStr) {
   if (!orderSuccess) {
-    alert(`Order placed! ${summary?.ref || ''}`);
+    alert('Order placed! ' + (summary?.ref || ''));
     return;
   }
   
@@ -4700,20 +6069,34 @@ function handleExtraClick(opt) {
 
 
   // 1) header
-  const titleEl = document.getElementById('order-success-title');
-  if (titleEl) {
-    titleEl.textContent = `Order confirmed — ${summary?.ref || ''}`;
-  }
+const titleEl = document.getElementById('order-success-title');
+
+if (titleEl) {
+  titleEl.textContent =
+    "Order confirmed — " + (summary?.ref || "");
+}
 
     // 2) message
   const msgEl = document.getElementById('order-success-msg');
-  if (msgEl) {
-    const suffix = (summary?.orderType === 'delivery') ? 'delivery' : 'collection';
-    const note = preferredTimeStr
-      ? `Thanks! We’ll contact you to confirm your ${suffix} time (${preferredTimeStr}).`
-      : `Thanks! We’ll contact you to confirm your ${suffix}.`;
-    msgEl.textContent = note;
-  }
+
+if (msgEl) {
+  const suffix =
+    (summary?.orderType === 'delivery')
+      ? 'delivery'
+      : 'collection';
+
+  const note = preferredTimeStr
+    ? "Thanks! We’ll contact you to confirm your " +
+      suffix +
+      " time (" +
+      preferredTimeStr +
+      ")."
+    : "Thanks! We’ll contact you to confirm your " +
+      suffix +
+      " time.";
+
+  msgEl.textContent = note;
+} 
 
   // 2b) order type + time check
   const typeEl = document.getElementById('order-success-type');
@@ -4739,10 +6122,17 @@ function handleExtraClick(opt) {
       const div = document.createElement('div');
       div.style.padding = '6px 0';
       div.style.borderBottom = '1px dashed #eee';
-      div.innerHTML = `
-        ${row.qty} × ${row.name}
-        ${details.length ? ` <span class="muted small">• ${details.join(' • ')}</span>` : ''}
-      `;
+      div.innerHTML =
+  row.qty +
+  " × " +
+  row.name +
+  (
+    details.length
+      ? ' <span class="muted small">• ' +
+        details.join(" • ") +
+        "</span>"
+      : ""
+  );
       listEl.appendChild(div);
     });
   }
@@ -4788,17 +6178,30 @@ function handleExtraClick(opt) {
 
 
 	// close buttons
-	if (orderSuccessX)     orderSuccessX.addEventListener('click', () => orderSuccess.style.display = 'none');
-	if (orderSuccessClose) orderSuccessClose.addEventListener('click', () => orderSuccess.style.display = 'none');
-	if (orderSuccess) {
-	  orderSuccess.addEventListener('click', (e) => {
-		if (e.target === orderSuccess) orderSuccess.style.display = 'none';
-	  });
-	}
+if (orderSuccessX) {
+  orderSuccessX.addEventListener(
+    'click',
+    () => orderSuccess.style.display = 'none'
+  );
+}
 
+if (orderSuccessClose) {
+  orderSuccessClose.addEventListener(
+    'click',
+    () => orderSuccess.style.display = 'none'
+  );
+}
 
-	// make it available to the second script
-	window.showOrderSuccessNew = showOrderSuccessNew;
+if (orderSuccess) {
+  orderSuccess.addEventListener('click', (e) => {
+    if (e.target === orderSuccess) {
+      orderSuccess.style.display = 'none';
+    }
+  });
+}
+
+// make it available to the second script
+window.showOrderSuccessNew = showOrderSuccessNew;
 
 
 	
@@ -4827,7 +6230,7 @@ function handleExtraClick(opt) {
 			// if it passed just "012", add RTK-
 			ref: (typeof orderId === 'string' && orderId.startsWith('RTK-'))
 			  ? orderId
-			  : `RTK-${orderId}`,
+			  : "RTK-" + orderId,
 			subtotal: 0,
 			delivery: 0,
 			total: total || 0,
@@ -4842,7 +6245,9 @@ function handleExtraClick(opt) {
 
 	  // Fallback if the new function isn’t there
 	  alert(
-		(typeof orderId === 'string' ? orderId : `RTK-${orderId}`) ||
+		(typeof orderId === 'string'
+  ? orderId
+  : "RTK-" + orderId) ||
 		'Order placed!'
 	  );
 	}
@@ -4955,9 +6360,11 @@ if (Array.isArray(item.allowedExtras)) {
 
 	  buildModifierChips(allowed, requires, isMulti, max);
 	  buildExtraChips();
-	  modalTitle.textContent = `Customise — ${item.name}`;
+	  modalTitle.textContent =
+  "Customise — " + item.name;
 	  modalBase.dataset.price = item.price;
-	  modalBase.textContent   = `Base price: ${formatCurrency(item.price)}`;
+	  modalBase.textContent =
+  "Base price: " + formatCurrency(item.price);
 	  qtyInput.value = 1;
 	  updateUnitPricePreview();
 
@@ -5039,15 +6446,34 @@ if (Array.isArray(item.allowedExtras)) {
 	}
 	const itemId = item.id;
 
-	  basket.push({
-		name: item.name,
-		itemId: item.id,
-		mods: [...modsArr, ...extrasArr],   // put extras in mods for downstream reuse
-		unitPrice,
-		qty,
-		img: item.img || '',
-		spice: currentSpice ?? null
-	  });
+	  const newMods = [...modsArr, ...extrasArr];
+const newSpice = currentSpice ?? null;
+
+/*
+  Merge only genuinely identical basket lines:
+  - same dish
+  - same modifiers / extras
+  - same spice level
+*/
+const existingLine = basket.find(line =>
+  line.itemId === item.id &&
+  (line.spice ?? null) === newSpice &&
+  JSON.stringify(line.mods || []) === JSON.stringify(newMods)
+);
+
+if (existingLine) {
+  existingLine.qty += qty;
+} else {
+  basket.push({
+    name: item.name,
+    itemId: item.id,
+    mods: newMods,
+    unitPrice,
+    qty,
+    img: item.img || '',
+    spice: newSpice
+  });
+}
 
 	  closeModal();
 	  renderOrder();
@@ -5277,9 +6703,6 @@ document.getElementById('order-panel').addEventListener('click', async e => {
 
 // end Loaded
 
-
-
-
 </script>
 <script>
 // — measures the header and exposes its height in --header-h
@@ -5372,7 +6795,7 @@ function updateHeaderVar() {
 
 
 
- Supabase JS (CDN)
+ <!--Supabase JS (CDN)-->
   <!--<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>-->
   <script>
   console.log("Supabase global:", window.supabase);
@@ -5466,10 +6889,9 @@ function showCheckoutBanner(kind, msg) {
     ? 'checkout-banner--closed'
     : 'checkout-banner--fullybooked');
 
-  el.innerHTML = `
-    <button class="x" aria-label="Dismiss" onclick="this.parentElement.style.display='none'">×</button>
-    ${msg}
-  `;
+el.innerHTML =
+  '<button class="x" aria-label="Dismiss" onclick="this.parentElement.style.display=\'none\'">×</button>' +
+  msg;
   el.style.display = 'block';
 }
 function hideCheckoutBanner() {
@@ -5561,17 +6983,21 @@ if (preferredTimeInput) {
       const today = new Date();
       const todayKey = toYMD(today);
 
-      if (newDate === todayKey) {
-        // Today: respect minimum lead time
-        searchFrom = new Date();
-        searchFrom.setMinutes(
-          searchFrom.getMinutes() + LEAD_MINUTES
-        );
-      } else {
-        // Future date: begin at midnight;
-        // nextAllowed() will walk forward to opening time.
-        searchFrom = new Date(`${newDate}T00:00:00`);
-      }
+     if (newDate === todayKey) {
+  // Today: respect minimum lead time
+  searchFrom = new Date();
+
+  searchFrom.setMinutes(
+    searchFrom.getMinutes() + LEAD_MINUTES
+  );
+
+} else {
+  // Future date: begin at midnight;
+  // nextAllowed() will walk forward to opening time.
+  searchFrom = new Date(
+    newDate + "T00:00:00"
+  );
+}
 
       const nextAvailable =
   await nextAllowedWithKitchenSchedule(searchFrom);
@@ -5608,8 +7034,8 @@ if (preferredTimeInput) {
 }
 
 // 3) Guard your submit handler (fail fast if invalid)
-//    In your existing `checkoutForm.addEventListener('submit', async (e) => { ... })`,
-//    add these lines near the top, right after you read `preferredTimeRaw`:
+//    In your existing checkoutForm.addEventListener('submit', async (e) => { ... }),
+//    add these lines near the top, right after you read preferredTimeRaw:
 
 /*
   // inside your submit handler, after:
@@ -5732,13 +7158,16 @@ if (
     };
   }
 
-  if (foodSubtotal < Number(data.min_food_subtotal || 0)) {
-    return {
-      valid: false,
-      reason:
-        `This code requires a minimum food spend of £${Number(data.min_food_subtotal).toFixed(2)}.`
-    };
-  }
+if (foodSubtotal < Number(data.min_food_subtotal || 0)) {
+
+  return {
+    valid: false,
+    reason:
+      'This code requires a minimum food spend of £' +
+      Number(data.min_food_subtotal).toFixed(2)
+  };
+
+}
 
   let discountAmount = 0;
 
@@ -5791,7 +7220,7 @@ async function refreshAppliedDiscountCode() {
 
     if (message) {
   message.textContent =
-    `Discount code removed — ${result.reason}`;
+  'Discount code removed — ' + result.reason;
   message.className = "discount-code-message error";
 }
 
@@ -5801,13 +7230,17 @@ async function refreshAppliedDiscountCode() {
 
   appliedDiscountAmount = result.discountAmount;
 
-  if (message) {
-    message.textContent =
-      `${appliedDiscountCode} applied: £${appliedDiscountAmount.toFixed(2)} off`;
-    message.className = "discount-code-message success";
-  }
+ if (message) {
+  message.textContent =
+    appliedDiscountCode +
+    " applied: £" +
+    appliedDiscountAmount.toFixed(2) +
+    " off";
 
-  recomputeCheckoutTotals();
+  message.className = "discount-code-message success";
+}
+
+recomputeCheckoutTotals();
 }
 
 // ← ADD THIS HERE
@@ -5905,21 +7338,52 @@ function renderLoyaltyMessage() {
   el.hidden = false;
 
 if (rewardEligible && discountApplied > 0) {
-  el.innerHTML = `
-    <strong>Loyalty reward applied:</strong> You have ${points} points, so <strong>£${discountApplied.toFixed(2)} off</strong> your food subtotal has been applied automatically.<br>
-    Redeeming on fulfilment: -${pointsRedeemedPending} points<br>
-    This order: +${pointsEarnedPending} pending points<br>
-    Expected balance after fulfilment: <strong>${expectedBalance}</strong>
-  `;
+
+  el.innerHTML =
+    '<strong>Loyalty reward applied:</strong> ' +
+    'You have ' + points + ' points, so ' +
+    '<strong>£' + discountApplied.toFixed(2) + ' off</strong> ' +
+    'your food subtotal has been applied automatically.<br>' +
+    'Redeeming on fulfilment: -' +
+    pointsRedeemedPending +
+    ' points<br>' +
+    'This order: +' +
+    pointsEarnedPending +
+    ' pending points<br>' +
+    'Expected balance after fulfilment: <strong>' +
+    expectedBalance +
+    '</strong>';
+
   return;
 }
 
-  el.innerHTML = `
-    <strong>Loyalty points:</strong> You currently have ${points} points.<br>
-    This order: +${pointsEarnedPending} pending points<br>
-    Expected balance after fulfilment: <strong>${expectedBalance}</strong><br>
-    ${needed > 0 ? `Only ${needed} more points until your next £5 reward.` : ''}
-  `;
+if (rewardEligible && discountApplied > 0) {
+
+  el.innerHTML =
+    '<strong>Loyalty reward applied:</strong> ' +
+    'You have ' + points + ' points, so ' +
+    '<strong>£' + discountApplied.toFixed(2) + ' off</strong> ' +
+    'your food subtotal has been applied automatically.<br>' +
+    'Redeeming on fulfilment: -' +
+    pointsRedeemedPending +
+    ' points<br>' +
+    'This order: +' +
+    pointsEarnedPending +
+    ' pending points<br>' +
+    'Expected balance after fulfilment: <strong>' +
+    expectedBalance +
+    '</strong>';
+
+  return;
+}
+
+  el.innerHTML =
+  '<strong>Loyalty points:</strong> You currently have ' + points + ' points.<br>' +
+  'This order: +' + pointsEarnedPending + ' pending points<br>' +
+  'Expected balance after fulfilment: <strong>' + expectedBalance + '</strong><br>' +
+  (needed > 0
+    ? 'Only ' + needed + ' more points until your next £5 reward.'
+    : '');
 }
 
 function normalisePhone(phone) {
@@ -6005,7 +7469,10 @@ async function fetchLoyaltyBalance(phone) {
 
   const remaining = Math.max(0, DELIVERY_FREE_THRESHOLD - subtotal);
 
-  hintEl.textContent = `🚚 Add £${remaining.toFixed(2)} more for FREE delivery`;
+ hintEl.textContent =
+  "🚚 Add £" +
+  remaining.toFixed(2) +
+  " more for FREE delivery";
   hintEl.style.display = "block";
 }
 			
@@ -6108,12 +7575,16 @@ if (typeof deliveryNote !== 'undefined' && deliveryNote) {
 
     } else {
       deliveryNote.className = "";
-      deliveryNote.textContent =
-        `Delivery ${formatCurrency(Number(quote.fee ?? 0))}${
-          Number.isFinite(quote.routeMiles)
-            ? ` based on approx. route distance of ${quote.routeMiles.toFixed(1)} miles`
-            : ' based on approximate distance'
-        }`;
+deliveryNote.textContent =
+  "Delivery " +
+  formatCurrency(Number(quote.fee ?? 0)) +
+  (
+    Number.isFinite(quote.routeMiles)
+      ? " based on approx. route distance of " +
+        quote.routeMiles.toFixed(1) +
+        " miles"
+      : " based on approximate distance"
+  );
     }
   }
 }
@@ -6139,8 +7610,10 @@ if (typeof deliveryNote !== 'undefined' && deliveryNote) {
 					let label = 'Discount';
 
 					if (appliedDiscountCode) {
-					  label += ` (${appliedDiscountCode})`;
-					}
+
+  label += " (" + appliedDiscountCode + ")";
+
+}
 
 					const labelEl =
 					  discountRow.querySelector('.label');
@@ -6150,7 +7623,7 @@ if (typeof deliveryNote !== 'undefined' && deliveryNote) {
 					}
 
 					discountValue.textContent =
-					  `-£${totalDiscount.toFixed(2)}`;
+  "-£" + totalDiscount.toFixed(2);
 
 				  } else {
 
@@ -6166,8 +7639,8 @@ if (typeof deliveryNote !== 'undefined' && deliveryNote) {
 			  if (loyaltyRow && loyaltyValue) {
 				if (loyaltyDiscount > 0) {
 				  loyaltyRow.style.display = 'flex';
-				  loyaltyValue.textContent = `-£${loyaltyDiscount.toFixed(2)}`;
-				} else {
+        loyaltyValue.textContent =
+      "-£" + loyaltyDiscount.toFixed(2);				} else {
 				  loyaltyRow.style.display = 'none';
 				  loyaltyValue.textContent = '';
 				}
@@ -6182,8 +7655,8 @@ if (typeof deliveryNote !== 'undefined' && deliveryNote) {
 				  discount_amount: Number(appliedDiscountAmount || 0),
 				  discount_code: appliedDiscountCode || "",
 				  discount_label: appliedDiscountCode
-					? `Voucher discount (${appliedDiscountCode})`
-					: "",
+				? "Voucher discount (" + appliedDiscountCode + ")"
+: "",
 
 				  discounted_subtotal: discountedSubtotal,
 
@@ -6227,22 +7700,19 @@ function updateCheckoutOrderSummary() {
   const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
   const address = document.getElementById('cust-address')?.value || '';
 
-  if (orderType === 'delivery') {
-    box.innerHTML = `
-      <strong>ORDER TYPE: DELIVERY</strong><br>
-      Delivering to:<br>
-      ${address || '(enter delivery address)'}
-    `;
-  } else {
-    box.innerHTML = `
-      <strong>ORDER TYPE: COLLECTION</strong><br>
-      Collect from:<br>
-      Rung's Thai Kitchen, Morley
-    `;
-  }
+ if (orderType === "delivery") {
+  box.innerHTML =
+    "<strong>ORDER TYPE: DELIVERY</strong><br>" +
+    "Delivering to:<br>" +
+    (address || "(enter delivery address)");
+} else {
+  box.innerHTML =
+    "<strong>ORDER TYPE: COLLECTION</strong><br>" +
+    "Collect from:<br>" +
+    "Rung's Thai Kitchen, Morley";
 }
 
-
+}
     orderTypeRadios.forEach(r => r.addEventListener('change', recomputeCheckoutTotals));
 	
 				// ---- Address required only for delivery ----
@@ -6508,7 +7978,13 @@ kitchenSlotMap = buildKitchenProductionMap(schedule);
 
 function toYMD(d){
   const pad = n => String(n).padStart(2,'0');
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+ return (
+  d.getFullYear() +
+  "-" +
+  pad(d.getMonth() + 1) +
+  "-" +
+  pad(d.getDate())
+);
 }
 function parseHm(dateRef, hm){ // "HH:MM" -> Date on same Y/M/D
   const [h,m] = hm.split(':').map(Number);
@@ -6726,8 +8202,18 @@ const LEAD_MINUTES = 20;
 /** Convert a Date to the value format of datetime-local input */
 function toLocalInputValue(d) {
   const pad = n => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
-         `T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+  return (
+    d.getFullYear() +
+    '-' +
+    pad(d.getMonth() + 1) +
+    '-' +
+    pad(d.getDate()) +
+    'T' +
+    pad(d.getHours()) +
+    ':' +
+    pad(d.getMinutes())
+  );
 }
 
 const KITCHEN_LOAD_BY_CATEGORY = {
@@ -6920,10 +8406,11 @@ if (preferredTimeEl?.value) {
     });
 
   showPreferredTimeMessage(
-    `Your selected time is no longer available due to kitchen capacity. ` +
-    `We've moved your order to the next available time at ${newTime}. ` +
-    `Please check the new time and press Place Order again.`
-  );
+  "Your selected time is no longer available due to kitchen capacity. " +
+  "We've moved your order to the next available time at " +
+  newTime +
+  ". Please check the new time and press Place Order again."
+);
 
   console.log(
     '[kitchen-schedule] submit blocked; moved to:',
@@ -7128,13 +8615,16 @@ document.getElementById("apply-discount-code-btn")?.addEventListener("click", as
   appliedDiscountCode = result.code;
   appliedDiscountAmount = result.discountAmount;
 
-  if (message) {
-    message.textContent =
-      `${result.code} applied: £${result.discountAmount.toFixed(2)} off`;
+if (message) {
+  message.textContent =
+    result.code +
+    " applied: £" +
+    result.discountAmount.toFixed(2) +
+    " off";
 
-    message.className =
-      "discount-code-message success";
-  }
+  message.className =
+    "discount-code-message success";
+}
 
   recomputeCheckoutTotals();
 
@@ -7181,42 +8671,79 @@ document.getElementById("apply-discount-code-btn")?.addEventListener("click", as
 		  const totalEl  = document.getElementById('order-success-total');
 
 		  if (!wrap) {
-			alert(`Order placed! ${summary?.ref || ''}`);
-			return;
-		  }
+  alert(
+    "Order placed! " +
+    (summary?.ref || "")
+  );
+  return;
+}
 
-		  // header
-		  if (titleEl) {
-			titleEl.textContent = `Order confirmed — ${summary.ref}`;
-		  }
+		 // header
+if (titleEl) {
+  titleEl.textContent =
+    "Order confirmed — " + summary.ref;
+}
 
-		  // note
-		  if (msgEl) {
-			const suffix = summary.orderType === 'delivery' ? 'delivery' : 'collection';
-			const note = preferredTimeStr
-			  ? `Thanks! We’ll contact you to confirm your ${suffix} time (${preferredTimeStr}).`
-			  : `Thanks! We’ll contact you to confirm your ${suffix} time.`;
-			msgEl.textContent = note;
-		  }
+// note
+if (msgEl) {
+  const suffix =
+    summary.orderType === "delivery"
+      ? "delivery"
+      : "collection";
 
-		  // items
-		  if (listEl) {
-			listEl.innerHTML = items.map((row) => {
-	  const cleanName = stripChillies(row.name);
-	  const hasMods  = row.mods && row.mods.length;
-	  const hasSpice = typeof row.spice === 'number';
-	  const spiceStr = hasSpice ? ' ' + '🌶️'.repeat(Math.max(0, Math.min(3, row.spice))) : '';
-	  return `
-		<div style="padding:6px 0;border-bottom:1px dashed #eee">
-		  ${row.qty} × ${cleanName}
-		  ${hasMods ? `<span class="muted small"> • ${row.mods.map(m => m.name).join(', ')}</span>` : ''}
-		  ${spiceStr}
-		  <div class="muted small">Line: ${window.formatCurrency(row.qty * row.unitPrice)}</div>
-		</div>
-	  `;
-	}).join('');
+  const note = preferredTimeStr
+    ? "Thanks! We’ll contact you to confirm your " +
+      suffix +
+      " time (" +
+      preferredTimeStr +
+      ")."
+    : "Thanks! We’ll contact you to confirm your " +
+      suffix +
+      " time.";
 
-		  }
+  msgEl.textContent = note;
+}
+
+// items
+if (listEl) {
+  listEl.innerHTML = items.map((row) => {
+    const cleanName = stripChillies(row.name);
+
+    const hasMods =
+      row.mods && row.mods.length;
+
+    const hasSpice =
+      typeof row.spice === "number";
+
+    const spiceStr = hasSpice
+      ? " " +
+        "🌶️".repeat(
+          Math.max(0, Math.min(3, row.spice))
+        )
+      : "";
+
+    const modsHtml = hasMods
+      ? '<span class="muted small"> • ' +
+        row.mods.map(m => m.name).join(", ") +
+        "</span>"
+      : "";
+
+    return (
+      '<div style="padding:6px 0;border-bottom:1px dashed #eee">' +
+        row.qty +
+        " × " +
+        cleanName +
+        modsHtml +
+        spiceStr +
+        '<div class="muted small">Line: ' +
+        window.formatCurrency(
+          row.qty * row.unitPrice
+        ) +
+        "</div>" +
+      "</div>"
+    );
+  }).join("");
+}
 
 		  // total
 		  if (totalEl) {
@@ -7486,10 +9013,11 @@ if (submitPreferredTimeEl?.value) {
     });
 
   showPreferredTimeMessage(
-    `Your selected time is no longer available due to kitchen capacity. ` +
-    `We've moved your order to the next available time at ${newTime}. ` +
-    `Please check the new time and press Place Order again.`
-  );
+  "Your selected time is no longer available due to kitchen capacity. " +
+  "We've moved your order to the next available time at " +
+  newTime +
+  ". Please check the new time and press Place Order again."
+);
 
       console.log(
         '[kitchen-schedule] submit blocked; moved to:',
@@ -7646,13 +9174,20 @@ if (!hasFreeDelivery && (!routeMilesNow || routeMilesNow <= 0)) {
 
 
 
-    function fail(step, err){
-      console.error(`[Checkout] ${step} failed:`, err);
-      checkoutMsg.style.color = '#b02a2a';
-      checkoutMsg.textContent =
-        `${step} failed: ${err?.message || err?.hint || 'Unknown error'}`;
-    }
+   function fail(step, err) {
 
+  console.error(
+    "[Checkout] " + step + " failed:",
+    err
+  );
+
+  checkoutMsg.style.color = "#b02a2a";
+
+  checkoutMsg.textContent =
+    step +
+    " failed: " +
+    (err?.message || err?.hint || "Unknown error");
+}
     // ---------- Get or create customer ----------
     let customerId = null;
     try {
@@ -7820,7 +9355,10 @@ const baseOrderPayload = {
 
   discount_code: appliedDiscountCode,
   discount_amount: Number(appliedDiscountAmount || 0),
-  discount_label: appliedDiscountCode ? `Discount code ${appliedDiscountCode}` : null,
+ discount_label:
+  appliedDiscountCode
+    ? "Discount code " + appliedDiscountCode
+    : null,
 
   delivery_fee: Number(submitTotals.delivery_fee.toFixed(2)),
 
@@ -7978,12 +9516,12 @@ console.log('BASE ORDER PAYLOAD:', baseOrderPayload);
 
 						discount_label:
 						  appliedDiscountCode
-							? `Discount code ${appliedDiscountCode}`
-							: submitTotals.loyalty_discount > 0
-							  ? 'Loyalty reward'
-							  : submitTotals.discount > 0
-								? '10% Wed/Thu discount'
-								: null,
+						? "Discount code " + appliedDiscountCode
+  : submitTotals.loyalty_discount > 0
+    ? "Loyalty reward"
+    : submitTotals.discount > 0
+      ? "10% Wed/Thu discount"
+      : null,
 
 						loyalty_discount: submitTotals.loyalty_discount,
 						loyalty_reward_applied: submitTotals.loyalty_reward_applied,
@@ -8087,10 +9625,12 @@ window.downloadReceipt = function downloadReceipt(summary, items, preferredTimeS
   console.log('[receipt totals]', window.__checkoutTotals);
 console.log('[receipt summary]', summary);
 
-  const lines = [];
-  lines.push("Rung's Thai Kitchen");
-  lines.push('----------------------------------------');
-  lines.push(`Order ref: ${summary?.ref || 'RTK-???'}`);
+const lines = [];
+lines.push("Rung's Thai Kitchen");
+lines.push("----------------------------------------");
+lines.push(
+  "Order ref: " + (summary?.ref || "RTK-???")
+);
 
 console.log('[receipt totals]', window.__checkoutTotals);
 console.log('[receipt summary]', summary);
@@ -8140,54 +9680,117 @@ const calculatedTotal = Math.max(
   subtotal - voucherAmount - loyaltyAmount + deliveryFee
 );
 
-lines.push(`Subtotal: ${pound}${subtotal.toFixed(2)}`);
+lines.push(
+  "Subtotal: " + pound + subtotal.toFixed(2)
+);
 
 if (voucherAmount > 0) {
   const voucherText = voucherCode
-    ? `Voucher discount (${voucherCode})`
-    : 'Voucher discount';
+    ? "Voucher discount (" + voucherCode + ")"
+    : "Voucher discount";
 
-  lines.push(`${voucherText}: -${pound}${voucherAmount.toFixed(2)}`);
+  lines.push(
+    voucherText +
+    ": -" +
+    pound +
+    voucherAmount.toFixed(2)
+  );
 } else {
-  lines.push(`Voucher discount: ${pound}0.00`);
+  lines.push(
+    "Voucher discount: " + pound + "0.00"
+  );
 }
 
 if (loyaltyAmount > 0) {
-  lines.push(`Loyalty reward: -${pound}${loyaltyAmount.toFixed(2)}`);
+  lines.push(
+    "Loyalty reward: -" +
+    pound +
+    loyaltyAmount.toFixed(2)
+  );
 } else {
-  lines.push(`Loyalty reward: ${pound}0.00`);
+  lines.push(
+    "Loyalty reward: " + pound + "0.00"
+  );
 }
 
-lines.push(`Delivery: ${pound}${deliveryFee.toFixed(2)}`);
-lines.push(`Total: ${pound}${calculatedTotal.toFixed(2)}`);
-  lines.push(`Type: ${summary?.orderType || ''}`);
-  if (preferredTimeStr) lines.push(`Preferred time: ${preferredTimeStr}`);
-  lines.push('');
-  lines.push('Items');
+lines.push(
+  "Delivery: " +
+  pound +
+  deliveryFee.toFixed(2)
+);
 
-  (items || []).forEach((row) => {
-    const cleanName = noChilli(row.name || '');
-    const qty = row.qty || 1;
-    const lineTotal = (row.unitPrice || 0) * qty;
-    lines.push(`${qty} × ${cleanName} ${pound}${lineTotal.toFixed(2)}`);
+lines.push(
+  "Total: " +
+  pound +
+  calculatedTotal.toFixed(2)
+);
 
-    const extras = [];
-    if (Array.isArray(row.mods) && row.mods.length) {
-      extras.push(row.mods.map(m => m.name).join(', '));
-    }
-    if (typeof row.spice === 'number') {
-      const spiceText =
-        row.spice === 0 ? 'None' :
-        row.spice === 1 ? 'Mild' :
-        row.spice === 2 ? 'Medium' : 'Hot';
-      extras.push(`Spice: ${spiceText}`);
-    }
-    if (extras.length) lines.push(`${bullet} ${extras.join(` ${bullet} `)}`);
-  });
+lines.push(
+  "Type: " +
+  (summary?.orderType || "")
+);
 
-  lines.push('');
-  lines.push('Thank you for ordering with Rung\'s Thai Kitchen!');
+if (preferredTimeStr) {
+  lines.push(
+    "Preferred time: " + preferredTimeStr
+  );
+}
 
+lines.push("");
+lines.push("Items");
+
+(items || []).forEach((row) => {
+  const cleanName = noChilli(row.name || "");
+  const qty = row.qty || 1;
+  const lineTotal = (row.unitPrice || 0) * qty;
+
+  lines.push(
+    qty +
+    " × " +
+    cleanName +
+    " " +
+    pound +
+    lineTotal.toFixed(2)
+  );
+
+  const extras = [];
+
+  if (Array.isArray(row.mods) && row.mods.length) {
+    extras.push(
+      row.mods
+        .map(m => m.name)
+        .join(", ")
+    );
+  }
+
+  if (typeof row.spice === "number") {
+    const spiceText =
+      row.spice === 0
+        ? "None"
+        : row.spice === 1
+          ? "Mild"
+          : row.spice === 2
+            ? "Medium"
+            : "Hot";
+
+    extras.push(
+      "Spice: " + spiceText
+    );
+  }
+
+  if (extras.length) {
+    lines.push(
+      bullet +
+      " " +
+      extras.join(" " + bullet + " ")
+    );
+  }
+});
+
+lines.push("");
+lines.push(
+  "Thank you for ordering with Rung's Thai Kitchen!"
+);
   // make .txt UTF-8
   const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -8234,57 +9837,84 @@ window.downloadReceiptPlain = function (summary, items, preferredTimeStr) {
      .replace(/\s{2,}/g, ' ')
      .trim();
 
-  const lines = [];
-  lines.push("Rung's Thai Kitchen");
-  lines.push('----------------------------------------');
-  lines.push(`Order ref: ${summary?.ref || 'RTK-???'}`);
+const lines = [];
 
-  const totalNum = Number(summary?.total || 0);
-  const totalText = (typeof window.formatCurrency === 'function')
+lines.push("Rung's Thai Kitchen");
+lines.push("----------------------------------------");
+lines.push(
+  "Order ref: " + (summary?.ref || "RTK-???")
+);
+
+const totalNum = Number(summary?.total || 0);
+
+const totalText =
+  typeof window.formatCurrency === "function"
     ? window.formatCurrency(totalNum)
-    : '£' + totalNum.toFixed(2);
-  lines.push(`Total: ${totalText}`);
+    : "£" + totalNum.toFixed(2);
 
-  if (summary?.orderType) {
-    lines.push(`Type: ${summary.orderType}`);
-  }
-  if (preferredTimeStr) {
-    lines.push(`Preferred time: ${preferredTimeStr}`);
-  }
+lines.push("Total: " + totalText);
 
-  lines.push('');
-  lines.push('Items');
+if (summary?.orderType) {
+  lines.push("Type: " + summary.orderType);
+}
 
-  (items || []).forEach(row => {
-    const name = stripSpice(row.name || '');
-    const qty  = row.qty || 1;
-    const lineTotal = Number(qty) * Number(row.unitPrice || 0);
-    const linePrice = (typeof window.formatCurrency === 'function')
+if (preferredTimeStr) {
+  lines.push("Preferred time: " + preferredTimeStr);
+}
+
+lines.push("");
+lines.push("Items");
+
+(items || []).forEach(row => {
+  const name = stripSpice(row.name || "");
+  const qty = row.qty || 1;
+
+  const lineTotal =
+    Number(qty) * Number(row.unitPrice || 0);
+
+  const linePrice =
+    typeof window.formatCurrency === "function"
       ? window.formatCurrency(lineTotal)
-      : '£' + lineTotal.toFixed(2);
+      : "£" + lineTotal.toFixed(2);
 
-    // main line
-    lines.push(`${qty} × ${name} ${linePrice}`);
+  // main line
+  lines.push(
+    qty + " × " + name + " " + linePrice
+  );
 
-    // extras line
-    const extras = [];
-    if (Array.isArray(row.mods) && row.mods.length) {
-      extras.push(row.mods.map(m => m.name).join(', '));
-    }
-    if (typeof row.spice === 'number') {
-      const spiceText =
-        row.spice === 0 ? 'None' :
-        row.spice === 1 ? 'Mild' :
-        row.spice === 2 ? 'Medium' : 'Hot';
-      extras.push(`Spice: ${spiceText}`);
-    }
-    if (extras.length) {
-      lines.push('• ' + extras.join(' • '));
-    }
-  });
+  // extras line
+  const extras = [];
 
-  lines.push('');
-  lines.push('Thank you!');
+  if (Array.isArray(row.mods) && row.mods.length) {
+    extras.push(
+      row.mods.map(m => m.name).join(", ")
+    );
+  }
+
+  if (typeof row.spice === "number") {
+    const spiceText =
+      row.spice === 0
+        ? "None"
+        : row.spice === 1
+          ? "Mild"
+          : row.spice === 2
+            ? "Medium"
+            : "Hot";
+
+    extras.push(
+      "Spice: " + spiceText
+    );
+  }
+
+  if (extras.length) {
+    lines.push(
+      "• " + extras.join(" • ")
+    );
+  }
+});
+
+lines.push("");
+lines.push("Thank you!");
 
   // 👇 add a BOM so Windows/Notepad knows it's UTF-8
   const BOM = '\uFEFF';
@@ -8418,6 +10048,64 @@ backToTopBtn.addEventListener('click', () => {
   });
 });
 
+document.addEventListener("click", function (e) {
+
+  const btn = e.target.closest("[data-summary-action]");
+  if (!btn) return;
+
+  const idx = Number(btn.dataset.idx);
+  const action = btn.dataset.summaryAction;
+
+  if (!Number.isInteger(idx) || !basket[idx]) return;
+
+  if (action === "inc") {
+    basket[idx].qty += 1;
+  }
+
+  if (action === "dec") {
+    basket[idx].qty -= 1;
+
+    if (basket[idx].qty <= 0) {
+      basket.splice(idx, 1);
+    }
+  }
+
+  if (action === "remove") {
+    basket.splice(idx, 1);
+  }
+
+  renderOrder();
+});
+
+// Menu category quick-navigation
+document.addEventListener("click", function (e) {
+
+  const btn = e.target.closest(".menu-category-nav button");
+  if (!btn) return;
+
+  const targetId = btn.dataset.target;
+  const target = document.getElementById(targetId);
+
+  if (!target) {
+    console.warn("[menu nav] No category found for:", targetId);
+    return;
+  }
+
+  const menuSheet = document.querySelector(".menu-sheet");
+  const nav = document.querySelector(".menu-category-nav");
+
+  if (!menuSheet || !nav) return;
+
+  const extraGap = 18;
+  const targetTop =
+    target.offsetTop - nav.offsetHeight - extraGap;
+
+  menuSheet.scrollTo({
+    top: targetTop,
+    behavior: "smooth"
+  });
+});
+
 </script>
 <script>
 // --- Lightbox safe listener ---
@@ -8441,8 +10129,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // Create the map with closer zoom
   var map = L.map('delivery-map').setView([lat, lng], 15);
 
-  // 🌙 Night-mode / dark map tiles
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  // ☀️ Light map tiles
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
   }).addTo(map);
@@ -8465,15 +10153,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   L.circle([lat, lng], {
     radius: radiusMeters,
-    color: '#ffb347',        // warm accent for dark map
+    color: '#ffb347',        // warm RTK accent
     fillColor: '#ffb347',
     fillOpacity: 0.18,
     weight: 2
   }).addTo(map);
 });
 </script>
-
-getComputedStyle(document.documentElement).getPropertyValue('--header-offset')
 
 <script>
 console.info('Console levels forced');
@@ -8484,13 +10170,12 @@ console.log = console.info = console.debug = console.warn = console.error = cons
 
 // ---- Temporary closure override (edit when needed) ----
 const tempClosure = {
-  active: false, // ✅ set true when temporarily closed
+  active: false,
   title: "Temporarily closed",
-  message: `Just a quick heads up for our lovely local customers — unfortunately we won’t be open Wed/Thurs this week due to car trouble 🚗😒`,
-  // Optional reopen time shown to customers (UK local time)
+  message:
+    "Just a quick heads up for our lovely local customers — unfortunately we won’t be open Wed/Thurs this week due to car trouble 🚗😒",
   reopenText: "Hoping to be back Friday evening 🤞",
-  // Behaviour
-  autoHideMs: null, // null = don't auto-hide; e.g. 10000 to auto-hide
+  autoHideMs: null,
   blockOrdering: true
 };
 
@@ -8526,9 +10211,18 @@ document.addEventListener("DOMContentLoaded", () => {
     if (titleEl) titleEl.textContent = tempClosure.title;
 
     if (msgEl) {
-      const reopenLine = tempClosure.reopenText ? `<br><br><strong>${tempClosure.reopenText}</strong>` : "";
-      msgEl.innerHTML = `${tempClosure.message}${reopenLine}`;
-    }
+
+  const reopenLine =
+    tempClosure.reopenText
+      ? "<br><br><strong>" +
+        tempClosure.reopenText +
+        "</strong>"
+      : "";
+
+  msgEl.innerHTML =
+    tempClosure.message + reopenLine;
+
+}
 
     // Optional: change button label
     if (closeBtn) closeBtn.textContent = "Continue to website";
@@ -8951,48 +10645,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </script>
 
+<script>
+
+(function () {
+
+    const images = [
+        "images/hero/thai-sausage.png",
+        "images/hero/greencurry.png",
+        "images/hero/somtam.png"
+    ];
+
+    const imageA = document.getElementById("hero-right-image-a");
+    const imageB = document.getElementById("hero-right-image-b");
+
+    if (!imageA || !imageB) {
+        return;
+    }
+
+    let current = 0;
+
+    setInterval(() => {
+
+        const next = (current + 1) % images.length;
+
+        const active =
+            imageA.classList.contains("active")
+                ? imageA
+                : imageB;
+
+        const inactive =
+            active === imageA
+                ? imageB
+                : imageA;
+
+        inactive.src = images[next];
+
+        inactive.classList.add("active");
+
+        active.classList.remove("active");
+
+        current = next;
+
+    }, 12000);
+
+})();
+</script>
+
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
