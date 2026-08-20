@@ -3971,6 +3971,106 @@ footer#contact .footer-inner {
   border: none !important;
   background: transparent !important;
 }
+
+.menu-card-heading-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.menu-card-title-wrap {
+  min-width: 0;
+  flex: 1;
+}
+
+.menu-card-price {
+  position: static !important;
+  flex: 0 0 auto;
+  color: #16803a;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.menu-inline-controls {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+
+.menu-inline-modifier {
+  width: 100%;
+  min-height: 38px;
+  border-radius: 999px;
+  border: 1px solid #ead7d2;
+  padding: 0 12px;
+  background: #fff;
+  font-size: 14px;
+}
+
+.menu-inline-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-inline-qty-wrap {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  border: 1px solid #ead7d2;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.menu-inline-qty-minus,
+.menu-inline-qty-plus {
+  width: 34px;
+  height: 38px;
+  border: 0;
+  background: transparent;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.menu-inline-qty {
+  width: 38px !important;
+  height: 38px;
+  border: 0 !important;
+  padding: 0 !important;
+  text-align: center;
+  font-weight: 700;
+  background: transparent;
+}
+
+.menu-inline-add-btn {
+  min-width: 82px;
+  min-height: 38px;
+  padding: 8px 16px !important;
+  border: none !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #2E7D32, #43A047) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 6px 16px rgba(46,125,50,0.24);
+  cursor: pointer;
+}
+
+.menu-inline-add-btn.added {
+  background: linear-gradient(135deg, #16a34a, #15803d) !important;
+}
+
+.menu-more-options-btn {
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #9a5b2f;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
 		  </style>
 		</head>
 		<body>
@@ -5532,17 +5632,88 @@ else if (item.badge === 'popular') {
 
     card.innerHTML = `
   ${thumbHTML}
+
   <div class="menu-card-main">
-    ${badgeHTML}
-    <div class="menu-card-title">${item.name}</div>
-    <div class="menu-card-desc muted small">${item.desc || ''}</div>
-    ${allergenHTML}
-    <div class="menu-card-bottom">
-      <div class="price">${formatCurrency(item.price)}</div>
-      <button class="btn btn-accent" type="button" data-id="${item.id}">
-        customise
-      </button>
+
+    <div class="menu-card-heading-row">
+      <div class="menu-card-title-wrap">
+        ${badgeHTML}
+        <div class="menu-card-title">${item.name}</div>
+      </div>
+
+      <div
+        class="price menu-inline-price menu-card-price"
+        data-base-price="${item.price}"
+      >
+        ${formatCurrency(item.price)}
+      </div>
     </div>
+
+    <div class="menu-card-desc muted small">
+      ${item.desc || ''}
+    </div>
+
+    ${allergenHTML}
+
+    <div class="menu-card-bottom">
+      <div class="menu-inline-controls">
+
+        ${item.allowedModifiers ? `
+          <select class="menu-inline-modifier">
+            <option value="">Choose option</option>
+            ${item.allowedModifiers.map(id => {
+              const mod = MODIFIERS.find(m => m.id === id);
+              if (!mod) return '';
+
+              const priceText =
+                Number(mod.delta || 0) > 0
+                  ? ` +${formatCurrency(mod.delta)}`
+                  : '';
+
+              return `
+                <option value="${mod.id}">
+                  ${mod.name}${priceText}
+                </option>
+              `;
+            }).join('')}
+          </select>
+        ` : ''}
+
+        <div class="menu-inline-row">
+
+          <div class="menu-inline-qty-wrap">
+            <button type="button" class="menu-inline-qty-minus">−</button>
+
+            <input
+              class="menu-inline-qty"
+              type="number"
+              min="1"
+              value="1"
+            >
+
+            <button type="button" class="menu-inline-qty-plus">+</button>
+          </div>
+
+          <button
+            class="btn menu-inline-add-btn"
+            type="button"
+          >
+            Add
+          </button>
+
+        </div>
+
+        <button
+          class="menu-more-options-btn"
+          type="button"
+          data-id="${item.id}"
+        >
+          + Spice / extras
+        </button>
+
+      </div>
+    </div>
+
   </div>
 `;
 
@@ -5565,6 +5736,146 @@ if (!container.dataset.bound) {
 
 }
 
+function quickAddFromMenuCard(card) {
+  if (!card) return false;
+
+  const itemId = card.dataset.id;
+  const item = window.ITEMS_BY_ID.get(itemId);
+
+  if (!item) {
+    console.error('[quick add] Item not found:', itemId);
+    return false;
+  }
+
+  const modifierSelect =
+    card.querySelector('.menu-inline-modifier');
+
+  const modifierId =
+    modifierSelect ? modifierSelect.value : '';
+
+  // Required choice hasn't been made:
+  // send customer through the full customise flow.
+  if (
+    item.modifierRequired &&
+    Array.isArray(item.allowedModifiers) &&
+    item.allowedModifiers.length &&
+    !modifierId
+  ) {
+    openCustomise(item.id);
+    return false;
+  }
+
+  const modsArr = [];
+  let modsTotal = 0;
+
+  if (modifierId) {
+    const mod =
+      MODIFIERS.find(m => m.id === modifierId);
+
+    if (mod) {
+      modsArr.push(mod);
+      modsTotal += Number(mod.delta || 0);
+    }
+  }
+
+  const qtyInput =
+    card.querySelector('.menu-inline-qty');
+
+  const qty = Math.max(
+    1,
+    parseInt(qtyInput?.value || '1', 10)
+  );
+
+  const base = Number(item.price) || 0;
+
+  const unitPrice =
+    roundToTwo(base + modsTotal);
+
+  basket.push({
+    name: item.name,
+    itemId: item.id,
+    mods: modsArr,
+    unitPrice,
+    qty,
+    img: item.img || '',
+    spice: item.spiceEnabled
+      ? Number(item.spiceDefault || 0)
+      : null
+  });
+
+  renderOrder();
+
+  return true;
+}
+
+document
+  .getElementById('menu-list')
+  ?.addEventListener('click', function (e) {
+
+    const plus =
+      e.target.closest('.menu-inline-qty-plus');
+
+    if (plus) {
+      const card = plus.closest('.menu-item-card');
+      const input =
+        card?.querySelector('.menu-inline-qty');
+
+      if (input) {
+        input.value =
+          Math.max(
+            1,
+            parseInt(input.value || '1', 10) + 1
+          );
+      }
+
+      return;
+    }
+
+    const minus =
+      e.target.closest('.menu-inline-qty-minus');
+
+    if (minus) {
+      const card = minus.closest('.menu-item-card');
+      const input =
+        card?.querySelector('.menu-inline-qty');
+
+      if (input) {
+        input.value =
+          Math.max(
+            1,
+            parseInt(input.value || '1', 10) - 1
+          );
+      }
+
+      return;
+    }
+
+    const addBtn =
+      e.target.closest('.menu-inline-add-btn');
+
+    if (addBtn) {
+      const card =
+        addBtn.closest('.menu-item-card');
+
+      const added =
+        quickAddFromMenuCard(card);
+
+      if (!added) return;
+
+      const originalText =
+        addBtn.textContent;
+
+      addBtn.textContent = 'Added ✓';
+      addBtn.classList.add('added');
+
+      setTimeout(() => {
+        addBtn.textContent = originalText;
+        addBtn.classList.remove('added');
+      }, 1200);
+
+      return;
+    }
+  });
 
 // --------- Order rendering ----------
 function renderOrder(){
@@ -6574,8 +6885,7 @@ if (existingLine) {
 
 	  container.addEventListener('click', (e) => {
 		// works for either a button or the whole card if we later add data-id there
-		const btn = e.target.closest('[data-id]');
-		if (!btn) return;
+    const btn = e.target.closest('.menu-more-options-btn[data-id]');		if (!btn) return;
 
 		const id = btn.getAttribute('data-id');
 		if (!id) return;
