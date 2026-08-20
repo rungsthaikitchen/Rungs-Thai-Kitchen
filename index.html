@@ -6177,9 +6177,16 @@ if (menuSummaryCheckoutBtn) {
 
 
 
-// ESC key closes popup too
+/// ESC closes menu only when no child modal is open
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && menuOverlay?.classList.contains('show')) {
+  const customiseOpen =
+    document.getElementById('modal')?.style.display === 'flex';
+
+  if (
+    e.key === 'Escape' &&
+    menuOverlay?.classList.contains('show') &&
+    !customiseOpen
+  ) {
     closeMenuOverlay();
   }
 });
@@ -7076,12 +7083,19 @@ document.getElementById('order-panel').addEventListener('click', async e => {
 		});
 	  }
 
-	  // ESC key closes popup too
-	  document.addEventListener('keydown', (e) => {
-		if (e.key === 'Escape' && menuOverlay?.classList.contains('show')) {
-		  closeMenuOverlay();
-		}
-	  });
+	  // ESC closes menu only when no child modal is open
+document.addEventListener('keydown', (e) => {
+  const customiseOpen =
+    document.getElementById('modal')?.style.display === 'flex';
+
+  if (
+    e.key === 'Escape' &&
+    menuOverlay?.classList.contains('show') &&
+    !customiseOpen
+  ) {
+    closeMenuOverlay();
+  }
+});
 
 	function cancelOrder(order, reason, meta = {}) {
 	  order.status = 'cancelled';
