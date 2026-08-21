@@ -4232,6 +4232,34 @@ footer#contact .footer-inner {
   white-space: nowrap;
 }
 
+#modal .item-note-wrap {
+  margin-top: 16px;
+}
+
+#modal .item-note-wrap label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+#modal #item-note {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 80px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font: inherit;
+  resize: vertical;
+  background: #fff;
+}
+
+#modal .item-note-help {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
 		  </style>
 		</head>
 		<body>
@@ -4744,6 +4772,23 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
         <div class="spice-label">Spice level</div>
         <div id="spice-buttons" class="spice-buttons"></div>
       </div>
+
+      <div id="item-note-wrap" class="item-note-wrap">
+      <label for="item-note">
+        Special instructions (optional)
+      </label>
+
+      <textarea
+        id="item-note"
+        rows="3"
+        maxlength="200"
+        placeholder="Examples: No onions • Only chicken and carrots • Extra vegetables • Allergy request"
+      ></textarea>
+
+      <div class="item-note-help">
+        For dish-specific requests only. We'll do our best to accommodate special requests.
+      </div>
+    </div>
 
       <div class="totals" style="margin-top:12px">
         <div class="muted small">Unit price</div>
@@ -6704,7 +6749,13 @@ modalBase.dataset.price = item.price;
 modalBase.textContent =
   'Base price: ' + formatCurrency(item.price);
   qtyInput.value = 1;
-  updateUnitPricePreview();
+
+const itemNoteInput = document.getElementById('item-note');
+if (itemNoteInput) {
+  itemNoteInput.value = '';
+}
+
+updateUnitPricePreview();
 
   if (modalImg) {
     if (item.img) {
@@ -7157,24 +7208,30 @@ const newSpice = currentSpice ?? null;
   - same modifiers / extras
   - same spice level
 */
+
+const itemNote =
+  document.getElementById('item-note')?.value.trim() || '';
+
 const existingLine = basket.find(line =>
   line.itemId === item.id &&
   (line.spice ?? null) === newSpice &&
-  JSON.stringify(line.mods || []) === JSON.stringify(newMods)
+  JSON.stringify(line.mods || []) === JSON.stringify(newMods) &&
+  (line.itemNote || '') === itemNote
 );
 
 if (existingLine) {
   existingLine.qty += qty;
 } else {
   basket.push({
-    name: item.name,
-    itemId: item.id,
-    mods: newMods,
-    unitPrice,
-    qty,
-    img: item.img || '',
-    spice: newSpice
-  });
+  name: item.name,
+  itemId: item.id,
+  mods: newMods,
+  unitPrice,
+  qty,
+  img: item.img || '',
+  spice: newSpice,
+  itemNote
+});
 }
 
 	  closeModal();
