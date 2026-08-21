@@ -4200,6 +4200,38 @@ footer#contact .footer-inner {
   flex: 0 0 24px;
 }
 
+#modal .spice-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+#modal .spice-chilli-scale {
+  display: inline-flex;
+  gap: 2px;
+  align-items: center;
+}
+
+#modal .spice-chilli {
+  display: inline-block;
+  line-height: 1;
+  font-size: 14px;
+}
+
+#modal .spice-chilli.inactive {
+  opacity: 0.14;
+  filter: grayscale(1);
+}
+
+#modal .spice-chilli.active {
+  opacity: 1;
+}
+
+#modal .spice-btn-label {
+  white-space: nowrap;
+}
+
 		  </style>
 		</head>
 		<body>
@@ -6930,16 +6962,32 @@ window.showOrderSuccessNew = showOrderSuccessNew;
       currentSpice = Math.max(0, Math.min(3, Number(defaultLevel)||0));
 
       const labels = [
-        {v:0, text:'No spice'},
-        {v:1, text:'Mild 🌶️'},
-        {v:2, text:'Medium 🌶️🌶️'},
-        {v:3, text:'Very spicy 🌶️🌶️🌶️'}
-      ];
+      { v: 0, text: 'No spice' },
+      { v: 1, text: 'Mild' },
+      { v: 2, text: 'Medium' },
+      { v: 3, text: 'Very spicy' }
+    ];
       labels.forEach(l=>{
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'spice-btn' + (l.v===currentSpice ? ' active':'');
-        b.textContent = l.text;
+        const chilliScale = document.createElement('span');
+chilliScale.className = 'spice-chilli-scale';
+
+for (let i = 1; i <= 3; i++) {
+  const chilli = document.createElement('span');
+  chilli.className =
+    'spice-chilli' + (i <= l.v ? ' active' : ' inactive');
+  chilli.textContent = '🌶️';
+  chilliScale.appendChild(chilli);
+}
+
+const labelText = document.createElement('span');
+labelText.className = 'spice-btn-label';
+labelText.textContent = l.text;
+
+b.appendChild(chilliScale);
+b.appendChild(labelText);
         b.setAttribute('aria-pressed', l.v===currentSpice ? 'true':'false');
         b.addEventListener('click', ()=>{
           currentSpice = l.v;
