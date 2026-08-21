@@ -4071,6 +4071,135 @@ footer#contact .footer-inner {
   font-weight: 700;
   cursor: pointer;
 }
+
+/* =========================================================
+   Customise Modal - Refined Shell
+   ========================================================= */
+
+#modal {
+  padding: 24px;
+}
+
+#modal > .modal {
+  width: min(100%, 820px);
+  max-width: 820px;
+  max-height: 88vh;
+
+  padding: 22px 28px;
+
+  border-radius: 20px;
+  background: #fffaf6;
+
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.24);
+
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Dish image */
+#modal #modal-img {
+  width: 100%;
+  max-height: 230px !important;
+  margin: 16px 0 18px !important;
+
+  object-fit: contain;
+  border-radius: 14px;
+}
+
+/* Give each customise section a little more breathing room */
+#modal #mods,
+#modal #extras,
+#modal #modal-allergens,
+#modal #spice-buttons {
+  margin-top: 8px;
+}
+
+#modal #extras-wrap,
+#modal #modal-allergens-wrap,
+#modal #spice-wrap {
+  margin-top: 16px !important;
+}
+
+/* Slightly stronger section labels */
+#modal .small,
+#modal .spice-label {
+  line-height: 1.4;
+}
+
+/* More separation before price/actions */
+#modal .totals {
+  margin-top: 18px !important;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  #modal {
+    padding: 10px;
+  }
+
+  #modal > .modal {
+    width: 100%;
+    max-width: none;
+    max-height: calc(100vh - 20px);
+
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  #modal #modal-img {
+    max-height: 190px !important;
+    margin: 12px 0 14px !important;
+  }
+}
+
+#modal .allergen-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+#modal .allergen-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 6px 10px 6px 6px;
+
+  border: 1px solid #eee;
+  border-radius: 999px;
+
+  background: #fff;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+#modal .allergen-badge-img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  flex: 0 0 30px;
+}
+
+/* Proper allergen icons on menu cards */
+.menu-allergen-icons {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+}
+
+.menu-allergen-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: block;
+  flex: 0 0 24px;
+}
+
 		  </style>
 		</head>
 		<body>
@@ -4944,47 +5073,169 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
 	
 	// ---------- Allergen registry ----------
   const ALLERGENS = {
+  peanuts: {
+    icon: '🥜',
+    label: 'Peanuts',
+    image: 'images/allergens/peanut.png'
+  },
 
-      peanuts:   { icon:'🥜',        label:'Peanuts' },
-      tree_nuts: { icon:'🌰',        label:'Tree Nuts' },
-      gluten:    { icon:'🌾',        label:'Gluten (Cereals)' },
-      shellfish: { icon:'🦐',        label:'Crustaceans (Shellfish)' },
-      molluscs:  { icon:'🦪',        label:'Molluscs' },
-      dairy:     { icon:'🥛',        label:'Milk / Dairy' },
-      egg:       { icon:'🍳',        label:'Egg' },
-      fish:      { icon:'🐟',        label:'Fish' },
-      celery:    { icon:'🌿',        label:'Celery' },
-      lupin:     { icon:'🌼',        label:'Lupin' },
-      mustard:   { icon:'&#x1F331;', label:'Mustard' },
-      sesame:    { icon:'⚫',        label:'Sesame Seeds' },
-      soya:      { icon:'🫘',        label:'Soya' },
-      sulphites: { icon:'💨',        label:'Sulphur Dioxide / Sulphites' },
-      spicy:     { icon:'🌶️',       label:'Spicy (heat)' }
-    };
+  tree_nuts: {
+    icon: '🌰',
+    label: 'Tree Nuts',
+    image: 'images/allergens/treenuts.png'
+  },
+
+  gluten: {
+    icon: '🌾',
+    label: 'Gluten (Cereals)',
+    image: 'images/allergens/gluten.png'
+  },
+
+  shellfish: {
+    icon: '🦐',
+    label: 'Crustaceans',
+    image: 'images/allergens/crustaceans.png'
+  },
+
+  molluscs: {
+    icon: '🦪',
+    label: 'Molluscs',
+    image: 'images/allergens/molluscs.png'
+  },
+
+  dairy: {
+    icon: '🥛',
+    label: 'Milk',
+    image: 'images/allergens/milk.png'
+  },
+
+  egg: {
+    icon: '🥚',
+    label: 'Egg',
+    image: 'images/allergens/egg.png'
+  },
+
+  fish: {
+    icon: '🐟',
+    label: 'Fish',
+    image: 'images/allergens/fish.png'
+  },
+
+  celery: {
+    icon: '🥬',
+    label: 'Celery',
+    image: 'images/allergens/celery.png'
+  },
+
+  lupin: {
+    icon: '🌿',
+    label: 'Lupin',
+    image: 'images/allergens/lupin.png'
+  },
+
+  mustard: {
+    icon: '🟡',
+    label: 'Mustard',
+    image: 'images/allergens/mustard.png'
+  },
+
+  sesame: {
+    icon: '⚪',
+    label: 'Sesame',
+    image: 'images/allergens/sesame.png'
+  },
+
+  soya: {
+    icon: '🫘',
+    label: 'Soya',
+    image: 'images/allergens/soybean.png'
+  },
+
+  sulphites: {
+    icon: '💨',
+    label: 'Sulphites',
+    image: 'images/allergens/so2.png'
+  },
+
+  spicy: {
+    icon: '🌶️',
+    label: 'Spicy (heat)'
+  }
+};
     function normalizeAllergens(list){
       const out = [];
       (list || []).forEach(k => { if (k === 'nuts') out.push('peanuts','tree_nuts'); else out.push(k); });
       return [...new Set(out)];
     }
-    function renderAllergenIconsCompact(list){
-      const normalized = normalizeAllergens(list);
-      if(!normalized.length) return '';
-      const spans = normalized.map(key => {
-        const a = ALLERGENS[key]; if(!a) return '';
-        return `<span class="allergen-icon" title="${a.label}" aria-label="${a.label}">${a.icon}</span>`;
-      }).join(' ');
-      return `<div class="muted small">${spans}</div>`;
+    function renderAllergenIconsCompact(list) {
+  const normalized = normalizeAllergens(list);
+
+  if (!normalized.length) return '';
+
+  const icons = normalized.map(key => {
+    const a = ALLERGENS[key];
+
+    if (!a) return '';
+
+    if (a.image) {
+      return `
+        <img
+          class="menu-allergen-icon"
+          src="${a.image}"
+          alt="${a.label}"
+          title="${a.label}"
+        >
+      `;
     }
-    function renderAllergenBadges(list){
-      const normalized = normalizeAllergens(list);
-      if(!normalized.length) return '';
-      return normalized.map(key => {
-        const a = ALLERGENS[key]; if(!a) return '';
-        return `<span class="allergen-badge" title="${a.label}" aria-label="${a.label}">
-                 <span class="allergen-icon">${a.icon}</span><span>${a.label}</span>
-               </span>`;
-      }).join('');
-    }
+
+    return `
+      <span
+        class="allergen-icon"
+        title="${a.label}"
+        aria-label="${a.label}"
+      >
+        ${a.icon}
+      </span>
+    `;
+  }).join('');
+
+  return `
+    <div class="menu-allergen-icons">
+      ${icons}
+    </div>
+  `;
+}
+    function renderAllergenBadges(list) {
+  const normalized = normalizeAllergens(list);
+
+  if (!normalized.length) return '';
+
+  return normalized.map(key => {
+    const a = ALLERGENS[key];
+
+    if (!a) return '';
+
+    const visual = a.image
+      ? `<img
+           class="allergen-badge-img"
+           src="${a.image}"
+           alt=""
+           aria-hidden="true"
+         >`
+      : `<span class="allergen-icon">${a.icon}</span>`;
+
+    return `
+      <span
+        class="allergen-badge"
+        title="${a.label}"
+        aria-label="${a.label}"
+      >
+        ${visual}
+        <span>${a.label}</span>
+      </span>
+    `;
+  }).join('');
+}
 	
 	// Paid EXTRAS (per dish)
 const EXTRAS = [
@@ -6952,12 +7203,33 @@ document.getElementById('order-panel').addEventListener('click', async e => {
 	};
 
 		document.addEventListener('keydown', (e) => {
-	  if (e.key === 'Escape') {
-		if (typeof closeModal === 'function' && modal?.style.display === 'flex') closeModal();
-		if (typeof closeCheckout === 'function' && checkoutModal?.style.display === 'flex') closeCheckout();
-		if (typeof hideOrderSuccess === 'function') hideOrderSuccess();
-	  }
-	});
+  if (e.key !== 'Escape') return;
+
+  // Customise is the top-most modal.
+  // Close only it and consume this Esc press so the
+  // underlying menu overlay does not close as well.
+  if (
+    typeof closeModal === 'function' &&
+    modal?.style.display === 'flex'
+  ) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    closeModal();
+    return;
+  }
+
+  if (
+    typeof closeCheckout === 'function' &&
+    checkoutModal?.style.display === 'flex'
+  ) {
+    closeCheckout();
+    return;
+  }
+
+  if (typeof hideOrderSuccess === 'function') {
+    hideOrderSuccess();
+  }
+});
 
 	// --- One handler for all "customise" buttons in the popup menu ---
 	const menuListEl = document.getElementById('menu-list');
@@ -7085,8 +7357,7 @@ document.getElementById('order-panel').addEventListener('click', async e => {
 
 	  // ESC closes menu only when no child modal is open
 document.addEventListener('keydown', (e) => {
-  const customiseOpen =
-    document.getElementById('modal')?.style.display === 'flex';
+  const customiseOpen = modal?.style.display === 'flex';
 
   if (
     e.key === 'Escape' &&
