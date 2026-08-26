@@ -6088,6 +6088,13 @@ function isAllowed(dt){
     return false;
   }
 
+  // Never allow kitchen scheduling before normal opening time
+  const kitchenStart = parseHm(dt, OPEN_WINDOW.start);
+
+  if (dt < kitchenStart) {
+    return false;
+  }
+
   // Scheduler may fulfil later than normal closing,
   // but never later than the kitchen cut-off.
   const kitchenEnd = new Date(dt);
