@@ -5030,11 +5030,10 @@ if (preferredTimeInput) {
       } else {
         // Future date: begin at midnight;
         // nextAllowed() will walk forward to opening time.
-        searchFrom = new Date(`${newDate}T17:00:00`);
+        searchFrom = new Date(`${newDate}T00:00:00`);
       }
 
-      const nextAvailable =
-  await nextAllowedWithKitchenSchedule(searchFrom);
+      const nextAvailable = nextAllowed(searchFrom);
 
       if (nextAvailable) {
         preferredTimeInput.value =
@@ -5050,7 +5049,7 @@ if (preferredTimeInput) {
       // Respect their chosen time unless unavailable.
       if (!isAllowed(chosen)) {
   const nextAvailable =
-    await nextAllowedWithKitchenSchedule(chosen);
+  await nextAlternativeFulfilment(chosen);
 
         if (nextAvailable) {
           preferredTimeInput.value =
@@ -5771,8 +5770,9 @@ const MAX_KITCHEN_LOAD_PER_SLOT = 3;
 const KITCHEN_START_HOUR = 16;
 const KITCHEN_START_MINUTE = 30;
 
-const KITCHEN_END_HOUR = 22;
-const KITCHEN_END_MINUTE = 0;
+// System-generated alternative fulfilment times may extend
+// beyond the normal customer-selectable closing time.
+const KITCHEN_OVERRUN_MINUTES = 60;
 
 // Kitchen scheduling:
 // 1 Chef Rung workload unit = 5 continuous minutes
@@ -5912,17 +5912,103 @@ function allocateLoadBackwards(
   };
 }
 
+function forceAllocateExistingLoad(
+  readyTime,
+  load,
+  slotMap
+) {
+  const requiredSteps = Number(load || 0);
+
+  if (requiredSteps <= 0) {
+    return {
+      overCapacity: false,
+      conflicts: []
+    };
+  }
+
+  const kitchenStart =
+    getKitchenStartForDate(readyTime);
+
+  let slot = new Date(
+    readyTime.getTime() -
+    KITCHEN_STEP_MINUTES * 60 * 1000
+  );
+
+  const conflicts = [];
+
+  for (let i = 0; i < requiredSteps; i++) {
+    if (slot < kitchenStart) {
+      break;
+    }
+
+    const key = slot.toISOString();
+    const existingLoad = slotMap.get(key) || 0;
+
+    if (existingLoad > 0) {
+      conflicts.push({
+        time: key,
+        existingLoad,
+        newLoad: existingLoad + 1
+      });
+    }
+
+    slotMap.set(
+      key,
+      existingLoad + 1
+    );
+
+    slot = new Date(
+      slot.getTime() -
+      KITCHEN_STEP_MINUTES * 60 * 1000
+    );
+  }
+
+  return {
+    overCapacity: conflicts.length > 0,
+    conflicts
+  };
+}
+
+function getEffectiveOrderTime(order) {
+  // An explicitly confirmed adjusted time is always authoritative.
+  if (order.confirmed_time) {
+    return order.confirmed_time;
+  }
+
+  // Customer rejected the proposed time.
+  // The original requested time was already unavailable,
+  // so don't reserve capacity until another time is agreed/offered.
+  if (
+    order.status === 'pending' &&
+    order.proposed_time
+  ) {
+    return null;
+  }
+
+  // A proposed replacement time is the best operational time we have.
+  // This covers both an active proposal and an order subsequently
+  // progressed/completed without confirmed_time being populated.
+  if (order.proposed_time) {
+    return order.proposed_time;
+  }
+
+  // Normal untouched order.
+  return order.preferred_time;
+}
+
 function buildKitchenProductionMap(orders) {
   const productionMap = new Map();
 
   const sortedOrders = [...orders].sort(
     (a, b) =>
-      new Date(a.preferred_time) -
-      new Date(b.preferred_time)
+      new Date(getEffectiveOrderTime(a)) -
+      new Date(getEffectiveOrderTime(b))
   );
 
   for (const order of sortedOrders) {
-    if (!order.preferred_time) continue;
+    const effectiveTime = getEffectiveOrderTime(order);
+
+    if (!effectiveTime) continue;
 
     const load =
       getExistingOrderKitchenLoad(order);
@@ -5930,7 +6016,7 @@ function buildKitchenProductionMap(orders) {
     if (load <= 0) continue;
 
     const readyTime =
-      new Date(order.preferred_time);
+      new Date(effectiveTime);
 
     const result = allocateLoadBackwards(
       readyTime,
@@ -5939,16 +6025,26 @@ function buildKitchenProductionMap(orders) {
     );
 
     if (!result.success) {
-      console.warn(
-        '[kitchen-schedule] existing order exceeds available capacity:',
-        {
-          orderId: order.id,
-          readyTime: order.preferred_time,
-          load,
-          remainingLoad: result.remainingLoad
-        }
-      );
+  const forced =
+    forceAllocateExistingLoad(
+      readyTime,
+      load,
+      productionMap
+    );
+
+  console.warn(
+    '[kitchen-schedule] existing order exceeds available capacity:',
+    {
+      orderId: order.id,
+      preferredTime: order.preferred_time,
+      proposedTime: order.proposed_time,
+      confirmedTime: order.confirmed_time,
+      effectiveTime,
+      load,
+      conflicts: forced.conflicts
     }
+  );
+}
   }
 
   return productionMap;
@@ -6012,9 +6108,12 @@ async function loadKitchenScheduleForDate(serviceDate) {
   end.setDate(end.getDate() + 1);
 
   const { data, error } = await sb
-    .from('orders')    .select(`
+    .from('orders')
+    .select(`
       id,
       preferred_time,
+      proposed_time,
+      confirmed_time,
       status,
       is_test,
       order_items (
@@ -6032,7 +6131,7 @@ async function loadKitchenScheduleForDate(serviceDate) {
   }
 
   return (data || []).filter(order =>
-    order.preferred_time &&
+    getEffectiveOrderTime(order) &&
     order.status !== 'cancelled'
   );
 }
@@ -6062,7 +6161,9 @@ async function refreshKitchenScheduleForDateTime(dt) {
 
   if (!isAllowed(currentlySelected)) {
     const nextAvailable =
-  await nextAllowedWithKitchenSchedule(currentlySelected);
+      await nextAlternativeFulfilment(
+        currentlySelected
+      );
 
     if (nextAvailable) {
       preferredTimeEl.value =
@@ -6083,38 +6184,32 @@ function isAllowed(dt){
          canBasketFitInSlot(dt);
 }
 
-	function isAllowedForKitchenScheduler(dt) {
-  // Must still be one of our normal trading days
+function isAllowedForAlternativeFulfilment(dt) {
+  // Must still be one of our trading days.
   if (!OPEN_DAYS.includes(dt.getDay())) {
     return false;
   }
 
-  // Never allow kitchen scheduling before normal opening time
-  const kitchenStart = parseHm(dt, OPEN_WINDOW.start);
-
-  if (dt < kitchenStart) {
+  // Respect closures / fully-booked periods.
+  if (isClosedDate(dt) || isFullyBooked(dt)) {
     return false;
   }
 
-  // Scheduler may fulfil later than normal closing,
-  // but never later than the kitchen cut-off.
-  const kitchenEnd = new Date(dt);
-  kitchenEnd.setHours(
-    KITCHEN_END_HOUR,
-    KITCHEN_END_MINUTE,
-    0,
-    0
+  const normalStart = parseHm(dt, OPEN_WINDOW.start);
+  const normalEnd = parseHm(dt, OPEN_WINDOW.end);
+
+  const extendedEnd = new Date(
+    normalEnd.getTime() +
+    KITCHEN_OVERRUN_MINUTES * 60 * 1000
   );
 
-  if (dt > kitchenEnd) {
+  // Alternative fulfilment may run beyond normal closing,
+  // but must not begin before the normal customer opening time.
+  if (dt < normalStart || dt > extendedEnd) {
     return false;
   }
 
-  return (
-    !isClosedDate(dt) &&
-    !isFullyBooked(dt) &&
-    canBasketFitInSlot(dt)
-  );
+  return canBasketFitInSlot(dt);
 }
 
 function nextAllowed(from) {
@@ -6133,29 +6228,27 @@ function nextAllowed(from) {
   return null;
 }
 
-// Date-aware version for kitchen-capacity searches
-async function nextAllowedWithKitchenSchedule(from) {
+async function nextAlternativeFulfilment(from) {
   const cap = new Date(from);
   cap.setDate(cap.getDate() + 30);
 
-  let t = new Date(from);
-  t = roundTo5Min(t);
+  let t = roundTo5Min(new Date(from));
 
   let loadedDateKey = null;
 
   while (t <= cap) {
     const dateKey = toYMD(t);
 
-    // Whenever the search moves onto another day,
-    // load that day's actual kitchen commitments.
+    // The kitchen production map is date-specific.
+    // Reload it whenever the search crosses onto another day.
     if (dateKey !== loadedDateKey) {
       await refreshKitchenSlotMap(t);
       loadedDateKey = dateKey;
     }
 
-    if (isAllowedForKitchenScheduler(t)) {
-  return t;
-}
+    if (isAllowedForAlternativeFulfilment(t)) {
+      return t;
+    }
 
     t = new Date(
       t.getTime() + 5 * 60 * 1000
@@ -6164,7 +6257,6 @@ async function nextAllowedWithKitchenSchedule(from) {
 
   return null;
 }
-
 function showPreferredTimeMessage(message) {
   const el =
     document.getElementById('preferred-time-message');
@@ -6374,7 +6466,9 @@ if (preferredTimeEl?.value) {
 
   if (!isAllowed(currentlySelected)) {
   const nextAvailable =
-    await nextAllowedWithKitchenSchedule(currentlySelected);
+  await nextAlternativeFulfilment(
+    currentlySelected
+  );
 
   if (nextAvailable) {
   preferredTimeEl.value =
@@ -6449,31 +6543,60 @@ if (preferredTimeEl?.value) {
     }
 
     // Live validation + snapping on change
-    const onChoose = () => {
-      if (!t.value) return;
-      const chosen = new Date(t.value);
-      const rounded = roundTo5Min(chosen);
+    const onChoose = async () => {
+  if (!t.value) return;
 
-      if (!isAllowed(rounded)) {
-        const next = nextAllowed(rounded);
-        if (next) {
-          const nv = toLocalInputValue(next);
-			t.value = nv;
-			t.removeAttribute('min');
-			checkoutMsg.style.color = '#b02a2a';
-			checkoutMsg.textContent =
-			  'That time is unavailable; we’ve moved you to the next available slot.';
-        } else {
-          checkoutMsg.style.color = '#b02a2a';
-          checkoutMsg.textContent =
-            'No available time slots found. Please choose a different day.';
-        }
-      } else {
-        // valid slot picked
-        checkoutMsg.textContent = '';
-        checkoutMsg.style.color = '';
-      }
-    };
+  const chosen = new Date(t.value);
+  const rounded = roundTo5Min(chosen);
+
+  // Customer may only manually choose within normal opening hours.
+  // Extended fulfilment after closing is reserved for times
+  // automatically proposed by the scheduler.
+  if (!withinOpenHours(rounded)) {
+    const next = nextAllowed(rounded);
+
+    if (next) {
+      t.value = toLocalInputValue(next);
+      t.removeAttribute('min');
+
+      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.textContent =
+        'Please choose a time within our opening hours.';
+    } else {
+      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.textContent =
+        'No available time slots found. Please choose a different day.';
+    }
+
+    return;
+  }
+
+  // Customer chose a valid opening-hours time,
+  // but kitchen capacity may require a later system-generated time.
+  if (!isAllowed(rounded)) {
+    const next =
+      await nextAlternativeFulfilment(
+        rounded
+      );
+
+    if (next) {
+      t.value = toLocalInputValue(next);
+      t.removeAttribute('min');
+
+      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.textContent =
+        'That time is unavailable; we’ve moved you to the next available slot.';
+    } else {
+      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.textContent =
+        'No available time slots found. Please choose a different day.';
+    }
+  } else {
+    // Valid customer-selected slot.
+    checkoutMsg.textContent = '';
+    checkoutMsg.style.color = '';
+  }
+};
 
     // Avoid double binding if openCheckout runs multiple times
     t.removeEventListener('change', onChoose);
@@ -6936,11 +7059,13 @@ if (submitPreferredTimeEl?.value) {
   // Get the very latest kitchen commitments
   await refreshKitchenSlotMap(selectedTime);
 
-  // Is the customer's selected slot still available?
-  if (!isAllowedForKitchenScheduler(selectedTime)) {
+ // Is the customer's selected slot still available?
+if (!isAllowed(selectedTime)) {
 
-   const nextAvailable =
-  await nextAllowedWithKitchenSchedule(selectedTime);
+  const nextAvailable =
+    await nextAlternativeFulfilment(
+      selectedTime
+    );
 
     if (nextAvailable) {
       submitPreferredTimeEl.value =
