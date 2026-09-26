@@ -2792,16 +2792,44 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
   <div id="discount-code-message"></div>
 </div>
 
-        <!-- Preferred time -->
-        <div class="field">
-  <label for="cust-preferred-time">Preferred collection/delivery time</label>
+        <!-- Preferred date / time -->
+<div class="field">
+  <label>Preferred collection/delivery date &amp; time</label>
 
+  <div class="row-2">
+
+    <!-- Customer-facing date picker -->
+    <div class="field">
+      <label for="cust-preferred-date">Date</label>
+      <input
+        id="cust-preferred-date"
+        type="date"
+        class="input"
+      >
+    </div>
+
+    <!-- Customer-facing time picker -->
+    <div class="field">
+      <label for="cust-preferred-time-select">Time</label>
+      <select
+        id="cust-preferred-time-select"
+        class="input"
+      >
+        <option value="">Select a date first</option>
+      </select>
+    </div>
+
+  </div>
+
+  <!--
+    Compatibility field.
+    Existing checkout/scheduler code continues to use this field.
+    We will populate it from the date + time controls.
+  -->
   <input
     id="cust-preferred-time"
     name="preferred_time"
-    type="datetime-local"
-    class="input"
-    step="300"
+    type="hidden"
   >
 
   <div
@@ -2810,13 +2838,15 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
     style="display:none;">
   </div>
 
-  <!--<label style="display:flex;align-items:center;gap:6px;margin-top:4px;">
-    <input type="checkbox" id="cust-asap" name="asap_requested">
-    As soon as possible
-  </label>-->
+  <div class="muted small" style="margin-top:6px;">
+    Times shown as unavailable are already fully allocated.
+    Please choose another available time.
+  </div>
 
-  <div class="muted small">
-    Please select a suitable time. We will either confirm that time once the order has been reviewed, or get in contact with you to suggest an alternative within our opening days (Fri & Sat, 17:00 - 21:00).
+  <div class="muted small" style="margin-top:4px;">
+    We will either confirm your selected time once the order has been reviewed,
+    or contact you to suggest an alternative within our opening days
+    (Fri &amp; Sat, 17:00 - 21:00).
   </div>
 </div>
 
@@ -4998,74 +5028,6 @@ function validatePreferredTime() {
   return true;
 }
 
-if (preferredTimeInput) {
-  preferredTimeInput.addEventListener('change', async () => {
-    const raw = preferredTimeInput.value;
-    if (!raw) return;
-
-    const newDate = raw.slice(0, 10);
-    const dateChanged =
-      lastPreferredDate !== null &&
-      newDate !== lastPreferredDate;
-
-    const chosen = new Date(raw);
-
-    // Load the kitchen commitments for the newly selected date
-    await refreshKitchenSlotMap(chosen);
-
-    if (dateChanged) {
-      // Customer changed DAY:
-      // start again from the earliest possible time on that date.
-      let searchFrom;
-
-      const today = new Date();
-      const todayKey = toYMD(today);
-
-      if (newDate === todayKey) {
-        // Today: respect minimum lead time
-        searchFrom = new Date();
-        searchFrom.setMinutes(
-          searchFrom.getMinutes() + LEAD_MINUTES
-        );
-      } else {
-        // Future date: begin at midnight;
-        // nextAllowed() will walk forward to opening time.
-        searchFrom = new Date(`${newDate}T00:00:00`);
-      }
-
-      const nextAvailable = nextAllowed(searchFrom);
-
-      if (nextAvailable) {
-        preferredTimeInput.value =
-          toLocalInputValue(nextAvailable);
-
-        console.log(
-          '[kitchen-schedule] date changed; earliest available:',
-          preferredTimeInput.value
-        );
-      }
-    } else {
-      // Same date, customer merely changed the time.
-      // Respect their chosen time unless unavailable.
-      if (!isAllowed(chosen)) {
-  const nextAvailable =
-  await nextAlternativeFulfilment(chosen);
-
-        if (nextAvailable) {
-          preferredTimeInput.value =
-            toLocalInputValue(nextAvailable);
-        }
-      }
-    }
-
-    // Remember whichever date we have now finished processing
-    lastPreferredDate =
-      preferredTimeInput.value.slice(0, 10);
-
-    validatePreferredTime();
-  });
-}
-
 // 3) Guard your submit handler (fail fast if invalid)
 //    In your existing `checkoutForm.addEventListener('submit', async (e) => { ... })`,
 //    add these lines near the top, right after you read `preferredTimeRaw`:
@@ -5088,7 +5050,258 @@ if (preferredTimeInput) {
   }
 */
 
+// ============================================================
+// PREFERRED DATE / TIME DROPDOWN
+// ============================================================
 
+const preferredDateInput =
+  document.getElementById('cust-preferred-date');
+
+const preferredTimeSelect =
+  document.getElementById('cust-preferred-time-select');
+
+const preferredTimeHidden =
+  document.getElementById('cust-preferred-time');
+
+
+function formatTimeHHMM(date) {
+  return date.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+}
+
+
+function clearPreferredTimeSelect(message = 'Select a date first') {
+  if (!preferredTimeSelect) return;
+
+  preferredTimeSelect.innerHTML = '';
+
+  const option = document.createElement('option');
+  option.value = '';
+  option.textContent = message;
+
+  preferredTimeSelect.appendChild(option);
+
+  if (preferredTimeHidden) {
+    preferredTimeHidden.value = '';
+  }
+}
+
+
+async function populatePreferredTimeSelect(dateString) {
+  if (
+    !preferredTimeSelect ||
+    !preferredTimeHidden ||
+    !dateString
+  ) {
+    return;
+  }
+
+  clearPreferredTimeSelect('Loading times…');
+  preferredTimeSelect.disabled = true;
+
+  const serviceDate =
+    new Date(`${dateString}T12:00:00`);
+
+  // Load the latest kitchen commitments for this date.
+  await refreshKitchenSlotMap(serviceDate);
+
+  preferredTimeSelect.innerHTML = '';
+
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = 'Select a time';
+  placeholder.selected = true;
+
+  preferredTimeSelect.appendChild(placeholder);
+
+  const start =
+    new Date(`${dateString}T${OPEN_WINDOW.start}:00`);
+
+  const end =
+    new Date(`${dateString}T${OPEN_WINDOW.end}:00`);
+
+    // Overrun fulfilment may extend beyond normal closing time,
+// but should only be offered when the basket cannot fit
+// anywhere in the remaining normal service window.
+const extendedEnd = new Date(
+  end.getTime() +
+  KITCHEN_OVERRUN_MINUTES * 60 * 1000
+);
+
+  const now = new Date();
+
+  const earliestToday = new Date(now);
+  earliestToday.setMinutes(
+    earliestToday.getMinutes() + LEAD_MINUTES
+  );
+
+  const roundedEarliestToday =
+    roundTo5Min(earliestToday);
+
+  const todayKey = toYMD(now);
+const isToday = dateString === todayKey;
+
+// If this isn't one of our normal trading days,
+// don't generate a meaningless list of unavailable times.
+if (!OPEN_DAYS.includes(serviceDate.getDay())) {
+  preferredTimeSelect.innerHTML = '';
+
+  const option = document.createElement('option');
+  option.value = '';
+  option.textContent = 'Closed on this date';
+  option.selected = true;
+
+  preferredTimeSelect.appendChild(option);
+
+  preferredTimeSelect.disabled = true;
+  preferredTimeHidden.value = '';
+
+  return;
+}
+
+let availableCount = 0;
+
+  for (
+    let slot = new Date(start);
+    slot <= end;
+    slot = new Date(slot.getTime() + (5 * 60 * 1000))
+  ) {
+    const option = document.createElement('option');
+    const timeText = formatTimeHHMM(slot);
+
+    option.value = timeText;
+
+    // Past / lead-time slots today are unavailable.
+    const insideLeadTime =
+      isToday && slot < roundedEarliestToday;
+
+    // Existing scheduler decides whether the basket can fit.
+    const schedulerAllows =
+      !insideLeadTime && isAllowed(slot);
+
+    if (schedulerAllows) {
+      option.textContent = timeText;
+      availableCount++;
+    } else {
+      option.textContent =
+        `${timeText} — Unavailable`;
+
+      option.disabled = true;
+    }
+
+    preferredTimeSelect.appendChild(option);
+  }
+
+  // If nothing can accommodate this basket during the normal
+// service window, expose genuine overrun fulfilment options.
+// Overrun is only available for today's service while
+// the normal ordering window is still open.
+const isTodayService =
+  dateString === toYMD(now);
+
+const beforeNormalClose =
+  now <= end;
+
+if (
+  availableCount === 0 &&
+  isTodayService &&
+  beforeNormalClose
+) {
+
+  for (
+    let slot = new Date(
+      end.getTime() + (5 * 60 * 1000)
+    );
+    slot <= extendedEnd;
+    slot = new Date(
+      slot.getTime() + (5 * 60 * 1000)
+    )
+  ) {
+    const option =
+      document.createElement('option');
+
+    const timeText =
+      formatTimeHHMM(slot);
+
+    option.value = timeText;
+
+    const schedulerAllows =
+      isAllowedForAlternativeFulfilment(slot);
+
+    if (schedulerAllows) {
+      option.textContent = timeText;
+      availableCount++;
+    } else {
+      option.textContent =
+        `${timeText} — Unavailable`;
+
+      option.disabled = true;
+    }
+
+    preferredTimeSelect.appendChild(option);
+  }
+}
+
+  if (availableCount === 0) {
+    placeholder.textContent =
+      'No times available on this date';
+
+    preferredTimeSelect.value = '';
+    preferredTimeHidden.value = '';
+  }
+
+  preferredTimeSelect.disabled = false;
+
+  console.log(
+    '[preferred-time] generated slots:',
+    {
+      date: dateString,
+      availableCount,
+      basketLoad:
+        typeof getBasketKitchenLoad === 'function'
+          ? getBasketKitchenLoad()
+          : null
+    }
+  );
+}
+
+
+if (preferredDateInput) {
+  preferredDateInput.addEventListener('change', async () => {
+    const dateString = preferredDateInput.value;
+
+    if (!dateString) {
+      clearPreferredTimeSelect();
+      return;
+    }
+
+    await populatePreferredTimeSelect(dateString);
+  });
+}
+
+
+if (preferredTimeSelect) {
+  preferredTimeSelect.addEventListener('change', () => {
+    if (
+      !preferredDateInput?.value ||
+      !preferredTimeSelect.value
+    ) {
+      preferredTimeHidden.value = '';
+      return;
+    }
+
+    preferredTimeHidden.value =
+      `${preferredDateInput.value}T${preferredTimeSelect.value}`;
+
+    console.log(
+      '[preferred-time] selected:',
+      preferredTimeHidden.value
+    );
+  });
+}
 
 // Checkout modal helpers
 const checkoutModal = document.getElementById('checkout-modal');
@@ -6449,50 +6662,6 @@ function findNextAllowedFromNow() {
 const preferredTimeEl =
   document.getElementById('cust-preferred-time');
 
-if (preferredTimeEl?.value) {
-  await refreshKitchenScheduleForDateTime(
-    new Date(preferredTimeEl.value)
-  );
-}
-
-console.log(
-  '[kitchen-capacity] basket load at checkout:',
-  getBasketKitchenLoad()
-);
-
-if (preferredTimeEl?.value) {
-  const currentlySelected =
-    new Date(preferredTimeEl.value);
-
-  if (!isAllowed(currentlySelected)) {
-  const nextAvailable =
-  await nextAlternativeFulfilment(
-    currentlySelected
-  );
-
-  if (nextAvailable) {
-  preferredTimeEl.value =
-    toLocalInputValue(nextAvailable);
-
-  const newTime =
-    nextAvailable.toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-
-  showPreferredTimeMessage(
-    `Your selected time is no longer available due to kitchen capacity. ` +
-    `We've moved your order to the next available time at ${newTime}. ` +
-    `Please check the new time and press Place Order again.`
-  );
-
-  console.log(
-    '[kitchen-schedule] submit blocked; moved to:',
-    preferredTimeEl.value
-  );
-}
-  }
-}
 
 // Remember the date checkout has settled on
 if (preferredTimeEl?.value) {
@@ -6504,6 +6673,46 @@ if (preferredTimeEl?.value) {
 				console.warn("[checkout] openCheckout blocked - empty basket", { subtotal });
 				return;
 			  }
+
+        // Refresh preferred-time availability whenever checkout opens.
+// This ensures the dropdown reflects the latest orders in Supabase
+// and the current basket's kitchen load.
+if (
+  preferredDateInput?.value &&
+  typeof populatePreferredTimeSelect === 'function'
+) {
+  const previouslySelectedTime =
+    preferredTimeSelect?.value || '';
+
+  await populatePreferredTimeSelect(
+    preferredDateInput.value
+  );
+
+  // Restore the previous selection only if it is still available.
+  if (previouslySelectedTime && preferredTimeSelect) {
+    const previousOption =
+      Array.from(preferredTimeSelect.options)
+        .find(option =>
+          option.value === previouslySelectedTime &&
+          !option.disabled
+        );
+
+    if (previousOption) {
+      preferredTimeSelect.value =
+        previouslySelectedTime;
+
+      preferredTimeHidden.value =
+        `${preferredDateInput.value}T${previouslySelectedTime}`;
+    } else {
+      preferredTimeSelect.value = '';
+      preferredTimeHidden.value = '';
+
+      showPreferredTimeMessage(
+        'Your previously selected time is no longer available. Please choose another available time.'
+      );
+    }
+  }
+}
 
 			  checkoutBaseSubtotal = Math.round(subtotal * 100) / 100;
 			  checkoutMsg.textContent = '';
@@ -6518,93 +6727,6 @@ if (preferredTimeEl?.value) {
 			  checkoutModal.style.display = 'flex';
 			}
  
-
-  // 2. Preferred time input setup
-  const t = document.getElementById('cust-preferred-time');
-  if (t) {
-    // enforce 5-minute steps
-    t.step = 300;
-
-    // 👉 Find the first allowed slot starting from now + LEAD_MINUTES
-    const firstAllowed = findNextAllowedFromNow();
-
-    if (!firstAllowed) {
-      // Nothing available in +30 days – very unlikely, but handle gracefully
-      checkoutMsg.style.color = '#b02a2a';
-      checkoutMsg.textContent = 'No available time slots found. Please choose a different date.';
-      t.value = '';
-		t.removeAttribute('min');
-    } else {
-      const earliest = new Date();
-		earliest.setMinutes(earliest.getMinutes() + LEAD_MINUTES);
-
-		t.removeAttribute('min');
-		t.value = toLocalInputValue(firstAllowed);
-    }
-
-    // Live validation + snapping on change
-    const onChoose = async () => {
-  if (!t.value) return;
-
-  const chosen = new Date(t.value);
-  const rounded = roundTo5Min(chosen);
-
-  // Customer may only manually choose within normal opening hours.
-  // Extended fulfilment after closing is reserved for times
-  // automatically proposed by the scheduler.
-  if (!withinOpenHours(rounded)) {
-    const next = nextAllowed(rounded);
-
-    if (next) {
-      t.value = toLocalInputValue(next);
-      t.removeAttribute('min');
-
-      checkoutMsg.style.color = '#b02a2a';
-      checkoutMsg.textContent =
-        'Please choose a time within our opening hours.';
-    } else {
-      checkoutMsg.style.color = '#b02a2a';
-      checkoutMsg.textContent =
-        'No available time slots found. Please choose a different day.';
-    }
-
-    return;
-  }
-
-  // Customer chose a valid opening-hours time,
-  // but kitchen capacity may require a later system-generated time.
-  if (!isAllowed(rounded)) {
-    const next =
-      await nextAlternativeFulfilment(
-        rounded
-      );
-
-    if (next) {
-      t.value = toLocalInputValue(next);
-      t.removeAttribute('min');
-
-      checkoutMsg.style.color = '#b02a2a';
-      checkoutMsg.textContent =
-        'That time is unavailable; we’ve moved you to the next available slot.';
-    } else {
-      checkoutMsg.style.color = '#b02a2a';
-      checkoutMsg.textContent =
-        'No available time slots found. Please choose a different day.';
-    }
-  } else {
-    // Valid customer-selected slot.
-    checkoutMsg.textContent = '';
-    checkoutMsg.style.color = '';
-  }
-};
-
-    // Avoid double binding if openCheckout runs multiple times
-    t.removeEventListener('change', onChoose);
-    t.removeEventListener('input', onChoose);
-    t.addEventListener('change', onChoose);
-    t.addEventListener('input', onChoose);
-  }
-
     // 3. Update submit button + show the modal
 	// updateCheckoutSubmitButton();
 	//updateCheckoutOrderSummary();
@@ -7059,40 +7181,78 @@ if (submitPreferredTimeEl?.value) {
   // Get the very latest kitchen commitments
   await refreshKitchenSlotMap(selectedTime);
 
+  // A time after normal closing may only be accepted as a
+// same-day overrun while today's normal ordering window is still open.
+const normalClose = new Date(selectedTime);
+const [closeHour, closeMinute] =
+  OPEN_WINDOW.end.split(':').map(Number);
+
+normalClose.setHours(
+  closeHour,
+  closeMinute,
+  0,
+  0
+);
+
+const nowForSubmit = new Date();
+
+const isOverrunTime =
+  selectedTime > normalClose;
+
+const isSameDayOrder =
+  toYMD(selectedTime) === toYMD(nowForSubmit);
+
+const beforeNormalClose =
+  nowForSubmit < normalClose;
+
+const selectedTimeIsAllowed =
+  isOverrunTime
+    ? (
+        isSameDayOrder &&
+        beforeNormalClose &&
+        isAllowedForAlternativeFulfilment(selectedTime)
+      )
+    : isAllowed(selectedTime);
+
  // Is the customer's selected slot still available?
-if (!isAllowed(selectedTime)) {
-
-  const nextAvailable =
-    await nextAlternativeFulfilment(
-      selectedTime
-    );
-
-    if (nextAvailable) {
-      submitPreferredTimeEl.value =
-        toLocalInputValue(nextAvailable);
-		
-		  const newTime =
-    nextAvailable.toLocaleTimeString('en-GB', {
+if (!selectedTimeIsAllowed) {
+  
+  const selectedTimeText =
+    selectedTime.toLocaleTimeString('en-GB', {
       hour: '2-digit',
       minute: '2-digit'
     });
 
+  // Rebuild the visible dropdown using the latest
+  // kitchen commitments we have just loaded.
+  if (
+    preferredDateInput?.value &&
+    typeof populatePreferredTimeSelect === 'function'
+  ) {
+    await populatePreferredTimeSelect(
+      preferredDateInput.value
+    );
+  }
+
+  // Do not silently move the customer's order.
+  preferredTimeHidden.value = '';
+
+  if (preferredTimeSelect) {
+    preferredTimeSelect.value = '';
+  }
+
   showPreferredTimeMessage(
-    `Your selected time is no longer available due to kitchen capacity. ` +
-    `We've moved your order to the next available time at ${newTime}. ` +
-    `Please check the new time and press Place Order again.`
+    `Sorry — ${selectedTimeText} has just become unavailable. ` +
+    `Please choose another available time.`
   );
 
-      console.log(
-        '[kitchen-schedule] submit blocked; moved to:',
-        submitPreferredTimeEl.value
-      );
-    }
+  console.log(
+    '[kitchen-schedule] submit blocked; selected time no longer available:',
+    selectedTime
+  );
 
-    // IMPORTANT:
-    // Don't submit after changing the customer's time.
-    return;
-  }
+  return;
+}
 }
 
   // Final safety check against closures / fully-booked windows
