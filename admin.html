@@ -1155,14 +1155,6 @@ if ((o.order_type || '').toLowerCase() === 'delivery') {
       ? Number(o.total)
       : Math.round((subtotal - discount + delivery) * 100) / 100;
 
-console.log("ADMIN DISCOUNT DEBUG", {
-  ref: o.order_ref,
-  discount: o.discount,
-  discount_label: o.discount_label,
-  discount_code: o.discount_code,
-  discount_amount: o.discount_amount
-});
-
 const displayDiscountAmount =
   Number(o.discount_amount || o.discount || 0);
 
@@ -3077,7 +3069,7 @@ console.log('[ALLERGEN PRINT] items:', order?.items);
    ORDER ACTION API CALLER
 ----------------------------------------------------------- */
 const ORDER_ACTION_API_URL =
-  "https://order-backend-production.up.railway.app/admin-order-action";
+  "/admin-api/order-action";
 
 async function callOrderAction(payload) {
   console.log("Calling admin-order-action with payload:", payload);
