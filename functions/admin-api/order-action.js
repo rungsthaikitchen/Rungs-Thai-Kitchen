@@ -9,9 +9,10 @@ export async function onRequestPost(context) {
       RAILWAY_ADMIN_ORDER_ACTION_URL,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+    headers: {
+        "Content-Type": "application/json",
+        "x-rtk-proxy-secret": context.env.RTK_PROXY_SECRET
+    },
         body: JSON.stringify(payload)
       }
     );
