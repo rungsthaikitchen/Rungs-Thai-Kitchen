@@ -411,6 +411,15 @@ tbody#tbody tr.row-attention:hover > td {
   background: #22c55e;
 }
 
+.service-control__status--restricted {
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.service-control__status--restricted .service-control__status-dot {
+  background: #f59e0b;
+}
+
 .service-control__actions {
   display: flex;
   flex-wrap: wrap;
@@ -641,7 +650,7 @@ tbody#tbody tr.row-attention:hover > td {
 
     <div class="service-control__status">
       <span class="service-control__status-dot"></span>
-      <span>Normal</span>
+      <span id="service-control-status-text">Normal</span>
     </div>
   </div>
 
@@ -3638,6 +3647,9 @@ const fullyBookedConfirm =
 const activeRestrictionsList =
   document.getElementById('service-active-restrictions');
 
+const serviceControlStatusText =
+  document.getElementById('service-control-status-text');
+
 function openCloseServiceModal() {
   if (!closeServiceModal) return;
 
@@ -3763,6 +3775,20 @@ async function loadActiveRestrictions() {
     }
 
     const blackouts = data.blackouts || [];
+
+    if (serviceControlStatusText) {
+      serviceControlStatusText.textContent =
+        blackouts.length > 0
+          ? 'Restrictions active'
+          : 'Normal';
+
+      serviceControlStatusText
+        .closest('.service-control__status')
+        ?.classList.toggle(
+          'service-control__status--restricted',
+          blackouts.length > 0
+        );
+    }
 
     if (blackouts.length === 0) {
       activeRestrictionsList.innerHTML =
