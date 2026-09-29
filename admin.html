@@ -663,6 +663,78 @@ tbody#tbody tr.row-attention:hover > td {
   </div>
 </div>
 
+<!-- =========================================================
+     FULLY BOOKED MODAL
+========================================================= -->
+<div id="fully-booked-modal" class="service-modal" aria-hidden="true">
+  <div class="service-modal__backdrop"></div>
+
+  <div class="service-modal__panel"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="fully-booked-title">
+
+    <div class="service-modal__header">
+      <div>
+        <h2 id="fully-booked-title">Mark period fully booked</h2>
+        <div class="muted small">
+          Prevent customers booking during a fully allocated period.
+        </div>
+      </div>
+
+      <button type="button"
+              class="service-modal__x"
+              id="fully-booked-x"
+              aria-label="Close">
+        ×
+      </button>
+    </div>
+
+    <div class="service-modal__body">
+
+      <label class="service-field">
+        <span>Date</span>
+        <input type="date" id="fully-booked-date">
+      </label>
+
+      <div class="service-modal__time-row">
+        <label class="service-field">
+          <span>From</span>
+          <input type="time" id="fully-booked-from" value="17:00">
+        </label>
+
+        <label class="service-field">
+          <span>Until</span>
+          <input type="time" id="fully-booked-until" value="21:00">
+        </label>
+      </div>
+
+      <label class="service-field">
+        <span>Customer message</span>
+        <textarea id="fully-booked-message"
+                  rows="3"
+                  placeholder="e.g. We're fully booked during this period. Please choose another time."></textarea>
+      </label>
+
+    </div>
+
+    <div class="service-modal__footer">
+      <button type="button"
+              class="btn"
+              id="fully-booked-cancel">
+        Cancel
+      </button>
+
+      <button type="button"
+              class="btn"
+              id="fully-booked-confirm">
+        Mark fully booked
+      </button>
+    </div>
+
+  </div>
+</div>
+
   <div id="liveDashboard">
   <div id="loyaltyDashboard" class="loyalty-dashboard" style="display:none;">
   <div class="dashboard-grid">
@@ -3461,6 +3533,36 @@ const closeServiceMessage =
 const closeServiceConfirm =
   document.getElementById('close-service-confirm');
 
+const fullyBookedButton =
+  document.getElementById('service-fully-booked');
+
+const fullyBookedModal =
+  document.getElementById('fully-booked-modal');
+
+const fullyBookedX =
+  document.getElementById('fully-booked-x');
+
+const fullyBookedCancel =
+  document.getElementById('fully-booked-cancel');
+
+const fullyBookedBackdrop =
+  fullyBookedModal?.querySelector('.service-modal__backdrop');
+
+const fullyBookedDate =
+  document.getElementById('fully-booked-date');
+
+const fullyBookedFrom =
+  document.getElementById('fully-booked-from');
+
+const fullyBookedUntil =
+  document.getElementById('fully-booked-until');
+
+const fullyBookedMessage =
+  document.getElementById('fully-booked-message');
+
+const fullyBookedConfirm =
+  document.getElementById('fully-booked-confirm');
+
 function openCloseServiceModal() {
   if (!closeServiceModal) return;
 
@@ -3507,6 +3609,54 @@ closeServiceCancel?.addEventListener(
 closeServiceBackdrop?.addEventListener(
   'click',
   hideCloseServiceModal
+);
+
+function openFullyBookedModal() {
+  if (!fullyBookedModal) return;
+
+  // Default to today's local date.
+  const now = new Date();
+
+  const localDate =
+    `${now.getFullYear()}-` +
+    `${String(now.getMonth() + 1).padStart(2, '0')}-` +
+    `${String(now.getDate()).padStart(2, '0')}`;
+
+  if (fullyBookedDate) {
+    fullyBookedDate.value = localDate;
+  }
+
+  fullyBookedModal.classList.add('is-open');
+  fullyBookedModal.setAttribute('aria-hidden', 'false');
+}
+
+
+function hideFullyBookedModal() {
+  if (!fullyBookedModal) return;
+
+  fullyBookedModal.classList.remove('is-open');
+  fullyBookedModal.setAttribute('aria-hidden', 'true');
+}
+
+
+fullyBookedButton?.addEventListener(
+  'click',
+  openFullyBookedModal
+);
+
+fullyBookedX?.addEventListener(
+  'click',
+  hideFullyBookedModal
+);
+
+fullyBookedCancel?.addEventListener(
+  'click',
+  hideFullyBookedModal
+);
+
+fullyBookedBackdrop?.addEventListener(
+  'click',
+  hideFullyBookedModal
 );
 
 async function createServiceBlackout() {
@@ -3586,6 +3736,89 @@ async function createServiceBlackout() {
     closeServiceConfirm.textContent = 'Close service';
   }
 }
+
+async function createFullyBookedBlackout() {
+  const date = fullyBookedDate?.value;
+  const from = fullyBookedFrom?.value;
+  const until = fullyBookedUntil?.value;
+  const message = fullyBookedMessage?.value.trim() || '';
+
+  if (!date || !from || !until) {
+    alert('Please enter a date, start time and end time.');
+    return;
+  }
+
+  const start = new Date(`${date}T${from}:00`);
+  const end = new Date(`${date}T${until}:00`);
+
+  if (
+    Number.isNaN(start.getTime()) ||
+    Number.isNaN(end.getTime())
+  ) {
+    alert('Please enter a valid date and time.');
+    return;
+  }
+
+  if (end <= start) {
+    alert('The fully booked end time must be after the start time.');
+    return;
+  }
+
+  const payload = {
+    action: 'create_blackout',
+    kind: 'fully_booked',
+    start_at: start.toISOString(),
+    end_at: end.toISOString(),
+    message
+  };
+
+  fullyBookedConfirm.disabled = true;
+  fullyBookedConfirm.textContent = 'Saving…';
+
+  try {
+    const response = await fetch(
+      '/admin-api/service-control',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || 'Unable to mark period fully booked'
+      );
+    }
+
+    alert('Fully booked period created successfully.');
+
+    hideFullyBookedModal();
+
+  } catch (error) {
+    console.error(
+      '[SERVICE CONTROL] Fully booked failed:',
+      error
+    );
+
+    alert(
+      `Unable to mark period fully booked: ${error.message}`
+    );
+
+  } finally {
+    fullyBookedConfirm.disabled = false;
+    fullyBookedConfirm.textContent = 'Mark fully booked';
+  }
+}
+
+fullyBookedConfirm?.addEventListener(
+  'click',
+  createFullyBookedBlackout
+);
 
 closeServiceConfirm?.addEventListener(
   'click',
