@@ -357,20 +357,192 @@
 		  color: #111827;
 		}
 
-			tr.row-attention td {
-			  background-color: #ffe9c6 !important;
-			}
-			tr.row-attention:hover td {
-			tr.row-attention td {
-  background-color: #ffe9c6 !important;
+/* Highlight future orders */
+tbody#tbody tr.row-attention > td {
+  background: #ffe9c6 !important;
 }
 
-/* Highlight future orders - force it to win over existing styles */
-	tbody#tbody tr.row-attention > td { background: #ffe9c6 !important; }
-	tbody#tbody tr.row-attention:hover > td { background: #ffd89a !important; }
+tbody#tbody tr.row-attention:hover > td {
+  background: #ffd89a !important;
+}
 
+/* =========================================================
+   SERVICE CONTROL
+========================================================= */
 
+.service-control {
+  max-width: 1180px;
+  margin: 18px auto 22px;
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
 
+.service-control__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.service-control__header h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+
+.service-control__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #ecfdf3;
+  color: #166534;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.service-control__status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+.service-control__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.service-control__actions .btn {
+  min-height: 38px;
+}
+
+@media (max-width: 700px) {
+  .service-control {
+    margin: 12px;
+    padding: 16px;
+  }
+
+  .service-control__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* =========================================================
+   SERVICE CONTROL MODALS
+========================================================= */
+
+.service-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.service-modal.is-open {
+  display: flex;
+}
+
+.service-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.55);
+}
+
+.service-modal__panel {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+}
+
+.service-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.service-modal__header h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+
+.service-modal__x {
+  border: 0;
+  background: transparent;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.service-modal__body {
+  padding: 20px 22px;
+}
+
+.service-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+}
+
+.service-field input,
+.service-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 11px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-weight: 400;
+  color: #111827;
+}
+
+.service-field textarea {
+  resize: vertical;
+  min-height: 82px;
+}
+
+.service-modal__time-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.service-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+@media (max-width: 520px) {
+  .service-modal__time-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
   
   </style>
 </head>
@@ -395,6 +567,102 @@
 
     </div>
   </header>
+
+  <!-- =========================================================
+     SERVICE CONTROL
+========================================================= -->
+<section id="service-control" class="service-control">
+  <div class="service-control__header">
+    <div>
+      <h2>Service Control</h2>
+      <div class="muted small">
+        Manage today's service availability and customer messaging.
+      </div>
+    </div>
+
+    <div class="service-control__status">
+      <span class="service-control__status-dot"></span>
+      <span>Normal</span>
+    </div>
+  </div>
+
+  <div class="service-control__actions">
+    <button type="button" class="btn" id="service-close">
+      Close service
+    </button>
+
+    <button type="button" class="btn" id="service-fully-booked">
+      Mark period fully booked
+    </button>
+  </div>
+</section>
+
+<!-- =========================================================
+     CLOSE SERVICE MODAL
+========================================================= -->
+<div id="close-service-modal" class="service-modal" aria-hidden="true">
+  <div class="service-modal__backdrop"></div>
+
+  <div class="service-modal__panel" role="dialog" aria-modal="true"
+       aria-labelledby="close-service-title">
+
+    <div class="service-modal__header">
+      <div>
+        <h2 id="close-service-title">Close service</h2>
+        <div class="muted small">
+          Prevent customers booking during a specified period.
+        </div>
+      </div>
+
+      <button type="button"
+              class="service-modal__x"
+              id="close-service-x"
+              aria-label="Close">
+        ×
+      </button>
+    </div>
+
+    <div class="service-modal__body">
+
+      <label class="service-field">
+        <span>Date</span>
+        <input type="date" id="close-service-date">
+      </label>
+
+      <div class="service-modal__time-row">
+        <label class="service-field">
+          <span>From</span>
+          <input type="time" id="close-service-from" value="17:00">
+        </label>
+
+        <label class="service-field">
+          <span>Until</span>
+          <input type="time" id="close-service-until" value="21:00">
+        </label>
+      </div>
+
+      <label class="service-field">
+        <span>Customer message</span>
+        <textarea id="close-service-message"
+                  rows="3"
+                  placeholder="e.g. Unfortunately we're closed this evening."></textarea>
+      </label>
+
+    </div>
+
+    <div class="service-modal__footer">
+      <button type="button" class="btn" id="close-service-cancel">
+        Cancel
+      </button>
+
+      <button type="button" class="btn" id="close-service-confirm">
+        Close service
+      </button>
+    </div>
+
+  </div>
+</div>
+
   <div id="liveDashboard">
   <div id="loyaltyDashboard" class="loyalty-dashboard" style="display:none;">
   <div class="dashboard-grid">
@@ -3159,7 +3427,179 @@ const NOTIFY_API_BASE = "https://order-backend-production.up.railway.app";
 			  }
 			}
 
+/* =========================================================
+   SERVICE CONTROL — CLOSE SERVICE MODAL
+========================================================= */
 
+const closeServiceButton =
+  document.getElementById('service-close');
+
+const closeServiceModal =
+  document.getElementById('close-service-modal');
+
+const closeServiceX =
+  document.getElementById('close-service-x');
+
+const closeServiceCancel =
+  document.getElementById('close-service-cancel');
+
+const closeServiceBackdrop =
+  closeServiceModal?.querySelector('.service-modal__backdrop');
+
+const closeServiceDate =
+  document.getElementById('close-service-date');
+
+const closeServiceFrom =
+  document.getElementById('close-service-from');
+
+const closeServiceUntil =
+  document.getElementById('close-service-until');
+
+const closeServiceMessage =
+  document.getElementById('close-service-message');
+
+const closeServiceConfirm =
+  document.getElementById('close-service-confirm');
+
+function openCloseServiceModal() {
+  if (!closeServiceModal) return;
+
+  // Default to today's local date.
+  const now = new Date();
+
+  const localDate =
+    `${now.getFullYear()}-` +
+    `${String(now.getMonth() + 1).padStart(2, '0')}-` +
+    `${String(now.getDate()).padStart(2, '0')}`;
+
+  if (closeServiceDate) {
+    closeServiceDate.value = localDate;
+  }
+
+  closeServiceModal.classList.add('is-open');
+  closeServiceModal.setAttribute('aria-hidden', 'false');
+}
+
+
+function hideCloseServiceModal() {
+  if (!closeServiceModal) return;
+
+  closeServiceModal.classList.remove('is-open');
+  closeServiceModal.setAttribute('aria-hidden', 'true');
+}
+
+
+closeServiceButton?.addEventListener(
+  'click',
+  openCloseServiceModal
+);
+
+closeServiceX?.addEventListener(
+  'click',
+  hideCloseServiceModal
+);
+
+closeServiceCancel?.addEventListener(
+  'click',
+  hideCloseServiceModal
+);
+
+closeServiceBackdrop?.addEventListener(
+  'click',
+  hideCloseServiceModal
+);
+
+async function createServiceBlackout() {
+  const date = closeServiceDate?.value;
+  const from = closeServiceFrom?.value;
+  const until = closeServiceUntil?.value;
+  const message = closeServiceMessage?.value.trim() || '';
+
+  if (!date || !from || !until) {
+    alert('Please enter a date, start time and end time.');
+    return;
+  }
+
+  const start = new Date(`${date}T${from}:00`);
+  const end = new Date(`${date}T${until}:00`);
+
+  if (
+    Number.isNaN(start.getTime()) ||
+    Number.isNaN(end.getTime())
+  ) {
+    alert('Please enter a valid date and time.');
+    return;
+  }
+
+  if (end <= start) {
+    alert('The closing end time must be after the start time.');
+    return;
+  }
+
+  const payload = {
+    action: 'create_blackout',
+    kind: 'closed',
+    start_at: start.toISOString(),
+    end_at: end.toISOString(),
+    message
+  };
+
+  closeServiceConfirm.disabled = true;
+  closeServiceConfirm.textContent = 'Closing…';
+
+  try {
+    const response = await fetch(
+      '/admin-api/service-control',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || 'Unable to close service'
+      );
+    }
+
+    alert('Service closure created successfully.');
+
+    hideCloseServiceModal();
+
+  } catch (error) {
+    console.error(
+      '[SERVICE CONTROL] Close service failed:',
+      error
+    );
+
+    alert(
+      `Unable to close service: ${error.message}`
+    );
+
+  } finally {
+    closeServiceConfirm.disabled = false;
+    closeServiceConfirm.textContent = 'Close service';
+  }
+}
+
+closeServiceConfirm?.addEventListener(
+  'click',
+  createServiceBlackout
+);
+
+document.addEventListener('keydown', event => {
+  if (
+    event.key === 'Escape' &&
+    closeServiceModal?.classList.contains('is-open')
+  ) {
+    hideCloseServiceModal();
+  }
+});
 
 /* -----------------------------------------------------------
    SINGLE GLOBAL CLICK HANDLER — Accept / Decline / Suggest
