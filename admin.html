@@ -434,6 +434,31 @@ tbody#tbody tr.row-attention:hover > td {
   }
 }
 
+.service-control__restrictions {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.service-control__restrictions-title {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+}
+
+.service-control__restrictions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.service-control__actions {
+  margin-top: 18px;
+}
+
 /* =========================================================
    SERVICE CONTROL MODALS
 ========================================================= */
@@ -583,6 +608,19 @@ tbody#tbody tr.row-attention:hover > td {
     <div class="service-control__status">
       <span class="service-control__status-dot"></span>
       <span>Normal</span>
+    </div>
+  </div>
+
+  <div class="service-control__restrictions">
+    <div class="service-control__restrictions-title">
+      Active restrictions
+    </div>
+
+    <div id="service-active-restrictions"
+         class="service-control__restrictions-list">
+      <div class="muted small">
+        No active restrictions.
+      </div>
     </div>
   </div>
 
@@ -3563,6 +3601,9 @@ const fullyBookedMessage =
 const fullyBookedConfirm =
   document.getElementById('fully-booked-confirm');
 
+const activeRestrictionsList =
+  document.getElementById('service-active-restrictions');
+
 function openCloseServiceModal() {
   if (!closeServiceModal) return;
 
@@ -3658,6 +3699,58 @@ fullyBookedBackdrop?.addEventListener(
   'click',
   hideFullyBookedModal
 );
+
+async function loadActiveRestrictions() {
+  if (!activeRestrictionsList) return;
+
+  activeRestrictionsList.innerHTML =
+    '<div class="muted small">Loading restrictions…</div>';
+
+  try {
+    const response = await fetch(
+      '/admin-api/service-control',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'list_blackouts'
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || 'Unable to load active restrictions'
+      );
+    }
+
+    const blackouts = data.blackouts || [];
+
+    if (blackouts.length === 0) {
+      activeRestrictionsList.innerHTML =
+        '<div class="muted small">No active restrictions.</div>';
+      return;
+    }
+
+    activeRestrictionsList.innerHTML =
+      `<div class="muted small">${blackouts.length} active restriction${blackouts.length === 1 ? '' : 's'}.</div>`;
+
+  } catch (error) {
+    console.error(
+      '[SERVICE CONTROL] Unable to load restrictions:',
+      error
+    );
+
+    activeRestrictionsList.innerHTML =
+      '<div class="muted small">Unable to load active restrictions.</div>';
+  }
+}
+
+loadActiveRestrictions();
 
 async function createServiceBlackout() {
   const date = closeServiceDate?.value;
