@@ -4033,6 +4033,9 @@ async function createFullyBookedBlackout() {
 
     hideFullyBookedModal();
 
+    await new Promise(resolve => setTimeout(resolve, 250));
+    await loadActiveRestrictions();
+
   } catch (error) {
     console.error(
       '[SERVICE CONTROL] Fully booked failed:',
