@@ -3832,6 +3832,64 @@ async function loadActiveRestrictions() {
 
 loadActiveRestrictions();
 
+activeRestrictionsList?.addEventListener('click', async event => {
+  const button = event.target.closest('.service-restriction__reopen');
+
+  if (!button) return;
+
+  const blackoutId = button.dataset.blackoutId;
+
+  if (!blackoutId) return;
+
+  const confirmed = window.confirm(
+    'Reopen this period and make it available for booking again?'
+  );
+
+  if (!confirmed) return;
+
+  button.disabled = true;
+  button.textContent = 'Reopening…';
+
+  try {
+    const response = await fetch(
+      '/admin-api/service-control',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'deactivate_blackout',
+          blackout_id: blackoutId
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || 'Unable to reopen period'
+      );
+    }
+
+    await loadActiveRestrictions();
+
+  } catch (error) {
+    console.error(
+      '[SERVICE CONTROL] Reopen failed:',
+      error
+    );
+
+    alert(
+      `Unable to reopen period: ${error.message}`
+    );
+
+    button.disabled = false;
+    button.textContent = 'Reopen';
+  }
+});
+
 async function createServiceBlackout() {
   const date = closeServiceDate?.value;
   const from = closeServiceFrom?.value;
