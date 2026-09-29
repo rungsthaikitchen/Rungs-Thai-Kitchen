@@ -4996,21 +4996,6 @@ function showBlackoutBannerForDate(dateString) {
       closedWindow.message ||
         'Sorry, we are closed during this service.'
     );
-    return;
-  }
-
-  const fullyBookedWindow =
-    FULLY_BOOKED.find(win =>
-      win.start <= dayEnd &&
-      win.end >= dayStart
-    );
-
-  if (fullyBookedWindow) {
-    showCheckoutBanner(
-      'fully_booked',
-      fullyBookedWindow.message ||
-        'Some times during this service are fully booked.'
-    );
   }
 }
 
