@@ -3952,6 +3952,8 @@ async function createServiceBlackout() {
 
     hideCloseServiceModal();
 
+    await loadActiveRestrictions();
+
   } catch (error) {
     console.error(
       '[SERVICE CONTROL] Close service failed:',
