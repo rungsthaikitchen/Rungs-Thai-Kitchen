@@ -3736,8 +3736,54 @@ async function loadActiveRestrictions() {
       return;
     }
 
-    activeRestrictionsList.innerHTML =
-      `<div class="muted small">${blackouts.length} active restriction${blackouts.length === 1 ? '' : 's'}.</div>`;
+    activeRestrictionsList.innerHTML = blackouts.map(blackout => {
+      const start = new Date(blackout.start_at);
+      const end = new Date(blackout.end_at);
+
+      const dateLabel = start.toLocaleDateString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short'
+      });
+
+      const timeLabel =
+        `${start.toLocaleTimeString('en-GB', {
+          hour: '2-digit',
+          minute: '2-digit'
+        })}–${end.toLocaleTimeString('en-GB', {
+          hour: '2-digit',
+          minute: '2-digit'
+        })}`;
+
+      const typeLabel =
+        blackout.kind === 'closed'
+          ? 'CLOSED'
+          : 'FULLY BOOKED';
+
+      return `
+        <div class="service-restriction">
+          <div class="service-restriction__type">
+            ${typeLabel}
+          </div>
+
+          <div class="service-restriction__when">
+            ${dateLabel} · ${timeLabel}
+          </div>
+
+          ${
+            blackout.message
+              ? `<div class="service-restriction__message">${blackout.message}</div>`
+              : ''
+          }
+
+          <button type="button"
+                  class="btn service-restriction__reopen"
+                  data-blackout-id="${blackout.id}">
+            Reopen
+          </button>
+        </div>
+      `;
+    }).join('');
 
   } catch (error) {
     console.error(
