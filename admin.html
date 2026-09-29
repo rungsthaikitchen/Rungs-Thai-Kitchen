@@ -3952,6 +3952,7 @@ async function createServiceBlackout() {
 
     hideCloseServiceModal();
 
+    await new Promise(resolve => setTimeout(resolve, 250));
     await loadActiveRestrictions();
 
   } catch (error) {
