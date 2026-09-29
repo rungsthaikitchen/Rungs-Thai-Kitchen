@@ -6370,14 +6370,21 @@ function withinOpenHours(d){
 }
 function isClosedDate(d){
   const ymd = toYMD(d);
+
   if (CLOSED_DATES.includes(ymd)) return true;
+
   for (const r of CLOSED_RANGES){
     const rs = new Date(r.start);
     const re = new Date(r.end);
-    if (isBetween(d, rs, re)) return true;
+
+    // Blackout end times are exclusive:
+    // 18:00–18:30 closes 18:00 through 18:25.
+    if (d >= rs && d < re) return true;
   }
+
   return false;
 }
+
 function isFullyBooked(d) {
   return FULLY_BOOKED.some(win =>
     d >= win.start && d < win.end
