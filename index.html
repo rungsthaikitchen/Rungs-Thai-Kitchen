@@ -2735,8 +2735,7 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
         </div>
         <button id="checkout-close" class="btn btn-ghost">Close</button>
       </div>
-		<div id="checkout-banner" class="checkout-banner" role="status" aria-live="polite"></div>
-		<div id="checkout-order-summary" class="checkout-order-summary"></div>
+				<div id="checkout-order-summary" class="checkout-order-summary"></div>
 
       <form id="checkout-form" class="form-grid">
         <div class="field">
@@ -2821,6 +2820,13 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
 
   </div>
 
+  <div
+    id="checkout-banner"
+    class="checkout-banner"
+    role="status"
+    aria-live="polite"
+  ></div>
+
   <!--
     Compatibility field.
     Existing checkout/scheduler code continues to use this field.
@@ -2839,8 +2845,7 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
   </div>
 
   <div class="muted small" style="margin-top:6px;">
-    Times shown as unavailable are already fully allocated.
-    Please choose another available time.
+    Times shown as unavailable, fully booked or closed cannot currently be selected. Please choose another available time.
   </div>
 
   <div class="muted small" style="margin-top:4px;">
@@ -4967,6 +4972,48 @@ function hideCheckoutBanner() {
   if (el) { el.style.display = 'none'; el.textContent = ''; el.className = 'checkout-banner'; }
 }
 
+function showBlackoutBannerForDate(dateString) {
+  hideCheckoutBanner();
+
+  if (!dateString) return;
+
+  const dayStart =
+    new Date(`${dateString}T00:00:00`);
+
+  const dayEnd =
+    new Date(`${dateString}T23:59:59`);
+
+  // A closure takes priority if both kinds somehow overlap.
+  const closedWindow =
+    CLOSED_RANGES.find(win =>
+      win.start <= dayEnd &&
+      win.end >= dayStart
+    );
+
+  if (closedWindow) {
+    showCheckoutBanner(
+      'closed',
+      closedWindow.message ||
+        'Sorry, we are closed during this service.'
+    );
+    return;
+  }
+
+  const fullyBookedWindow =
+    FULLY_BOOKED.find(win =>
+      win.start <= dayEnd &&
+      win.end >= dayStart
+    );
+
+  if (fullyBookedWindow) {
+    showCheckoutBanner(
+      'fully_booked',
+      fullyBookedWindow.message ||
+        'Some times during this service are fully booked.'
+    );
+  }
+}
+
 /* ------------------------------
    Wire into your existing flow
 ---------------------------------*/
@@ -5183,14 +5230,33 @@ let availableCount = 0;
       !insideLeadTime && isAllowed(slot);
 
     if (schedulerAllows) {
-      option.textContent = timeText;
-      availableCount++;
-    } else {
-      option.textContent =
-        `${timeText} — Unavailable`;
+  option.textContent = timeText;
+  availableCount++;
+} else {
 
-      option.disabled = true;
-    }
+  const closedBlackout =
+    typeof isClosedDate === 'function'
+      ? isClosedDate(slot)
+      : null;
+
+  const fullyBookedBlackout =
+    typeof isFullyBooked === 'function'
+      ? isFullyBooked(slot)
+      : null;
+
+  if (closedBlackout) {
+    option.textContent =
+      `${timeText} — Closed`;
+  } else if (fullyBookedBlackout) {
+    option.textContent =
+      `${timeText} — Fully booked`;
+  } else {
+    option.textContent =
+      `${timeText} — Unavailable`;
+  }
+
+  option.disabled = true;
+}
 
     preferredTimeSelect.appendChild(option);
   }
@@ -5277,6 +5343,10 @@ if (preferredDateInput) {
       clearPreferredTimeSelect();
       return;
     }
+
+    showBlackoutBannerForDate(
+    preferredDateInput.value
+  );
 
     await populatePreferredTimeSelect(dateString);
   });
@@ -6673,6 +6743,10 @@ if (preferredTimeEl?.value) {
 				console.warn("[checkout] openCheckout blocked - empty basket", { subtotal });
 				return;
 			  }
+
+        // Refresh closures / fully-booked periods whenever checkout opens.
+// This prevents a customer using stale blackout data from an older page load.
+await loadBlackouts();
 
         // Refresh preferred-time availability whenever checkout opens.
 // This ensures the dropdown reflects the latest orders in Supabase
