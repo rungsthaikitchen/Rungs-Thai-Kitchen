@@ -3747,6 +3747,17 @@ async function setServiceMode(mode) {
       data
     );
 
+    currentServiceMode = mode;
+
+    serviceModeButtons.forEach(button => {
+      button.classList.toggle(
+        'service-mode-btn--active',
+        button.dataset.serviceMode === mode
+      );
+    });
+
+    renderServiceControlStatus();
+
   } catch (error) {
     console.error(
       '[SERVICE CONTROL] Unable to update service mode:',
