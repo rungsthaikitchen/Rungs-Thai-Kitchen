@@ -1843,8 +1843,17 @@ const PRINT_CATEGORY_LOOKUP = {
 				  "moo-ping": ["Jaew Sauce"],
 				  "fried-prawns": ["Sweet Chilli Sauce"]
 				};
-				
+
 				const GOOGLE_REVIEW_URL = "https://g.page/r/Ce3aoHonJ9KzEBM/review";
+
+        async function printTicketCopies(order, copies = 3) {
+          for (let i = 0; i < copies; i++) {
+            printTicket(order);
+
+            // Give the browser/printer time to start the job
+            await new Promise(resolve => setTimeout(resolve, 1200));
+          }
+        }
 	  
 	  function printTicket(o) {
   const c = o.customers || {};
@@ -2644,11 +2653,11 @@ const discountLabel =
     }
 
     const printBtn = tr.querySelector('[data-action="print"]');
-if (printBtn) {
-  printBtn.addEventListener('click', () => {
-    printTicket(o);
-  });
-}
+    if (printBtn) {
+      printBtn.addEventListener('click', () => {
+        printTicketCopies(o, 3);
+      });
+    }
 
 const allergenBtn = tr.querySelector('[data-action="print-allergens"]');
 if (allergenBtn) {
