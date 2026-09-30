@@ -516,6 +516,24 @@ tbody#tbody tr.row-attention:hover > td {
   min-width: 110px;
 }
 
+.service-control__mode-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+}
+
+.service-control__mode-message label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.service-control__mode-message input[type="text"] {
+  width: 320px;
+  min-width: 220px;
+}
+
 .service-mode-btn--active {
   background: #ecfdf3;
   border-color: #86efac;
@@ -746,6 +764,16 @@ tbody#tbody tr.row-attention:hover > td {
       <input type="time"
              id="service-mode-until"
              step="300">
+    </div>
+
+    <div class="service-control__mode-message">
+      <label for="service-mode-message">
+        Message
+      </label>
+
+      <input type="text"
+             id="service-mode-message"
+             placeholder="Optional customer message">
     </div>
   </div>
   <div class="service-control__restrictions-row">
@@ -3764,6 +3792,9 @@ const serviceModeButtons =
 const serviceModeUntil =
   document.getElementById('service-mode-until');
 
+const serviceModeMessage =
+  document.getElementById('service-mode-message');
+
 async function setServiceMode(mode) {
   try {
     const response = await fetch(
@@ -3776,7 +3807,10 @@ async function setServiceMode(mode) {
         body: JSON.stringify({
           action: 'set_service_state',
           mode,
-          customer_message: null,
+          customer_message:
+            mode !== 'normal'
+              ? serviceModeMessage?.value.trim() || null
+              : null,
           effective_until:
             mode !== 'normal' && serviceModeUntil?.value
               ? (() => {
@@ -4012,6 +4046,11 @@ async function loadServiceState() {
       } else {
         serviceModeUntil.value = '';
       }
+    }
+
+    if (serviceModeMessage) {
+      serviceModeMessage.value =
+        serviceState?.customer_message || '';
     }
 
     serviceModeButtons.forEach(button => {
