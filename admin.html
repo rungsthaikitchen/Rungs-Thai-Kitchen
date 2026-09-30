@@ -3759,7 +3759,12 @@ async function setServiceMode(mode) {
           action: 'set_service_state',
           mode,
           customer_message: null,
-          effective_until: null
+          effective_until:
+            mode !== 'normal' && serviceModeUntil?.value
+              ? new Date(
+                  `${toYMD(new Date())}T${serviceModeUntil.value}:00`
+                ).toISOString()
+              : null
         })
       }
     );
