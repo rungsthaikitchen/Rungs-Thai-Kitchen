@@ -3716,6 +3716,51 @@ let hasActiveServiceRestrictions = false;
 const serviceModeButtons =
   document.querySelectorAll('.service-mode-btn');
 
+async function setServiceMode(mode) {
+  try {
+    const response = await fetch(
+      '/admin-api/service-control',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'set_service_state',
+          mode,
+          customer_message: null,
+          effective_until: null
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || 'Unable to update service mode'
+      );
+    }
+
+    console.log(
+      '[SERVICE CONTROL] Service mode updated:',
+      data
+    );
+
+  } catch (error) {
+    console.error(
+      '[SERVICE CONTROL] Unable to update service mode:',
+      error
+    );
+  }
+}
+
+serviceModeButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    setServiceMode(button.dataset.serviceMode);
+  });
+});
+
 function openCloseServiceModal() {
   if (!closeServiceModal) return;
 
