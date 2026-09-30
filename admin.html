@@ -3761,9 +3761,18 @@ async function setServiceMode(mode) {
           customer_message: null,
           effective_until:
             mode !== 'normal' && serviceModeUntil?.value
-              ? new Date(
-                  `${toYMD(new Date())}T${serviceModeUntil.value}:00`
-                ).toISOString()
+              ? (() => {
+                  const now = new Date();
+
+                  const localDate =
+                    `${now.getFullYear()}-` +
+                    `${String(now.getMonth() + 1).padStart(2, '0')}-` +
+                    `${String(now.getDate()).padStart(2, '0')}`;
+
+                  return new Date(
+                    `${localDate}T${serviceModeUntil.value}:00`
+                  ).toISOString();
+                })()
               : null
         })
       }
