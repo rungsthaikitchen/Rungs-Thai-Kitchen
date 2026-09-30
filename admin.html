@@ -3845,6 +3845,16 @@ async function setServiceMode(mode) {
 
     currentServiceMode = mode;
 
+    if (mode === 'normal') {
+      if (serviceModeUntil) {
+        serviceModeUntil.value = '';
+      }
+
+      if (serviceModeMessage) {
+        serviceModeMessage.value = '';
+      }
+    }
+
     serviceModeButtons.forEach(button => {
       button.classList.toggle(
         'service-mode-btn--active',
