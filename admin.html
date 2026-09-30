@@ -468,6 +468,35 @@ tbody#tbody tr.row-attention:hover > td {
   margin-top: 18px;
 }
 
+.service-control__mode {
+  margin: 18px 0 20px;
+}
+
+.service-control__mode-title {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #475569;
+}
+
+.service-control__mode-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.service-mode-btn {
+  min-width: 92px;
+}
+
+.service-mode-btn--active {
+  background: #ecfdf3;
+  border-color: #86efac;
+  color: #166534;
+}
+
 .service-restriction {
   position: relative;
   padding: 14px 120px 14px 16px;
@@ -654,6 +683,37 @@ tbody#tbody tr.row-attention:hover > td {
     </div>
   </div>
 
+  <div class="service-control__mode">
+    <div class="service-control__mode-title">
+      Service mode
+    </div>
+
+    <div class="service-control__mode-options">
+      <button type="button"
+              class="btn service-mode-btn service-mode-btn--active"
+              data-service-mode="normal">
+        Normal
+      </button>
+
+      <button type="button"
+              class="btn service-mode-btn"
+              data-service-mode="busy">
+        Busy
+      </button>
+
+      <button type="button"
+              class="btn service-mode-btn"
+              data-service-mode="very_busy">
+        Very busy
+      </button>
+
+      <button type="button"
+              class="btn service-mode-btn"
+              data-service-mode="paused">
+        Pause orders
+      </button>
+    </div>
+  </div>
   <div class="service-control__restrictions">
     <div class="service-control__restrictions-title">
       Active restrictions
@@ -3650,6 +3710,11 @@ const activeRestrictionsList =
 const serviceControlStatusText =
   document.getElementById('service-control-status-text');
 
+let hasActiveServiceRestrictions = false;
+
+const serviceModeButtons =
+  document.querySelectorAll('.service-mode-btn');
+
 function openCloseServiceModal() {
   if (!closeServiceModal) return;
 
@@ -3746,6 +3811,49 @@ fullyBookedBackdrop?.addEventListener(
   hideFullyBookedModal
 );
 
+async function loadServiceState() {
+  try {
+    const response = await fetch(
+      '/admin-api/service-control',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'get_service_state'
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || 'Unable to load service state'
+      );
+    }
+
+    const serviceState =
+      data.effective_service_state || data.service_state;
+
+    const mode = serviceState?.mode || 'normal';
+
+    serviceModeButtons.forEach(button => {
+      button.classList.toggle(
+        'service-mode-btn--active',
+        button.dataset.serviceMode === mode
+      );
+    });
+
+  } catch (error) {
+    console.error(
+      '[SERVICE CONTROL] Unable to load service state:',
+      error
+    );
+  }
+}
+
 async function loadActiveRestrictions() {
   if (!activeRestrictionsList) return;
 
@@ -3776,19 +3884,7 @@ async function loadActiveRestrictions() {
 
     const blackouts = data.blackouts || [];
 
-    if (serviceControlStatusText) {
-      serviceControlStatusText.textContent =
-        blackouts.length > 0
-          ? 'Restrictions active'
-          : 'Normal';
-
-      serviceControlStatusText
-        .closest('.service-control__status')
-        ?.classList.toggle(
-          'service-control__status--restricted',
-          blackouts.length > 0
-        );
-    }
+    hasActiveServiceRestrictions = blackouts.length > 0;
 
     if (blackouts.length === 0) {
       activeRestrictionsList.innerHTML =
@@ -3856,6 +3952,7 @@ async function loadActiveRestrictions() {
   }
 }
 
+loadServiceState();
 loadActiveRestrictions();
 
 activeRestrictionsList?.addEventListener('click', async event => {
