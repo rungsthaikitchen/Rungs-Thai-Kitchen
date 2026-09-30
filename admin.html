@@ -3710,6 +3710,7 @@ const activeRestrictionsList =
 const serviceControlStatusText =
   document.getElementById('service-control-status-text');
 
+let currentServiceMode = 'normal';
 let hasActiveServiceRestrictions = false;
 
 const serviceModeButtons =
@@ -3811,6 +3812,36 @@ fullyBookedBackdrop?.addEventListener(
   hideFullyBookedModal
 );
 
+function renderServiceControlStatus() {
+  if (!serviceControlStatusText) return;
+
+  let statusText = 'Normal';
+  let isRestricted = false;
+
+  if (currentServiceMode === 'paused') {
+    statusText = 'Orders paused';
+    isRestricted = true;
+  } else if (currentServiceMode === 'very_busy') {
+    statusText = 'Very busy';
+    isRestricted = true;
+  } else if (currentServiceMode === 'busy') {
+    statusText = 'Busy';
+    isRestricted = true;
+  } else if (hasActiveServiceRestrictions) {
+    statusText = 'Restrictions active';
+    isRestricted = true;
+  }
+
+  serviceControlStatusText.textContent = statusText;
+
+  serviceControlStatusText
+    .closest('.service-control__status')
+    ?.classList.toggle(
+      'service-control__status--restricted',
+      isRestricted
+    );
+}
+
 async function loadServiceState() {
   try {
     const response = await fetch(
@@ -3839,12 +3870,16 @@ async function loadServiceState() {
 
     const mode = serviceState?.mode || 'normal';
 
+    currentServiceMode = mode;
+
     serviceModeButtons.forEach(button => {
       button.classList.toggle(
         'service-mode-btn--active',
         button.dataset.serviceMode === mode
       );
     });
+
+    renderServiceControlStatus();
 
   } catch (error) {
     console.error(
@@ -3885,6 +3920,8 @@ async function loadActiveRestrictions() {
     const blackouts = data.blackouts || [];
 
     hasActiveServiceRestrictions = blackouts.length > 0;
+
+    renderServiceControlStatus();
 
     if (blackouts.length === 0) {
       activeRestrictionsList.innerHTML =
