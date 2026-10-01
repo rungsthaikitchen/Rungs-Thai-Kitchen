@@ -6829,6 +6829,23 @@ if (preferredTimeEl?.value) {
 				return;
 			  }
 
+await loadServiceState();
+
+if (SERVICE_STATE.mode === 'paused') {
+  if (orderMsg) {
+    orderMsg.textContent =
+      SERVICE_STATE.customer_message ||
+      'Online orders are temporarily paused. Please check back shortly.';
+    orderMsg.style.color = '#b02a2a';
+  }
+
+  console.warn(
+    '[checkout] openCheckout blocked - orders paused'
+  );
+
+  return;
+}
+
         // Refresh closures / fully-booked periods whenever checkout opens.
 // This prevents a customer using stale blackout data from an older page load.
 await loadBlackouts();
@@ -6948,16 +6965,6 @@ if (openCheckoutBtn) {
     if (!window.basket || window.basket.length === 0) {
       if (orderMsg) {
         orderMsg.textContent = 'Your basket is empty.';
-        orderMsg.style.color = '#b02a2a';
-      }
-      return;
-    }
-
-    if (SERVICE_STATE.mode === 'paused') {
-      if (orderMsg) {
-        orderMsg.textContent =
-          SERVICE_STATE.customer_message ||
-          'Online orders are temporarily paused. Please check back shortly.';
         orderMsg.style.color = '#b02a2a';
       }
       return;
