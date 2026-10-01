@@ -7346,6 +7346,23 @@ document.getElementById("apply-discount-code-btn")?.addEventListener("click", as
 // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
 checkoutForm.addEventListener('submit', async (e) => {
   e.preventDefault();
+
+  await loadServiceState();
+
+  if (SERVICE_STATE.mode === 'paused') {
+    if (orderMsg) {
+      orderMsg.textContent =
+        SERVICE_STATE.customer_message ||
+        'Online orders are temporarily paused. Please check back shortly.';
+      orderMsg.style.color = '#b02a2a';
+    }
+
+    console.warn(
+      '[checkout] submit blocked - orders paused'
+    );
+
+    return;
+  }
     
   const submitPreferredTimeEl =
   document.getElementById('cust-preferred-time');
