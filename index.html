@@ -4928,6 +4928,52 @@ console.log('[blackouts] CLOSED_RANGES:', CLOSED_RANGES);
 console.log('[blackouts] FULLY_BOOKED:', FULLY_BOOKED);
 }
 
+let SERVICE_STATE = {
+  mode: 'normal',
+  capacity_throttle: 0,
+  customer_message: null,
+  effective_until: null
+};
+
+async function loadServiceState() {
+  try {
+    const response = await fetch(
+      '/admin-api/service-control',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'get_service_state'
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || 'Unable to load service state'
+      );
+    }
+
+    SERVICE_STATE =
+      data.effective_service_state || SERVICE_STATE;
+
+    console.log(
+      '[service-state] loaded:',
+      SERVICE_STATE
+    );
+
+  } catch (error) {
+    console.warn(
+      '[service-state] fetch failed:',
+      error
+    );
+  }
+}
+
 // Helpers
 function inAnyWindow(dt, windows) {
   const t = +dt;
@@ -5011,6 +5057,8 @@ loadBlackouts().then(() => {
     t.dispatchEvent(new Event('change'));
   }
 });
+
+loadServiceState();
 
 // 2) When opening checkout, keep your existing min (+30m) and step=300
 //    Just add an input change listener to live-validate the chosen time.
