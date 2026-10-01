@@ -1870,6 +1870,17 @@ body.menu-open .menu-fab {
   z-index: 13001 !important;
 }
 
+#checkout-msg.checkout-msg--paused {
+  margin-top: 12px !important;
+  padding: 12px 14px;
+  border: 1px solid #dc3545;
+  border-radius: 8px;
+  background: #fff2f2;
+  color: #842029 !important;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 <style>
  html, body {
   margin: 0;
@@ -6881,9 +6892,10 @@ if (
   }
 }
 
-			  checkoutBaseSubtotal = Math.round(subtotal * 100) / 100;
-			  checkoutMsg.textContent = '';
-			  checkoutMsg.style.color = '';
+      checkoutBaseSubtotal = Math.round(subtotal * 100) / 100;
+      checkoutMsg.textContent = '';
+      checkoutMsg.style.color = '';
+      checkoutMsg.classList.remove('checkout-msg--paused');
 
 			  document.querySelector('input[name="order-type"][value="collection"]').checked = true;
 
@@ -7345,7 +7357,7 @@ checkoutForm.addEventListener('submit', async (e) => {
       checkoutMsg.textContent =
         SERVICE_STATE.customer_message ||
         'Online orders are temporarily paused. Please check back shortly.';
-      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.classList.add('checkout-msg--paused');
     }
 
     console.warn(
