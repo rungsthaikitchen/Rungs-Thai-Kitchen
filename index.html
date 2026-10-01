@@ -7350,11 +7350,11 @@ checkoutForm.addEventListener('submit', async (e) => {
   await loadServiceState();
 
   if (SERVICE_STATE.mode === 'paused') {
-    if (orderMsg) {
-      orderMsg.textContent =
+    if (checkoutMsg) {
+      checkoutMsg.textContent =
         SERVICE_STATE.customer_message ||
         'Online orders are temporarily paused. Please check back shortly.';
-      orderMsg.style.color = '#b02a2a';
+      checkoutMsg.style.color = '#b02a2a';
     }
 
     console.warn(
