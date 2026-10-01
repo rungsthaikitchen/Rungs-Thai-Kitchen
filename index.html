@@ -1870,17 +1870,6 @@ body.menu-open .menu-fab {
   z-index: 13001 !important;
 }
 
-#checkout-msg.checkout-msg--paused {
-  margin-top: 12px !important;
-  padding: 12px 14px;
-  border: 1px solid #dc3545;
-  border-radius: 8px;
-  background: #fff2f2;
-  color: #842029 !important;
-  font-size: 14px;
-  font-weight: 600;
-}
-
 #paused-order-alert {
   z-index: 14000 !important;
 }
@@ -6980,7 +6969,6 @@ if (
       checkoutBaseSubtotal = Math.round(subtotal * 100) / 100;
       checkoutMsg.textContent = '';
       checkoutMsg.style.color = '';
-      checkoutMsg.classList.remove('checkout-msg--paused');
 
 			  document.querySelector('input[name="order-type"][value="collection"]').checked = true;
 
