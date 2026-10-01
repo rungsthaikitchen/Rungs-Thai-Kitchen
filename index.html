@@ -1881,6 +1881,30 @@ body.menu-open .menu-fab {
   font-weight: 600;
 }
 
+#paused-order-alert {
+  z-index: 14000;
+}
+
+#paused-order-alert .paused-order-alert {
+  max-width: 420px;
+  padding: 22px;
+}
+
+#paused-order-alert-title {
+  margin: 0 0 12px;
+}
+
+#paused-order-alert-message {
+  line-height: 1.5;
+  font-size: 15px;
+}
+
+.paused-order-alert__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
 <style>
  html, body {
   margin: 0;
@@ -2942,6 +2966,34 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
       </form>
     </div>
   </div>
+
+<!-- Paused Order Alert -->
+<div
+  id="paused-order-alert"
+  class="modal-backdrop"
+  style="display:none"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="paused-order-alert-title"
+>
+  <div class="modal paused-order-alert">
+    <h3 id="paused-order-alert-title">
+      ⏸️ Orders temporarily paused
+    </h3>
+
+    <div id="paused-order-alert-message"></div>
+
+    <div class="paused-order-alert__actions">
+      <button
+        type="button"
+        id="paused-order-alert-ok"
+        class="btn btn-accent"
+      >
+        OK
+      </button>
+    </div>
+  </div>
+</div>
 
 			  <!-- Order Success Modal -->
 			<div id="order-success" class="modal-backdrop" style="display:none" role="dialog" aria-modal="true">
@@ -5465,6 +5517,39 @@ const checkoutTotalEl = document.getElementById('checkout-total');
 const deliveryNote = document.getElementById('delivery-note');
 const orderMsg = document.getElementById('order-msg');
 const openCheckoutBtn = document.getElementById('open-checkout');
+const pausedOrderAlert =
+  document.getElementById('paused-order-alert');
+
+const pausedOrderAlertMessage =
+  document.getElementById('paused-order-alert-message');
+
+const pausedOrderAlertOk =
+  document.getElementById('paused-order-alert-ok');
+
+function showPausedOrderAlert(message) {
+  if (!pausedOrderAlert || !pausedOrderAlertMessage) return;
+
+  pausedOrderAlertMessage.textContent =
+    message ||
+    'Online orders are temporarily paused. Please check back shortly.';
+
+  pausedOrderAlert.style.display = 'flex';
+
+  if (pausedOrderAlertOk) {
+    pausedOrderAlertOk.focus();
+  }
+}
+
+function hidePausedOrderAlert() {
+  if (!pausedOrderAlert) return;
+
+  pausedOrderAlert.style.display = 'none';
+}
+
+pausedOrderAlertOk?.addEventListener(
+  'click',
+  hidePausedOrderAlert
+);
 
 const orderTypeRadios = document.querySelectorAll('input[name="order-type"]');
 let checkoutBaseSubtotal = 0;
@@ -7349,24 +7434,19 @@ document.getElementById("apply-discount-code-btn")?.addEventListener("click", as
 // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
 checkoutForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-
   await loadServiceState();
 
   if (SERVICE_STATE.mode === 'paused') {
-    if (checkoutMsg) {
-      checkoutMsg.textContent =
-        SERVICE_STATE.customer_message ||
-        'Online orders are temporarily paused. Please check back shortly.';
-      checkoutMsg.classList.add('checkout-msg--paused');
-    }
+    showPausedOrderAlert(
+      SERVICE_STATE.customer_message
+    );
 
     console.warn(
       '[checkout] submit blocked - orders paused'
     );
-
     return;
   }
-    
+
   const submitPreferredTimeEl =
   document.getElementById('cust-preferred-time');
 
