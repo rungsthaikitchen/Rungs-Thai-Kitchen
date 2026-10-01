@@ -6952,6 +6952,17 @@ if (openCheckoutBtn) {
       }
       return;
     }
+
+    if (SERVICE_STATE.mode === 'paused') {
+      if (orderMsg) {
+        orderMsg.textContent =
+          SERVICE_STATE.customer_message ||
+          'Online orders are temporarily paused. Please check back shortly.';
+        orderMsg.style.color = '#b02a2a';
+      }
+      return;
+    }
+
     if (orderMsg) {
       orderMsg.textContent = '';
       orderMsg.style.color = '';
