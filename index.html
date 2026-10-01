@@ -4981,16 +4981,7 @@ function renderServiceStatusNotice() {
 async function loadServiceState() {
   try {
     const response = await fetch(
-      '/admin-api/service-control',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: 'get_service_state'
-        })
-      }
+      '/api/service-state'
     );
 
     const data = await response.json();
