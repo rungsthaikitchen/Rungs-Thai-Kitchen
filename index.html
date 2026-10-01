@@ -2440,6 +2440,10 @@ We’re really sorry for the short notice and for any disappointment, particular
 Rung's Thai Kitchen will be taking a short summer break and will be closed from <strong>Saturday 11th July until Friday 17th July (inclusive)</strong>. We look forward to welcoming you back from <strong>Saturday 18th July</strong>. Thank you for your continued support! ❤️
 </div>-->
 
+<div id="service-status-notice"
+     class="site-notice"
+     hidden>
+</div>
 
 <script>
 (function(){
@@ -4928,12 +4932,51 @@ console.log('[blackouts] CLOSED_RANGES:', CLOSED_RANGES);
 console.log('[blackouts] FULLY_BOOKED:', FULLY_BOOKED);
 }
 
+const serviceStatusNotice =
+  document.getElementById('service-status-notice');
+
 let SERVICE_STATE = {
   mode: 'normal',
   capacity_throttle: 0,
   customer_message: null,
   effective_until: null
 };
+
+function renderServiceStatusNotice() {
+  if (!serviceStatusNotice) return;
+
+  const mode = SERVICE_STATE.mode || 'normal';
+
+  if (mode === 'normal') {
+    serviceStatusNotice.hidden = true;
+    serviceStatusNotice.innerHTML = '';
+    return;
+  }
+
+  const titleByMode = {
+    busy: '🍜 We’re a little busy tonight',
+    very_busy: '🔥 We’re very busy tonight',
+    paused: '⏸️ Online orders are temporarily paused'
+  };
+
+  const title = titleByMode[mode] || '';
+  const message = SERVICE_STATE.customer_message || '';
+
+  serviceStatusNotice.innerHTML =
+    `<strong>${title}</strong>`;
+
+  if (message) {
+    serviceStatusNotice.appendChild(
+      document.createElement('br')
+    );
+
+    serviceStatusNotice.appendChild(
+      document.createTextNode(message)
+    );
+  }
+
+  serviceStatusNotice.hidden = false;
+}
 
 async function loadServiceState() {
   try {
@@ -4960,6 +5003,8 @@ async function loadServiceState() {
 
     SERVICE_STATE =
       data.effective_service_state || SERVICE_STATE;
+
+    renderServiceStatusNotice();
 
     console.log(
       '[service-state] loaded:',
