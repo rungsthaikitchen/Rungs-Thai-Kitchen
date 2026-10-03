@@ -2832,6 +2832,7 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
         id="cust-preferred-date"
         type="date"
         class="input"
+        required
       >
     </div>
 
@@ -2841,6 +2842,7 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
       <select
         id="cust-preferred-time-select"
         class="input"
+        required
       >
         <option value="">Select a date first</option>
       </select>
@@ -7421,7 +7423,37 @@ document.getElementById("apply-discount-code-btn")?.addEventListener("click", as
 
 // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
 checkoutForm.addEventListener('submit', async (e) => {
+
   e.preventDefault();
+
+  // HARD GUARD: date and time are mandatory
+  const submitDateValue =
+    document.getElementById('cust-preferred-date')?.value?.trim() || '';
+
+  const submitTimeSelectValue =
+    document.getElementById('cust-preferred-time-select')?.value?.trim() || '';
+
+  const submitPreferredTimeValue =
+    document.getElementById('cust-preferred-time')?.value?.trim() || '';
+
+  if (!submitDateValue) {
+    checkoutMsg.style.color = '#b02a2a';
+    checkoutMsg.textContent =
+      'Please select a date for your order.';
+
+    document.getElementById('cust-preferred-date')?.focus();
+    return;
+  }
+
+  if (!submitTimeSelectValue || !submitPreferredTimeValue) {
+    checkoutMsg.style.color = '#b02a2a';
+    checkoutMsg.textContent =
+      'Please select an available time for your order.';
+
+    document.getElementById('cust-preferred-time-select')?.focus();
+    return;
+  }
+
   await loadServiceState();
 
   if (SERVICE_STATE.mode === 'paused') {
