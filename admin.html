@@ -2654,7 +2654,7 @@ const discountLabel =
 
         <button class="btn-small btn-accept" data-order-id="${o.id}">Accept</button>
         <button class="btn-small btn-decline" data-order-id="${o.id}">Decline</button>
-        <button class="btn-small btn-paid" data-order-id="${o.id}">Mark paid</button>
+        <button class="btn-small btn-paid" data-order-id="${o.id}" data-order-total="${Number(o.total ?? 0).toFixed(2)}">Mark paid</button>
         <button class="btn-small btn-complete" data-order-id="${o.id}">Completed</button>
       </td>
     `;
@@ -4422,6 +4422,63 @@ document.addEventListener('keydown', event => {
   }
 });
 
+/* Payment UI preview: save deliberately disabled until backend is ready. */
+function openPaymentCapturePreview(orderId, amount) {
+  document.getElementById("rtk-payment-preview")?.remove();
+  const overlay = document.createElement("div");
+  overlay.id = "rtk-payment-preview";
+  overlay.style.cssText = "position:fixed;inset:0;background:#0009;z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px";
+  const panel = document.createElement("section");
+  panel.setAttribute("role", "dialog");
+  panel.setAttribute("aria-modal", "true");
+  panel.setAttribute("aria-labelledby", "rtk-payment-title");
+  panel.style.cssText = "background:white;color:#222;border-radius:12px;max-width:440px;width:100%;padding:22px;box-sizing:border-box;box-shadow:0 12px 40px #0005";
+  const n = Number(amount);
+  const total = Number.isFinite(n) && n >= 0 ? "£" + n.toFixed(2) : "Unavailable";
+  panel.innerHTML = `
+    <h2 id="rtk-payment-title">Record payment &amp; complete</h2>
+    <p>Order <strong id="rtk-payment-order"></strong> · Amount due <strong id="rtk-payment-total"></strong></p>
+    <label style="display:block;margin:12px 0">Bill payment method
+      <select id="rtk-bill-method" style="display:block;width:100%;padding:8px;margin-top:4px">
+        <option value="card">Card reader</option><option value="cash">Cash</option><option value="bank_transfer">Bank transfer</option>
+      </select>
+    </label>
+    <label style="display:block;margin:12px 0">Tip amount (£)
+      <input id="rtk-tip-amount" type="number" min="0" step="0.01" value="0.00" style="display:block;width:100%;box-sizing:border-box;padding:8px;margin-top:4px">
+    </label>
+    <label id="rtk-tip-method-row" style="display:none;margin:12px 0">Tip payment method
+      <select id="rtk-tip-method" style="display:block;width:100%;padding:8px;margin-top:4px">
+        <option value="cash">Cash</option><option value="card">Card reader</option><option value="bank_transfer">Bank transfer</option>
+      </select>
+    </label>
+    <p style="background:#fff3cd;padding:10px;border-radius:6px;font-size:13px">Preview only: saving is disabled until Railway and Supabase changes are ready.</p>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button type="button" id="rtk-payment-cancel">Cancel</button>
+      <button type="button" disabled>Save payment &amp; complete</button>
+    </div>`;
+  panel.querySelector("#rtk-payment-order").textContent = orderId;
+  panel.querySelector("#rtk-payment-total").textContent = total;
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+  const previousFocus = document.activeElement;
+  const close = () => { overlay.remove(); previousFocus?.focus?.(); };
+  panel.querySelector("#rtk-payment-cancel").addEventListener("click", close);
+  overlay.addEventListener("click", e => { if (e.target === overlay) close(); });
+  overlay.addEventListener("keydown", e => {
+    if (e.key === "Escape") close();
+    if (e.key === "Tab") {
+      const focusables = [...panel.querySelectorAll("select,input,button:not([disabled])")].filter(el => el.getClientRects().length);
+      if (e.shiftKey && document.activeElement === focusables[0]) { e.preventDefault(); focusables.at(-1).focus(); }
+      else if (!e.shiftKey && document.activeElement === focusables.at(-1)) { e.preventDefault(); focusables[0].focus(); }
+    }
+  });
+  const tip = panel.querySelector("#rtk-tip-amount");
+  tip.addEventListener("input", () => {
+    panel.querySelector("#rtk-tip-method-row").style.display = Number(tip.value) > 0 ? "block" : "none";
+  });
+  panel.querySelector("#rtk-bill-method").focus();
+}
+
 /* -----------------------------------------------------------
    SINGLE GLOBAL CLICK HANDLER — Accept / Decline / Suggest
 ----------------------------------------------------------- */
@@ -4534,19 +4591,9 @@ if (btn.classList.contains("btn-suggest")) {
   }
   return;
 }
-  /* ---------------- MARK PAID ---------------- */
+  /* ---------------- PAYMENT PREVIEW (NO BACKEND WRITE) ---------------- */
   if (btn.classList.contains("btn-paid")) {
-    if (!confirm("Mark this order as paid?")) return;
-
-    const result = await callOrderAction({
-      action: "mark_paid",
-      orderId
-    });
-
-    if (result?.success) {
-      alert("Order marked as paid.");
-      location.reload();
-    }
+    openPaymentCapturePreview(orderId, btn.dataset.orderTotal);
     return;
   }
 
