@@ -2655,7 +2655,7 @@ const discountLabel =
 
         <button class="btn-small btn-accept" data-order-id="${o.id}">Accept</button>
         <button class="btn-small btn-decline" data-order-id="${o.id}">Decline</button>
-        <button class="btn-small btn-paid" data-order-id="${o.id}" data-order-total="${Number(o.total ?? 0).toFixed(2)}">Mark paid</button>
+        <button class="btn-small btn-paid" data-order-id="${o.id}" data-order-total="${Number.isFinite(finalTotal) && finalTotal >= 0 ? finalTotal.toFixed(2) : ''}">Mark paid</button>
         <button class="btn-small btn-complete" data-order-id="${o.id}">Completed</button>
       </td>
     `;
