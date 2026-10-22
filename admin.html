@@ -4487,7 +4487,7 @@ function openPaymentCapturePreview(orderId, amount) {
   const methodLabel = select => select.options[select.selectedIndex].text;
   const updateSummary = () => {
     const raw = tip.value.trim();
-    const tipValid = raw !== "" && /^(?:0|[1-9]\\d*)(?:\\.\\d{1,2})?$/.test(raw);
+    const tipValid = raw !== "" && /^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/.test(raw);
     const parsed = tipValid ? Number(raw) : NaN;
     const safe = tipValid && Number.isSafeInteger(Math.round(parsed * 100)) && parsed >= 0;
     const pence = safe ? Math.round(parsed * 100) : 0;
