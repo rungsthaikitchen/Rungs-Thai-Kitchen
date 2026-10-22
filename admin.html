@@ -2589,6 +2589,7 @@ const discountLabel =
     tr.dataset.email = customer.email || '';
     tr.dataset.phone = customer.phone || '';
     tr.dataset.total = String(finalTotal);
+    tr.dataset.orderRef = rtkRef;
     tr.dataset.subtotal = String(subtotal);
     tr.dataset.discount = String(discount);
     tr.dataset.discountLabel = discountLabel;
@@ -4423,7 +4424,7 @@ document.addEventListener('keydown', event => {
 });
 
 /* Payment UI preview: save deliberately disabled until backend is ready. */
-function openPaymentCapturePreview(orderId, amount) {
+function openPaymentCapturePreview(orderId, amount, displayRef) {
   document.getElementById("rtk-payment-preview")?.remove();
   const overlay = document.createElement("div");
   overlay.id = "rtk-payment-preview";
@@ -4464,7 +4465,7 @@ function openPaymentCapturePreview(orderId, amount) {
       <button type="button" id="rtk-payment-cancel" style="padding:10px 14px">Cancel</button>
       <button type="button" disabled style="padding:10px 14px;opacity:.55;cursor:not-allowed">Save payment &amp; complete</button>
     </div>`;
-  panel.querySelector("#rtk-payment-order").textContent = orderId;
+  panel.querySelector("#rtk-payment-order").textContent = displayRef || orderId;
   panel.querySelector("#rtk-payment-total").textContent = validTotal ? money(totalPennies) : "Unavailable";
   overlay.appendChild(panel);
   document.body.appendChild(overlay);
@@ -4620,7 +4621,7 @@ if (btn.classList.contains("btn-suggest")) {
 }
   /* ---------------- PAYMENT PREVIEW (NO BACKEND WRITE) ---------------- */
   if (btn.classList.contains("btn-paid")) {
-    openPaymentCapturePreview(orderId, btn.dataset.orderTotal);
+    openPaymentCapturePreview(orderId, btn.dataset.orderTotal, row?.dataset.orderRef);
     return;
   }
 
