@@ -5,6 +5,8 @@
 create table if not exists public.order_payments (
   id uuid primary key default gen_random_uuid(),
   order_id uuid not null unique references public.orders(id) on delete restrict,
+  -- One immutable request key for the initial payment capture.
+  capture_idempotency_key uuid not null unique,
   bill_amount numeric(10,2) not null check (bill_amount >= 0),
   bill_method text not null check (bill_method in ('cash','card','bank_transfer')),
   tip_amount numeric(10,2) not null default 0 check (tip_amount >= 0),
@@ -23,6 +25,8 @@ create table if not exists public.order_payment_events (
   order_id uuid not null references public.orders(id) on delete restrict,
   payment_id uuid references public.order_payments(id) on delete restrict,
   event_type text not null check (event_type in ('recorded','corrected')),
+  -- Each logical event must have a unique key, including correction requests.
+  event_idempotency_key uuid not null unique,
   previous_details jsonb,
   new_details jsonb not null,
   reason text,
@@ -45,8 +49,15 @@ revoke all on public.order_payment_events from public, anon, authenticated;
 -- credentials should record payments and corrections.
 -- A future backend transaction must:
 --   1. Lock the order; validate payable final orders.total and request values.
---   2. Upsert payment record; append audit event with actor/reason.
+--   2. Insert the payment record once and append its audit event.
+--      A repeated request with the same idempotency key must return the
+--      original result without creating a second event. A different key
+--      for an already-recorded payment must fail, not overwrite it.
+--      Corrections require a distinct action, reason and event key.
 --   3. Update orders.paid, payment_status, paid_at and completion status.
 --   4. Commit all changes atomically, or roll back all.
 -- Do not implement this as multiple independent browser requests.
 -- Existing orders are deliberately NOT backfilled or marked paid.
+-- Important: unique keys alone are not sufficient for idempotency: the
+-- backend must compare canonical request payloads on retries, serialise
+-- concurrent requests, and commit payment + event + status atomically.
