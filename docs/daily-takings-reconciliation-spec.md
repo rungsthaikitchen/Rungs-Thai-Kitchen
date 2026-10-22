@@ -27,7 +27,7 @@ Decision needed: report by **trading/service date** (preferred for daily cash-up
 ## Corrections and audit
 The report reflects the **latest valid payment state**, not a sum of historical audit events. Audit events provide a correction history, not additional takings. Display corrected orders with an indicator and allow a separate detailed audit printout. Define handling for refunds and reversed payments before introducing them.
 
-## Proposed 58/80 mm receipt format
+## Proposed 80 mm receipt format
 - Restaurant name; report title; selected date and generation timestamp
 - Paid order count; bill sales; tips; total received
 - Card/cash/bank transfer takings, including tips, and control difference
@@ -35,7 +35,7 @@ The report reflects the **latest valid payment state**, not a sum of historical 
 - Exceptions section: completed/unpaid, legacy payment method unknown, corrections
 - END OF REPORT
 
-Avoid tiny text and excessively wide lines. Reuse the existing Admin ticket-printing mechanism where practical; confirm actual printer paper width and browser print CSS before coding. Do not assume a direct printer API is available.
+**Confirmed hardware:** 80 mm receipt paper (user confirmed). Design the receipt for this roll width, allowing for printer-specific printable margins. Avoid tiny text and excessively wide lines. Reuse the existing Admin ticket-printing mechanism where practical; confirm printer/browser print CSS before coding. Do not assume a direct printer API is available.
 
 ## Acceptance checks
 | ID | Input | Expected |
@@ -55,7 +55,7 @@ Avoid tiny text and excessively wide lines. Reuse the existing Admin ticket-prin
 1. Final payment schema and correction behaviour.
 2. Railway backend payment-capture endpoint and reliable payment records.
 3. Read-only authorised reporting endpoint (never expose privileged database keys to browser).
-4. Agreement on trading-date attribution and printer paper width.
+4. Agreement on trading-date attribution; 80 mm printer paper is confirmed.
 5. Reconciliation checks against real card-reader settlement and cash count, using authorised test data.
 
 **Release boundary:** Keep this report out of the initial payment-capture release unless explicitly approved later.
