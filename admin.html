@@ -4432,32 +4432,40 @@ function openPaymentCapturePreview(orderId, amount) {
   panel.setAttribute("role", "dialog");
   panel.setAttribute("aria-modal", "true");
   panel.setAttribute("aria-labelledby", "rtk-payment-title");
-  panel.style.cssText = "background:white;color:#222;border-radius:12px;max-width:440px;width:100%;padding:22px;box-sizing:border-box;box-shadow:0 12px 40px #0005";
+  panel.style.cssText = "background:#fff;color:#222;border-radius:12px;max-width:440px;width:100%;max-height:90vh;overflow-y:auto;padding:22px;box-sizing:border-box;box-shadow:0 12px 40px #0005;font:inherit";
   const n = Number(amount);
-  const total = Number.isFinite(n) && n >= 0 ? "£" + n.toFixed(2) : "Unavailable";
+  const validTotal = Number.isFinite(n) && n >= 0;
+  const totalPennies = validTotal ? Math.round(n * 100) : 0;
+  const money = pence => "£" + (pence / 100).toFixed(2);
   panel.innerHTML = `
-    <h2 id="rtk-payment-title">Record payment &amp; complete</h2>
-    <p>Order <strong id="rtk-payment-order"></strong> · Amount due <strong id="rtk-payment-total"></strong></p>
-    <label style="display:block;margin:12px 0">Bill payment method
-      <select id="rtk-bill-method" style="display:block;width:100%;padding:8px;margin-top:4px">
-        <option value="card">Card reader</option><option value="cash">Cash</option><option value="bank_transfer">Bank transfer</option>
-      </select>
-    </label>
-    <label style="display:block;margin:12px 0">Tip amount (£)
-      <input id="rtk-tip-amount" type="number" min="0" step="0.01" value="0.00" style="display:block;width:100%;box-sizing:border-box;padding:8px;margin-top:4px">
-    </label>
-    <label id="rtk-tip-method-row" style="display:none;margin:12px 0">Tip payment method
-      <select id="rtk-tip-method" style="display:block;width:100%;padding:8px;margin-top:4px">
+    <h2 id="rtk-payment-title" style="margin:0 0 8px">Record payment &amp; complete</h2>
+    <p style="margin:0 0 14px;color:#555">Order <strong id="rtk-payment-order"></strong></p>
+    <div style="padding:14px;background:#f4f5f7;border-radius:8px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;gap:12px"><span>Food, delivery &amp; discounts</span><strong id="rtk-payment-total"></strong></div>
+      <div style="display:flex;justify-content:space-between;gap:12px;margin-top:9px"><span>Tip</span><strong id="rtk-payment-tip-summary">£0.00</strong></div>
+      <div style="display:flex;justify-content:space-between;gap:12px;border-top:1px solid #ccc;padding-top:10px;margin-top:10px;font-size:1.12em"><strong>Total received</strong><strong id="rtk-payment-received"></strong></div>
+    </div>
+    <label for="rtk-bill-method" style="display:block;font-weight:600;margin:12px 0 5px">Bill payment method</label>
+    <select id="rtk-bill-method" style="display:block;width:100%;padding:11px;margin-bottom:14px;font:inherit">
+      <option value="card">Card reader</option><option value="cash">Cash</option><option value="bank_transfer">Bank transfer</option>
+    </select>
+    <label for="rtk-tip-amount" style="display:block;font-weight:600;margin-bottom:5px">Tip amount (£)</label>
+    <input id="rtk-tip-amount" inputmode="decimal" type="number" min="0" step="0.01" value="0.00" style="display:block;width:100%;box-sizing:border-box;padding:11px;font:inherit">
+    <p id="rtk-tip-error" role="alert" style="display:none;color:#9b1c1c;font-size:13px;margin:6px 0"></p>
+    <div id="rtk-tip-method-row" style="display:none;margin:12px 0">
+      <label for="rtk-tip-method" style="display:block;font-weight:600;margin-bottom:5px">Tip payment method</label>
+      <select id="rtk-tip-method" style="display:block;width:100%;padding:11px;font:inherit">
         <option value="cash">Cash</option><option value="card">Card reader</option><option value="bank_transfer">Bank transfer</option>
       </select>
-    </label>
-    <p style="background:#fff3cd;padding:10px;border-radius:6px;font-size:13px">Preview only: saving is disabled until Railway and Supabase changes are ready.</p>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button type="button" id="rtk-payment-cancel">Cancel</button>
-      <button type="button" disabled>Save payment &amp; complete</button>
+    </div>
+    <p id="rtk-payment-method-summary" style="font-size:13px;color:#555;margin:14px 0"></p>
+    <p style="background:#fff3cd;padding:10px;border-radius:6px;font-size:13px">Preview only: saving is disabled until the backend and database changes are ready.</p>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+      <button type="button" id="rtk-payment-cancel" style="padding:10px 14px">Cancel</button>
+      <button type="button" disabled style="padding:10px 14px;opacity:.55;cursor:not-allowed">Save payment &amp; complete</button>
     </div>`;
   panel.querySelector("#rtk-payment-order").textContent = orderId;
-  panel.querySelector("#rtk-payment-total").textContent = total;
+  panel.querySelector("#rtk-payment-total").textContent = validTotal ? money(totalPennies) : "Unavailable";
   overlay.appendChild(panel);
   document.body.appendChild(overlay);
   const previousFocus = document.activeElement;
@@ -4468,15 +4476,34 @@ function openPaymentCapturePreview(orderId, amount) {
     if (e.key === "Escape") close();
     if (e.key === "Tab") {
       const focusables = [...panel.querySelectorAll("select,input,button:not([disabled])")].filter(el => el.getClientRects().length);
+      if (!focusables.length) return;
       if (e.shiftKey && document.activeElement === focusables[0]) { e.preventDefault(); focusables.at(-1).focus(); }
       else if (!e.shiftKey && document.activeElement === focusables.at(-1)) { e.preventDefault(); focusables[0].focus(); }
     }
   });
   const tip = panel.querySelector("#rtk-tip-amount");
-  tip.addEventListener("input", () => {
-    panel.querySelector("#rtk-tip-method-row").style.display = Number(tip.value) > 0 ? "block" : "none";
-  });
-  panel.querySelector("#rtk-bill-method").focus();
+  const billMethod = panel.querySelector("#rtk-bill-method");
+  const tipMethod = panel.querySelector("#rtk-tip-method");
+  const methodLabel = select => select.options[select.selectedIndex].text;
+  const updateSummary = () => {
+    const raw = tip.value.trim();
+    const tipValid = raw !== "" && /^(?:0|[1-9]\\d*)(?:\\.\\d{1,2})?$/.test(raw);
+    const parsed = tipValid ? Number(raw) : NaN;
+    const safe = tipValid && Number.isSafeInteger(Math.round(parsed * 100)) && parsed >= 0;
+    const pence = safe ? Math.round(parsed * 100) : 0;
+    const error = panel.querySelector("#rtk-tip-error");
+    error.style.display = safe ? "none" : "block";
+    error.textContent = safe ? "" : "Enter a valid tip of £0 or more, with up to 2 decimal places.";
+    panel.querySelector("#rtk-tip-method-row").style.display = safe && pence > 0 ? "block" : "none";
+    panel.querySelector("#rtk-payment-tip-summary").textContent = safe ? money(pence) : "Invalid";
+    panel.querySelector("#rtk-payment-received").textContent = safe && validTotal ? money(totalPennies + pence) : "—";
+    panel.querySelector("#rtk-payment-method-summary").textContent =
+      "Bill: " + methodLabel(billMethod) +
+      (safe && pence > 0 ? " · Tip: " + methodLabel(tipMethod) : " · No tip");
+  };
+  [tip, billMethod, tipMethod].forEach(el => el.addEventListener("input", updateSummary));
+  updateSummary();
+  billMethod.focus();
 }
 
 /* -----------------------------------------------------------
