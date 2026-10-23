@@ -1015,15 +1015,15 @@ tbody#tbody tr.row-attention:hover > td {
   </main>
   <audio id="new-order-sound" src="Sounds/bell railroad1.wav" preload="auto"></audio>
   <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
   <script>
     // ---------- Config ----------
     const SUPABASE_URL = 'https://ubyjrrsvbbqomitpaidb.supabase.co';
-	const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVieWpycnN2YmJxb21pdHBhaWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NTYyNjMsImV4cCI6MjA3NjUzMjI2M30.WTllxO5KnaMI0i1d4VHNBhjLuRMfu4_Xx5arqZmYevw';
+	const SUPABASE_PUBLIC_KEY = 'sb_publishable_wnLIasgPkPRUH3UnCpTMZw_hW6PHz2O';
 
 		// do this ONCE
 		window.supabaseClient = window.supabaseClient
-		  || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+		  || window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY);
 
 		// then everywhere else:
 		const sb = window.supabaseClient;
