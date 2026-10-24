@@ -2896,12 +2896,12 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
 			  <label>How should we contact you about collection/delivery times?</label>
 			  <div style="display:flex;gap:12px;align-items:center;margin-top:6px">
 				<label>
-				  <input type="radio" name="communication_preference" value="email" checked>
+				  <input type="radio" name="communication_preference" value="email">
 				  Email
 			
 			</label>
 				<label>
-				  <input type="radio" name="communication_preference" value="sms">
+				  <input type="radio" name="communication_preference" value="sms" checked>
 				  SMS
 				</label>
 			  </div>
@@ -7592,7 +7592,7 @@ if (!selectedTimeIsAllowed) {
     );
     const communicationPreference = commPrefInput
       ? commPrefInput.value
-      : 'email';
+      : 'sms';
 
     // ---------- Basic validation ----------
     if (!name){
