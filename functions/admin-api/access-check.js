@@ -786,8 +786,10 @@ function createReadProbe(options = {}) {
 }
 
 // access-check-entry.mjs
-var handler = createReadProbe({ "enabled": true, "teamDomain": "https://rungsthaikitchen.cloudflareaccess.com", "audience": "d29d9159669da2346f9a5aacb672bd24cb83ea4b2b8a6959e5f841a0488d501c", "requestOrigin": "https://rungsthaikitchen.co.uk", "endEpoch": 1793088645 });
+var probeConfig = { "enabled": true, "teamDomain": "https://rungsthaikitchen.cloudflareaccess.com", "audience": "d29d9159669da2346f9a5aacb672bd24cb83ea4b2b8a6959e5f841a0488d501c", "requestOrigin": "https://rungsthaikitchen.co.uk", "endEpoch": 1793088645 };
+var handler;
 function onRequest(context) {
+  handler ??= createReadProbe(probeConfig);
   return handler(context.request);
 }
 export {
