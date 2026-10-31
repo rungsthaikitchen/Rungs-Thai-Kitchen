@@ -2510,7 +2510,8 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
 
         <!-- Our Food -->
         <!--<div class="card-spacer">-->
-		<div class="card" id="our-food" style="margin-top:8px">
+		<div id="collection-only-home" role="status" style="display:none;margin:12px 0;padding:14px;border:2px solid #c77b20;border-radius:10px;background:#fff4df;color:#55330a"><strong>🎧 Saturday 31 October — COLLECTION ONLY!</strong><div>Sam’s swapping the fryer for the DJ decks! We’re open 5–9pm as usual, but deliveries aren’t available today. Please order for collection.</div></div>
+<div class="card" id="our-food" style="margin-top:8px">
           <h3>Our Food</h3>
           <div style="display:flex;gap:1px;align-items:flex-start;flex-wrap:wrap">
             <div style="flex:1 1 320px;min-width:240px">
@@ -2753,6 +2754,41 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
     </div>
   </div>
 
+<script>
+(function () {
+  const restrictedDate = '2026-10-31';
+  const ukToday = () => {
+    const parts = new Intl.DateTimeFormat('en-GB', {timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+    const part = type => parts.find(p => p.type === type)?.value;
+    return part('year') + '-' + part('month') + '-' + part('day');
+  };
+  function refreshCollectionOnly() {
+    const date = document.getElementById('cust-preferred-date')?.value || ukToday();
+    const restricted = date === restrictedDate;
+    const delivery = document.getElementById('order-type-delivery');
+    const option = document.getElementById('delivery-order-option');
+    const collection = document.getElementById('order-type-collection');
+    if (option) option.style.display = restricted ? 'none' : '';
+    if (delivery) delivery.disabled = restricted;
+    if (restricted && delivery?.checked && collection) {
+      collection.checked = true;
+      collection.dispatchEvent(new Event('change', {bubbles:true}));
+    }
+    const checkout = document.getElementById('collection-only-checkout');
+    if (checkout) checkout.style.display = restricted ? 'block' : 'none';
+    const home = document.getElementById('collection-only-home');
+    if (home) home.style.display = ukToday() === restrictedDate ? 'block' : 'none';
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    refreshCollectionOnly();
+    document.getElementById('cust-preferred-date')?.addEventListener('change', refreshCollectionOnly);
+    document.getElementById('cust-preferred-date')?.addEventListener('input', refreshCollectionOnly);
+    const modal = document.getElementById('checkout-modal');
+    if (modal) new MutationObserver(refreshCollectionOnly).observe(modal, {attributes:true,attributeFilter:['style']});
+  });
+  window.isCollectionOnlyOrderDate = date => date === restrictedDate;
+})();
+</script>
   <!-- Checkout Modal -->
   <div id="checkout-modal" class="modal-backdrop" style="display:none" aria-modal="true" role="dialog">
     <div class="modal">
@@ -2765,7 +2801,8 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
       </div>
 				<div id="checkout-order-summary" class="checkout-order-summary"></div>
 
-      <form id="checkout-form" class="form-grid">
+      <div id="collection-only-checkout" role="status" style="display:none;margin-top:10px;padding:10px;border-radius:8px;background:#fff4df;color:#55330a"><strong>🎧 Collection only on Saturday 31 October.</strong> Please choose your collection time.</div>
+<form id="checkout-form" class="form-grid">
         <div class="field">
           <label for="cust-name">Full name</label>
           <input id="cust-name" name="name" type="text" autocomplete="name" required class="input auto-fit" required>
@@ -2793,7 +2830,7 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
           <label>Order type</label>
           <div style="display:flex;gap:12px;align-items:center">
             <label><input type="radio" name="order-type" id="order-type-collection" value="collection" checked> Collection</label>
-            <label><input type="radio" name="order-type" id="order-type-delivery" value="delivery"> Delivery</label>
+            <label id="delivery-order-option"><input type="radio" name="order-type" id="order-type-delivery" value="delivery"> Delivery</label>
           </div>
           <div id="delivery-note" class="muted small" style="margin-top:4px;display:none">
             Delivery is £3 for orders under £20, free for £20 and above.
@@ -7571,6 +7608,13 @@ if (!selectedTimeIsAllowed) {
     const phone     = document.getElementById('cust-phone').value.trim();
     const address   = document.getElementById('cust-address').value.trim();
     const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+    if (orderType === 'delivery' && window.isCollectionOnlyOrderDate?.(document.getElementById('cust-preferred-date')?.value)) {
+      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.textContent = 'Delivery is unavailable on Saturday 31 October. Please select Collection.';
+      isSubmittingOrder = false;
+      if (submitBtn) submitBtn.disabled = false;
+      return;
+    }
     const notes     = document.getElementById('cust-notes').value.trim() || null;
 
     // ASAP checkbox
