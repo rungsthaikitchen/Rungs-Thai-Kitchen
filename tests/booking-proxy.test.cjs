@@ -24,3 +24,18 @@ test('configured staging proxy forwards exact body and server secret without exp
   assert.deepEqual(await response.json(),{success:true});assert.equal(response.headers.get('Cache-Control'),'no-store');
  }finally{global.fetch=old;}
 });
+
+test('all Pages proxies use Workers-compatible redirects and refuse redirects without leaking Location',async()=>{
+ const old=global.fetch;let calls=0;
+ global.fetch=async(_url,options)=>{calls++;assert.equal(options.redirect,'manual');
+  return new Response(null,{status:302,headers:{Location:'https://unexpected.example.invalid'}});};
+ try{
+  const env={RTK_ORDER_BACKEND_URL:'https://staging.example.invalid',RTK_PROXY_SECRET:'server-secret'};
+  for(const [name,method] of [['booking','onRequestPost'],['booking-mode','onRequestGet'],['booking-availability','onRequestPost']]){
+   const response=await(await file('functions/api/'+name+'.js'))[method]({env,
+    request:new Request('https://review.rtk.pages.dev/api/'+name,{method:method==='onRequestGet'?'GET':'POST',...(method==='onRequestPost'?{body:'{}'}:{})})});
+   assert.equal(response.status,503);assert.equal(response.headers.get('Location'),null);
+  }
+  assert.equal(calls,3);
+ }finally{global.fetch=old;}
+});

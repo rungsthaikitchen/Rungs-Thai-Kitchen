@@ -7,7 +7,10 @@ export async function onRequestPost(context){
  try{
   const response=await fetch(new URL('/book-order',base),{method:'POST',
    headers:{'Content-Type':'application/json','x-rtk-proxy-secret':context.env.RTK_PROXY_SECRET},
-   body:await context.request.text(),redirect:'error',signal:AbortSignal.timeout(25000)});
+   body:await context.request.text(),redirect:'manual',signal:AbortSignal.timeout(25000)});
+  // Workers supports manual redirects, not redirect:'error'. Never forward
+  // redirects to the browser or send the proxy secret to another destination.
+  if(response.status>=300&&response.status<400)throw Error('UPSTREAM_REDIRECT_REFUSED');
   return new Response(await response.text(),{status:response.status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
  }catch(_){return Response.json({error:'Ordering service unavailable; retry the same request'},{status:503});}
 }

@@ -70,3 +70,12 @@ LEGACY mode on Pages/GitHub preview hostnames, preventing the retained live lega
 Supabase path from being exercised during staging. The guard allows production
 hostnames and local test hosts. Twenty admin/client/proxy tests pass. Staging
 backend remains deliberately LEGACY until the controlled rehearsal is ready.
+
+Hosted mode-check failure diagnosed: Workers rejects redirect:'error' before any
+upstream request is sent. All three Pages proxies now use redirect:'manual' and
+explicitly refuse every 3xx response without forwarding Location. Cloudflare's
+actual local workerd runtime (Miniflare 4.20260730.0) reproduces the original
+TypeError and passes real HTTP upstream requests plus redirect rejection for mode,
+booking and availability. Run tests/booking-worker-runtime.cjs as documented in
+its header. Twenty-one admin/client/proxy tests also pass. The hosted response
+still needs rechecking after this preview-only deployment.
