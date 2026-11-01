@@ -35,7 +35,7 @@
   }
   return {async submit(input){
    let mode;
-   try{const r=await get(modeUrl,{},5000);if(!r.ok)throw Error();mode=(await r.json()).mode;}
+   try{const r=await get(modeUrl,{},17000);if(!r.ok)throw Error();mode=(await r.json()).mode;}
    catch(_){throw Error('We could not check ordering availability. Please retry; your order has not been submitted.');}
    const previous=pending();
    if(mode==='LEGACY'){

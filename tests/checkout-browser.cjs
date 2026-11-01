@@ -6,14 +6,25 @@ const root=path.resolve(__dirname,'..');
 const mode=process.env.MW_TEST_MODE||'MASTER_WOK';
 let bookings=[],legacyNotices=0;
 const bridge=process.env.MW_TEST_BRIDGE_DIR;
+const hosted=process.env.MW_TEST_HOSTED_CONFIG?JSON.parse(fs.readFileSync(process.env.MW_TEST_HOSTED_CONFIG,'utf8')):null;
+let proxyHandlers,hostedReceipt;
+async function proxy(req,res,body){
+ const request=new Request('http://localhost'+req.url,{method:req.method,...(body?{body}:{}),headers:{'Content-Type':'application/json'}});
+ const handler=req.method==='POST'?proxyHandlers.booking.onRequestPost:proxyHandlers.mode.onRequestGet;
+ const response=await handler({request,env:{RTK_ORDER_BACKEND_URL:hosted.backend,RTK_PROXY_SECRET:hosted.proxy}});
+ const text=await response.text();
+ if(req.method==='POST')hostedReceipt=JSON.parse(text);
+ res.writeHead(response.status,{'Content-Type':'application/json'});res.end(text);
+}
 if(bridge)fs.mkdirSync(bridge,{recursive:true});
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const server=http.createServer(async(req,res)=>{
  const u=new URL(req.url,'http://localhost');
- if(u.pathname==='/api/booking-mode'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({mode}));return;}
+ if(u.pathname==='/api/booking-mode'){if(hosted)return proxy(req,res);res.setHeader('Content-Type','application/json');res.end(JSON.stringify({mode}));return;}
  if(u.pathname==='/api/booking'){
   let body='';for await(const chunk of req)body+=chunk;
   const payload=JSON.parse(body);bookings.push(payload);
+  if(hosted)return proxy(req,res,body);
   if(bridge){
    const serial=bookings.length;fs.writeFileSync(path.join(bridge,serial+'.request.json'),body);
    console.log('DB_REQUEST_READY:'+serial);
@@ -33,6 +44,10 @@ const server=http.createServer(async(req,res)=>{
  res.setHeader('Content-Type','image/svg+xml');res.end('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>');
 });
 (async()=>{
+ if(hosted){
+  const load=async name=>import('data:text/javascript;base64,'+fs.readFileSync(path.join(root,'functions/api/'+name+'.js')).toString('base64'));
+  proxyHandlers={booking:await load('booking'),mode:await load('booking-mode')};
+ }
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
  let args=['--no-sandbox','--disable-dev-shm-usage','--disable-gpu'];
  if(process.env.MW_BROWSER_PACKAGE)args=(await import(process.env.MW_BROWSER_PACKAGE)).default.args;
@@ -80,7 +95,7 @@ const server=http.createServer(async(req,res)=>{
   assert.ok(choices.length,'No available time options');
   await page.locator('#cust-preferred-time-select').selectOption(choices.find(o=>o.text.includes('17:30'))?.value||choices[0].value);
   await page.locator('#checkout-submit').click();
-  await page.waitForFunction(()=>window.basket.length===0||document.getElementById('checkout-msg').textContent.includes('failed'),null,{timeout:30000});
+  await page.waitForFunction(()=>window.basket.length===0||document.getElementById('checkout-msg').textContent.includes('failed'),null,{timeout:hosted?60000:30000});
   const result=await page.evaluate(()=>({basketCount:window.basket.length,message:document.getElementById('checkout-msg').textContent,writes:window.__sbWrites,totals:window.__lastOrderTotals}));
   assert.equal(result.basketCount,0,JSON.stringify({result,errors}));
   if(mode==='MASTER_WOK'){
@@ -92,8 +107,8 @@ const server=http.createServer(async(req,res)=>{
   }
   assert.equal(result.totals.total,9);assert.deepEqual(errors,[]);
   if(process.env.MW_TEST_BRIDGE_DIR)fs.writeFileSync(path.join(bridge,'browser-result.json'),JSON.stringify(result));
-  console.log(JSON.stringify({status:'PASS',scope:bridge?'MOBILE_BROWSER_TO_PRIVATE_STAGING_DATABASE_WITH_PROVIDER_FIXTURES':'MOBILE_BROWSER_WITH_INTERCEPTED_EXTERNAL_PROVIDERS',mode,
+  console.log(JSON.stringify({status:'PASS',scope:hosted?'MOBILE_BROWSER_LOCAL_PAGES_FUNCTIONS_TO_DEPLOYED_RAILWAY_AND_PRIVATE_STAGING_DATABASE':bridge?'MOBILE_BROWSER_TO_PRIVATE_STAGING_DATABASE_WITH_PROVIDER_FIXTURES':'MOBILE_BROWSER_WITH_INTERCEPTED_EXTERNAL_PROVIDERS',mode,
    newWriterRequests:bookings.length,supabaseWrites:result.writes.length,legacyNotificationRequests:legacyNotices,
-   pageErrors:errors}));
+   pageErrors:errors,...(hosted?{receipt:hostedReceipt}:{})}));
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e.stack);server.close();process.exitCode=1;});

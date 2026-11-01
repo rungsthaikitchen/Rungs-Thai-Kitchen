@@ -35,3 +35,10 @@ Validation: ten client/proxy tests; mobile Chromium checkout in both modes; actu
 browser JSON passed into the private staging database through a controlled test
 bridge. Maps, loyalty read providers and notification sends were isolated. This
 evidence does not certify the deployed Cloudflare/Railway transport or delivery.
+
+Follow-up: the browser test can run the actual Pages functions locally against a
+deployed staging backend via MW_TEST_HOSTED_CONFIG (private temporary JSON; never
+commit credentials). This passed through Railway and Supabase with one GBP9 order.
+The public mode check now permits the server's cold-start budget before failing
+closed. Hosted Cloudflare preview build succeeded but redirects to Access login;
+its actual environment configuration and full browser chain are not certified.
