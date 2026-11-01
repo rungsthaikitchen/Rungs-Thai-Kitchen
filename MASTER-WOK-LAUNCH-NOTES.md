@@ -50,3 +50,17 @@ refreshing times. Checkout always reassesses atomically. Twelve client/proxy cas
 and mobile checks for both modes/availability failure pass. Actual local Pages
 functions -> deployed Railway -> private Supabase availability and checkout pass;
 Cloudflare-hosted access/configuration remains unverified.
+
+Admin follow-up (1 November): existing status dropdown uses the authenticated
+/admin-api/order-action gateway in Master Wok mode, including atomic completion
+and loyalty. Legacy direct status/settlement behavior is retained only after an
+explicit LEGACY mode response. Missing/unknown mode fails closed. Lifecycle
+responses mark notification ownership so accept/decline/suggest do not send a
+second browser notification. Eighteen admin/client/proxy tests pass; all three
+admin inline scripts parse. This does not certify the hosted /admin-api route.
+
+The core review includes sql/booking-write-fence.sql, tested in private staging
+with the exact SQL and real anon/authenticated/service_role roles (49 joined
+scenario groups). It must be included in the approved staging/production release
+plan; no production SQL has been applied. Deploy both updated lifecycle response
+and admin client together before enabling Master Wok.

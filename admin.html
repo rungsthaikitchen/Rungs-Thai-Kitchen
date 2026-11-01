@@ -2,6 +2,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script src="/master-wok-admin-client.js"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>RTK — Admin Orders</title>
@@ -2712,6 +2713,7 @@ if (allergenBtn) {
 
 async function updateOrderStatus(orderId, newStatus) {
   try {
+    if (await window.MasterWokAdminClient.updateStatus(orderId, newStatus)) return;
     const { error } = await sb
       .from('orders')
       .update({ status: newStatus })
@@ -3626,35 +3628,11 @@ const ORDER_ACTION_API_URL =
   "/admin-api/order-action";
 
 async function callOrderAction(payload) {
-  console.log("Calling admin-order-action with payload:", payload);
-
   try {
-    const res = await fetch(ORDER_ACTION_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    let data;
-    try {
-      data = await res.json();
-    } catch {
-      data = {};
-    }
-
-    console.log("admin-order-action response:", res.status, data);
-
-    if (!res.ok) {
-      alert("Error: " + (data.error || "Unknown error"));
-      return null;
-    }
-
-    return data;
+    return await window.MasterWokAdminClient.submit(payload);
   } catch (err) {
-    console.error("Network error calling admin-order-action:", err);
-    alert("Network error calling admin-order-action");
+    console.error("Order action failed:", err);
+    alert(err.message || "Could not update the order. Please refresh before retrying.");
     return null;
   }
 }
@@ -4444,12 +4422,12 @@ document.addEventListener("click", async (event) => {
         result.preferred_time ||
         null;
 
-      await notifyCustomer("time_confirmed", row, {
+      if (!result.notification_managed) await notifyCustomer("time_confirmed", row, {
         preferred_time: preferredTime,
         asap_requested: row.dataset.asapRequested === "true"
       });
 
-      alert("Order accepted. Customer notified.");
+      alert(result.notification_managed ? "Order accepted. Customer notification queued." : "Order accepted. Customer notified.");
       location.reload();
     }
     return;
@@ -4467,8 +4445,8 @@ document.addEventListener("click", async (event) => {
     });
 
     if (result?.success) {
-      await notifyCustomer("time_declined", row);
-      alert("Order declined. Customer notified.");
+      if (!result.notification_managed) await notifyCustomer("time_declined", row);
+      alert(result.notification_managed ? "Order declined. Customer notification queued." : "Order declined. Customer notified.");
       location.reload();
     }
     return;
@@ -4524,12 +4502,12 @@ if (btn.classList.contains("btn-suggest")) {
   const result = await callOrderAction(payload);
 
   if (result?.success) {
-    await notifyCustomer("time_suggested", row, {
+    if (!result.notification_managed) await notifyCustomer("time_suggested", row, {
       proposed_time: proposedIso,
       asap_requested: isAsap
     });
 
-    alert("Suggested time sent to customer.");
+    alert(result.notification_managed ? "Suggested time saved. Customer notification queued." : "Suggested time sent to customer.");
     location.reload();
   }
   return;
