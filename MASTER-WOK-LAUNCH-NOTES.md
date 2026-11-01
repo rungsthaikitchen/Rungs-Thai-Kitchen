@@ -42,3 +42,11 @@ commit credentials). This passed through Railway and Supabase with one GBP9 orde
 The public mode check now permits the server's cold-start budget before failing
 closed. Hosted Cloudflare preview build succeeded but redirects to Access login;
 its actual environment configuration and full browser chain are not certified.
+
+The existing picker now requests basket-specific availability in MASTER_WOK mode;
+LEGACY retains the old scheduler. Hints never create a booking or pending key,
+failed/incomplete responses disable time selection, and a mode change requires
+refreshing times. Checkout always reassesses atomically. Twelve client/proxy cases
+and mobile checks for both modes/availability failure pass. Actual local Pages
+functions -> deployed Railway -> private Supabase availability and checkout pass;
+Cloudflare-hosted access/configuration remains unverified.

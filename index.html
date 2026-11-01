@@ -5204,6 +5204,11 @@ function validatePreferredTime() {
   if (!raw) return true;
 
   const chosen = new Date(raw);
+  if(masterWokTimeHints){
+    const available=masterWokTimeHints.get(chosen.toISOString())===true;
+    if(submitBtn)submitBtn.disabled=!available;
+    return available;
+  }
 
   const isClosed = inAnyWindow(chosen, CLOSED_RANGES);
   const isFull   = inAnyWindow(chosen, FULLY_BOOKED);
@@ -5297,7 +5302,11 @@ function clearPreferredTimeSelect(message = 'Select a date first') {
 }
 
 
+let masterWokTimeHints=null;
+let preferredTimeGeneration=0;
 async function populatePreferredTimeSelect(dateString) {
+  const generation=++preferredTimeGeneration;
+  masterWokTimeHints=null;
   if (
     !preferredTimeSelect ||
     !preferredTimeHidden ||
@@ -5313,7 +5322,7 @@ async function populatePreferredTimeSelect(dateString) {
     new Date(`${dateString}T12:00:00`);
 
   // Load the latest kitchen commitments for this date.
-  await refreshKitchenSlotMap(serviceDate);
+  // Select the authoritative hint source below after validating the date.
 
   preferredTimeSelect.innerHTML = '';
 
@@ -5369,6 +5378,23 @@ if (!OPEN_DAYS.includes(serviceDate.getDay())) {
   return;
 }
 
+try {
+  if(!window.RTKBookingClient)throw Error('Ordering service is still loading. Please retry.');
+  const times=[];
+  for(let slot=new Date(start);slot<=extendedEnd;slot=new Date(slot.getTime()+5*60*1000))times.push(slot.toISOString());
+  const preview=await window.RTKBookingClient.availability({times,items:basket.map(line=>({
+    item_id:line.itemId,qty:line.qty,modifiers:(line.mods||[]).map(mod=>({id:mod.id})),
+    spice:line.spice??null,item_note:line.item_note||null}))});
+  if(generation!==preferredTimeGeneration)return;
+  if(preview.route==='MASTER_WOK')masterWokTimeHints=new Map(preview.hints.map(h=>[h.time,h.available]));
+  else await refreshKitchenSlotMap(serviceDate);
+  if(generation!==preferredTimeGeneration)return;
+} catch(error) {
+  if(generation!==preferredTimeGeneration)return;
+  clearPreferredTimeSelect('Times unavailable — please retry');
+  showPreferredTimeMessage(error.message||'Times could not be checked. Please retry.');
+  return;
+}
 let availableCount = 0;
 
   for (
@@ -6662,6 +6688,7 @@ async function refreshKitchenScheduleForDateTime(dt) {
 }
 
 function isAllowed(dt){
+  if(masterWokTimeHints)return withinOpenHours(dt)&&masterWokTimeHints.get(dt.toISOString())===true;
   return withinOpenHours(dt) &&
          !isClosedDate(dt) &&
          !isFullyBooked(dt) &&
@@ -6669,6 +6696,7 @@ function isAllowed(dt){
 }
 
 function isAllowedForAlternativeFulfilment(dt) {
+  if(masterWokTimeHints)return masterWokTimeHints.get(dt.toISOString())===true;
   // Must still be one of our trading days.
   if (!OPEN_DAYS.includes(dt.getDay())) {
     return false;

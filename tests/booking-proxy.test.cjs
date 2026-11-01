@@ -7,6 +7,7 @@ test('preview without an explicit backend cannot use production booking or legac
   const context={env:{},request:new Request('https://review.rtk.pages.dev/api/booking')};
   assert.equal((await(await file('functions/api/booking.js')).onRequestPost(context)).status,503);
   assert.equal((await(await file('functions/api/booking-mode.js')).onRequestGet(context)).status,503);
+  assert.equal((await(await file('functions/api/booking-availability.js')).onRequestPost(context)).status,503);
   assert.equal(calls,0);
  }finally{global.fetch=old;}
 });

@@ -4,9 +4,31 @@ const input=()=>({orderType:'collection',preferredTime:'2026-11-04T18:00:00Z',it
 const stored=()=>{const map=new Map();return {getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};};
 const ok=body=>({ok:true,status:200,json:async()=>body});
 const success=()=>ok({success:true,orderId:'00000000-0000-4000-8000-000000000001',orderRef:'RTK-123',totals:{total:9},notification_status:'queued'});
+test('availability is read-only, validates complete hints and never creates a pending booking key',async()=>{
+ const storage=stored(),times=['2026-11-04T18:00:00.000Z'];let posts=0;
+ const c=createClient({fetch:async(u,o)=>{
+  if(u.includes('booking-mode'))return ok({mode:'MASTER_WOK'});
+  assert.equal(u,'/api/booking-availability');posts++;
+  return ok({success:true,bookingApprovalAllowed:false,hints:[{time:times[0],available:true}]});
+ },storage,crypto});
+ assert.equal((await c.availability({times,items:input().items})).route,'MASTER_WOK');
+ assert.equal(posts,1);assert.equal(storage.getItem('rtk_master_wok_pending_checkout'),null);
+ const bad=createClient({fetch:async u=>u.includes('booking-mode')?ok({mode:'MASTER_WOK'}):ok({success:true,bookingApprovalAllowed:false,hints:[]}),storage,crypto});
+ await assert.rejects(bad.availability({times,items:input().items}));
+});
 test('explicit legacy mode never posts an order to the new writer',async()=>{
  let posts=0;const c=createClient({fetch:async(_u,o)=>{if(o.method)posts++;return ok({mode:'LEGACY'});},storage:stored(),crypto});
  assert.equal((await c.submit(input())).route,'LEGACY');assert.equal(posts,0);
+});
+test('switching schedulers after time selection requires refreshing hints before either writer',async()=>{
+ let mode='MASTER_WOK',bookingPosts=0;const times=['2026-11-04T18:00:00.000Z'];
+ const c=createClient({fetch:async(u)=>{
+  if(u.includes('booking-mode'))return ok({mode});
+  if(u.includes('booking-availability'))return ok({success:true,bookingApprovalAllowed:false,hints:[{time:times[0],available:true}]});
+  bookingPosts++;return success();
+ },storage:stored(),crypto});
+ await c.availability({times,items:input().items});mode='LEGACY';
+ await assert.rejects(c.submit(input()),/refresh/);assert.equal(bookingPosts,0);
 });
 test('unknown or unavailable mode cannot cause a legacy write',async()=>{
  for(const fetch of [async()=>{throw Error('offline');},async()=>ok({mode:'typo'})])

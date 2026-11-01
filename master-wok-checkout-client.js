@@ -23,6 +23,7 @@
  }
  function createClient({fetch:transport,storage,crypto:cryptoApi,modeUrl='/api/booking-mode',bookingUrl='/api/booking'}={}){
   const storageKey='rtk_master_wok_pending_checkout';
+  let availabilityMode=null;
   if(!transport||!storage||!cryptoApi)throw Error('Checkout service is unavailable. Please reload this page.');
   async function get(url,options={},timeout=25000){
    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);
@@ -33,10 +34,24 @@
    try{const saved=JSON.parse(text);if(typeof saved.key==='string'&&typeof saved.fingerprint==='string')return saved;}catch(_){}
    throw Error('An earlier checkout needs checking. Please contact the restaurant before trying again.');
   }
-  return {async submit(input){
+  return {async availability(input){
+   const response=await get(modeUrl,{},17000);
+   if(!response.ok)throw Error('Ordering availability could not be checked. Please retry.');
+   const mode=(await response.json()).mode;
+   if(mode==='LEGACY'){availabilityMode=mode;return {route:'LEGACY'};}
+   if(mode!=='MASTER_WOK')throw Error('Ordering availability is temporarily unavailable.');
+   const result=await get('/api/booking-availability',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});
+   const body=await result.json();
+   if(!result.ok||body.success!==true||body.bookingApprovalAllowed!==false||!Array.isArray(body.hints)||
+    body.hints.length!==input.times.length||new Set(body.hints.map(h=>h.time)).size!==input.times.length||
+    body.hints.some(h=>!input.times.includes(h.time)||typeof h.available!=='boolean'))
+    throw Error('Ordering availability could not be checked. Please retry.');
+   availabilityMode=mode;return {route:'MASTER_WOK',hints:body.hints};
+  },async submit(input){
    let mode;
    try{const r=await get(modeUrl,{},17000);if(!r.ok)throw Error();mode=(await r.json()).mode;}
    catch(_){throw Error('We could not check ordering availability. Please retry; your order has not been submitted.');}
+   if(availabilityMode&&availabilityMode!==mode)throw Error('Ordering has changed. Please refresh the available times before submitting.');
    const previous=pending();
    if(mode==='LEGACY'){
     if(previous)throw Error('We need to check your previous order before creating another. Please contact the restaurant.');
