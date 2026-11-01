@@ -48,3 +48,9 @@ test('server notification ownership overrides an older legacy mode hint',async()
  const c=createClient({fetch:async u=>response(u==='/api/booking-mode'?{mode:'LEGACY'}:{success:true,notification_managed:true})});
  assert.equal((await c.submit({action:'accept'})).notification_managed,true);
 });
+
+test('preview admin cannot fall back to live legacy status or loyalty writes',async()=>{
+ let posts=0;const c=createClient({hostname:'review.rungsthaikitchen.pages.dev',fetch:async(_u,o)=>{if(o.method)posts++;return response({mode:'LEGACY'});}});
+ await assert.rejects(c.updateStatus('fixture','completed'),/Preview admin changes are disabled/);
+ await assert.rejects(c.submit({action:'accept',orderId:'fixture'}),/Preview admin changes are disabled/);assert.equal(posts,0);
+});

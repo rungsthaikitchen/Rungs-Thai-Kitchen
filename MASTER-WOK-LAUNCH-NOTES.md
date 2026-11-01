@@ -64,3 +64,9 @@ with the exact SQL and real anon/authenticated/service_role roles (49 joined
 scenario groups). It must be included in the approved staging/production release
 plan; no production SQL has been applied. Deploy both updated lifecycle response
 and admin client together before enabling Master Wok.
+
+Preview isolation: checkout hints/submission and admin mutations now refuse
+LEGACY mode on Pages/GitHub preview hostnames, preventing the retained live legacy
+Supabase path from being exercised during staging. The guard allows production
+hostnames and local test hosts. Twenty admin/client/proxy tests pass. Staging
+backend remains deliberately LEGACY until the controlled rehearsal is ready.

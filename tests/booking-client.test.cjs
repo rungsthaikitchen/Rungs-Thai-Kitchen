@@ -78,3 +78,11 @@ test('imported legacy proposal behavior and terminal/test exclusions stay intact
  assert.equal(capacityRows([{...order,status:'proposed'}],start,end)[0].confirmed_time,'2026-11-04T19:00:00.000Z');
  assert.deepEqual(capacityRows([{...order,status:'cancelled'},{...order,is_test:true}],start,end),[]);
 });
+
+test('Pages and GitHub previews cannot fall back to live legacy checkout or availability',async()=>{
+ for(const hostname of ['review-master-wok-checkout-i.rungsthaikitchen.pages.dev','rungsthaikitchen.github.io']){
+  let posts=0;const c=createClient({hostname,fetch:async(_u,o)=>{if(o.method)posts++;return ok({mode:'LEGACY'});},storage:stored(),crypto});
+  await assert.rejects(c.availability({times:[],items:input().items}),/Preview ordering is disabled/);
+  await assert.rejects(c.submit(input()),/Preview ordering is disabled/);assert.equal(posts,0);
+ }
+});

@@ -1,10 +1,12 @@
 (function(root){
  'use strict';
- function createClient({fetch=root.fetch.bind(root)}={}){
+ function createClient({fetch=root.fetch.bind(root),hostname=root.location?.hostname??null}={}){
   async function mode(){
    const response=await fetch('/api/booking-mode',{cache:'no-store',redirect:'error',signal:AbortSignal.timeout(17000)});
    const data=await response.json();
    if(!response.ok||!['LEGACY','MASTER_WOK'].includes(data.mode))throw Error('Order actions are temporarily unavailable. Please try again.');
+   if(data.mode==='LEGACY'&&hostname!==null&&!['rungsthaikitchen.co.uk','www.rungsthaikitchen.co.uk','localhost','127.0.0.1','::1'].includes(hostname))
+    throw Error('Preview admin changes are disabled until the staging booking service is ready.');
    return data.mode;
   }
   async function post(payload,selected){

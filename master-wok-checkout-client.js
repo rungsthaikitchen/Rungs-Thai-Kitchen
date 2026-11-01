@@ -21,7 +21,9 @@
     .map(t=>({...row,id:row.id+'@'+t,preferred_time:t,confirmed_time:t}));
   });
  }
- function createClient({fetch:transport,storage,crypto:cryptoApi,modeUrl='/api/booking-mode',bookingUrl='/api/booking'}={}){
+ function createClient({fetch:transport,storage,crypto:cryptoApi,modeUrl='/api/booking-mode',bookingUrl='/api/booking',hostname=root?.location?.hostname??null}={}){
+  const legacyAllowed=hostname===null||['rungsthaikitchen.co.uk','www.rungsthaikitchen.co.uk','localhost','127.0.0.1','::1'].includes(hostname);
+  function requireLegacyHost(){if(!legacyAllowed)throw Error('Preview ordering is disabled until the staging booking service is ready.');}
   const storageKey='rtk_master_wok_pending_checkout';
   let availabilityMode=null;
   if(!transport||!storage||!cryptoApi)throw Error('Checkout service is unavailable. Please reload this page.');
@@ -38,7 +40,7 @@
    const response=await get(modeUrl,{},17000);
    if(!response.ok)throw Error('Ordering availability could not be checked. Please retry.');
    const mode=(await response.json()).mode;
-   if(mode==='LEGACY'){availabilityMode=mode;return {route:'LEGACY'};}
+   if(mode==='LEGACY'){requireLegacyHost();availabilityMode=mode;return {route:'LEGACY'};}
    if(mode!=='MASTER_WOK')throw Error('Ordering availability is temporarily unavailable.');
    const result=await get('/api/booking-availability',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});
    const body=await result.json();
@@ -54,6 +56,7 @@
    if(availabilityMode&&availabilityMode!==mode)throw Error('Ordering has changed. Please refresh the available times before submitting.');
    const previous=pending();
    if(mode==='LEGACY'){
+    requireLegacyHost();
     if(previous)throw Error('We need to check your previous order before creating another. Please contact the restaurant.');
     return {route:'LEGACY'};
    }
