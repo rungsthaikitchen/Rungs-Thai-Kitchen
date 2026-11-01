@@ -54,3 +54,16 @@ test('preview admin cannot fall back to live legacy status or loyalty writes',as
  await assert.rejects(c.updateStatus('fixture','completed'),/Preview admin changes are disabled/);
  await assert.rejects(c.submit({action:'accept',orderId:'fixture'}),/Preview admin changes are disabled/);assert.equal(posts,0);
 });
+
+test('Preview order list uses the staging gateway and never reads live Supabase',async()=>{
+ let legacyReads=0;
+ const c=createClient({hostname:'review.rtk.pages.dev',fetch:async(u,o)=>{
+  if(u==='/api/booking-mode')return response({mode:'MASTER_WOK'});
+  assert.equal(JSON.parse(o.body).action,'preview_list_orders');return response({success:true,notification_managed:true,orders:[{order_ref:'RTK-119'}]});
+ }});
+ assert.deepEqual((await c.loadOrders(()=>{legacyReads++;})).data,[{order_ref:'RTK-119'}]);assert.equal(legacyReads,0);
+ const stopped=createClient({hostname:'review.rtk.pages.dev',fetch:async()=>response({mode:'LEGACY'})});
+ await assert.rejects(stopped.loadOrders(()=>{legacyReads++;}));assert.equal(legacyReads,0);
+ const live=createClient({hostname:'rungsthaikitchen.co.uk',fetch:async()=>{throw Error('unnecessary');}});
+ assert.equal(await live.loadOrders(async()=>{legacyReads++;return 'existing read';}),'existing read');assert.equal(legacyReads,1);
+});

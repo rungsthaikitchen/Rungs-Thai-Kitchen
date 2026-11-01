@@ -20,7 +20,16 @@
     throw Error('Order response could not be verified. Please refresh before retrying.');
    return {...data,notification_managed:data.notification_managed===true};
   }
-  return {mode,submit:async payload=>post(payload,await mode()),
+  return {mode,async loadOrders(readLegacy){
+   // Preview must never list live customers/orders through the legacy browser client.
+   const preview=hostname!==null&&!['rungsthaikitchen.co.uk','www.rungsthaikitchen.co.uk','localhost','127.0.0.1','::1'].includes(hostname);
+   if(!preview)return readLegacy();
+   const selected=await mode();
+   if(selected!=='MASTER_WOK')throw Error('Staging admin is not ready.');
+   const result=await post({action:'preview_list_orders'},selected);
+   if(!Array.isArray(result.orders))throw Error('Staging order list could not be verified.');
+   return {data:result.orders,error:null};
+  },submit:async payload=>post(payload,await mode()),
    async updateStatus(orderId,status){
     const selected=await mode();
     if(selected==='LEGACY')return false;

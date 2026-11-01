@@ -39,3 +39,21 @@ test('all Pages proxies use Workers-compatible redirects and refuse redirects wi
   assert.equal(calls,3);
  }finally{global.fetch=old;}
 });
+
+test('admin proxies isolate Preview routing and refuse redirected secret-bearing requests',async()=>{
+ const old=global.fetch;let calls=0,seen;
+ global.fetch=async(url,options)=>{calls++;seen={url:String(url),options};return Response.json({success:true});};
+ try{
+  for(const [name,endpoint] of [['order-action','admin-order-action'],['service-control','admin-service-control']]){
+   const handler=(await file('functions/admin-api/'+name+'.js')).onRequestPost;
+   const request=()=>new Request('https://review.rtk.pages.dev/admin-api/'+name,{method:'POST',body:'{"action":"test"}'});
+   let before=calls;assert.equal((await handler({request:request(),env:{RTK_PROXY_SECRET:'fixture'}})).status,503);assert.equal(calls,before);
+   const env={RTK_ORDER_BACKEND_URL:'https://staging.example.invalid',RTK_PROXY_SECRET:'fixture'};
+   assert.equal((await handler({request:request(),env})).status,200);
+   assert.equal(seen.url,'https://staging.example.invalid/'+endpoint);assert.equal(seen.options.redirect,'manual');
+   assert.equal(seen.options.headers['x-rtk-proxy-secret'],'fixture');
+   const saved=global.fetch;global.fetch=async()=>new Response(null,{status:302,headers:{Location:'https://wrong.example.invalid'}});
+   const refused=await handler({request:request(),env});assert.equal(refused.status,503);assert.equal(refused.headers.get('Location'),null);global.fetch=saved;
+  }
+ }finally{global.fetch=old;}
+});

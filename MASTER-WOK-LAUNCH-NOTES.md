@@ -79,3 +79,14 @@ TypeError and passes real HTTP upstream requests plus redirect rejection for mod
 booking and availability. Run tests/booking-worker-runtime.cjs as documented in
 its header. Twenty-one admin/client/proxy tests also pass. The hosted response
 still needs rechecking after this preview-only deployment.
+
+Admin rehearsal: both existing admin proxies now honor RTK_ORDER_BACKEND_URL,
+refuse implicit production routing on Preview, keep the proxy secret server-side,
+and reject redirects. Preview's existing admin screen loads only the private
+rehearsal order list through the authenticated gateway; production keeps its
+existing Supabase reader. The temporary staging wrapper limits reads/mutations to
+this run's receipt prefix and fixture email, while reusing createBookingRuntime
+and the existing lifecycle/assessment modules. No dashboard is added. Twenty-three
+client/admin/proxy tests and real workerd checks for all five proxies pass.
+Hosted admin UI and customer-response checks are recorded separately in the core
+review branch; these changes do not authorize production deployment.

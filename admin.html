@@ -2758,7 +2758,7 @@ async function updateOrderStatus(orderId, newStatus) {
 
 					
 			async function loadAndRender() {
-			  const { data: orders, error } = await sb
+			  const { data: orders, error } = await window.MasterWokAdminClient.loadOrders(() => sb
 			  .from('orders')
 			  .select(`
 					  id,
@@ -2805,7 +2805,7 @@ async function updateOrderStatus(orderId, newStatus) {
 					  )
 					`)
 			  .eq('is_test', false)
-			  .order('created_at', { ascending: false });
+			  .order('created_at', { ascending: false }));
 
 
 		  if (error) {
