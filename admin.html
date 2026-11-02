@@ -1788,6 +1788,13 @@ function fmtCustomerTime(value, isAsap) {
 }
 
 function getTimeStatusLabel(o) {
+  if (o.capacity_scheduler === 'MASTER_WOK') {
+    if (o.status === 'proposed') return 'PROPOSED';
+    if (o.status === 'customer_accepted_time') return 'ACCEPTED';
+    if (o.status === 'customer_declined_time') return 'DECLINED';
+    if (o.confirmed_time) return 'CONFIRMED';
+    return '—';
+  }
   if (o.proposed_time) return "PROPOSED";
   if (o.asap_requested) return "ASAP";
   return "—";
@@ -2764,6 +2771,7 @@ async function updateOrderStatus(orderId, newStatus) {
 					  id,
 					  customer_id,
 					  order_ref,
+                      capacity_scheduler,
 					  created_at,
 					  confirmed_time,
 					  proposed_time,

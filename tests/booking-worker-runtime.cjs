@@ -14,7 +14,7 @@ const server=http.createServer(async(req,res)=>{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
  const base='http://127.0.0.1:'+server.address().port;
  try{
-  for(const [name,method,endpoint] of [['booking-mode','onRequestGet','/booking-mode'],['booking','onRequestPost','/book-order'],['booking-availability','onRequestPost','/booking-availability'],['admin-api/order-action','onRequestPost','/admin-order-action'],['admin-api/service-control','onRequestPost','/admin-service-control']]){
+  for(const [name,method,endpoint] of [['service-state','onRequestGet','/admin-service-control'],['booking-mode','onRequestGet','/booking-mode'],['booking','onRequestPost','/book-order'],['booking-availability','onRequestPost','/booking-availability'],['admin-api/order-action','onRequestPost','/admin-order-action'],['admin-api/service-control','onRequestPost','/admin-service-control']]){
    const source=fs.readFileSync(path.join(__dirname,'../functions/'+(name.startsWith('admin-api/')?name:'api/'+name)+'.js'),'utf8');
    const mf=new Miniflare({modules:true,cf:false,compatibilityDate:'2026-07-30',
     bindings:{RTK_ORDER_BACKEND_URL:base,RTK_PROXY_SECRET:'fixture-secret-not-a-real-credential'},

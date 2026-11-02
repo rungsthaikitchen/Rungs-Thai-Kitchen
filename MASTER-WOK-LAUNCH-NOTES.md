@@ -90,3 +90,12 @@ and the existing lifecycle/assessment modules. No dashboard is added. Twenty-thr
 client/admin/proxy tests and real workerd checks for all five proxies pass.
 Hosted admin UI and customer-response checks are recorded separately in the core
 review branch; these changes do not authorize production deployment.
+
+Service-state follow-up: the customer service-state proxy now honors the staging
+backend too. Master Wok control reads/listing and mutations use the same writer
+schema; LEGACY retains its handlers. The admin time-status label distinguishes
+accepted/declined Master Wok responses from historical proposal fields. Local
+validation passes 25 admin/client/proxy tests, all six real workerd proxy checks,
+and three inline admin scripts. The core's deployed private staging checks cover
+pause -> blocked hints, create/list -> blocked hints, deactivate -> restored hints,
+server-clock busy expiry and restoration to normal. No real notifications sent.

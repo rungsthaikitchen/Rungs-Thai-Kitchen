@@ -67,3 +67,14 @@ test('Preview order list uses the staging gateway and never reads live Supabase'
  const live=createClient({hostname:'rungsthaikitchen.co.uk',fetch:async()=>{throw Error('unnecessary');}});
  assert.equal(await live.loadOrders(async()=>{legacyReads++;return 'existing read';}),'existing read');assert.equal(legacyReads,1);
 });
+
+test('actual admin time label distinguishes accepted Master Wok response from retained proposal history',()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+ const html=fs.readFileSync(path.join(__dirname,'../admin.html'),'utf8');
+ const code=html.match(/function getTimeStatusLabel\(o\) {[\s\S]*?\n}/)[0],context={};vm.createContext(context);vm.runInContext(code,context);
+ const order={capacity_scheduler:'MASTER_WOK',proposed_time:'2026-11-04T18:10:00Z',confirmed_time:'2026-11-04T18:05:00Z'};
+ assert.equal(context.getTimeStatusLabel({...order,status:'customer_accepted_time'}),'ACCEPTED');
+ assert.equal(context.getTimeStatusLabel({...order,status:'proposed'}),'PROPOSED');
+ assert.equal(context.getTimeStatusLabel({...order,status:'customer_declined_time'}),'DECLINED');
+ assert.equal(context.getTimeStatusLabel({...order,capacity_scheduler:'LEGACY'}),'PROPOSED');
+});

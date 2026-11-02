@@ -57,3 +57,17 @@ test('admin proxies isolate Preview routing and refuse redirected secret-bearing
   }
  }finally{global.fetch=old;}
 });
+
+test('customer service-state read uses staging control contract without touching production',async()=>{
+ const old=global.fetch;let calls=0;
+ global.fetch=async(url,options)=>{calls++;assert.equal(String(url),'https://staging.example.invalid/admin-service-control');
+  assert.equal(options.method,'POST');assert.equal(JSON.parse(options.body).action,'get_service_state');assert.equal(options.redirect,'manual');
+  return Response.json({ok:true,effective_service_state:{mode:'busy'}});};
+ try{
+  const handler=(await file('functions/api/service-state.js')).onRequestGet;
+  const request=new Request('https://review.rtk.pages.dev/api/service-state');
+  assert.equal((await handler({request,env:{}})).status,503);assert.equal(calls,0);
+  const result=await handler({request,env:{RTK_ORDER_BACKEND_URL:'https://staging.example.invalid',RTK_PROXY_SECRET:'fixture'}});
+  assert.equal(result.status,200);assert.equal((await result.json()).effective_service_state.mode,'busy');assert.equal(calls,1);
+ }finally{global.fetch=old;}
+});
