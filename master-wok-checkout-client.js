@@ -52,7 +52,10 @@
   },async submit(input){
    let mode;
    try{const r=await get(modeUrl,{},17000);if(!r.ok)throw Error();mode=(await r.json()).mode;}
-   catch(_){throw Error('We could not check ordering availability. Please retry; your order has not been submitted.');}
+   catch(_){
+    if(pending())throw Error('Your earlier checkout still needs checking. Please retry the same order or contact the restaurant before placing another.');
+    throw Error('We could not check ordering availability. Please retry; your order has not been submitted.');
+   }
    if(availabilityMode&&availabilityMode!==mode)throw Error('Ordering has changed. Please refresh the available times before submitting.');
    const previous=pending();
    if(mode==='LEGACY'){
@@ -82,7 +85,7 @@
     storage.removeItem(storageKey);
     const messages={CHECKOUT_PRICE_CHANGED:'Your price or loyalty balance has changed. Please refresh checkout and review the total.',
      REVIEW_REQUIRED:'That time is no longer available for this order. Please choose another time.'};
-    throw Error(messages[body.reason]||body.message||'We could not book this order. Please review your details and selected time.');
+    throw Error(messages[body.reason||body.error]||body.message||'We could not book this order. Please review your details and selected time.');
    }
    throw Error('We could not confirm the result. Please retry the same order or contact the restaurant.');
   }};

@@ -99,3 +99,11 @@ validation passes 25 admin/client/proxy tests, all six real workerd proxy checks
 and three inline admin scripts. The core's deployed private staging checks cover
 pause -> blocked hints, create/list -> blocked hints, deactivate -> restored hints,
 server-clock busy expiry and restoration to normal. No real notifications sent.
+
+3 November rollback check: when the mode endpoint fails after an unknown booking
+outcome, preserve the pending key and uncertainty message; do not claim no order
+was submitted. The client also accepts the writer's error field for changed-price
+review messages. Twenty-seven admin/client/proxy tests pass. These changes are
+review/preview only; production checkout is unchanged. The full unknown-response
+rehearsal uses the deployed private runtime and gateway mode endpoint with a
+transport adapter, not an authenticated hosted Cloudflare browser claim.
