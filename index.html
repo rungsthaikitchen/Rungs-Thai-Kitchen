@@ -2371,7 +2371,8 @@ body.overlay-open {
 
 
 		  </style>
-		</head>
+		<script src="/master-wok-checkout-client.js"></script>
+</head>
 		<body>
 				  <!-- Kitchen notice overlay -->
 				  <div id="kitchen-notice-overlay"
@@ -5203,6 +5204,11 @@ function validatePreferredTime() {
   if (!raw) return true;
 
   const chosen = new Date(raw);
+  if(masterWokTimeHints){
+    const available=masterWokTimeHints.get(chosen.toISOString())===true;
+    if(submitBtn)submitBtn.disabled=!available;
+    return available;
+  }
 
   const isClosed = inAnyWindow(chosen, CLOSED_RANGES);
   const isFull   = inAnyWindow(chosen, FULLY_BOOKED);
@@ -5296,7 +5302,11 @@ function clearPreferredTimeSelect(message = 'Select a date first') {
 }
 
 
+let masterWokTimeHints=null;
+let preferredTimeGeneration=0;
 async function populatePreferredTimeSelect(dateString) {
+  const generation=++preferredTimeGeneration;
+  masterWokTimeHints=null;
   if (
     !preferredTimeSelect ||
     !preferredTimeHidden ||
@@ -5312,7 +5322,7 @@ async function populatePreferredTimeSelect(dateString) {
     new Date(`${dateString}T12:00:00`);
 
   // Load the latest kitchen commitments for this date.
-  await refreshKitchenSlotMap(serviceDate);
+  // Select the authoritative hint source below after validating the date.
 
   preferredTimeSelect.innerHTML = '';
 
@@ -5368,6 +5378,23 @@ if (!OPEN_DAYS.includes(serviceDate.getDay())) {
   return;
 }
 
+try {
+  if(!window.RTKBookingClient)throw Error('Ordering service is still loading. Please retry.');
+  const times=[];
+  for(let slot=new Date(start);slot<=extendedEnd;slot=new Date(slot.getTime()+5*60*1000))times.push(slot.toISOString());
+  const preview=await window.RTKBookingClient.availability({times,items:basket.map(line=>({
+    item_id:line.itemId,qty:line.qty,modifiers:(line.mods||[]).map(mod=>({id:mod.id})),
+    spice:line.spice??null,item_note:line.item_note||null}))});
+  if(generation!==preferredTimeGeneration)return;
+  if(preview.route==='MASTER_WOK')masterWokTimeHints=new Map(preview.hints.map(h=>[h.time,h.available]));
+  else await refreshKitchenSlotMap(serviceDate);
+  if(generation!==preferredTimeGeneration)return;
+} catch(error) {
+  if(generation!==preferredTimeGeneration)return;
+  clearPreferredTimeSelect('Times unavailable — please retry');
+  showPreferredTimeMessage(error.message||'Times could not be checked. Please retry.');
+  return;
+}
 let availableCount = 0;
 
   for (
@@ -6598,13 +6625,17 @@ async function loadKitchenScheduleForDate(serviceDate) {
       confirmed_time,
       status,
       is_test,
+      capacity_scheduler,
       order_items (
         qty,
         kitchen_load
       )
     `)
-    .gte('preferred_time', start.toISOString())
-    .lt('preferred_time', end.toISOString())
+    .or([
+      `and(preferred_time.gte.${start.toISOString()},preferred_time.lt.${end.toISOString()})`,
+      `and(proposed_time.gte.${start.toISOString()},proposed_time.lt.${end.toISOString()})`,
+      `and(confirmed_time.gte.${start.toISOString()},confirmed_time.lt.${end.toISOString()})`
+    ].join(','))
     .eq('is_test', false);
 
   if (error) {
@@ -6612,10 +6643,7 @@ async function loadKitchenScheduleForDate(serviceDate) {
     return [];
   }
 
-  return (data || []).filter(order =>
-    getEffectiveOrderTime(order) &&
-    order.status !== 'cancelled'
-  );
+  return window.RTKBookingCapacityRows(data||[],start,end);
 }
 
 function getExistingOrderKitchenLoad(order) {
@@ -6660,6 +6688,7 @@ async function refreshKitchenScheduleForDateTime(dt) {
 }
 
 function isAllowed(dt){
+  if(masterWokTimeHints)return withinOpenHours(dt)&&masterWokTimeHints.get(dt.toISOString())===true;
   return withinOpenHours(dt) &&
          !isClosedDate(dt) &&
          !isFullyBooked(dt) &&
@@ -6667,6 +6696,7 @@ function isAllowed(dt){
 }
 
 function isAllowedForAlternativeFulfilment(dt) {
+  if(masterWokTimeHints)return masterWokTimeHints.get(dt.toISOString())===true;
   // Must still be one of our trading days.
   if (!OPEN_DAYS.includes(dt.getDay())) {
     return false;
@@ -7745,8 +7775,31 @@ if (!hasFreeDelivery && (!routeMilesNow || routeMilesNow <= 0)) {
         `${step} failed: ${err?.message || err?.hint || 'Unknown error'}`;
     }
 
+    let customerId=null,orderRef=null,orderId=null,submitTotals=null;
+    const previewTotals=recomputeCheckoutTotals();
+    if(!window.RTKBookingClient)throw new Error('Ordering service is still loading. Please reload and try again.');
+    const booking=await window.RTKBookingClient.submit({
+      preferredTime:preferredTimeISO,orderType,
+      customer:{name,email,phone,address},notes,
+      items:itemsSnapshot.map(line=>({item_id:line.itemId,qty:line.qty,
+        modifiers:(line.mods||[]).map(mod=>({id:mod.id})),spice:line.spice??null,
+        item_note:line.item_note||null})),
+      discountCode:appliedDiscountCode||null,
+      paymentPreference:document.querySelector('input[name="paymentPreference"]:checked')?.value||'on_arrival',
+      communicationPreference,
+      expectedTotals:{subtotal:Number(previewTotals.subtotal),total:Number(previewTotals.total),
+        delivery_fee:Number(previewTotals.delivery_fee),loyalty_discount:Number(previewTotals.loyalty_discount||0),
+        discount:Math.round((Number(previewTotals.subtotal)+Number(previewTotals.delivery_fee)-Number(previewTotals.total))*100)/100}
+    });
+    const masterWokManaged=booking.route==='MASTER_WOK';
+    if(masterWokManaged){
+      orderId=booking.order.orderId;orderRef=booking.order.orderRef;customerId=booking.order.customerId;
+      // Keep the receipt's existing separate voucher/loyalty display contract.
+      submitTotals={...previewTotals,...booking.order.totals,discount:Number(booking.order.totals.discount_amount||0)};
+      window.__checkoutTotals=submitTotals;
+    }else{
     // ---------- Get or create customer ----------
-    let customerId = null;
+    customerId = null;
     try {
       const row = await getOrCreateCustomer({
         name,
@@ -7774,7 +7827,7 @@ if (!hasFreeDelivery && (!routeMilesNow || routeMilesNow <= 0)) {
     }
 
     // ---------- Global sequential order ref ----------
-    let orderRef = 'RTK-???';
+    orderRef = 'RTK-???';
     try {
       orderRef = await getNextOrderRef();
     } catch (err) {
@@ -7853,7 +7906,7 @@ if (!hasFreeDelivery && (!routeMilesNow || routeMilesNow <= 0)) {
 			  return;
 			}
 			
-				const submitTotals = recomputeCheckoutTotals();
+				submitTotals = recomputeCheckoutTotals();
 
 				if (getSelectedOrderType() === "delivery") {
 
@@ -8007,7 +8060,7 @@ console.log('BASE ORDER PAYLOAD:', baseOrderPayload);
 
 		if (orderUpsertErr) return fail('Create order', orderUpsertErr);
 
-		const orderId = orderRow.id;
+		orderId = orderRow.id;
 
 
 
@@ -8044,6 +8097,8 @@ console.log('BASE ORDER PAYLOAD:', baseOrderPayload);
 
 			const { error: itemsErr } = await window.sb.from('order_items').insert(rows);
 			if (itemsErr) return fail('Add order items', itemsErr);
+    }
+
 
 
 			// ✅ Recompute and freeze totals once
@@ -8051,7 +8106,7 @@ console.log('BASE ORDER PAYLOAD:', baseOrderPayload);
 				console.log('[CHECKOUT TOTALS @ SUBMIT]', submitTotals);
 
 				try {
-				  await fetch('https://order-backend-production.up.railway.app/send-order-confirmation', {
+				  if(!masterWokManaged) await fetch('https://order-backend-production.up.railway.app/send-order-confirmation', {
 					method: 'POST',
 					headers: { 'Content-Type': 'text/plain' },
 					body: JSON.stringify({
@@ -8114,7 +8169,7 @@ console.log('BASE ORDER PAYLOAD:', baseOrderPayload);
       : String(orderRef);
 
 			// numeric total
-			const grandTotal = total;
+			const grandTotal = Number(submitTotals.total);
 
 showOrderSuccess(
   refText,
@@ -9010,6 +9065,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </body>
 
 </html>
+
 
 
 
