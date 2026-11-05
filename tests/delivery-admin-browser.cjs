@@ -1,7 +1,7 @@
 const path=require('node:path'),assert=require('node:assert/strict');
 const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwright');
 (async()=>{
- const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ const browser=await chromium.launch({headless:true,executablePath:process.env.MW_BROWSER_EXECUTABLE||undefined,args:['--no-sandbox']});
  try{
   const page=await browser.newPage(),posts=[],errors=[];let recommended=true,stale=false,combined=false;
   const a='11111111-1111-4111-8111-111111111111',b='22222222-2222-4222-8222-222222222222';
