@@ -2511,6 +2511,7 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
 
         <!-- Our Food -->
         <!--<div class="card-spacer">-->
+		<div id="late-collection-home" role="status" style="display:none;margin:12px 0;padding:14px;background:#fff4df;color:#55330a"><strong>Collection only from 7:30pm tonight.</strong> Delivery slots are available before 7:30pm, subject to availability.</div>
 		<div id="collection-only-home" role="status" style="display:none;margin:12px 0;padding:14px;border:2px solid #c77b20;border-radius:10px;background:#fff4df;color:#55330a"><strong>🎧 Saturday 31 October — COLLECTION ONLY!</strong><div>Sam’s swapping the fryer for the DJ decks! We’re open 5–9pm as usual, but deliveries aren’t available today. Please order for collection.</div></div>
 <div class="card" id="our-food" style="margin-top:8px">
           <h3>Our Food</h3>
@@ -2763,9 +2764,13 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
     const part = type => parts.find(p => p.type === type)?.value;
     return part('year') + '-' + part('month') + '-' + part('day');
   };
+  const lateCollectionDate = '2026-11-06';
+  window.isLateDeliverySlot = (date, time) => date === lateCollectionDate && time >= '19:30';
   function refreshCollectionOnly() {
     const date = document.getElementById('cust-preferred-date')?.value || ukToday();
     const restricted = date === restrictedDate;
+    document.getElementById('late-collection-home').style.display = ukToday() === lateCollectionDate ? 'block' : 'none';
+    document.getElementById('late-collection-checkout').style.display = date === lateCollectionDate ? 'block' : 'none';
     const delivery = document.getElementById('order-type-delivery');
     const option = document.getElementById('delivery-order-option');
     const collection = document.getElementById('order-type-collection');
@@ -2802,6 +2807,7 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
       </div>
 				<div id="checkout-order-summary" class="checkout-order-summary"></div>
 
+      <div id="late-collection-checkout" role="status" style="display:none;margin-top:10px;padding:10px;background:#fff4df;color:#55330a">For Friday 6 November, choose collection for slots from 7:30pm.</div>
       <div id="collection-only-checkout" role="status" style="display:none;margin-top:10px;padding:10px;border-radius:8px;background:#fff4df;color:#55330a"><strong>🎧 Collection only on Saturday 31 October.</strong> Please choose your collection time.</div>
 <form id="checkout-form" class="form-grid">
         <div class="field">
@@ -5396,6 +5402,7 @@ try {
   return;
 }
 let availableCount = 0;
+  const isDelivery = getSelectedOrderType() === 'delivery';
 
   for (
     let slot = new Date(start);
@@ -5404,6 +5411,7 @@ let availableCount = 0;
   ) {
     const option = document.createElement('option');
     const timeText = formatTimeHHMM(slot);
+    if (isDelivery && window.isLateDeliverySlot(dateString, timeText)) continue;
 
     option.value = timeText;
 
@@ -5480,6 +5488,7 @@ if (
 
     option.value = timeText;
 
+    if (isDelivery && window.isLateDeliverySlot(dateString, timeText)) continue;
     const schedulerAllows =
       isAllowedForAlternativeFulfilment(slot);
 
@@ -5538,6 +5547,12 @@ if (preferredDateInput) {
   });
 }
 
+
+document.addEventListener('change', event => {
+  if (event.target.name === 'order-type' && preferredDateInput?.value === '2026-11-06') {
+    populatePreferredTimeSelect(preferredDateInput.value);
+  }
+});
 
 if (preferredTimeSelect) {
   preferredTimeSelect.addEventListener('change', () => {
@@ -7654,6 +7669,10 @@ if (!selectedTimeIsAllowed) {
     // Preferred time input
     const preferredInput   = document.getElementById('cust-preferred-time');
     const preferredTimeRaw = preferredInput ? preferredInput.value : "";
+    if (orderType === 'delivery' && window.isLateDeliverySlot(preferredTimeRaw.slice(0, 10), preferredTimeRaw.slice(11, 16))) {
+      showPreferredTimeMessage('Please choose collection for slots from 7:30pm.');
+      return;
+    }
     const selectedLocal    = preferredTimeRaw ? new Date(preferredTimeRaw) : null;
 
     // Only store a preferred_time in DB if NOT ASAP
