@@ -1,4 +1,4 @@
-import cloudflareAccessPlugin from '@cloudflare/pages-plugin-cloudflare-access';
+import cloudflareAccessPlugin from '../../_vendor/cloudflare-access/index.mjs';
 
 export function createHandler({validate=cloudflareAccessPlugin,fetch=globalThis.fetch}={}){
  return async context=>{
