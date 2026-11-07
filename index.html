@@ -5305,21 +5305,24 @@ function clearPreferredTimeSelect(message = 'Select a date first') {
 
 let masterWokTimeHints=null;
 let preferredTimeGeneration=0;
-function showUnavailableBasketDialog() {
+function showUnavailableBasketDialog({availabilityUnknown = false} = {}) {
   let dialog = document.getElementById('unavailable-basket-dialog');
   if (!dialog) {
     dialog = document.createElement('dialog');
     dialog.id = 'unavailable-basket-dialog';
     dialog.setAttribute('aria-labelledby', 'unavailable-basket-title');
-    dialog.style.cssText = 'max-width:420px;width:calc(100% - 48px);padding:24px;border:0;border-radius:16px;color:#18222c;background:white;box-sizing:border-box';
+    dialog.style.cssText = 'max-width:420px;width:calc(100% - 48px);padding:24px;border:0;border-radius:16px;color:#18222c;background:white;box-sizing:border-box;max-height:85vh;overflow-y:auto';
     dialog.innerHTML = '<h2 id="unavailable-basket-title">Let’s arrange your order</h2>'
       + '<p>We couldn’t find an online collection time for this combination of dishes. Please call us on <a href="tel:01134699564">0113 469 9564</a> so we can help arrange it. Your basket is saved here.</p>'
       + '<form method="dialog"><button type="submit" autofocus>Back to checkout</button></form>';
     document.body.appendChild(dialog);
   }
   const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
-  dialog.querySelector('p').innerHTML = 'We couldn’t find an online ' + (orderType === 'delivery' ? 'delivery' : 'collection')
-    + ' time for this combination of dishes. Please call us on <a href="tel:01134699564">0113 469 9564</a> so we can help arrange it. Your basket is saved here.';
+  const introduction = availabilityUnknown
+    ? 'Online times could not be checked. '
+    : 'We couldn’t find an online ' + (orderType === 'delivery' ? 'delivery' : 'collection') + ' time for this combination of dishes. ';
+  dialog.querySelector('p').innerHTML = introduction
+    + 'Please call us on <a href="tel:01134699564">0113 469 9564</a> so we can help arrange it. Your basket is saved here.';
   if (!dialog.open) dialog.showModal();
   if (!dialog.querySelector('[data-review-form]') && window.RTKBasketReview) {
     window.RTKBasketReview.enabled().then(enabled => {
@@ -5464,6 +5467,20 @@ try {
   if(generation!==preferredTimeGeneration)return;
   clearPreferredTimeSelect('Times unavailable — please retry');
   showPreferredTimeMessage(error.message||'Times could not be checked. Please retry.');
+  // An unavailable service is not proof of an impossible basket. Offer the
+  // separately gated enquiry flow without enabling either booking writer.
+  if (window.RTKBasketReview && await window.RTKBasketReview.enabled()
+      && generation === preferredTimeGeneration) {
+    const message = document.getElementById('preferred-time-message');
+    if (message) {
+      const reviewButton = document.createElement('button');
+      reviewButton.type = 'button';
+      reviewButton.textContent = 'Ask us to review this basket';
+      reviewButton.style.cssText = 'display:block;margin-top:10px';
+      reviewButton.onclick = () => showUnavailableBasketDialog({availabilityUnknown:true});
+      message.appendChild(reviewButton);
+    }
+  }
   return;
 }
 let availableCount = 0;
