@@ -5321,6 +5321,12 @@ async function populatePreferredTimeSelect(dateString) {
     return;
   }
 
+  const hintOrderType=document.querySelector('input[name="order-type"]:checked')?.value||'collection';
+  if(hintOrderType==='delivery'&&!(document.getElementById('cust-address')?.value||'').trim()){
+    clearPreferredTimeSelect('Enter your delivery address first');
+    showPreferredTimeMessage('Enter your delivery address to see arrival times.');
+    return;
+  }
   clearPreferredTimeSelect('Loading times…');
   preferredTimeSelect.disabled = true;
 
@@ -5388,7 +5394,9 @@ try {
   if(!window.RTKBookingClient)throw Error('Ordering service is still loading. Please retry.');
   const times=[];
   for(let slot=new Date(start);slot<=extendedEnd;slot=new Date(slot.getTime()+5*60*1000))times.push(slot.toISOString());
-  const preview=await window.RTKBookingClient.availability({times,items:basket.map(line=>({
+  const preview=await window.RTKBookingClient.availability({times,
+    orderType:document.querySelector('input[name="order-type"]:checked')?.value||'collection',
+    address:document.getElementById('cust-address')?.value?.trim()||'',items:basket.map(line=>({
     item_id:line.itemId,qty:line.qty,modifiers:(line.mods||[]).map(mod=>({id:mod.id})),
     spice:line.spice??null,item_note:line.item_note||null}))});
   if(generation!==preferredTimeGeneration)return;
@@ -7095,6 +7103,7 @@ document.addEventListener('change', async (e) => {
     updateCheckoutOrderSummary();
 
     await refreshCheckoutPricingAndRender();
+    await populatePreferredTimeSelect(document.getElementById('cust-preferred-date')?.value);
   }
 });
 
@@ -7106,7 +7115,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const address = e.target.value;
 
       if (address && address.length > 5) {
-        geocodeCustomerAddress(address);
+        geocodeCustomerAddress(address).then(()=>populatePreferredTimeSelect(document.getElementById('cust-preferred-date')?.value));
       }
     });
   }
@@ -7115,6 +7124,10 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('input', (e) => {
   if (e.target && e.target.id === 'cust-address') {
     updateCheckoutOrderSummary();
+    if(document.querySelector('input[name="order-type"]:checked')?.value==='delivery'){
+      ++preferredTimeGeneration;masterWokTimeHints=null;
+      clearPreferredTimeSelect('Finish entering your delivery address');
+    }
   }
 });
 
