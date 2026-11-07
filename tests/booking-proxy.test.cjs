@@ -71,3 +71,21 @@ test('customer service-state read uses staging control contract without touching
   assert.equal(result.status,200);assert.equal((await result.json()).effective_service_state.mode,'busy');assert.equal(calls,1);
  }finally{global.fetch=old;}
 });
+
+test('review proxy is gated separately and isolates Preview from production',async()=>{
+ const api=await file('functions/api/basket-review.js');
+ const old=global.fetch;let forwarded;
+ global.fetch=async(url,options)=>{forwarded={url:String(url),options};return Response.json({success:true,bookingApprovalAllowed:false});};
+ const request=()=>new Request('https://review.rtk.pages.dev/api/basket-review',{method:'POST',body:'{"requestKey":"same-key"}'});
+ try{
+  assert.deepEqual(await(await api.onRequestGet({env:{}})).json(),{enabled:false});
+  assert.equal((await api.onRequestPost({env:{},request:request()})).status,503);
+  assert.equal((await api.onRequestPost({env:{MASTER_WOK_BASKET_REVIEWS:'enabled'},request:request()})).status,503);
+  assert.equal(forwarded,undefined);
+  const response=await api.onRequestPost({env:{MASTER_WOK_BASKET_REVIEWS:'enabled',RTK_ORDER_BACKEND_URL:'https://staging.example.invalid',RTK_PROXY_SECRET:'secret'},request:request()});
+  assert.equal(response.status,200);assert.equal(response.headers.get('Cache-Control'),'no-store');
+  assert.equal(forwarded.url,'https://staging.example.invalid/basket-review');
+  assert.equal(JSON.parse(forwarded.options.body).requestKey,'same-key');
+  assert.equal(forwarded.options.redirect,'manual');
+ }finally{global.fetch=old;}
+});

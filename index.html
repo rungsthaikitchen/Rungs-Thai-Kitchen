@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script defer src="/master-wok-basket-review-client.js"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Rung's Thai Kitchen</title>
@@ -5304,6 +5305,64 @@ function clearPreferredTimeSelect(message = 'Select a date first') {
 
 let masterWokTimeHints=null;
 let preferredTimeGeneration=0;
+function showUnavailableBasketDialog() {
+  let dialog = document.getElementById('unavailable-basket-dialog');
+  if (!dialog) {
+    dialog = document.createElement('dialog');
+    dialog.id = 'unavailable-basket-dialog';
+    dialog.setAttribute('aria-labelledby', 'unavailable-basket-title');
+    dialog.style.cssText = 'max-width:420px;width:calc(100% - 48px);padding:24px;border:0;border-radius:16px;color:#18222c;background:white;box-sizing:border-box';
+    dialog.innerHTML = '<h2 id="unavailable-basket-title">Let’s arrange your order</h2>'
+      + '<p>We couldn’t find an online collection time for this combination of dishes. Please call us on <a href="tel:01134699564">0113 469 9564</a> so we can help arrange it. Your basket is saved here.</p>'
+      + '<form method="dialog"><button type="submit" autofocus>Back to checkout</button></form>';
+    document.body.appendChild(dialog);
+  }
+  const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
+  dialog.querySelector('p').innerHTML = 'We couldn’t find an online ' + (orderType === 'delivery' ? 'delivery' : 'collection')
+    + ' time for this combination of dishes. Please call us on <a href="tel:01134699564">0113 469 9564</a> so we can help arrange it. Your basket is saved here.';
+  if (!dialog.open) dialog.showModal();
+  if (!dialog.querySelector('[data-review-form]') && window.RTKBasketReview) {
+    window.RTKBasketReview.enabled().then(enabled => {
+      if (!enabled || dialog.querySelector('[data-review-form]')) return;
+      const form = document.createElement('form');
+      form.dataset.reviewForm = 'true';
+      form.innerHTML = '<h3>Send us your basket to review</h3>'
+        + '<p>This is a request for us to contact you. It is not a confirmed order or a reserved time.</p>'
+        + '<label>Your name <input name="name" autocomplete="name" required maxlength="200"></label><br>'
+        + '<label>Phone number <input name="phone" type="tel" autocomplete="tel" required maxlength="40"></label><br>'
+        + '<label>Preferred date <input name="date" type="date" required></label><br>'
+        + '<label>Preferred time <input name="time" type="time" step="300" min="17:00" max="22:00" required></label>'
+        + '<p>We will check the basket and discuss what we can arrange. Please call if you need an immediate answer.</p>'
+        + '<button type="submit">Send basket for review</button><p role="status" aria-live="polite"></p>';
+      form.elements.name.value = document.getElementById('cust-name')?.value || '';
+      form.elements.phone.value = document.getElementById('cust-phone')?.value || '';
+      form.elements.date.value = document.getElementById('cust-preferred-date')?.value || '';
+      form.onsubmit = async event => {
+        event.preventDefault();
+        const button = form.querySelector('button'), status = form.querySelector('[role="status"]');
+        button.disabled = true;
+        status.textContent = 'Sending your basket…';
+        try {
+          const result = await window.RTKBasketReview.submit({
+            customer:{name:form.elements.name.value.trim(),phone:form.elements.phone.value.trim()},
+            orderType:document.querySelector('input[name="order-type"]:checked')?.value || 'collection',
+            deliveryAddress:document.getElementById('cust-address')?.value?.trim() || '',
+            preferredTime:window.RTKBasketReview.londonTime(form.elements.date.value,form.elements.time.value),
+            items:basket.map(line=>({item_id:line.itemId,qty:line.qty,
+              modifiers:(line.mods||[]).map(mod=>({id:mod.id})),spice:line.spice??null,item_note:line.item_note||null}))
+          });
+          status.textContent = 'Basket received for review. Your order and preferred time are not confirmed. Please call us to discuss it.';
+          button.textContent = 'Basket sent';
+        } catch(error) {
+          status.textContent = error.message || 'Please retry with the same details or call us.';
+          button.disabled = false;
+        }
+      };
+      dialog.insertBefore(form, dialog.querySelector('form[method="dialog"]'));
+    });
+  }
+}
+
 async function populatePreferredTimeSelect(dateString) {
   const generation=++preferredTimeGeneration;
   masterWokTimeHints=null;
@@ -5384,6 +5443,7 @@ if (!OPEN_DAYS.includes(serviceDate.getDay())) {
   return;
 }
 
+let masterWokAssessment = false;
 try {
   if(!window.RTKBookingClient)throw Error('Ordering service is still loading. Please retry.');
   const times=[];
@@ -5394,7 +5454,10 @@ try {
     item_id:line.itemId,qty:line.qty,modifiers:(line.mods||[]).map(mod=>({id:mod.id})),
     spice:line.spice??null,item_note:line.item_note||null}))});
   if(generation!==preferredTimeGeneration)return;
-  if(preview.route==='MASTER_WOK')masterWokTimeHints=new Map(preview.hints.map(h=>[h.time,h.available]));
+  if(preview.route==='MASTER_WOK'){
+    masterWokAssessment = true;
+    masterWokTimeHints=new Map(preview.hints.map(h=>[h.time,h.available]));
+  }
   else await refreshKitchenSlotMap(serviceDate);
   if(generation!==preferredTimeGeneration)return;
 } catch(error) {
@@ -5508,6 +5571,7 @@ if (
   if (availableCount === 0) {
     placeholder.textContent =
       'No times available on this date';
+    if (masterWokAssessment) showUnavailableBasketDialog();
 
     preferredTimeSelect.value = '';
     preferredTimeHidden.value = '';
