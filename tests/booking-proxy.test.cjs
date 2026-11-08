@@ -25,6 +25,28 @@ test('configured staging proxy forwards exact body and server secret without exp
  }finally{global.fetch=old;}
 });
 
+test('private rehearsal alias namespaces UUID retries only for its exact staging backend and synthetic email',async()=>{
+ const old=global.fetch;const bodies=[];
+ global.fetch=async(_url,options)=>{bodies.push(options.body);return Response.json({success:true});};
+ try{
+  const api=await file('functions/api/booking.js');
+  const host='feature-basket-review-stagin.rungsthaikitchen.pages.dev';
+  const env={RTK_ORDER_BACKEND_URL:'https://master-wok-booking-gateway-staging-master-wok-staging.up.railway.app',RTK_PROXY_SECRET:'fixture'};
+  const input={key:'00000000-0000-4000-8000-000000000001',customer:{email:'rehearsal@example.invalid'},items:[]};
+  const call=(payload,hostname=host,settings=env)=>api.onRequestPost({env:settings,
+   request:new Request('https://'+hostname+'/api/booking',{method:'POST',body:JSON.stringify(payload)})});
+  for(let i=0;i<2;i++)assert.equal((await call(input)).status,200);
+  assert.equal(JSON.parse(bodies[0]).key,'release-nov6-delivery-'+input.key);assert.equal(bodies[0],bodies[1]);
+  assert.equal((await call({...input,customer:{email:'customer@example.com'}})).status,403);
+  assert.equal((await call({...input,key:'not-a-uuid'})).status,403);assert.equal(bodies.length,2);
+  for(const hostname of ['rungsthaikitchen.co.uk','www.rungsthaikitchen.co.uk','another.rungsthaikitchen.pages.dev']){
+   await call(input,hostname);assert.equal(bodies.at(-1),JSON.stringify(input));
+  }
+  await call(input,host,{...env,RTK_ORDER_BACKEND_URL:'https://different-staging.example.invalid'});
+  assert.equal(bodies.at(-1),JSON.stringify(input));
+ }finally{global.fetch=old;}
+});
+
 test('all Pages proxies use Workers-compatible redirects and refuse redirects without leaking Location',async()=>{
  const old=global.fetch;let calls=0;
  global.fetch=async(_url,options)=>{calls++;assert.equal(options.redirect,'manual');
