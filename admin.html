@@ -2938,6 +2938,11 @@ for (const o of orders) {
 		}
 
 
+	// Manual refresh must fetch authoritative orders, including Preview data.
+	document.getElementById('refresh').addEventListener('click', () => {
+	  loadAndRender().catch(() => alert('Could not refresh orders. Please try again.'));
+	});
+
 	// Initial load
 	loadAndRender();
 	
