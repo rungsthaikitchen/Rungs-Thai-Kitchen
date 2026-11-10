@@ -5463,6 +5463,7 @@ try {
   }
   else await refreshKitchenSlotMap(serviceDate);
   if(generation!==preferredTimeGeneration)return;
+  hidePreferredTimeMessage();
 } catch(error) {
   if(generation!==preferredTimeGeneration)return;
   clearPreferredTimeSelect('Times unavailable — please retry');
