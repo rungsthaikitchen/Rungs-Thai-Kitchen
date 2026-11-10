@@ -2,7 +2,10 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script defer src="/master-wok-basket-review-client.js"></script>
+<script defer src="/master-wok-basket-review-admin.js"></script>
 <script src="/master-wok-admin-client.js"></script>
+<script src="/master-wok-delivery-admin.js"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>RTK — Admin Orders</title>
@@ -2649,6 +2652,7 @@ const discountLabel =
         <button class="btn-small" data-action="toggle">Details</button>
 		<button class="btn-small" data-action="print">Print</button>
 		<button class="btn-small" data-action="print-allergens">Allergens</button>
+        ${o.order_type==='delivery'&&!o.is_test&&!['cancelled','declined','rejected','completed'].includes(status)?'<button class="btn-small btn-delivery-trip">Delivery trip</button>':''}
 
         <div style="display:inline-flex;align-items:center;gap:4px;margin-left:8px">
           <input
@@ -2697,6 +2701,8 @@ const discountLabel =
       });
     }
 
+    const deliveryTripBtn=tr.querySelector('.btn-delivery-trip');
+    if(deliveryTripBtn)deliveryTripBtn.addEventListener('click',()=>window.MasterWokDeliveryAdmin.open(o));
     const printBtn = tr.querySelector('[data-action="print"]');
     if (printBtn) {
       printBtn.addEventListener('click', () => {
@@ -2931,6 +2937,11 @@ for (const o of orders) {
 
 		}
 
+
+	// Manual refresh must fetch authoritative orders, including Preview data.
+	document.getElementById('refresh').addEventListener('click', () => {
+	  loadAndRender().catch(() => alert('Could not refresh orders. Please try again.'));
+	});
 
 	// Initial load
 	loadAndRender();
