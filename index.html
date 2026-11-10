@@ -2512,6 +2512,7 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
 
         <!-- Our Food -->
         <!--<div class="card-spacer">-->
+		<div id="late-collection-home" role="status" style="display:none;margin:12px 0;padding:14px;background:#fff4df;color:#55330a"><strong>Collection only from 7:30pm tonight.</strong> Delivery slots are available before 7:30pm, subject to availability.</div>
 		<div id="collection-only-home" role="status" style="display:none;margin:12px 0;padding:14px;border:2px solid #c77b20;border-radius:10px;background:#fff4df;color:#55330a"><strong>🎧 Saturday 31 October — COLLECTION ONLY!</strong><div>Sam’s swapping the fryer for the DJ decks! We’re open 5–9pm as usual, but deliveries aren’t available today. Please order for collection.</div></div>
 <div class="card" id="our-food" style="margin-top:8px">
           <h3>Our Food</h3>
@@ -2764,9 +2765,13 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
     const part = type => parts.find(p => p.type === type)?.value;
     return part('year') + '-' + part('month') + '-' + part('day');
   };
+  const lateCollectionDate = '2026-11-06';
+  window.isLateDeliverySlot = (date, time) => date === lateCollectionDate && time >= '19:30';
   function refreshCollectionOnly() {
     const date = document.getElementById('cust-preferred-date')?.value || ukToday();
     const restricted = date === restrictedDate;
+    document.getElementById('late-collection-home').style.display = ukToday() === lateCollectionDate ? 'block' : 'none';
+    document.getElementById('late-collection-checkout').style.display = date === lateCollectionDate ? 'block' : 'none';
     const delivery = document.getElementById('order-type-delivery');
     const option = document.getElementById('delivery-order-option');
     const collection = document.getElementById('order-type-collection');
@@ -2803,6 +2808,7 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
       </div>
 				<div id="checkout-order-summary" class="checkout-order-summary"></div>
 
+      <div id="late-collection-checkout" role="status" style="display:none;margin-top:10px;padding:10px;background:#fff4df;color:#55330a">For Friday 6 November, choose collection for slots from 7:30pm.</div>
       <div id="collection-only-checkout" role="status" style="display:none;margin-top:10px;padding:10px;border-radius:8px;background:#fff4df;color:#55330a"><strong>🎧 Collection only on Saturday 31 October.</strong> Please choose your collection time.</div>
 <form id="checkout-form" class="form-grid">
         <div class="field">
@@ -3188,7 +3194,7 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
     };
     function normalizeAllergens(list){
       const out = [];
-      (list || []).forEach(k => { if (k === 'nuts') out.push('peanuts','tree_nuts'); else out.push(k); });
+      (list || []).forEach(k => { if (k === 'nuts') out.push('peanuts','tree_nuts'); else out.push(k === 'peanut' ? 'peanuts' : k); });
       return [...new Set(out)];
     }
     function renderAllergenIconsCompact(list){
@@ -3245,7 +3251,7 @@ const EXTRAS = [
         { id: 'fish-cakes', name: 'Thai Fish Cakes', desc: 'Flavourful, bite-sized fritters with a blend of savoury, spicy, and tangy flavours.', price: 6.00, img: 'images/thaifishcakesjpg.jpg',spiceEnabled: true, spiceDefault: 1, allergens: ['fish','egg','gluten'] },
         { id: 'pork-dumplings', name: 'Pork Steamed Dumplings', desc: 'Steamed dumplings filled with tender pork.', price: 6.00, img: 'images/dumplings.jpg', allergens: ['gluten','soya','sesame'] },
         { id: 'fried-prawns', name: 'Deep Fried Tiger Prawns (x4)', desc: 'Tiger Prawns cooked in a crispy tempura batter served with authentic Thai sweet Chilli Sauce.', price: 6.50, img: 'images/Prawns.jpg',  allergens: ['shellfish','gluten'] },
-        { id: 'thai-sausage', name: 'Thai Pork Sausage', desc: 'A traditional fermented Thai sausage made with ground pork, sticky rice, and fragrant seasonings. Served with fresh sliced ginger, whole peanuts and slices of cucumber.', price: 6.50, img: 'images/sausage.jpg', allergens: [] },
+        { id: 'thai-sausage', name: 'Thai Pork Sausage', desc: 'A traditional fermented Thai sausage made with ground pork, sticky rice, and fragrant seasonings. Served with fresh sliced ginger, whole peanuts and slices of cucumber.', price: 6.50, img: 'images/sausage.jpg', allergens: ['peanut'] },
 		/*{ id: 'chicken-panang', name: 'Chicken Paneng Skewers🌶️🌶️', desc: 'A flavorful Thai-inspired dish combining tender chicken marinated in creamy, spicy Panang curry paste, coconut milk, and fish sauce.', price: 6.50, img: 'images/paneng_chicken.jpg', allergens: ['fish','soya'], badge: 'new' },
 		{ id: 'grill-chicken', name: 'Grilled Chicken Thigh (Gai Yang)', desc: 'A popular Thai street food dish consisting of marinated chicken thighs (skin-on, bone-in), grilled to a smoky, charred finish and topped with crispy onions', price: 7.50, img: 'images/grill_chicken.jpg', allergens: ['gluten','molluscs','soya'], badge: 'new' },
 		{ id: 'salt-wings', name: 'Thai-style Salt & Pepper Chicken Wings', desc: 'Tender, bite-sized pieces of battered chicken, stir-fried with fresh vegetables and chilli in our special sauce.',  price: 7.50, img: 'images/salt-wings.jpeg', allergens: ['soya','gluten','molluscs','sesame'], badge: 'new' },*/
@@ -3260,7 +3266,7 @@ const EXTRAS = [
       { id:'salad',    title:'Salad',   allowExtras:true,  items:[
       { id: 'papaya-salad', name: 'Green Papaya Salad (Som Tam)🌶️🌶️🌶️', desc: 'A spicy, savoury, and sweet Thai salad made primarily of shredded green papaya.', price: 7.00, img: 'images/somtam.jpg', spiceEnabled: true, spiceDefault: 3, allergens: ['peanuts','fish'], allowedExtras: ['extra-prawn'] },
         { id: 'beef-salad', name: 'Spicy Beef Salad (Yum Nuea)🌶️🌶️', desc: 'A classic Thai salad with grilled sirloin steak (cooked mediu - please advise in the checkout comments if you would prefer it cooked differently), tossed with crisp vegetables, fresh mint, coriander, and a tangy lime-fish sauce dressing.', price: 9.50, img: 'images/ymbeef.jpg', spiceEnabled: true, spiceDefault: 2, allergens: ['fish','celery','soya'], allowedExtras: ['extra-beef'] },
-        { id: 'pork-salad', name: 'Grilled Pork Salad (Nam Tok)🌶️', desc: 'This classic North-eastern Thai salad features smoky, charred grilled pork slices tossed with a fiery dressing of lime, fish sauce, and chili flakes.', price: 8.50, img: 'images/porksalad.jpg', spiceEnabled: true, spiceDefault: 1, allergens: ['fish'], allowedExtras: ['extra-pork'] },
+        //{ id: 'pork-salad', name: 'Grilled Pork Salad (Nam Tok)🌶️', desc: 'This classic North-eastern Thai salad features smoky, charred grilled pork slices tossed with a fiery dressing of lime, fish sauce, and chili flakes.', price: 8.50, img: 'images/porksalad.jpg', spiceEnabled: true, spiceDefault: 1, allergens: ['fish'], allowedExtras: ['extra-pork'] },
 		/*{ id: 'mango-salad', name: 'Crispy Chicken with Mango Salad🌶️🌶️', desc: 'A vibrant, contrasting dish featuring golden, crunchy fried chicken, paired with a fresh, zesty salad of fresh  mango, herbs, and chilies.', price: 8.50, img: 'images/mango_salad.jpg', spiceEnabled: true, spiceDefault: 1, allergens: ['gluten','fish','celery','soya'], allowedExtras: ['extra-bchicken'], badge: 'new'  },*/
         { id: 'laab', name: 'Laab🌶️🌶️', desc: 'A vibrant and flavourful meat salad known for its harmony of spicy, sour, salty, and savoury flavours.', price: 7.50, img: 'images/Larb.jpg', allowedModifiers: ['chicken','pork'], spiceEnabled: true, spiceDefault: 2, allergens: ['fish',',soya'], allowedExtras: ['extra-chicken'] }
       ]},
@@ -5485,6 +5491,7 @@ try {
   return;
 }
 let availableCount = 0;
+  const isDelivery = getSelectedOrderType() === 'delivery';
 
   for (
     let slot = new Date(start);
@@ -5493,6 +5500,7 @@ let availableCount = 0;
   ) {
     const option = document.createElement('option');
     const timeText = formatTimeHHMM(slot);
+    if (isDelivery && window.isLateDeliverySlot(dateString, timeText)) continue;
 
     option.value = timeText;
 
@@ -5569,6 +5577,7 @@ if (
 
     option.value = timeText;
 
+    if (isDelivery && window.isLateDeliverySlot(dateString, timeText)) continue;
     const schedulerAllows =
       isAllowedForAlternativeFulfilment(slot);
 
@@ -5628,6 +5637,12 @@ if (preferredDateInput) {
   });
 }
 
+
+document.addEventListener('change', event => {
+  if (event.target.name === 'order-type' && preferredDateInput?.value === '2026-11-06') {
+    populatePreferredTimeSelect(preferredDateInput.value);
+  }
+});
 
 if (preferredTimeSelect) {
   preferredTimeSelect.addEventListener('change', () => {
@@ -7749,6 +7764,10 @@ if (!selectedTimeIsAllowed) {
     // Preferred time input
     const preferredInput   = document.getElementById('cust-preferred-time');
     const preferredTimeRaw = preferredInput ? preferredInput.value : "";
+    if (orderType === 'delivery' && window.isLateDeliverySlot(preferredTimeRaw.slice(0, 10), preferredTimeRaw.slice(11, 16))) {
+      showPreferredTimeMessage('Please choose collection for slots from 7:30pm.');
+      return;
+    }
     const selectedLocal    = preferredTimeRaw ? new Date(preferredTimeRaw) : null;
 
     // Only store a preferred_time in DB if NOT ASAP
