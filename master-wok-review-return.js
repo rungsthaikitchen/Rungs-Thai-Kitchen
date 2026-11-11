@@ -9,7 +9,7 @@
   // Do not leak the capability into later navigation, screenshots or referrers.
   history.replaceState(null,'',location.pathname+location.search);
   document.querySelector('[data-review-checkout-notice]')?.remove();
-  const notice=document.createElement('section');notice.dataset.reviewCheckoutNotice='true';notice.style.cssText='margin:20px;padding:20px;border:2px solid #69415d;border-radius:12px';
+  const notice=document.createElement('section');notice.dataset.reviewCheckoutNotice='true';notice.style.cssText='margin:20px;padding:20px;border:2px solid #69415d;border-radius:12px;background:#fff;color:#222';
   notice.setAttribute('role','status');document.querySelector('main').prepend(notice);
   try{
    if(!/^[a-f0-9]{64}$/.test(token)||localStorage.getItem('rtk_master_wok_pending_checkout'))
