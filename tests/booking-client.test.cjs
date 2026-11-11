@@ -102,3 +102,12 @@ test('actual writer error field shows the expected changed-price review message'
  await assert.rejects(c.submit(input()),/price or loyalty balance has changed/);
  assert.equal(storage.getItem('rtk_master_wok_pending_checkout'),null);
 });
+test('an agreed-time link displays only its granted time and can never fall through to legacy checkout',async()=>{
+ const time='2026-11-28T20:15:00.000Z',token='a'.repeat(64),storage=stored();
+ const client=createClient({storage,crypto,fetch:async url=>url.includes('booking-mode')?ok({mode:'MASTER_WOK'}):ok({success:true,review:{preferredTime:time}})});
+ const result=await client.availability({times:[time,'2026-11-28T20:20:00.000Z'],reviewApprovalToken:token});
+ assert.deepEqual(result.hints.map(h=>h.available),[true,false]);
+ assert.equal(storage.getItem('rtk_master_wok_pending_checkout'),null);
+ const legacy=createClient({storage:stored(),crypto,fetch:async()=>ok({mode:'LEGACY'})});
+ await assert.rejects(legacy.submit({...input(),reviewApprovalToken:token}),/unavailable/);
+});

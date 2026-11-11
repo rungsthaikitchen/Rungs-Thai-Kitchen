@@ -24,7 +24,7 @@
    const form=document.getElementById('cust-name').closest('form');
    const label=document.createElement('label'),ack=document.createElement('input');ack.type='checkbox';ack.id='review-holding-ack';ack.required=true;
    label.append(ack,document.createTextNode(' I confirm our discussion: some dishes may be prepared earlier than usual, up to '+data.review.maxHoldMinutes+' minutes before collection or arrival.'));
-   form.append(label);await root.RTKApplyReviewedTime(data.review.preferredTime);
+   document.getElementById('checkout-submit').before(label);await root.RTKApplyReviewedTime(data.review.preferredTime);
   }catch(error){notice.textContent=error.message;}
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',restore);else restore();

@@ -5612,6 +5612,13 @@ if (
   }
 
   preferredTimeSelect.disabled = false;
+  if(window.RTKApprovedReview&&new Date(window.RTKApprovedReview.preferredTime).toISOString().slice(0,10)===dateString){
+    const agreedText=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(window.RTKApprovedReview.preferredTime));
+    if([...preferredTimeSelect.options].some(o=>o.value===agreedText&&!o.disabled)){
+      preferredTimeSelect.value=agreedText;
+      preferredTimeSelect.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+  }
 
   console.log(
     '[preferred-time] generated slots:',
