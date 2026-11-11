@@ -42,6 +42,11 @@
    const mode=(await response.json()).mode;
    if(mode==='LEGACY'){requireLegacyHost();availabilityMode=mode;return {route:'LEGACY'};}
    if(mode!=='MASTER_WOK')throw Error('Ordering availability is temporarily unavailable.');
+   if(input.reviewApprovalToken){
+    const response=await get('/api/basket-review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'approval_lookup',token:input.reviewApprovalToken})});
+    const data=await response.json();if(!response.ok||!data.success||!data.review)throw Error('The agreed-time link is invalid or expired. Please contact the restaurant.');
+    availabilityMode=mode;return {route:'MASTER_WOK',hints:input.times.map(time=>({time,available:time===new Date(data.review.preferredTime).toISOString()}))};
+   }
    const result=await get('/api/booking-availability',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});
    const body=await result.json();
    if(!result.ok||body.success!==true||body.bookingApprovalAllowed!==false||!Array.isArray(body.hints)||
@@ -59,6 +64,7 @@
    if(availabilityMode&&availabilityMode!==mode)throw Error('Ordering has changed. Please refresh the available times before submitting.');
    const previous=pending();
    if(mode==='LEGACY'){
+    if(input.reviewApprovalToken)throw Error('Agreed-time checkout is currently unavailable. Please contact the restaurant.');
     requireLegacyHost();
     if(previous)throw Error('We need to check your previous order before creating another. Please contact the restaurant.');
     return {route:'LEGACY'};

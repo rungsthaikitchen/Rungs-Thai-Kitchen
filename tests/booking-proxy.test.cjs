@@ -100,7 +100,7 @@ test('review proxy is gated separately and isolates Preview from production',asy
  global.fetch=async(url,options)=>{forwarded={url:String(url),options};return Response.json({success:true,bookingApprovalAllowed:false});};
  const request=()=>new Request('https://review.rtk.pages.dev/api/basket-review',{method:'POST',body:'{"requestKey":"same-key"}'});
  try{
-  assert.deepEqual(await(await api.onRequestGet({env:{}})).json(),{enabled:false});
+  assert.deepEqual(await(await api.onRequestGet({env:{}})).json(),{enabled:false,approvalsEnabled:false});
   assert.equal((await api.onRequestPost({env:{},request:request()})).status,503);
   assert.equal((await api.onRequestPost({env:{MASTER_WOK_BASKET_REVIEWS:'enabled'},request:request()})).status,503);
   assert.equal(forwarded,undefined);

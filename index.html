@@ -2373,6 +2373,7 @@ body.overlay-open {
 
 		  </style>
 		<script src="/master-wok-checkout-client.js"></script>
+<script defer src="/master-wok-review-return.js"></script>
 </head>
 		<body>
 				  <!-- Kitchen notice overlay -->
@@ -4812,6 +4813,12 @@ document.getElementById('order-panel').addEventListener('click', async e => {
 	window.orderMsg           = document.getElementById('order-msg');
 	window.basket             = basket;
 	window.renderOrder        = renderOrder;
+ window.RTKRestoreReviewedBasket=items=>{
+  if(basket.length&&!confirm('Replace your current basket with the basket reviewed by the restaurant?'))return false;
+  const restored=items.map(line=>({itemId:line.item_id,name:line.name,mods:line.modifiers,
+   unitPrice:line.unit_price,qty:line.qty,img:line.img||'',spice:line.spice,item_note:line.item_note}));
+  basket.splice(0,basket.length,...restored);renderOrder();return true;
+ };
 	window.roundToTwo         = roundToTwo;
 	window.chilliIcons        = chilliIcons;
 	window.nameWithoutChillies= nameWithoutChillies;
@@ -5457,7 +5464,7 @@ try {
   if(!window.RTKBookingClient)throw Error('Ordering service is still loading. Please retry.');
   const times=[];
   for(let slot=new Date(start);slot<=extendedEnd;slot=new Date(slot.getTime()+5*60*1000))times.push(slot.toISOString());
-  const preview=await window.RTKBookingClient.availability({times,
+  const preview=await window.RTKBookingClient.availability({times,reviewApprovalToken:window.RTKApprovedReview?.token,
     orderType:document.querySelector('input[name="order-type"]:checked')?.value||'collection',
     address:document.getElementById('cust-address')?.value?.trim()||'',items:basket.map(line=>({
     item_id:line.itemId,qty:line.qty,modifiers:(line.mods||[]).map(mod=>({id:mod.id})),
@@ -7060,7 +7067,17 @@ function findNextAllowedFromNow() {
 
 			
 		// Single, clean checkout opener
-			async function openCheckout(subtotal) {
+			window.RTKApplyReviewedTime=async instant=>{
+ const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(instant)).map(p=>[p.type,p.value]));
+ const date=parts.year+'-'+parts.month+'-'+parts.day;
+ preferredDateInput.value=date;
+ await populatePreferredTimeSelect(date);
+ preferredTimeSelect.value=parts.hour+':'+parts.minute;
+ preferredTimeSelect.dispatchEvent(new Event('change',{bubbles:true}));
+ document.getElementById('unavailable-basket-dialog')?.close();
+};
+window.RTKOpenReviewedCheckout=()=>openCheckout(basket.reduce((n,i)=>n+i.qty*i.unitPrice,0));
+async function openCheckout(subtotal) {
 			  console.trace("[checkout] openCheckout called", { subtotal });
 			  
 const preferredTimeEl =
@@ -7894,6 +7911,7 @@ if (!hasFreeDelivery && (!routeMilesNow || routeMilesNow <= 0)) {
     if(!window.RTKBookingClient)throw new Error('Ordering service is still loading. Please reload and try again.');
     const booking=await window.RTKBookingClient.submit({
       preferredTime:preferredTimeISO,orderType,
+      ...(window.RTKApprovedReview?{reviewApprovalToken:window.RTKApprovedReview.token,reviewHoldingAcknowledged:document.getElementById('review-holding-ack')?.checked===true}:{}),
       customer:{name,email,phone,address},notes,
       items:itemsSnapshot.map(line=>({item_id:line.itemId,qty:line.qty,
         modifiers:(line.mods||[]).map(mod=>({id:mod.id})),spice:line.spice??null,
