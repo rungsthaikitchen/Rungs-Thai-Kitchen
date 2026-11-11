@@ -688,6 +688,20 @@ tbody#tbody tr.row-attention:hover > td {
   }
 }
   
+
+/* Keep the orders visible while keeping service state and reviews in reach. */
+.service-control { padding: 14px 22px; }
+.service-control > summary { cursor: pointer; list-style: none; }
+.service-control > summary::-webkit-details-marker { display: none; }
+.service-control > summary h2::after { content: ' ▾'; font-size: 16px; }
+.service-control[open] > summary h2::after { content: ' ▴'; }
+.service-control[open] > summary { margin-bottom: 18px; }
+#basket-reviews-toggle[hidden], #basket-reviews-panel[hidden] { display: none; }
+#basket-reviews-toggle.has-reviews { background: #fff3cd; border-color: #d48a00; color: #713f00; font-weight: 700; }
+#basket-reviews-count:not(:empty) { margin-left: 5px; }
+#basket-reviews-panel { margin: 16px auto; padding: 20px 22px; max-width: 1640px; border: 1px solid #ddd; border-radius: 12px; background: #fff; }
+#basket-reviews-panel .review-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#basket-reviews-panel h2 { margin: 0 0 12px; }
   </style>
 </head>
 <body>
@@ -698,6 +712,7 @@ tbody#tbody tr.row-attention:hover > td {
         <div class="muted small">Live dashboard (auto-updates)</div>
       </div>
       <div class="controls">
+  <button id="basket-reviews-toggle" class="btn" type="button" aria-expanded="false" aria-controls="basket-reviews-panel" hidden>Basket reviews <span id="basket-reviews-count"></span></button>
   <button id="refresh" class="btn">Refresh</button>
   <button id="export" class="btn">Export CSV</button>
   <button id="toggleDashboard" class="btn">Hide dashboard</button>
@@ -715,8 +730,8 @@ tbody#tbody tr.row-attention:hover > td {
   <!-- =========================================================
      SERVICE CONTROL
 ========================================================= -->
-<section id="service-control" class="service-control">
-  <div class="service-control__header">
+<details id="service-control" class="service-control">
+  <summary class="service-control__header">
     <div>
       <h2>Service Control</h2>
       <div class="muted small">
@@ -728,7 +743,7 @@ tbody#tbody tr.row-attention:hover > td {
       <span class="service-control__status-dot"></span>
       <span id="service-control-status-text">Normal</span>
     </div>
-  </div>
+  </summary>
 
   <div class="service-control__mode">
     <div class="service-control__mode-title">
@@ -804,7 +819,7 @@ tbody#tbody tr.row-attention:hover > td {
     </button>
   </div>
   </div>
-</section>
+</details>
 
 <!-- =========================================================
      CLOSE SERVICE MODAL

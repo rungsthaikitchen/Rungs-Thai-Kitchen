@@ -2,11 +2,21 @@
  'use strict';
  async function mount(){
   if(!await root.RTKBasketReview?.enabled())return;
-  const section=document.createElement('section');section.style.cssText='margin:24px;padding:20px;border:1px solid #ddd;border-radius:12px';
+  const toggle=document.getElementById('basket-reviews-toggle'),count=document.getElementById('basket-reviews-count');
+  if(!toggle||!count)return;
+  const section=document.createElement('section');section.id='basket-reviews-panel';section.hidden=true;
+  toggle.hidden=false;toggle.setAttribute('aria-label','Basket reviews: checking requests');
+  const close=document.createElement('button');close.type='button';close.className='btn';close.textContent='Close reviews';
+  const setOpen=open=>{section.hidden=!open;toggle.setAttribute('aria-expanded',String(open));if(!open)toggle.focus();else if(!preserveCheckoutLink&&!editing)load();};
+  toggle.onclick=()=>setOpen(section.hidden);close.onclick=()=>setOpen(false);
+  section.addEventListener('keydown',event=>{if(event.key==='Escape'){event.stopPropagation();setOpen(false);}});
+  let preserveCheckoutLink=false,editing=false;
+  section.addEventListener('input',()=>{editing=true;});
   const title=document.createElement('h2');title.textContent='Basket review requests';
   const refresh=document.createElement('button');refresh.textContent='Refresh reviews';
   const status=document.createElement('p'),content=document.createElement('div');status.setAttribute('role','status');
-  section.append(title,refresh,status,content);(document.querySelector('main')||document.body).prepend(section);
+  const heading=document.createElement('div');heading.className='review-panel-heading';heading.append(title,close);
+  section.append(heading,refresh,status,content);(document.querySelector('main')||document.body).prepend(section);
   async function request(payload){
    const response=await fetch('/admin-api/basket-reviews',{method:'POST',redirect:'error',
     headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(25000)});
@@ -15,11 +25,15 @@
   }
   const paragraph=(parent,value)=>{const p=document.createElement('p');p.textContent=value;parent.append(p);};
   const flags=await (await fetch('/api/basket-review',{cache:'no-store'})).json();
-  async function load(){
-   refresh.disabled=true;status.textContent='Loading reviews…';
+  async function load({render=true}={}){
+   if(render){refresh.disabled=true;status.textContent='Loading reviews…';}
    try{
     const data=await request({action:'list'});if(!Array.isArray(data.reviews))throw Error('Invalid review response');
-    content.replaceChildren();
+    const active=data.reviews.length;count.textContent=active?'('+active+')':'';
+    toggle.classList.toggle('has-reviews',active>0);toggle.setAttribute('aria-label','Basket reviews: '+active+' active requests');
+    toggle.title=active?active+' active basket review requests':'No active basket review requests';
+    if(!render)return;
+    preserveCheckoutLink=false;editing=false;content.replaceChildren();
     for(const review of data.reviews){
      const article=document.createElement('article');article.style.cssText='border-top:1px solid #ddd;padding:16px 0';
      paragraph(article,review.customer_name+' · '+review.customer_phone+' · '+review.status);
@@ -48,7 +62,7 @@
         const output=document.createElement('p'),link=document.createElement('a');
         link.href=new URL('/#basket-review='+result.token,location.origin).href;
         link.textContent='Customer checkout link (expires in 30 minutes)';link.rel='noreferrer';link.target='_blank';
-        output.append(link);form.replaceWith(output);article.querySelectorAll('button').forEach(b=>b.remove());status.textContent='Approval created. Share the link privately with this customer. No booking has been made.';
+        output.append(link);preserveCheckoutLink=true;form.replaceWith(output);article.querySelectorAll('button').forEach(b=>b.remove());status.textContent='Approval created. Share the link privately with this customer. No booking has been made.';
        }catch(error){status.textContent=error.message;button.disabled=false;}};
       article.append(form);
      }
@@ -62,9 +76,12 @@
      content.append(article);
     }
     status.textContent=data.reviews.length?data.reviews.length+' active review requests':'No active review requests';
-   }catch(error){status.textContent=error.message;}finally{refresh.disabled=false;}
+   }catch(error){status.textContent=error.message;count.textContent='!';toggle.classList.add('has-reviews');toggle.setAttribute('aria-label','Basket reviews: unable to check requests');toggle.title=error.message;}finally{if(render)refresh.disabled=false;}
   }
-  refresh.onclick=load;await load();
+  refresh.className='btn';refresh.onclick=()=>load();await load();
+  // Refresh the badge without replacing staff inputs or a newly created bearer link.
+  let polling=false;
+  setInterval(async()=>{if(document.hidden||polling||refresh.disabled)return;polling=true;try{await load({render:false});}finally{polling=false;}},30000);
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })(globalThis);
