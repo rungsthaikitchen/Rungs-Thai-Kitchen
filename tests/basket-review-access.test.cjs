@@ -33,3 +33,12 @@ test('actual Access validator rejects missing or forged assertion before upstrea
  }
  assert.equal(calls,0);
 });
+test('agreed-time approvals bind the signed Access identity instead of a browser actor',async()=>{
+ const {createHandler}=await modulePromise;let forwarded;
+ const handler=createHandler({fetch:async(_url,options)=>{forwarded=options;return Response.json({success:true});},
+  validate:()=>async c=>{c.data.cloudflareAccess={JWT:{payload:{email:'owner@example.invalid'}}};return c.next();}});
+ const request=new Request('https://review.pages.dev/admin-api/basket-reviews',{method:'POST',headers:{Origin:'https://review.pages.dev'},body:JSON.stringify({action:'approve_agreed_time',staffActor:'forged@example.invalid'})});
+ assert.equal((await handler(context({request}))).status,200);
+ assert.equal(JSON.parse(forwarded.body).staffActor,'owner@example.invalid');
+ assert.equal(forwarded.headers['x-rtk-review-actor'],'owner@example.invalid');
+});

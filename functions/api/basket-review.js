@@ -1,7 +1,14 @@
 // Enquiries have a separate feature gate from booking authority.
 export async function onRequestGet(context){
- return Response.json({enabled:context.env.MASTER_WOK_BASKET_REVIEWS==='enabled'},
-  {headers:{'Cache-Control':'no-store'}});
+ const enabled=context.env.MASTER_WOK_BASKET_REVIEWS==='enabled';
+ let approvalsEnabled=false;
+ const host=new URL(context.request?.url||'https://rungsthaikitchen.co.uk').hostname;
+ if(enabled&&context.env.RTK_PROXY_SECRET&&(['rungsthaikitchen.co.uk','www.rungsthaikitchen.co.uk'].includes(host)||context.env.RTK_ORDER_BACKEND_URL))try{
+  const response=await fetch(new URL('/basket-review-capabilities',context.env.RTK_ORDER_BACKEND_URL||'https://order-backend-production.up.railway.app'),{
+   headers:{'x-rtk-proxy-secret':context.env.RTK_PROXY_SECRET},redirect:'manual',signal:AbortSignal.timeout(10000)});
+  if(response.ok)approvalsEnabled=(await response.json()).approvalsEnabled===true;
+ }catch(_){}
+ return Response.json({enabled,approvalsEnabled},{headers:{'Cache-Control':'no-store'}});
 }
 export async function onRequestPost(context){
  if(context.env.MASTER_WOK_BASKET_REVIEWS!=='enabled')

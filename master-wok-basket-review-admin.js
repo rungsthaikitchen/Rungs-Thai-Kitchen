@@ -14,6 +14,7 @@
    return data;
   }
   const paragraph=(parent,value)=>{const p=document.createElement('p');p.textContent=value;parent.append(p);};
+  const flags=await (await fetch('/api/basket-review',{cache:'no-store'})).json();
   async function load(){
    refresh.disabled=true;status.textContent='Loading reviews…';
    try{
@@ -30,8 +31,29 @@
       (line.spice!=null?' · Spice '+line.spice:'')+(line.item_note?' · '+line.item_note:''));
      paragraph(article,'Basket total £'+(review.basket||[]).reduce((total,line)=>total+Number(line.qty)*Number(line.unit_price),0).toFixed(2));
      paragraph(article,review.assessment?.message||'Bottleneck analysis is unavailable. Check the basket before discussing a time.');
-     for(const [label,next] of [['Mark contacted','contacted'],['Resolve review','resolved'],['Close review','closed']]){
-      if(review.status===next)continue;
+     if(flags.approvalsEnabled&&['pending','contacted','approved'].includes(review.status)){
+      const form=document.createElement('form');
+      form.innerHTML='<h3>'+ (review.status==='approved'?'Replace customer checkout link':'Allow checkout at an agreed time')+'</h3>'
+       +'<p>This does not reserve capacity. Checkout will recheck current bookings and prices.</p>'
+       +'<label>Agreed date <input name="date" type="date" required></label> '
+       +'<label>Agreed time <input name="time" type="time" step="300" required></label><br>'
+       +'<label>Maximum finished-food holding time (minutes) <input name="hold" type="number" min="20" max="330" value="20" required></label><br>'
+       +'<label>Reason / customer discussion <textarea name="reason" minlength="5" maxlength="1000" required></textarea></label><br>'
+       +'<label><input name="discussed" type="checkbox" required> I discussed the basket, time and any longer holding with the customer.</label><br>'
+       +'<button type="submit">Create customer checkout link</button>';
+      form.onsubmit=async event=>{event.preventDefault();const button=form.querySelector('button');button.disabled=true;
+       try{const result=await request({action:'approve_agreed_time',reviewId:review.id,expectedStatus:review.status,
+        agreedTime:root.RTKBasketReview.londonTime(form.elements.date.value,form.elements.time.value),
+        maxHoldMinutes:Number(form.elements.hold.value),reason:form.elements.reason.value,customerDiscussed:form.elements.discussed.checked});
+        const output=document.createElement('p'),link=document.createElement('a');
+        link.href=new URL('/#basket-review='+result.token,location.origin).href;
+        link.textContent='Customer checkout link (expires in 30 minutes)';link.rel='noreferrer';link.target='_blank';
+        output.append(link);form.replaceWith(output);article.querySelectorAll('button').forEach(b=>b.remove());status.textContent='Approval created. Share the link privately with this customer. No booking has been made.';
+       }catch(error){status.textContent=error.message;button.disabled=false;}};
+      article.append(form);
+     }
+     for(const [label,next] of [['Mark contacted','contacted'],['Resolve review','resolved'],['Close review','closed']]){ 
+      if(review.status===next||review.status==='approved'&&next!=='closed')continue;
       const button=document.createElement('button');button.textContent=label;button.style.marginRight='8px';
       button.onclick=async()=>{button.disabled=true;try{await request({action:'set_status',reviewId:review.id,status:next,expectedStatus:review.status});await load();}
        catch(error){status.textContent=error.message;button.disabled=false;}};
