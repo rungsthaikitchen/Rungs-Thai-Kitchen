@@ -65,9 +65,22 @@
   }
   // Ctrl+P while reviewing a receipt uses exactly the same receipt-only output.
   window.addEventListener('beforeprint',preparePrint);window.addEventListener('afterprint',finishPrint);
+  let printWindow=null;
   print.onclick=()=>{
-   if(!report)return;preparePrint();
-   try{window.print();}catch(error){finishPrint();status.textContent='Printing could not start. Please try again.';}
+   if(!report)return;
+   if(printWindow&&!printWindow.closed){printWindow.focus();return;}
+   const selectedReport=report;
+   printWindow=window.open('/admin-reconciliation-print.html','_blank','width=420,height=750');
+   if(!printWindow){status.textContent='Allow pop-ups to open the printer dialogue.';return;}
+   const target=printWindow;let sent=false;
+   const cleanup=()=>{window.removeEventListener('message',receive);clearTimeout(timeout);};
+   function receive(event){
+    if(event.origin!==location.origin||event.source!==target)return;
+    if(event.data?.type==='rtk-eod-print-ready'&&!sent){sent=true;clearTimeout(timeout);target.postMessage({type:'rtk-eod-print-report',report:selectedReport},location.origin);}
+    if(event.data?.type==='rtk-eod-print-finished'){cleanup();if(report===selectedReport&&dialog.open)dialog.close();}
+   }
+   window.addEventListener('message',receive);
+   const timeout=setTimeout(()=>{cleanup();if(!sent)status.textContent='The print window did not become ready. Close it and try again.';},60000);
   }; }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })();

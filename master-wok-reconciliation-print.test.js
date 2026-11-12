@@ -10,13 +10,13 @@ async function mount(){
  const dialog={...control(),open:true,querySelector:key=>elements.get(key),close(){this.open=false;},showModal(){this.open=true;}};
  const doc={readyState:'complete',body:{append(){},classList:{add:c=>classes.add(c),remove:c=>classes.delete(c)}},head:{append(){}},getElementById:()=>({parentElement:{prepend(){}}}),createElement:tag=>{const n=tag==='dialog'?dialog:control();created.push([tag,n]);return n;}};
  const model=require('./master-wok-reconciliation');
- const window={MasterWokReconciliation:model,MasterWokAdminClient:{loadOrders:async()=>({data:[]})},addEventListener:(name,handler)=>listeners[name]=handler,print(){listeners.beforeprint();}};
- vm.runInNewContext(fs.readFileSync(__dirname+'/master-wok-reconciliation-admin.js','utf8'),{document:doc,location:{hostname:'preview.pages.dev'},window,fetch:async()=>({ok:true,json:async()=>({enabled:true})}),AbortSignal,console});
+ const window={MasterWokReconciliation:model,MasterWokAdminClient:{loadOrders:async()=>({data:[]})},addEventListener:(name,handler)=>listeners[name]=handler,removeEventListener:name=>delete listeners[name],print(){listeners.beforeprint();}};
+ vm.runInNewContext(fs.readFileSync(__dirname+'/master-wok-reconciliation-admin.js','utf8'),{document:doc,location:{hostname:'preview.pages.dev',origin:'https://preview.pages.dev'},window,fetch:async()=>({ok:true,json:async()=>({enabled:true})}),AbortSignal,console,setTimeout:()=>1,clearTimeout(){}});
  await new Promise(resolve=>setImmediate(resolve));await form.onsubmit({preventDefault(){}});
  return {dialog,listeners,classes,window,button:elements.get('[data-print]'),root:created.find(([tag])=>tag==='section')[1],style:created.find(([tag])=>tag==='style')[1]};
 }
-test('receipt button prints a complete root while hiding the Admin modal and iframe',async()=>{
- const h=await mount();h.button.onclick();
+test('Ctrl+P prints a complete root while hiding the Admin modal and iframe',async()=>{
+ const h=await mount();h.listeners.beforeprint();
  assert.equal(h.dialog.open,false);assert.equal(h.root.hidden,false);assert.equal(h.style.disabled,false);assert.ok(h.classes.has('rtk-eod-printing'));
  assert.match(h.root.innerHTML,/Rung’s Thai Kitchen/);assert.match(h.root.innerHTML,/END OF RECEIPT/);
  assert.ok(!h.root.innerHTML.includes('Build receipt'));assert.ok(!h.root.innerHTML.includes('<iframe'));
@@ -28,7 +28,14 @@ test('browser Ctrl+P uses the same isolated output and cancel restores the form'
  const h=await mount();h.listeners.beforeprint();assert.equal(h.dialog.open,false);assert.match(h.root.innerHTML,/END OF RECEIPT/);
  h.listeners.beforeprint();h.listeners.afterprint();assert.equal(h.dialog.open,true);assert.equal(h.classes.size,0);
 });
-test('print failure restores Admin and does not leave print CSS enabled',async()=>{
- const h=await mount();h.window.print=()=>{throw Error('Printer unavailable');};h.button.onclick();
- assert.equal(h.dialog.open,true);assert.equal(h.root.hidden,true);assert.equal(h.style.disabled,true);assert.equal(h.classes.size,0);
+test('receipt button opens a real print page and sends data only to that window',async()=>{
+ const h=await mount(),sent=[];const target={closed:false,postMessage:(data,origin)=>sent.push({data,origin}),focus(){}};
+ h.window.open=(url)=>{assert.equal(url,'/admin-reconciliation-print.html');return target;};
+ h.button.onclick();assert.equal(h.dialog.open,true);
+ h.listeners.message({origin:'https://wrong.example',source:target,data:{type:'rtk-eod-print-ready'}});assert.equal(sent.length,0);
+ h.listeners.message({origin:'https://preview.pages.dev',source:{},data:{type:'rtk-eod-print-ready'}});assert.equal(sent.length,0);
+ h.listeners.message({origin:'https://preview.pages.dev',source:target,data:{type:'rtk-eod-print-ready'}});
+ assert.equal(sent.length,1);assert.equal(sent[0].data.report.date,'2026-11-12');assert.equal(sent[0].origin,'https://preview.pages.dev');
+ h.listeners.message({origin:'https://preview.pages.dev',source:target,data:{type:'rtk-eod-print-finished'}});
+ assert.equal(h.dialog.open,false);assert.equal(h.listeners.message,undefined);
 });
