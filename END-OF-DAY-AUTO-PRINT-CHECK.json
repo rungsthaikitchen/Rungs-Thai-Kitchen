@@ -1,0 +1,11 @@
+{
+  "sourceCommit": "513ef1f93cb82e8455ce730f50b7e4ae0082c053",
+  "preview": "https://e148f586.rungsthaikitchen.pages.dev/admin",
+  "cloudflare": "success",
+  "tests": 13,
+  "hostedBrowser": "Print receipt opens dedicated same-origin page; report delivered; complete content through END OF RECEIPT; page reaches automatic print invocation",
+  "nativePrintDialogue": "Not surfaced in agent browser; owner Epson test required",
+  "autoClose": "afterprint callback covered by automated tests; owner native print/cancel acceptance pending",
+  "testPopupClosed": "Manually after verification",
+  "productionModified": false
+}
