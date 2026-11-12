@@ -2663,7 +2663,7 @@ const discountLabel =
       <td>${getTimeStatusLabel(o)}</td>
       <td class="nowrap">${fmtMoney(subtotal)}</td>
       <td class="nowrap">${fmtMoney(delivery)}</td>
-      <td class="nowrap">${totalCellHtml}</td>
+      <td class="nowrap">${totalCellHtml}<div class="small muted" data-payment-summary data-order-id="${o.id}"></div></td>
       <td class="actions" style="text-align:right">
         <button class="btn-small" data-action="toggle">Details</button>
 		<button class="btn-small" data-action="print">Print</button>

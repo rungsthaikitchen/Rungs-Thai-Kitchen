@@ -9,8 +9,18 @@
   let current=null,pending=null,busy=false,uncertain=false;
   const money=v=>'£'+Number(v).toFixed(2);
   async function request(payload){const r=await fetch('/admin-api/payments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),redirect:'error',signal:AbortSignal.timeout(25000)});const data=await r.json();if(!r.ok||data.success!==true){const error=Error(data.reason||data.error||'Payment could not be confirmed. Retry the same payment.');error.definitive=r.status>=400&&r.status<500;throw error;}return data;}
+  let listing=false,rowRefreshTimer;
+  async function refreshSummaries(){
+   if(listing)return;const nodes=[...document.querySelectorAll('[data-payment-summary]')];if(!nodes.length)return;listing=true;
+   try{for(let offset=0;offset<nodes.length;offset+=60){const chunk=nodes.slice(offset,offset+60),data=await request({action:'list',orderIds:chunk.map(n=>n.dataset.orderId)}),byId=new Map(data.payments.map(p=>[p.order_id,p]));
+    for(const node of chunk){const row=byId.get(node.dataset.orderId);if(!row)continue;const p=row.payment;node.textContent=p?'Paid '+money(p.bill_amount)+' · '+p.bill_method.replace('_',' ')+(Number(p.tip_amount)>0?' · Tip '+money(p.tip_amount)+' '+p.tip_method.replace('_',' '):' · No tip'):row.paid?'Paid · method unknown':'Unpaid';}
+   }}catch(_){for(const node of nodes)node.textContent='Payment details unavailable';}finally{listing=false;}
+  }
+  const observer=new MutationObserver(()=>{clearTimeout(rowRefreshTimer);rowRefreshTimer=setTimeout(refreshSummaries,100);});
+  const orderRows=document.getElementById('tbody');if(orderRows)observer.observe(orderRows,{childList:true});
+  refreshSummaries();setInterval(()=>{if(!document.hidden)refreshSummaries();},30000);
   const controls=()=>[...form.querySelectorAll('input,select')];
-  function showSaved(data){form.hidden=true;const p=data.payment;summary.textContent='Bill '+money(p.bill_amount)+' via '+p.bill_method.replace('_',' ')+'; tip '+money(p.tip_amount)+(p.tip_method?' via '+p.tip_method.replace('_',' '):'')+'.';status.textContent='Payment recorded. Order completion is unchanged.';uncertain=false;}
+  function showSaved(data){form.hidden=true;const p=data.payment;summary.textContent='Bill '+money(p.bill_amount)+' via '+p.bill_method.replace('_',' ')+'; tip '+money(p.tip_amount)+(p.tip_method?' via '+p.tip_method.replace('_',' '):'')+'.';status.textContent='Payment recorded. Order completion is unchanged.';uncertain=false;refreshSummaries();}
   close.onclick=()=>{if(!busy)dialog.close();};dialog.addEventListener('cancel',e=>{if(busy||uncertain)e.preventDefault();});
   // Capture prevents the old Mark paid handler from also executing.
   document.addEventListener('click',async e=>{
