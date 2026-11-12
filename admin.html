@@ -5,6 +5,7 @@
 <script defer src="/master-wok-basket-review-client.js"></script>
 <script defer src="/master-wok-basket-review-admin.js"></script>
 <script src="/master-wok-admin-client.js"></script>
+<script defer src="/master-wok-payments-admin.js"></script>
 <script src="/master-wok-delivery-admin.js"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -2662,7 +2663,7 @@ const discountLabel =
       <td>${getTimeStatusLabel(o)}</td>
       <td class="nowrap">${fmtMoney(subtotal)}</td>
       <td class="nowrap">${fmtMoney(delivery)}</td>
-      <td class="nowrap">${totalCellHtml}</td>
+      <td class="nowrap">${totalCellHtml}<div class="small muted" data-payment-summary data-order-id="${o.id}"></div></td>
       <td class="actions" style="text-align:right">
         <button class="btn-small" data-action="toggle">Details</button>
 		<button class="btn-small" data-action="print">Print</button>
