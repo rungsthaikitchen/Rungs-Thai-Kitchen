@@ -39,19 +39,35 @@
     status.textContent=report.exceptions.length?`${report.exceptions.length} check(s) need attention. Review before printing.`:'Receipt ready. Please check the figures before printing.';
    }catch(error){status.textContent=error.message;}finally{busy=false;form.querySelectorAll('input,button').forEach(n=>n.disabled=false);}
   };
-  print.onclick=async()=>{
-   if(!report)return;const w=window.open('','_blank','width=420,height=750');if(!w){status.textContent='Allow pop-ups to print the receipt.';return;}
-   w.document.open();w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>RTK end of day '+report.date+'</title><style>'+api.css+'</style></head><body><button class="no-print" onclick="window.print()">Print receipt</button>'+api.receiptHTML(report)+'</body></html>');w.document.close();
-   // Wait for the entire document to lay out before measuring or opening print.
-   await w.document.fonts.ready;
-   await new Promise(resolve=>w.requestAnimationFrame(()=>w.requestAnimationFrame(resolve)));
-   const receipt=w.document.querySelector('.receipt');
-   // CSS cannot combine a length with auto in @page size. Supply the actual
-   // roll length, including paper margins and rounding tolerance, instead.
-   const heightMm=Math.ceil(receipt.getBoundingClientRect().height*25.4/96)+10;
-   const paper=w.document.createElement('style');paper.textContent='@page{size:80mm '+heightMm+'mm;margin:3mm}';w.document.head.append(paper);
-   w.focus();w.print();
-  };
- }
+  // Print a full-length sibling of Admin, never its clipped preview iframe.
+  const printRoot=document.createElement('section');printRoot.id='rtk-eod-print';printRoot.hidden=true;document.body.append(printRoot);
+  const printStyle=document.createElement('style');printStyle.media='print';printStyle.disabled=true;
+  printStyle.textContent=api.css+`
+   @page{size:auto;margin:3mm}
+   html:has(body.rtk-eod-printing){height:auto!important;overflow:visible!important}
+   body.rtk-eod-printing{width:74mm!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important;padding:0!important;overflow:visible!important;position:static!important;font:12px/1.3 Arial,sans-serif!important}
+   body.rtk-eod-printing > :not(#rtk-eod-print){display:none!important}
+   body.rtk-eod-printing > #rtk-eod-print{display:block!important;position:static!important;width:72mm!important;height:auto!important;max-height:none!important;overflow:visible!important;margin:0!important;padding:0!important}
+   #rtk-eod-print .receipt{width:72mm!important;max-width:72mm!important;margin:0!important;overflow:visible!important}
+   dialog::backdrop{display:none!important}
+  `;document.head.append(printStyle);
+  let restoreDialog=false,printing=false;
+  function preparePrint(){
+   if(printing||!report||!dialog.open)return;
+   printing=true;restoreDialog=true;printRoot.innerHTML=api.receiptHTML(report);
+   // A modal occupies the browser's top layer. Close it before print layout so
+   // neither its controls nor its fixed-height iframe can be paginated.
+   dialog.close();printRoot.hidden=false;printStyle.disabled=false;document.body.classList.add('rtk-eod-printing');
+  }
+  function finishPrint(){
+   if(!printing)return;document.body.classList.remove('rtk-eod-printing');printStyle.disabled=true;printRoot.hidden=true;printing=false;
+   if(restoreDialog){restoreDialog=false;dialog.showModal();}
+  }
+  // Ctrl+P while reviewing a receipt uses exactly the same receipt-only output.
+  window.addEventListener('beforeprint',preparePrint);window.addEventListener('afterprint',finishPrint);
+  print.onclick=()=>{
+   if(!report)return;preparePrint();
+   try{window.print();}catch(error){finishPrint();status.textContent='Printing could not start. Please try again.';}
+  }; }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })();
