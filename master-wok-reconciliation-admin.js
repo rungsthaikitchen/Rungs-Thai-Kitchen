@@ -39,9 +39,18 @@
     status.textContent=report.exceptions.length?`${report.exceptions.length} check(s) need attention. Review before printing.`:'Receipt ready. Please check the figures before printing.';
    }catch(error){status.textContent=error.message;}finally{busy=false;form.querySelectorAll('input,button').forEach(n=>n.disabled=false);}
   };
-  print.onclick=()=>{
+  print.onclick=async()=>{
    if(!report)return;const w=window.open('','_blank','width=420,height=750');if(!w){status.textContent='Allow pop-ups to print the receipt.';return;}
-   w.document.open();w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>RTK end of day '+report.date+'</title><style>'+api.css+'</style></head><body><button class="no-print" onclick="window.print()">Print receipt</button>'+api.receiptHTML(report)+'</body></html>');w.document.close();w.focus();w.print();
+   w.document.open();w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>RTK end of day '+report.date+'</title><style>'+api.css+'</style></head><body><button class="no-print" onclick="window.print()">Print receipt</button>'+api.receiptHTML(report)+'</body></html>');w.document.close();
+   // Wait for the entire document to lay out before measuring or opening print.
+   await w.document.fonts.ready;
+   await new Promise(resolve=>w.requestAnimationFrame(()=>w.requestAnimationFrame(resolve)));
+   const receipt=w.document.querySelector('.receipt');
+   // CSS cannot combine a length with auto in @page size. Supply the actual
+   // roll length, including paper margins and rounding tolerance, instead.
+   const heightMm=Math.ceil(receipt.getBoundingClientRect().height*25.4/96)+10;
+   const paper=w.document.createElement('style');paper.textContent='@page{size:80mm '+heightMm+'mm;margin:3mm}';w.document.head.append(paper);
+   w.focus();w.print();
   };
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
