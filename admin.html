@@ -6,6 +6,7 @@
 <script defer src="/master-wok-basket-review-admin.js"></script>
 <script src="/master-wok-admin-client.js"></script>
 <script defer src="/master-wok-payments-admin.js?v=combined-20261112"></script>
+<script defer src="/master-wok-amendments-admin.js?v=amend-20261112"></script>
 <script defer src="/master-wok-reconciliation.js?v=eod-autoprint-20261112"></script>
 <script defer src="/master-wok-reconciliation-admin.js?v=eod-autoprint-20261112"></script>
 <script src="/master-wok-delivery-admin.js"></script>
@@ -2684,6 +2685,7 @@ const discountLabel =
 
         <button class="btn-small btn-accept" data-order-id="${o.id}">Accept</button>
         <button class="btn-small btn-decline" data-order-id="${o.id}">Decline</button>
+        <button class="btn-small" data-amend-order="${o.id}" hidden>Amend</button>
         <button class="btn-small btn-paid" data-order-id="${o.id}">Mark paid</button>
         <button class="btn-small btn-complete" data-order-id="${o.id}">Completed</button>
       </td>
