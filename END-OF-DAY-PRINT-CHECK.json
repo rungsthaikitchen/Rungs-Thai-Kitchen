@@ -1,0 +1,9 @@
+{
+  "preview": "https://fb38f04d.rungsthaikitchen.pages.dev/admin",
+  "sourceCommit": "79f6a7d305f3b0aacb837c971bc59f96305873f0",
+  "cloudflare": "success",
+  "tests": 10,
+  "browser": "Print receipt opened full standalone document with END OF RECEIPT and measured @page size 80mm 237mm",
+  "physicalEpson": "Awaiting owner retest",
+  "productionChanges": 0
+}
