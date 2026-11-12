@@ -2372,7 +2372,7 @@ body.overlay-open {
 
 
 		  </style>
-		<script src="/master-wok-checkout-client.js"></script>
+		<script src="/master-wok-checkout-client.js?v=availability-20261112"></script>
 <script defer src="/master-wok-review-return.js"></script>
 </head>
 		<body>
@@ -2920,6 +2920,7 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
     style="display:none;">
   </div>
 
+  <button id="refresh-preferred-times" type="button" class="btn" style="margin-top:8px">Refresh times</button>
   <div class="muted small" style="margin-top:6px;">
     Times shown as unavailable, fully booked or closed cannot currently be selected. Please choose another available time.
   </div>
@@ -5634,6 +5635,26 @@ if (
 }
 
 
+async function refreshPreferredTimes() {
+  const date=preferredDateInput?.value;
+  if(!date)return;
+  const previous=preferredTimeSelect?.value||'';
+  const generation=preferredTimeGeneration+1;
+  await populatePreferredTimeSelect(date);
+  if(generation!==preferredTimeGeneration)return;
+  const option=[...preferredTimeSelect.options].find(o=>o.value===previous&&!o.disabled);
+  if(previous&&option){
+    preferredTimeSelect.value=previous;
+    preferredTimeSelect.dispatchEvent(new Event('change',{bubbles:true}));
+  }else if(previous){
+    showPreferredTimeMessage('Please choose a time from the refreshed list.');
+  }
+}
+document.getElementById('refresh-preferred-times')?.addEventListener('click',refreshPreferredTimes);
+window.addEventListener('pageshow',event=>{
+  if(event.persisted&&document.getElementById('checkout-modal')?.style.display==='flex')refreshPreferredTimes();
+});
+
 if (preferredDateInput) {
   preferredDateInput.addEventListener('change', async () => {
     const dateString = preferredDateInput.value;
@@ -7119,6 +7140,9 @@ if (SERVICE_STATE.mode === 'paused') {
   return;
 }
 
+        // Set the visible mode before requesting mode-specific availability.
+        document.querySelector('input[name="order-type"][value="collection"]').checked = true;
+
         // Refresh closures / fully-booked periods whenever checkout opens.
 // This prevents a customer using stale blackout data from an older page load.
 await loadBlackouts();
@@ -7167,7 +7191,7 @@ if (
       checkoutMsg.textContent = '';
       checkoutMsg.style.color = '';
 
-			  document.querySelector('input[name="order-type"][value="collection"]').checked = true;
+			  // Collection is selected before availability is assessed above.
 
 			  recomputeCheckoutTotals();
 			  updateCheckoutSubmitButton();

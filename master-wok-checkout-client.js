@@ -29,7 +29,7 @@
   if(!transport||!storage||!cryptoApi)throw Error('Checkout service is unavailable. Please reload this page.');
   async function get(url,options={},timeout=25000){
    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);
-   try{return await transport(url,{...options,signal:controller.signal});}finally{clearTimeout(timer);}
+   try{return await transport(url,{cache:'no-store',...options,signal:controller.signal});}finally{clearTimeout(timer);}
   }
   function pending(){
    const text=storage.getItem(storageKey);if(!text)return null;

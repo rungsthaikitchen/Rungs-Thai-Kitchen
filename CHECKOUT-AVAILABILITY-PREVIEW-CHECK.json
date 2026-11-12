@@ -1,0 +1,26 @@
+{
+  "sourceCommit": "b357e05b3fe4416348a76d67eac67749d8a125c5",
+  "preview": "https://f5c12b6e.rungsthaikitchen.pages.dev/",
+  "cloudflare": "success",
+  "tests": 17,
+  "regression": "Fails against production source; passes with visible order mode selected before assessment",
+  "basket": {
+    "items": [
+      "stir-crispy x1, medium",
+      "stir-pepper/chicken x1, no spice",
+      "jasmine-rice x2"
+    ],
+    "total": 22.5
+  },
+  "hostedChecks": {
+    "emptyStagingServiceDate": "2027-01-08",
+    "availableCollectionTimes": 49,
+    "refreshPreservesValidSelection": "20:00",
+    "reopenedAfterDeliveryShowsCollectionAndCollectionTimes": true
+  },
+  "stagingCaveat": "November 12 and 13 have existing release fixtures; their all-unavailable results were not used to infer production capacity.",
+  "productionWrites": 0,
+  "submittedOrders": 0,
+  "originalIncidentCause": "Unconfirmed; owner reports Safari refresh restored times",
+  "productionDeployment": "Pending explicit owner approval"
+}
