@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-12",
+  "preview": "https://d9dbcb21.rungsthaikitchen.pages.dev/admin",
+  "sourceCommit": "be498593fcd3d8254dbe3dac4c056e117f513b4d",
+  "cloudflareCheck": "success",
+  "tests": 9,
+  "browserChecks": [
+    "End of day action visible",
+    "Date and counted-cash controls",
+    "Read-only staging order and payment path",
+    "Empty-service receipt ready with zero totals",
+    "80mm layout rendered in sandboxed preview"
+  ],
+  "remaining": [
+    "Populated hosted receipt acceptance",
+    "Physical Epson print test",
+    "Owner production approval"
+  ],
+  "productionModified": false
+}
