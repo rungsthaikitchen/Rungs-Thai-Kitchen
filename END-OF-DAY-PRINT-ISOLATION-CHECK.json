@@ -1,0 +1,15 @@
+{
+  "sourceCommit": "25bb9754d00d3caad828fa4c7f6228b693f4d4e4",
+  "preview": "https://a5260a6d.rungsthaikitchen.pages.dev/admin",
+  "cloudflare": "success",
+  "tests": 12,
+  "browserPrintAction": {
+    "modalOpen": false,
+    "receiptHasEndMarker": true,
+    "receiptHasInputButtonOrIframe": false,
+    "printStyleEnabled": true,
+    "printStyleHidesAllOtherBodyChildren": true
+  },
+  "limitation": "Browser checks verify document isolation, not physical Epson output. Physical retest pending.",
+  "productionModified": false
+}
