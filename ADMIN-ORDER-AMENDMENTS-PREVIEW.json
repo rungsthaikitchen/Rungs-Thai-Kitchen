@@ -1,0 +1,13 @@
+{
+ "preview":"https://feature-admin-order-amendmen.rungsthaikitchen.pages.dev/admin",
+ "websiteSource":"8a25907dc22ac14e8c26cf10641e27dca116f697",
+ "stagingRuntimeVersion":65,
+ "runtimeSourceSha256":"eef0b50c4c04d164ad41212446741af25af5da4773a1e70025282e6c40e32925",
+ "syntheticOrder":"RTK-AMEND-PREVIEW",
+ "hostedSaves":["Collection 22.50 to delivery 24.50 using real address/route services","Waive delivery and apply AMEND10: 24.50 to 20.25","Return to collection and remove code: 20.25 to 22.50"],
+ "readOnlyReviewRemainingInBrowser":"AMEND10: 22.50 to 20.25, not saved",
+ "coreTests":352,"websiteTests":64,"postgresChecks":22,
+ "customerNotifications":0,"productionMutations":0,
+ "scope":"Active unpaid orders with unsettled loyalty",
+ "productionApproval":"PENDING"
+}
