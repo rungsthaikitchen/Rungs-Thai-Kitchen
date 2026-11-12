@@ -51,36 +51,26 @@
    #rtk-eod-print .receipt{width:72mm!important;max-width:72mm!important;margin:0!important;overflow:visible!important}
    dialog::backdrop{display:none!important}
   `;document.head.append(printStyle);
-  let restoreDialog=false,printing=false;
+  let printing=false;
   function preparePrint(){
    if(printing||!report||!dialog.open)return;
-   printing=true;restoreDialog=true;printRoot.innerHTML=api.receiptHTML(report);
+   printing=true;printRoot.innerHTML=api.receiptHTML(report);
    // A modal occupies the browser's top layer. Close it before print layout so
    // neither its controls nor its fixed-height iframe can be paginated.
    dialog.close();printRoot.hidden=false;printStyle.disabled=false;document.body.classList.add('rtk-eod-printing');
   }
   function finishPrint(){
    if(!printing)return;document.body.classList.remove('rtk-eod-printing');printStyle.disabled=true;printRoot.hidden=true;printing=false;
-   if(restoreDialog){restoreDialog=false;dialog.showModal();}
   }
   // Ctrl+P while reviewing a receipt uses exactly the same receipt-only output.
   window.addEventListener('beforeprint',preparePrint);window.addEventListener('afterprint',finishPrint);
-  let printWindow=null;
   print.onclick=()=>{
-   if(!report)return;
-   if(printWindow&&!printWindow.closed){printWindow.focus();return;}
-   const selectedReport=report;
-   printWindow=window.open('/admin-reconciliation-print.html','_blank','width=420,height=750');
-   if(!printWindow){status.textContent='Allow pop-ups to open the printer dialogue.';return;}
-   const target=printWindow;let sent=false;
-   const cleanup=()=>{window.removeEventListener('message',receive);clearTimeout(timeout);};
-   function receive(event){
-    if(event.origin!==location.origin||event.source!==target)return;
-    if(event.data?.type==='rtk-eod-print-ready'&&!sent){sent=true;clearTimeout(timeout);target.postMessage({type:'rtk-eod-print-report',report:selectedReport},location.origin);}
-    if(event.data?.type==='rtk-eod-print-finished'){cleanup();if(report===selectedReport&&dialog.open)dialog.close();}
+   if(!report||printing)return;
+   preparePrint();
+   // Invoke during the actual click; popup/message callbacks can lose activation.
+   try{window.focus();window.print();}catch(error){
+    finishPrint();dialog.showModal();status.textContent='Printing could not start. Please try Print receipt again.';
    }
-   window.addEventListener('message',receive);
-   const timeout=setTimeout(()=>{cleanup();if(!sent)status.textContent='The print window did not become ready. Close it and try again.';},60000);
   }; }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })();
