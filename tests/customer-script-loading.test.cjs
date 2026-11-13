@@ -5,7 +5,7 @@ test('customer classic scripts load once in the original dependency order',()=>{
  assert.ok(html.indexOf('window.sb =')<menu&&menu<checkout);
  for(const file of ['customer-menu-basket.js','customer-checkout.js']){
   assert.equal((html.match(new RegExp('<script src="/'+file.replaceAll('.','\\.')+'\\?','g'))||[]).length,1);
-  const tag=html.match(new RegExp('<script[^>]+src="/'+file.replaceAll('.','\\.')+'[^>]+>'))[0];assert.doesNotMatch(tag,/\b(?:async|defer|type)=?/);
+  const tag=html.match(new RegExp('<script[^>]+src="/'+file.replaceAll('.','\\.')+'[^>]+>'))[0];assert.doesNotMatch(tag,/\s(?:async|defer|type)(?:\s|=|>)/);
   assert.doesNotThrow(()=>new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file}));
  }
 });
