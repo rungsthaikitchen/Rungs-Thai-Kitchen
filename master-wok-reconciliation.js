@@ -35,7 +35,8 @@
    report.recordedBills+=bill;report.tips+=tip;
    if(cancelled)report.exceptions.push({ref,message:'Cancelled order has a recorded payment; check refund separately',amount:bill});
    else if(status!=='completed')report.exceptions.push({ref,message:'Payment recorded; order not completed',amount:bill});
-   if(bill!==pennies(o.total))report.exceptions.push({ref,message:'Recorded bill differs from order total',amount:bill});
+   const difference=bill-pennies(o.total);
+   if(difference!==0)report.exceptions.push({ref,message:difference<0?'Underpaid':'Overpaid — not recorded as a tip',amount:Math.abs(difference)});
   }
   for(const m of METHODS)report.methods[m].total=report.methods[m].bills+report.methods[m].tips;
   report.received=report.recordedBills+report.tips;
