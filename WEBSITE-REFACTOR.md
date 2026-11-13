@@ -9,3 +9,5 @@ The extraction evidence records the production base commit, exact script byte ha
 Next steps after acceptance: separate menu/catalogue and basket calculations behind small explicit interfaces, then split checkout display, availability and submission. Test each boundary before removing duplicate helpers or old code. Preserve the server as authority for booking/pricing; do not move operational decisions into the browser.
 
 Staging preview only. Production remains unchanged until reviewed.
+
+Hosted comparison: refactored preview cd0809c1 and unchanged baseline preview 0a21c377 both render the menu, customise black pepper chicken to £8.50, populate the basket and open collection checkout with the matching £8.50 total. Both return all time hints unavailable on 13 November 2026; no order was submitted and no contact details were entered. This is an unresolved staging availability result shared by the baseline, not evidence of a new extraction regression. Full booking acceptance and production rollout remain pending. Browser logs showed no site errors; extension metadata errors were excluded. The page and both published JavaScript assets match the locally tested bytes.
