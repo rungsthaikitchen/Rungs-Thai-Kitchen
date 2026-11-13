@@ -38,3 +38,12 @@ test('customer-supplied references are escaped in print markup',()=>{
 test('bank transfer and unpaid pending orders do not inflate cash or completed sales',()=>{
  const r=report([order('a'),order('b',{status:'pending'})],[payment('a','bank_transfer','1.00','bank_transfer'),{order_id:'b',paid:false,payment:null}]);assert.equal(r.methods.bank_transfer.total,1100);assert.equal(r.expectedCash,0);assert.equal(r.completedSales,1000);assert.equal(r.exceptions.length,1);
 });
+
+test('30p underpayment is a difference, while card totals retain actual receipts',()=>{
+ const p=payment('a','card','2.00','cash');p.payment.bill_amount='22.95';
+ const r=report([order('a',{total:'23.25'})],[p]);assert.equal(r.completedSales,2325);assert.equal(r.methods.card.bills,2295);assert.equal(r.methods.cash.tips,200);assert.equal(r.received,2495);
+ assert.deepEqual(r.exceptions,[{ref:'RTK-a',message:'Underpaid',amount:30}]);assert.match(receiptHTML(r),/Underpaid.*£0.30/);
+});
+test('overpayment stays in actual receipts and is never invented as a tip',()=>{
+ const p=payment('a','card');p.payment.bill_amount='11.00';const r=report([order('a')],[p]);assert.equal(r.recordedBills,1100);assert.equal(r.tips,0);assert.equal(r.exceptions[0].amount,100);assert.match(r.exceptions[0].message,/Overpaid/);
+});
