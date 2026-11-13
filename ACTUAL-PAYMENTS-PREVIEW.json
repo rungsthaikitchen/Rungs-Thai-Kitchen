@@ -1,0 +1,22 @@
+{
+  "preview": "https://8c3fdb55.rungsthaikitchen.pages.dev/admin",
+  "runtimeVersion": 66,
+  "sourceSha256": "dc4f1ea892e37f1815055808be8ca48cb51b01ee1cb74c2199be7d856e449e6a",
+  "hostedTest": {
+    "billDue": "23.25",
+    "cardReceipt": "22.95",
+    "cashTip": "2.00",
+    "underpayment": "0.30",
+    "status": "completed",
+    "auditEvents": 1,
+    "receiptMatches": true
+  },
+  "freshTestOrder": "RTK-PAYMENT-TRY",
+  "productionChanges": 0,
+  "productionApproval": "PENDING",
+  "tests": {
+    "core": 355,
+    "website": 67,
+    "postgres": 32
+  }
+}
