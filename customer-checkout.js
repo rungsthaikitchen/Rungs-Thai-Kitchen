@@ -331,7 +331,29 @@ function clearPreferredTimeSelect(message = 'Select a date first') {
 
 let masterWokTimeHints=null;
 let preferredTimeGeneration=0;
+function basketReviewDateMessage(dateString, now = new Date()) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+    timeZone:'Europe/London', year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', hourCycle:'h23'
+  }).formatToParts(now).map(part => [part.type, part.value]));
+  const today = `${parts.year}-${parts.month}-${parts.day}`;
+  if (dateString && dateString < today) return 'This date has passed. Please choose another date.';
+  if (dateString === today && `${parts.hour}:${parts.minute}` >= OPEN_WINDOW.end) {
+    return 'Ordering has finished for today. Please choose another date.';
+  }
+  return '';
+}
+function stopExpiredBasketReview(dateString) {
+  const message = basketReviewDateMessage(dateString);
+  if (!message) return false;
+  document.getElementById('unavailable-basket-dialog')?.close();
+  clearPreferredTimeSelect(message);
+  preferredTimeSelect.disabled = true;
+  showPreferredTimeMessage(message);
+  return true;
+}
 function showUnavailableBasketDialog({availabilityUnknown = false} = {}) {
+  if (stopExpiredBasketReview(preferredDateInput?.value)) return;
   let dialog = document.getElementById('unavailable-basket-dialog');
   if (!dialog) {
     dialog = document.createElement('dialog');
@@ -352,7 +374,7 @@ function showUnavailableBasketDialog({availabilityUnknown = false} = {}) {
   if (!dialog.open) dialog.showModal();
   if (!dialog.querySelector('[data-review-form]') && window.RTKBasketReview) {
     window.RTKBasketReview.enabled().then(enabled => {
-      if (!enabled || dialog.querySelector('[data-review-form]')) return;
+      if (!enabled || dialog.querySelector('[data-review-form]') || stopExpiredBasketReview(preferredDateInput?.value)) return;
       const form = document.createElement('form');
       form.dataset.reviewForm = 'true';
       form.innerHTML = '<h3>Send us your basket to review</h3>'
@@ -369,6 +391,8 @@ function showUnavailableBasketDialog({availabilityUnknown = false} = {}) {
       form.onsubmit = async event => {
         event.preventDefault();
         const button = form.querySelector('button'), status = form.querySelector('[role="status"]');
+        const dateMessage = basketReviewDateMessage(form.elements.date.value);
+        if (dateMessage) { status.textContent = dateMessage; return; }
         button.disabled = true;
         status.textContent = 'Sending your basket…';
         try {
@@ -403,6 +427,7 @@ async function populatePreferredTimeSelect(dateString) {
     return;
   }
 
+  if (stopExpiredBasketReview(dateString)) return;
   const hintOrderType=document.querySelector('input[name="order-type"]:checked')?.value||'collection';
   if(hintOrderType==='delivery'&&!(document.getElementById('cust-address')?.value||'').trim()){
     clearPreferredTimeSelect('Enter your delivery address first');
