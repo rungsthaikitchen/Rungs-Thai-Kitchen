@@ -7140,8 +7140,12 @@ if (SERVICE_STATE.mode === 'paused') {
   return;
 }
 
-        // Set the visible mode before requesting mode-specific availability.
-        document.querySelector('input[name="order-type"][value="collection"]').checked = true;
+        // Keep the customer's choice when reopening this checkout. Only use
+        // the initial collection default when neither option is selected.
+        if (!document.querySelector('input[name="order-type"]:checked')) {
+          const collection = document.querySelector('input[name="order-type"][value="collection"]');
+          if (collection) collection.checked = true;
+        }
 
         // Refresh closures / fully-booked periods whenever checkout opens.
 // This prevents a customer using stale blackout data from an older page load.
@@ -7191,7 +7195,7 @@ if (
       checkoutMsg.textContent = '';
       checkoutMsg.style.color = '';
 
-			  // Collection is selected before availability is assessed above.
+			  // Availability above uses the retained order type.
 
 			  recomputeCheckoutTotals();
 			  updateCheckoutSubmitButton();
