@@ -2,7 +2,13 @@
  'use strict';
  function describeBalance(balance){if(!balance)return '';return Number(balance.underpayment)>0?'Underpaid £'+Number(balance.underpayment).toFixed(2):Number(balance.overpayment)>0?'Overpaid £'+Number(balance.overpayment).toFixed(2)+' (not a tip)':'Bill paid in full';}
  function difference(due,received){const d=Math.round(Number(due)*100)-Math.round(Number(received)*100);return {underpayment:(Math.max(0,d)/100).toFixed(2),overpayment:(Math.max(0,-d)/100).toFixed(2)};}
- if(typeof module!=='undefined'&&module.exports){module.exports={describeBalance,difference};return;}
+ // Keep a refresh requested during an in-flight read; a table rebuild must
+ // never wait for the next background polling interval.
+ function createRefreshQueue(refresh){
+  let running=null,again=false;
+  return function(){again=true;if(!running)running=(async()=>{try{do{again=false;await refresh();}while(again);}finally{running=null;}})();return running;};
+ }
+ if(typeof module!=='undefined'&&module.exports){module.exports={describeBalance,difference,createRefreshQueue};return;}
  async function mount(){
   try{const r=await fetch('/api/payments',{cache:'no-store'});if(!r.ok||(await r.json()).enabled!==true)return;}catch(_){return;}
   const dialog=document.createElement('dialog');dialog.style.cssText='max-width:460px;width:calc(100% - 48px);border:1px solid #ddd;border-radius:12px;padding:24px';
@@ -12,23 +18,32 @@
   let current=null,pending=null,busy=false,uncertain=false;
   const money=v=>'£'+Number(v).toFixed(2);
   async function request(payload){const r=await fetch('/admin-api/payments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),redirect:'error',signal:AbortSignal.timeout(25000)});const data=await r.json();if(!r.ok||data.success!==true){const error=Error(data.reason==='PAYMENT_TOTAL_CHANGED_REFRESH'?'The order total changed. Close and reopen payment details before saving.':data.reason==='INVALID_PAYMENT_DETAILS'?'Check the amount received, payment methods and the reason for any difference.':data.reason||data.error||'Payment could not be confirmed. Retry the same payment.');error.definitive=r.status>=400&&r.status<500;throw error;}return data;}
-  let listing=false,rowRefreshTimer;
-  async function refreshSummaries(){
-   if(listing)return;const nodes=[...document.querySelectorAll('[data-payment-summary]')];if(!nodes.length)return;listing=true;
-   try{for(let offset=0;offset<nodes.length;offset+=60){const chunk=nodes.slice(offset,offset+60),data=await request({action:'list',orderIds:chunk.map(n=>n.dataset.orderId)}),byId=new Map(data.payments.map(p=>[p.order_id,p]));
-    for(const node of chunk){const row=byId.get(node.dataset.orderId);if(!row)continue;const p=row.payment;const tr=node.closest('tr'),paidButton=tr?.querySelector('.btn-paid'),completed=tr?.querySelector('.status-pill')?.textContent.trim().toUpperCase()==='COMPLETED';if(paidButton)paidButton.textContent=p?'Payment details':completed?'Record payment':'Take payment & complete';node.textContent=p?'Received '+money(p.bill_amount)+' · '+p.bill_method.replace('_',' ')+(row.balance?' · '+describeBalance(row.balance):'')+(Number(p.tip_amount)>0?' · Tip '+money(p.tip_amount)+' '+p.tip_method.replace('_',' '):' · No tip'):row.paid?'Paid · method unknown':'Unpaid';}
-   }}catch(_){for(const node of nodes)node.textContent='Payment details unavailable';}finally{listing=false;}
+  let rowRefreshTimer;
+  const paymentRows=new Map();
+  function decorateRows(){
+   for(const node of document.querySelectorAll('[data-payment-summary]')){
+    const row=paymentRows.get(node.dataset.orderId),p=row?.payment,tr=node.closest('tr'),button=tr?.querySelector('.btn-paid'),completed=tr?.querySelector('.status-pill')?.textContent.trim().toUpperCase()==='COMPLETED';
+    if(button)button.textContent=p?'Payment details':completed?'Record payment':'Take payment & complete';
+    node.textContent=row?(p?'Received '+money(p.bill_amount)+' · '+p.bill_method.replace('_',' ')+(row.balance?' · '+describeBalance(row.balance):'')+(Number(p.tip_amount)>0?' · Tip '+money(p.tip_amount)+' '+p.tip_method.replace('_',' '):' · No tip'):row.paid?'Paid · method unknown':'Unpaid'):'Loading payment details…';
+   }
   }
-  const observer=new MutationObserver(()=>{clearTimeout(rowRefreshTimer);rowRefreshTimer=setTimeout(refreshSummaries,100);});
+  const refreshSummaries=createRefreshQueue(async()=>{
+   const nodes=[...document.querySelectorAll('[data-payment-summary]')];if(!nodes.length)return;
+   try{for(let offset=0;offset<nodes.length;offset+=60){const data=await request({action:'list',orderIds:nodes.slice(offset,offset+60).map(n=>n.dataset.orderId)});
+    for(const row of data.payments)paymentRows.set(row.order_id,row);
+    decorateRows();
+   }}catch(_){for(const node of document.querySelectorAll('[data-payment-summary]'))if(!paymentRows.has(node.dataset.orderId))node.textContent='Payment details unavailable';}
+  });
+  const observer=new MutationObserver(()=>{decorateRows();clearTimeout(rowRefreshTimer);rowRefreshTimer=setTimeout(refreshSummaries,100);});
   const orderRows=document.getElementById('tbody');if(orderRows)observer.observe(orderRows,{childList:true});
-  refreshSummaries();setInterval(()=>{if(!document.hidden)refreshSummaries();},30000);
+  decorateRows();refreshSummaries();setInterval(()=>{if(!document.hidden)refreshSummaries();},30000);
   const controls=()=>[...form.querySelectorAll('input,select,textarea')];
   function updateDifference(){
    if(!pending)return;const b=difference(pending.expectedTotal,form.elements.billAmount.value),changed=Number(b.underpayment)>0||Number(b.overpayment)>0;
    dialog.querySelector('[data-difference]').textContent=describeBalance(b);dialog.querySelector('[data-reason]').hidden=!changed;form.elements.differenceReason.required=changed;
   }
   form.elements.billAmount.addEventListener('input',updateDifference);
-  function showSaved(data){form.hidden=true;const p=data.payment;summary.textContent='Received '+money(p.bill_amount)+' towards bill'+' via '+p.bill_method.replace('_',' ')+'; tip '+money(p.tip_amount)+(p.tip_method?' via '+p.tip_method.replace('_',' '):'')+'.';status.textContent=(data.status==='completed'?'Payment recorded. Order completed. ':'Payment recorded. ')+describeBalance(data.balance);uncertain=false;refreshSummaries();}
+  function showSaved(data){paymentRows.set(data.orderId||current,{order_id:data.orderId||current,payment:data.payment,balance:data.balance,paid:data.paid});decorateRows();form.hidden=true;const p=data.payment;summary.textContent='Received '+money(p.bill_amount)+' towards bill'+' via '+p.bill_method.replace('_',' ')+'; tip '+money(p.tip_amount)+(p.tip_method?' via '+p.tip_method.replace('_',' '):'')+'.';status.textContent=(data.status==='completed'?'Payment recorded. Order completed. ':'Payment recorded. ')+describeBalance(data.balance);uncertain=false;refreshSummaries();}
   close.onclick=()=>{if(!busy)dialog.close();};dialog.addEventListener('cancel',e=>{if(busy||uncertain)e.preventDefault();});
   // Capture prevents the old Mark paid handler from also executing.
   document.addEventListener('click',async e=>{
