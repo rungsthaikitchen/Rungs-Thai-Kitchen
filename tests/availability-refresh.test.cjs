@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
-const html=fs.readFileSync(process.env.CHECKOUT_INDEX||path.join(__dirname,'../index.html'),'utf8');
+const html=require('./customer-source.cjs')(process.env.CHECKOUT_INDEX||path.join(__dirname,'../index.html'));
 const opener=html.slice(html.indexOf('async function openCheckout(subtotal)'),html.indexOf('// Ensure other code can call it'));
 test('reopening a delivery checkout assesses the collection mode actually displayed',async()=>{
  let mode='delivery';const requests=[];
