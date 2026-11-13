@@ -4,7 +4,7 @@ const opener=html.slice(html.indexOf('async function openCheckout(subtotal)'),ht
 test('reopening a delivery checkout assesses the collection mode actually displayed',async()=>{
  let mode='delivery';const requests=[];
  const radio={set checked(value){if(value)mode='collection';}};
- const context={console:{trace(){},warn(){}},document:{getElementById:()=>({value:''}),querySelector:()=>radio},window:{},loadServiceState:async()=>{},SERVICE_STATE:{mode:'normal'},loadBlackouts:async()=>{},preferredDateInput:{value:'2026-11-12'},preferredTimeSelect:{value:'',options:[]},preferredTimeHidden:{value:''},populatePreferredTimeSelect:async()=>requests.push(mode),hidePreferredTimeMessage(){},showPreferredTimeMessage(){},recomputeCheckoutTotals(){},updateCheckoutSubmitButton(){},updateCheckoutOrderSummary(){},checkoutMsg:{style:{}},checkoutModal:{style:{}},lastPreferredDate:null,checkoutBaseSubtotal:0};
+ const context={availabilityBasketKey:()=>'',console:{trace(){},warn(){}},document:{getElementById:()=>({value:''}),querySelector:()=>radio},window:{},loadServiceState:async()=>{},SERVICE_STATE:{mode:'normal'},loadBlackouts:async()=>{},preferredDateInput:{value:'2026-11-12'},preferredTimeSelect:{value:'',options:[]},preferredTimeHidden:{value:''},populatePreferredTimeSelect:async()=>requests.push(mode),hidePreferredTimeMessage(){},showPreferredTimeMessage(){},recomputeCheckoutTotals(){},updateCheckoutSubmitButton(){},updateCheckoutOrderSummary(){},checkoutMsg:{style:{}},checkoutModal:{style:{}},lastPreferredDate:null,checkoutBaseSubtotal:0};
  vm.runInNewContext(opener,context);await context.openCheckout(22.50);
  assert.deepEqual(requests,['collection']);assert.equal(mode,'collection');assert.equal(context.checkoutModal.style.display,'flex');
 });

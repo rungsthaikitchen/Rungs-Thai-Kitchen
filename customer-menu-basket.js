@@ -731,6 +731,7 @@ if (!container.dataset.bound) {
 
 // --------- Order rendering ----------
 function renderOrder(){
+  window.dispatchEvent(new CustomEvent('rtk:basket-changed'));
   const orderListEl  = document.getElementById('order-list');
   const orderTotalEl = document.getElementById('order-total');
 

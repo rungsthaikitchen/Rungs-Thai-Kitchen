@@ -330,7 +330,19 @@ function clearPreferredTimeSelect(message = 'Select a date first') {
 
 
 let masterWokTimeHints=null;
+let masterWokUnverifiedTimes=new Set();
 let preferredTimeGeneration=0;
+function availabilityBasketKey(){return JSON.stringify((window.basket||[]).map(line=>[line.itemId,line.qty,(line.mods||[]).map(m=>m.id),line.spice??null,line.item_note||null]));}
+function availabilityContextKey(date){return JSON.stringify([date,availabilityBasketKey(),document.querySelector('input[name="order-type"]:checked')?.value||'collection',document.getElementById('cust-address')?.value?.trim()||'']);}
+let lastAvailabilityBasketKey=availabilityBasketKey();
+window.addEventListener('rtk:basket-changed',()=>{
+ const key=availabilityBasketKey();if(key===lastAvailabilityBasketKey)return;lastAvailabilityBasketKey=key;
+ ++preferredTimeGeneration;masterWokTimeHints=null;window.RTKBookingClient?.cancelAvailability?.();
+ clearPreferredTimeSelect('Basket changed — refresh times');
+ document.getElementById('unavailable-basket-dialog')?.close();
+ if(checkoutModal?.style.display==='flex'&&preferredDateInput?.value)refreshPreferredTimes();
+});
+
 function showUnavailableBasketDialog({availabilityUnknown = false} = {}) {
   let dialog = document.getElementById('unavailable-basket-dialog');
   if (!dialog) {
@@ -394,7 +406,8 @@ function showUnavailableBasketDialog({availabilityUnknown = false} = {}) {
 
 async function populatePreferredTimeSelect(dateString) {
   const generation=++preferredTimeGeneration;
-  masterWokTimeHints=null;
+  const requestedContext=availabilityContextKey(dateString);
+  masterWokTimeHints=null;masterWokUnverifiedTimes=new Set();
   if (
     !preferredTimeSelect ||
     !preferredTimeHidden ||
@@ -482,16 +495,17 @@ try {
     address:document.getElementById('cust-address')?.value?.trim()||'',items:basket.map(line=>({
     item_id:line.itemId,qty:line.qty,modifiers:(line.mods||[]).map(mod=>({id:mod.id})),
     spice:line.spice??null,item_note:line.item_note||null}))});
-  if(generation!==preferredTimeGeneration)return;
+  if(generation!==preferredTimeGeneration||requestedContext!==availabilityContextKey(dateString))return;
   if(preview.route==='MASTER_WOK'){
     masterWokAssessment = true;
     masterWokTimeHints=new Map(preview.hints.map(h=>[h.time,h.available]));
+    masterWokUnverifiedTimes=new Set(preview.hints.filter(h=>h.unverified===true).map(h=>h.time));
   }
   else await refreshKitchenSlotMap(serviceDate);
-  if(generation!==preferredTimeGeneration)return;
+  if(generation!==preferredTimeGeneration||requestedContext!==availabilityContextKey(dateString))return;
   hidePreferredTimeMessage();
 } catch(error) {
-  if(generation!==preferredTimeGeneration)return;
+  if(generation!==preferredTimeGeneration||requestedContext!==availabilityContextKey(dateString))return;
   clearPreferredTimeSelect('Times unavailable — please retry');
   showPreferredTimeMessage(error.message||'Times could not be checked. Please retry.');
   // An unavailable service is not proof of an impossible basket. Offer the
@@ -555,7 +569,7 @@ let availableCount = 0;
       `${timeText} — Fully booked`;
   } else {
     option.textContent =
-      `${timeText} — Unavailable`;
+      masterWokUnverifiedTimes.has(slot.toISOString())?`${timeText} — Not verified`:`${timeText} — Unavailable`;
   }
 
   option.disabled = true;
@@ -606,7 +620,7 @@ if (
       availableCount++;
     } else {
       option.textContent =
-        `${timeText} — Unavailable`;
+        masterWokUnverifiedTimes.has(slot.toISOString())?`${timeText} — Not verified`:`${timeText} — Unavailable`;
 
       option.disabled = true;
     }
@@ -618,7 +632,7 @@ if (
   if (availableCount === 0) {
     placeholder.textContent =
       'No times available on this date';
-    if (masterWokAssessment) showUnavailableBasketDialog();
+    if (masterWokAssessment) showUnavailableBasketDialog({availabilityUnknown:true});
 
     preferredTimeSelect.value = '';
     preferredTimeHidden.value = '';
@@ -2118,6 +2132,7 @@ function findNextAllowedFromNow() {
 };
 window.RTKOpenReviewedCheckout=()=>openCheckout(basket.reduce((n,i)=>n+i.qty*i.unitPrice,0));
 async function openCheckout(subtotal) {
+  const openedBasketKey=availabilityBasketKey();
 			  console.trace("[checkout] openCheckout called", { subtotal });
 			  
 const preferredTimeEl =
@@ -2199,6 +2214,7 @@ if (
   }
 }
 
+      if(openedBasketKey!==availabilityBasketKey())return;
       checkoutBaseSubtotal = Math.round(subtotal * 100) / 100;
       checkoutMsg.textContent = '';
       checkoutMsg.style.color = '';
