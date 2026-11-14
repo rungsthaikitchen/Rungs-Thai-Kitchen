@@ -53,15 +53,22 @@
    }
    // Keep each worker assessment bounded. A whole-day search against existing
    // commitments can exceed hosting CPU limits even when many times fit.
-   const chunks=[];for(let i=0;i<input.times.length;i+=12)chunks.push(input.times.slice(i,i+12));
+   const chunks=[];for(let i=0;i<input.times.length;i+=6)chunks.push(input.times.slice(i,i+6));
    const hintsByChunk=new Array(chunks.length);let next=0,completed=0;
    const progress=()=>{assertCurrent();if(typeof onProgress==='function')onProgress({completed,total:input.times.length});};
    progress();
    async function worker(){
     while(next<chunks.length){
      assertCurrent();const index=next++,times=chunks[index];
-     const result=await read('/api/booking-availability',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...input,times})});
-     const body=await result.json();assertCurrent();
+     const options={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...input,times})};
+     let result=await read('/api/booking-availability',options);
+     let body=await result.json();assertCurrent();
+     // A hosted worker can retire while handling a hint batch. Retry this
+     // read-only batch once; never retry booking writes by this mechanism.
+     if(!result.ok&&[502,503,504,546].includes(result.status)){
+      result=await read('/api/booking-availability',options);
+      body=await result.json();assertCurrent();
+     }
      if(!result.ok||body.success!==true||body.bookingApprovalAllowed!==false||!Array.isArray(body.hints)||
       body.hints.length!==times.length||new Set(body.hints.map(h=>h.time)).size!==times.length||
       body.hints.some(h=>!times.includes(h.time)||typeof h.available!=='boolean'))

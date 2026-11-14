@@ -138,7 +138,7 @@ test('whole-day availability uses bounded parallel batches and reports complete 
   return {ok:true,json:async()=>({success:true,bookingApprovalAllowed:false,hints:input.times.map(time=>({time,available:true}))})};
  },storage:{},crypto:{}});
  const result=await client.availability({times,orderType:'collection',items:[]},{onProgress:p=>progress.push(p)});
- assert.ok(batches.every(batch=>batch.length<=12));assert.equal(peak,2);
+ assert.ok(batches.every(batch=>batch.length<=6));assert.equal(peak,2);
  assert.deepEqual(result.hints.map(h=>h.time),times);assert.equal(progress[0].completed,0);assert.equal(progress.at(-1).completed,61);
  assert.ok(progress.every(p=>p.total===61));
 });
@@ -151,4 +151,24 @@ test('a failed availability batch cancels sibling checks and returns no partial 
   siblingSignal=options.signal;return new Promise((resolve,reject)=>options.signal.addEventListener('abort',()=>reject(new DOMException('cancelled','AbortError')),{once:true}));
  },storage:{},crypto:{}});
  await assert.rejects(client.availability({times,items:[]}),/could not be checked/);assert.equal(siblingSignal.aborted,true);
+});
+
+test('a transient availability worker failure retries the same read-only batch once',async()=>{
+ const requests=[],times=['2026-11-14T18:00:00Z'];
+ const c=createClient({fetch:async(url,options)=>{
+  if(url==='/api/booking-mode')return ok({mode:'MASTER_WOK'});
+  requests.push(options.body);
+  return requests.length===1?{ok:false,status:503,json:async()=>({error:'worker unavailable'})}:ok({success:true,bookingApprovalAllowed:false,hints:times.map(time=>({time,available:true}))});
+ },storage:{},crypto:{}});
+ const result=await c.availability({times,items:[]});assert.equal(result.hints[0].available,true);
+ assert.equal(requests.length,2);assert.equal(requests[0],requests[1]);
+});
+test('persistent availability failure stops after one retry and never submits a booking',async()=>{
+ let attempts=0;
+ const c=createClient({fetch:async(url)=>{
+  if(url==='/api/booking-mode')return ok({mode:'MASTER_WOK'});
+  assert.equal(url,'/api/booking-availability');attempts++;
+  return {ok:false,status:503,json:async()=>({error:'unavailable'})};
+ },storage:{},crypto:{}});
+ await assert.rejects(c.availability({times:['2026-11-14T18:00:00Z'],items:[]}),/could not be checked/);assert.equal(attempts,2);
 });
