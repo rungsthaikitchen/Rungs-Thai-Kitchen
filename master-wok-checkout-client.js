@@ -25,35 +25,61 @@
   const legacyAllowed=hostname===null||['rungsthaikitchen.co.uk','www.rungsthaikitchen.co.uk','localhost','127.0.0.1','::1'].includes(hostname);
   function requireLegacyHost(){if(!legacyAllowed)throw Error('Preview ordering is disabled until the staging booking service is ready.');}
   const storageKey='rtk_master_wok_pending_checkout';
-  let availabilityMode=null;
+  let availabilityMode=null,activeAvailability=null;
   if(!transport||!storage||!cryptoApi)throw Error('Checkout service is unavailable. Please reload this page.');
-  async function get(url,options={},timeout=25000){
+  async function get(url,options={},timeout=25000,parentSignal){
    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);
-   try{return await transport(url,{cache:'no-store',...options,signal:controller.signal});}finally{clearTimeout(timer);}
+   const cancel=()=>controller.abort();if(parentSignal?.aborted)cancel();else parentSignal?.addEventListener('abort',cancel,{once:true});
+   try{return await transport(url,{cache:'no-store',...options,signal:controller.signal});}finally{clearTimeout(timer);parentSignal?.removeEventListener('abort',cancel);}
   }
   function pending(){
    const text=storage.getItem(storageKey);if(!text)return null;
    try{const saved=JSON.parse(text);if(typeof saved.key==='string'&&typeof saved.fingerprint==='string')return saved;}catch(_){}
    throw Error('An earlier checkout needs checking. Please contact the restaurant before trying again.');
   }
-  return {async availability(input){
-   const response=await get(modeUrl,{},17000);
+  return {cancelAvailability(){activeAvailability?.abort();},async availability(input,{onProgress}={}){
+   activeAvailability?.abort();const controller=new AbortController();activeAvailability=controller;
+   const assertCurrent=()=>{if(controller.signal.aborted)throw new DOMException('Availability request superseded','AbortError');};
+   const read=async(url,options={},timeout=25000)=>{const r=await get(url,options,timeout,controller.signal);assertCurrent();return r;};
+   const response=await read(modeUrl,{},17000);
    if(!response.ok)throw Error('Ordering availability could not be checked. Please retry.');
-   const mode=(await response.json()).mode;
+   const mode=(await response.json()).mode;assertCurrent();
    if(mode==='LEGACY'){requireLegacyHost();availabilityMode=mode;return {route:'LEGACY'};}
    if(mode!=='MASTER_WOK')throw Error('Ordering availability is temporarily unavailable.');
    if(input.reviewApprovalToken){
-    const response=await get('/api/basket-review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'approval_lookup',token:input.reviewApprovalToken})});
-    const data=await response.json();if(!response.ok||!data.success||!data.review)throw Error('The agreed-time link is invalid or expired. Please contact the restaurant.');
+    const response=await read('/api/basket-review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'approval_lookup',token:input.reviewApprovalToken})});
+    const data=await response.json();assertCurrent();if(!response.ok||!data.success||!data.review)throw Error('The agreed-time link is invalid or expired. Please contact the restaurant.');
     availabilityMode=mode;return {route:'MASTER_WOK',hints:input.times.map(time=>({time,available:time===new Date(data.review.preferredTime).toISOString()}))};
    }
-   const result=await get('/api/booking-availability',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});
-   const body=await result.json();
-   if(!result.ok||body.success!==true||body.bookingApprovalAllowed!==false||!Array.isArray(body.hints)||
-    body.hints.length!==input.times.length||new Set(body.hints.map(h=>h.time)).size!==input.times.length||
-    body.hints.some(h=>!input.times.includes(h.time)||typeof h.available!=='boolean'))
-    throw Error('Ordering availability could not be checked. Please retry.');
-   availabilityMode=mode;return {route:'MASTER_WOK',hints:body.hints};
+   // Keep each worker assessment bounded. A whole-day search against existing
+   // commitments can exceed hosting CPU limits even when many times fit.
+   const chunks=[];for(let i=0;i<input.times.length;i+=6)chunks.push(input.times.slice(i,i+6));
+   const hintsByChunk=new Array(chunks.length);let next=0,completed=0;
+   const progress=()=>{assertCurrent();if(typeof onProgress==='function')onProgress({completed,total:input.times.length});};
+   progress();
+   async function worker(){
+    while(next<chunks.length){
+     assertCurrent();const index=next++,times=chunks[index];
+     const options={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...input,times})};
+     let result=await read('/api/booking-availability',options);
+     let body=await result.json();assertCurrent();
+     // A hosted worker can retire while handling a hint batch. Retry this
+     // read-only batch once; never retry booking writes by this mechanism.
+     if(!result.ok&&[502,503,504,546].includes(result.status)){
+      result=await read('/api/booking-availability',options);
+      body=await result.json();assertCurrent();
+     }
+     if(!result.ok||body.success!==true||body.bookingApprovalAllowed!==false||!Array.isArray(body.hints)||
+      body.hints.length!==times.length||new Set(body.hints.map(h=>h.time)).size!==times.length||
+      body.hints.some(h=>!times.includes(h.time)||typeof h.available!=='boolean'))
+      throw Error('Ordering availability could not be checked. Please retry.');
+     hintsByChunk[index]=body.hints;completed+=times.length;progress();
+    }
+   }
+   try{await Promise.all(Array.from({length:Math.min(2,chunks.length)},()=>worker()));}
+   catch(error){controller.abort();throw error;}
+   assertCurrent();
+   availabilityMode=mode;return {route:'MASTER_WOK',hints:hintsByChunk.flat()};
   },async submit(input){
    let mode;
    try{const r=await get(modeUrl,{},17000);if(!r.ok)throw Error();mode=(await r.json()).mode;}

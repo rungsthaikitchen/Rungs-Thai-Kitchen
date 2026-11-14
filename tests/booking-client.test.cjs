@@ -111,3 +111,64 @@ test('an agreed-time link displays only its granted time and can never fall thro
  const legacy=createClient({storage:stored(),crypto,fetch:async()=>ok({mode:'LEGACY'})});
  await assert.rejects(legacy.submit({...input(),reviewApprovalToken:token}),/unavailable/);
 });
+
+test('a newer availability request aborts the older one and rejects a late response',async()=>{
+ const times=['2026-11-13T18:30:00.000Z'];let releaseFirst,firstSignal,calls=0;
+ const c=createClient({fetch:async(u,o)=>{
+  if(u.includes('booking-mode'))return ok({mode:'MASTER_WOK'});
+  if(++calls===1){firstSignal=o.signal;return new Promise(resolve=>releaseFirst=()=>resolve(ok({success:true,bookingApprovalAllowed:false,hints:[{time:times[0],available:false}]})));}
+  return ok({success:true,bookingApprovalAllowed:false,hints:[{time:times[0],available:true}]});
+ },storage:stored(),crypto});
+ const first=c.availability({times,items:input().items});const rejected=assert.rejects(first,e=>e.name==='AbortError');await new Promise(setImmediate);
+ const second=await c.availability({times,items:input().items});assert.equal(firstSignal.aborted,true);assert.equal(second.hints[0].available,true);releaseFirst();await rejected;
+});
+test('basket invalidation can cancel an outstanding availability request without a booking write',async()=>{
+ const times=['2026-11-13T18:30:00.000Z'];let release,signal;
+ const c=createClient({fetch:async(u,o)=>u.includes('booking-mode')?ok({mode:'MASTER_WOK'}):new Promise(resolve=>{signal=o.signal;release=()=>resolve(ok({success:true,bookingApprovalAllowed:false,hints:[{time:times[0],available:true}]}));}),storage:stored(),crypto});
+ const pending=c.availability({times,items:input().items}),rejected=assert.rejects(pending,e=>e.name==='AbortError');await new Promise(setImmediate);c.cancelAvailability();assert.equal(signal.aborted,true);release();await rejected;
+});
+
+test('whole-day availability uses bounded parallel batches and reports complete progress',async()=>{
+ const times=Array.from({length:61},(_,i)=>new Date(Date.UTC(2026,10,14,17,i*5)).toISOString());
+ const batches=[],progress=[];let active=0,peak=0;
+ const client=createClient({fetch:async(url,options)=>{
+  if(url==='/api/booking-mode')return {ok:true,json:async()=>({mode:'MASTER_WOK'})};
+  assert.equal(url,'/api/booking-availability');const input=JSON.parse(options.body);batches.push(input.times);active++;peak=Math.max(peak,active);
+  await new Promise(resolve=>setTimeout(resolve,batches.length%2?3:1));active--;
+  return {ok:true,json:async()=>({success:true,bookingApprovalAllowed:false,hints:input.times.map(time=>({time,available:true}))})};
+ },storage:{},crypto:{}});
+ const result=await client.availability({times,orderType:'collection',items:[]},{onProgress:p=>progress.push(p)});
+ assert.ok(batches.every(batch=>batch.length<=6));assert.equal(peak,2);
+ assert.deepEqual(result.hints.map(h=>h.time),times);assert.equal(progress[0].completed,0);assert.equal(progress.at(-1).completed,61);
+ assert.ok(progress.every(p=>p.total===61));
+});
+test('a failed availability batch cancels sibling checks and returns no partial list',async()=>{
+ const times=Array.from({length:25},(_,i)=>new Date(Date.UTC(2026,10,14,17,i*5)).toISOString());let siblingSignal;
+ const client=createClient({fetch:async(url,options)=>{
+  if(url==='/api/booking-mode')return {ok:true,json:async()=>({mode:'MASTER_WOK'})};
+  const input=JSON.parse(options.body);
+  if(input.times[0]===times[0])return {ok:false,json:async()=>({error:'unavailable'})};
+  siblingSignal=options.signal;return new Promise((resolve,reject)=>options.signal.addEventListener('abort',()=>reject(new DOMException('cancelled','AbortError')),{once:true}));
+ },storage:{},crypto:{}});
+ await assert.rejects(client.availability({times,items:[]}),/could not be checked/);assert.equal(siblingSignal.aborted,true);
+});
+
+test('a transient availability worker failure retries the same read-only batch once',async()=>{
+ const requests=[],times=['2026-11-14T18:00:00Z'];
+ const c=createClient({fetch:async(url,options)=>{
+  if(url==='/api/booking-mode')return ok({mode:'MASTER_WOK'});
+  requests.push(options.body);
+  return requests.length===1?{ok:false,status:503,json:async()=>({error:'worker unavailable'})}:ok({success:true,bookingApprovalAllowed:false,hints:times.map(time=>({time,available:true}))});
+ },storage:{},crypto:{}});
+ const result=await c.availability({times,items:[]});assert.equal(result.hints[0].available,true);
+ assert.equal(requests.length,2);assert.equal(requests[0],requests[1]);
+});
+test('persistent availability failure stops after one retry and never submits a booking',async()=>{
+ let attempts=0;
+ const c=createClient({fetch:async(url)=>{
+  if(url==='/api/booking-mode')return ok({mode:'MASTER_WOK'});
+  assert.equal(url,'/api/booking-availability');attempts++;
+  return {ok:false,status:503,json:async()=>({error:'unavailable'})};
+ },storage:{},crypto:{}});
+ await assert.rejects(c.availability({times:['2026-11-14T18:00:00Z'],items:[]}),/could not be checked/);assert.equal(attempts,2);
+});
