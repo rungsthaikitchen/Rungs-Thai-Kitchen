@@ -2372,7 +2372,7 @@ body.overlay-open {
 
 
 		  </style>
-		<script src="/master-wok-checkout-client.js?v=basket-availability-20261113"></script>
+		<script src="/master-wok-checkout-client.js?v=bounded-availability-20261114"></script>
 <script defer src="/master-wok-review-return.js"></script>
 </head>
 		<body>
@@ -2798,6 +2798,7 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
 })();
 </script>
   <!-- Checkout Modal -->
+  <div id="checkout-opening-status" role="status" aria-live="polite" hidden style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:12005;padding:14px 22px;border-radius:12px;background:#18222c;color:white;box-shadow:0 4px 20px #0005">Opening checkout…</div>
   <div id="checkout-modal" class="modal-backdrop" style="display:none" aria-modal="true" role="dialog">
     <div class="modal">
       <div style="display:flex;justify-content:space-between;align-items:center">
@@ -2915,7 +2916,7 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
   >
 
   <div
-    id="preferred-time-message"
+    id="preferred-time-message" role="status" aria-live="polite"
     class="preferred-time-message"
     style="display:none;">
   </div>
@@ -3166,7 +3167,7 @@ Rung's Thai Kitchen will be taking a short summer break and will be closed from 
 </script>
 
 
-<script src="/customer-menu-basket.js?v=basket-availability-20261113"></script>
+<script src="/customer-menu-basket.js?v=bounded-availability-20261114"></script>
 <script>
 // — measures the header and exposes its height in --header-h
 function updateHeaderVar() {
@@ -3267,7 +3268,7 @@ function updateHeaderVar() {
 
 
 
-<script src="/customer-checkout.js?v=review-cutoff-20261113"></script>
+<script src="/customer-checkout.js?v=bounded-availability-20261114"></script>
   
 <script>
   // … your Supabase / checkout code …

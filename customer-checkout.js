@@ -431,6 +431,7 @@ function showUnavailableBasketDialog({availabilityUnknown = false} = {}) {
 async function populatePreferredTimeSelect(dateString) {
   const generation=++preferredTimeGeneration;
   const requestedContext=availabilityContextKey(dateString);
+  const current=()=>generation===preferredTimeGeneration&&requestedContext===availabilityContextKey(dateString);
   masterWokTimeHints=null;masterWokUnverifiedTimes=new Set();
   if (
     !preferredTimeSelect ||
@@ -447,7 +448,9 @@ async function populatePreferredTimeSelect(dateString) {
     showPreferredTimeMessage('Enter your delivery address to see arrival times.');
     return;
   }
-  clearPreferredTimeSelect('Loading times…');
+  setAvailabilityLoading(true);
+  try {
+  clearPreferredTimeSelect('Checking available times…');
   preferredTimeSelect.disabled = true;
 
   const serviceDate =
@@ -519,7 +522,9 @@ try {
     orderType:document.querySelector('input[name="order-type"]:checked')?.value||'collection',
     address:document.getElementById('cust-address')?.value?.trim()||'',items:basket.map(line=>({
     item_id:line.itemId,qty:line.qty,modifiers:(line.mods||[]).map(mod=>({id:mod.id})),
-    spice:line.spice??null,item_note:line.item_note||null}))});
+    spice:line.spice??null,item_note:line.item_note||null}))}, {onProgress:({completed,total})=>{
+      if (current()) showPreferredTimeMessage(`Checking available times… ${completed} of ${total} checked.`);
+    }});
   if(generation!==preferredTimeGeneration||requestedContext!==availabilityContextKey(dateString))return;
   if(preview.route==='MASTER_WOK'){
     masterWokAssessment = true;
@@ -683,6 +688,9 @@ if (
           : null
     }
   );
+  } finally {
+    if (current()) setAvailabilityLoading(false);
+  }
 }
 
 
@@ -2156,7 +2164,26 @@ function findNextAllowedFromNow() {
  document.getElementById('unavailable-basket-dialog')?.close();
 };
 window.RTKOpenReviewedCheckout=()=>openCheckout(basket.reduce((n,i)=>n+i.qty*i.unitPrice,0));
+let checkoutOpening = false;
+function setCheckoutOpening(loading) {
+  const status = document.getElementById('checkout-opening-status');
+  if (status) status.hidden = !loading;
+  for (const button of document.querySelectorAll('#open-checkout, #menu-checkout-btn')) {
+    button.disabled = loading;
+    button.setAttribute('aria-busy', String(loading));
+  }
+}
+function setAvailabilityLoading(loading) {
+  preferredTimeSelect?.setAttribute('aria-busy', String(loading));
+  const message = document.getElementById('preferred-time-message');
+  if (message) message.dataset.loading = String(loading);
+  if (loading) showPreferredTimeMessage('Checking available times…');
+}
 async function openCheckout(subtotal) {
+  if (checkoutOpening) return;
+  checkoutOpening = true;
+  setCheckoutOpening(true);
+  try {
   const openedBasketKey=availabilityBasketKey();
 			  console.trace("[checkout] openCheckout called", { subtotal });
 			  
@@ -2255,7 +2282,11 @@ if (
 			  updateCheckoutOrderSummary();
 
 			  checkoutModal.style.display = 'flex';
-			}
+			  } finally {
+    checkoutOpening = false;
+    setCheckoutOpening(false);
+  }
+}
  
     // 3. Update submit button + show the modal
 	// updateCheckoutSubmitButton();
