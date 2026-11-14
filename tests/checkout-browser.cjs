@@ -46,7 +46,7 @@ const server=http.createServer(async(req,res)=>{
    totals:{...payload.expectedTotals,discount_amount:0},notification_status:'queued'}));return;
  }
  if(u.pathname==='/api/service-state'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({effective_service_state:{mode:'normal',capacity_throttle:0}}));return;}
- if(['/customer-menu-basket.js','/customer-checkout.js'].includes(u.pathname)){res.setHeader('Content-Type','text/javascript');res.end(fs.readFileSync(path.join(root,u.pathname.slice(1))));return;}
+ if(['/customer-menu-basket.js','/customer-checkout-availability.js','/customer-checkout-dialog.js','/customer-checkout-submission.js','/customer-checkout.js'].includes(u.pathname)){res.setHeader('Content-Type','text/javascript');res.end(fs.readFileSync(path.join(root,u.pathname.slice(1))));return;}
  if(u.pathname==='/master-wok-checkout-client.js'){res.setHeader('Content-Type','text/javascript');res.end(fs.readFileSync(path.join(root,'master-wok-checkout-client.js')));return;}
  if(u.pathname==='/'){res.setHeader('Content-Type','text/html; charset=utf-8');res.end(html);return;}
  res.setHeader('Content-Type','image/svg+xml');res.end('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>');
