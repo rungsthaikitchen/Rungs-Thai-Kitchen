@@ -523,7 +523,7 @@ try {
     address:document.getElementById('cust-address')?.value?.trim()||'',items:basket.map(line=>({
     item_id:line.itemId,qty:line.qty,modifiers:(line.mods||[]).map(mod=>({id:mod.id})),
     spice:line.spice??null,item_note:line.item_note||null}))}, {onProgress:({completed,total})=>{
-      if (current()) showPreferredTimeMessage(`Checking available times… ${completed} of ${total} checked.`);
+      if (current()) showPreferredTimeMessage(`Checking available times… ${Math.round(completed / total * 100)}%`);
     }});
   if(generation!==preferredTimeGeneration||requestedContext!==availabilityContextKey(dateString))return;
   if(preview.route==='MASTER_WOK'){
