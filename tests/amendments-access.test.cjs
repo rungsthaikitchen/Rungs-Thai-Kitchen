@@ -49,3 +49,11 @@ test('amendment proxy rejects unrelated payment actions',async()=>{
  const c=context({request:new Request('https://review.pages.dev/admin-api/amendments',{method:'POST',headers:{Origin:'https://review.pages.dev'},body:'{"action":"record"}'})});
  assert.equal((await handler(c)).status,400);assert.equal(calls,0);
 });
+
+test('staff time correction requires a signed allowed identity and ignores a forged actor',async()=>{
+ const {createHandler}=await modulePromise;let identity='owner@example.invalid',forwarded,calls=0;
+ const handler=createHandler({fetch:async(_url,options)=>{calls++;forwarded=JSON.parse(options.body);return Response.json({success:true});},validate:()=>async c=>{c.data.cloudflareAccess={JWT:{payload:{email:identity}}};return c.next();}});
+ const make=()=>context({request:new Request('https://review.pages.dev/admin-api/amendments',{method:'POST',headers:{Origin:'https://review.pages.dev'},body:JSON.stringify({action:'amend_confirm_time',staffActor:'forged@example.invalid',reason:'Mistaken decline'})})});
+ assert.equal((await handler(make())).status,200);assert.equal(forwarded.staffActor,'owner@example.invalid');assert.equal(forwarded.action,'amend_confirm_time');
+ identity='customer@example.invalid';assert.equal((await handler(make())).status,403);assert.equal(calls,1);
+});
