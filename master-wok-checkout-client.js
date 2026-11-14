@@ -61,13 +61,20 @@
     while(next<chunks.length){
      assertCurrent();const index=next++,times=chunks[index];
      const options={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...input,times})};
-     let result=await read('/api/booking-availability',options);
-     let body=await result.json();assertCurrent();
-     // A hosted worker can retire while handling a hint batch. Retry this
-     // read-only batch once; never retry booking writes by this mechanism.
-     if(!result.ok&&[502,503,504,546].includes(result.status)){
-      result=await read('/api/booking-availability',options);
-      body=await result.json();assertCurrent();
+     let result,body,transient=false;
+     for(let attempt=0;attempt<2;attempt++){
+      try{
+       result=await read('/api/booking-availability',options);
+       transient=!result.ok&&[502,503,504,546].includes(result.status);
+       if(transient)continue;
+       body=await result.json();assertCurrent();transient=false;break;
+      }catch(error){assertCurrent();transient=true;}
+     }
+     if(transient){
+      // A failed read says nothing about kitchen capacity. Preserve other
+      // verified batches and keep every unchecked time explicitly disabled.
+      hintsByChunk[index]=times.map(time=>({time,available:false,unverified:true}));
+      completed+=times.length;progress();continue;
      }
      if(!result.ok||body.success!==true||body.bookingApprovalAllowed!==false||!Array.isArray(body.hints)||
       body.hints.length!==times.length||new Set(body.hints.map(h=>h.time)).size!==times.length||
