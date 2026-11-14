@@ -6,7 +6,7 @@
     {
       "file": "customer-checkout-availability.js",
       "global": "RTKCheckoutAvailability",
-      "lines": 478,
+      "lines": 482,
       "dependencies": [
         "KITCHEN_OVERRUN_MINUTES",
         "LEAD_MINUTES",
@@ -28,12 +28,12 @@
         "showPreferredTimeMessage",
         "toYMD"
       ],
-      "sourceSha256": "df6b4e56d2861baafe569751a135e05354318cf72f660521d2ec2abe66367f21"
+      "sourceSha256": "5fa4b3b6252921967340552731513c2ab5c034f90d722c57ecd8df2652ec60bd"
     },
     {
       "file": "customer-checkout-dialog.js",
       "global": "RTKCheckoutDialog",
-      "lines": 147,
+      "lines": 150,
       "dependencies": [
         "SERVICE_STATE",
         "availabilityBasketKey",
@@ -53,12 +53,12 @@
         "updateCheckoutOrderSummary",
         "updateCheckoutSubmitButton"
       ],
-      "sourceSha256": "e71ce6e4693a4654093bea6e688fa08ff89973fe863983b4d22e1099c4cf0b5c"
+      "sourceSha256": "2d36e950741874d0e98a8411e7a133b499b87d3d2a49d92b13686093efc5ee52"
     },
     {
       "file": "customer-checkout-submission.js",
       "global": "RTKCheckoutSubmission",
-      "lines": 721,
+      "lines": 720,
       "dependencies": [
         "DELIVERY_FREE_THRESHOLD",
         "OPEN_WINDOW",

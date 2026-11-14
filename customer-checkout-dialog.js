@@ -65,6 +65,20 @@ if (context.SERVICE_STATE.mode === 'paused') {
           if (collection) collection.checked = true;
         }
 
+        // Show the form before the slower read-only availability scan.
+      context.checkoutBaseSubtotal = Math.round(subtotal * 100) / 100;
+      context.checkoutMsg.textContent = '';
+      context.checkoutMsg.style.color = '';
+
+			  // Availability above uses the retained order type.
+
+			  (0, context.recomputeCheckoutTotals)();
+			  (0, context.updateCheckoutSubmitButton)();
+			  (0, context.updateCheckoutOrderSummary)();
+
+			  context.checkoutModal.style.display = 'flex';
+        if (context.preferredDateInput?.value) setAvailabilityLoading(true);
+
         // Refresh closures / fully-booked periods whenever checkout opens.
 // This prevents a customer using stale blackout data from an older page load.
 await (0, context.loadBlackouts)();
@@ -110,17 +124,7 @@ if (
 }
 
       if(openedBasketKey!==(0, context.availabilityBasketKey)())return;
-      context.checkoutBaseSubtotal = Math.round(subtotal * 100) / 100;
-      context.checkoutMsg.textContent = '';
-      context.checkoutMsg.style.color = '';
 
-			  // Availability above uses the retained order type.
-
-			  (0, context.recomputeCheckoutTotals)();
-			  (0, context.updateCheckoutSubmitButton)();
-			  (0, context.updateCheckoutOrderSummary)();
-
-			  context.checkoutModal.style.display = 'flex';
 			  } finally {
     checkoutOpening = false;
     setCheckoutOpening(false);

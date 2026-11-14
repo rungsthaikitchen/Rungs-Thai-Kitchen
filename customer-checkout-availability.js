@@ -372,7 +372,12 @@ if (
   if (availableCount === 0) {
     placeholder.textContent =
       'No times available on this date';
-    if (masterWokAssessment) showUnavailableBasketDialog({availabilityUnknown:true});
+    if (masterWokAssessment && masterWokUnverifiedTimes.size > 0) {
+      placeholder.textContent = 'Times not verified — please retry';
+      (0, context.showPreferredTimeMessage)('We could not verify available times. Please refresh times to try again.');
+    } else if (masterWokAssessment) {
+      showUnavailableBasketDialog();
+    }
 
     preferredTimeSelect.value = '';
     preferredTimeHidden.value = '';
