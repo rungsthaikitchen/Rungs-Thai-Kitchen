@@ -24,7 +24,7 @@ export function createHandler({validate=cloudflareAccessPlugin,fetch=globalThis.
     let raw=await request.text();
     if(new TextEncoder().encode(raw).length>4096)return json({error:'Request too large'},413);
     const payload=JSON.parse(raw);
-    if(!['amend_read','amend_preview','amend_save'].includes(payload?.action))return json({error:'Invalid amendment action'},400);
+    if(!['amend_read','amend_preview','amend_save','amend_confirm_time'].includes(payload?.action))return json({error:'Invalid amendment action'},400);
     raw=JSON.stringify({...payload,staffActor:email});
     const response=await fetch(new URL('/admin-payments',env.RTK_ORDER_BACKEND_URL||'https://order-backend-production.up.railway.app'),{
      method:'POST',headers:{'Content-Type':'application/json','x-rtk-proxy-secret':env.RTK_PROXY_SECRET,
