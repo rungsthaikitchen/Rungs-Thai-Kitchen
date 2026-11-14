@@ -1,0 +1,18 @@
+{
+  "baselineCommit": "7297a35d74d99da9dc5af2441ee90216734c2886",
+  "originalPageSha256": "ea0b9eeb7db6525b195bc40bf8262163bec6f2a2191e94a2ba4b4bdfe9e700ad",
+  "reconstructedPageSha256": "ea0b9eeb7db6525b195bc40bf8262163bec6f2a2191e94a2ba4b4bdfe9e700ad",
+  "byteIdentical": true,
+  "scripts": [
+    {
+      "file": "customer-menu-basket.js",
+      "bytes": 73320,
+      "sha256": "1ee29b303fc2edb6a3f9d21f250f4a69f49f58d0ec6631672742c7c198455395"
+    },
+    {
+      "file": "customer-checkout.js",
+      "bytes": 101497,
+      "sha256": "746401060836f62b19653f56c810658a2ee4cb9c3083b95d39f448276842451c"
+    }
+  ]
+}

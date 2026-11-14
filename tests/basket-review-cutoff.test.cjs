@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
-const source=fs.readFileSync(__dirname+'/../index.html','utf8');
+const source=require('./customer-source.cjs')(__dirname+'/../index.html');
 const helpers=source.slice(source.indexOf('function basketReviewDateMessage('),source.indexOf('function showUnavailableBasketDialog('));
 const context={Intl,Date,OPEN_WINDOW:{end:'21:00'}};vm.runInNewContext(helpers,context);
 test('basket review uses the London ordering cutoff in winter and summer',()=>{
@@ -18,6 +18,6 @@ test('future requests remain eligible after closing while previous dates are blo
 test('expired service stops before requesting availability or offering a review',async()=>{
  const populate=source.slice(source.indexOf('async function populatePreferredTimeSelect('),source.indexOf('async function refreshPreferredTimes()'));
  let stopped=0,requested=0;
- const ctx={preferredTimeGeneration:0,masterWokTimeHints:null,preferredTimeSelect:{},preferredTimeHidden:{},stopExpiredBasketReview:()=>{stopped++;return true;},window:{RTKBookingClient:{availability:()=>{requested++;}}}};
+ const ctx={availabilityContextKey:()=>'',preferredTimeGeneration:0,masterWokTimeHints:null,preferredTimeSelect:{},preferredTimeHidden:{},stopExpiredBasketReview:()=>{stopped++;return true;},window:{RTKBookingClient:{availability:()=>{requested++;}}}};
  vm.runInNewContext(populate,ctx);await ctx.populatePreferredTimeSelect('2026-11-13');assert.equal(stopped,1);assert.equal(requested,0);
 });
