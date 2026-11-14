@@ -163,12 +163,23 @@ test('a transient availability worker failure retries the same read-only batch o
  const result=await c.availability({times,items:[]});assert.equal(result.hints[0].available,true);
  assert.equal(requests.length,2);assert.equal(requests[0],requests[1]);
 });
-test('persistent availability failure stops after one retry and never submits a booking',async()=>{
+test('persistent availability failure marks only unchecked times unverified after one retry',async()=>{
  let attempts=0;
  const c=createClient({fetch:async(url)=>{
   if(url==='/api/booking-mode')return ok({mode:'MASTER_WOK'});
   assert.equal(url,'/api/booking-availability');attempts++;
   return {ok:false,status:503,json:async()=>({error:'unavailable'})};
  },storage:{},crypto:{}});
- await assert.rejects(c.availability({times:['2026-11-14T18:00:00Z'],items:[]}),/could not be checked/);assert.equal(attempts,2);
+ const r=await c.availability({times:['2026-11-14T18:00:00Z'],items:[]});assert.deepEqual(r.hints,[{time:'2026-11-14T18:00:00Z',available:false,unverified:true}]);assert.equal(attempts,2);
+});
+
+test('a worker CPU failure cannot discard successfully verified later times',async()=>{
+ const times=Array.from({length:18},(_,i)=>new Date(Date.UTC(2026,10,14,18,i*5)).toISOString()),calls=new Map();
+ const c=createClient({fetch:async(url,options)=>{
+  if(url==='/api/booking-mode')return ok({mode:'MASTER_WOK'});
+  assert.equal(url,'/api/booking-availability');const batch=JSON.parse(options.body).times;calls.set(batch[0],(calls.get(batch[0])||0)+1);
+  if(batch[0]===times[0])return {ok:false,status:546,json:async()=>{throw Error('non-JSON worker error');}};
+  return ok({success:true,bookingApprovalAllowed:false,hints:batch.map(time=>({time,available:true}))});
+ },storage:{},crypto:{}});
+ const r=await c.availability({times,items:[]});assert.deepEqual(r.hints.map(h=>h.time),times);assert.equal(r.hints.filter(h=>h.available).length,12);assert.equal(r.hints.filter(h=>h.unverified).length,6);assert.equal(calls.get(times[0]),2);
 });
