@@ -3,7 +3,10 @@ const root=path.join(__dirname,'..'),html=fs.readFileSync(path.join(root,'index.
 test('customer classic scripts load once in the original dependency order',()=>{
  const menu=html.indexOf('<script src="/customer-menu-basket.js?'),checkout=html.indexOf('<script src="/customer-checkout.js?');
  assert.ok(html.indexOf('window.sb =')<menu&&menu<checkout);
- for(const file of ['customer-menu-basket.js','customer-checkout.js']){
+ const scripts=['customer-menu-basket.js','customer-checkout-availability.js','customer-checkout-dialog.js','customer-checkout-submission.js','customer-checkout.js'];
+ const positions=scripts.map(file=>html.indexOf('<script src="/'+file+'?'));
+ assert.ok(positions.every((value,i)=>value>=0&&(i===0||value>positions[i-1])));
+ for(const file of scripts){
   assert.equal((html.match(new RegExp('<script src="/'+file.replaceAll('.','\\.')+'\\?','g'))||[]).length,1);
   const tag=html.match(new RegExp('<script[^>]+src="/'+file.replaceAll('.','\\.')+'[^>]+>'))[0];assert.doesNotMatch(tag,/\s(?:async|defer|type)(?:\s|=|>)/);
   assert.doesNotThrow(()=>new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file}));
