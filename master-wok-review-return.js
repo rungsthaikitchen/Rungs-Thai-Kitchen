@@ -1,14 +1,19 @@
 (function(root){
  'use strict';
  let restoreGeneration=0;
+ root.RTKClearApprovedReview=()=>{
+  restoreGeneration++;
+  root.RTKApprovedReview=null;
+  document.getElementById('review-holding-ack')?.closest('label')?.remove();
+  document.querySelector('[data-review-checkout-notice]')?.remove();
+ };
  async function restore(){
   const token=new URLSearchParams(location.hash.slice(1)).get('basket-review');
   if(!token)return;
-  const generation=++restoreGeneration;
-  root.RTKApprovedReview=null;
+  root.RTKClearApprovedReview();
+  const generation=restoreGeneration;
   // Do not leak the capability into later navigation, screenshots or referrers.
   history.replaceState(null,'',location.pathname+location.search);
-  document.querySelector('[data-review-checkout-notice]')?.remove();
   const notice=document.createElement('section');notice.dataset.reviewCheckoutNotice='true';notice.style.cssText='margin:20px;padding:20px;border:2px solid #69415d;border-radius:12px;background:#fff;color:#222';
   notice.setAttribute('role','status');document.querySelector('main').prepend(notice);
   try{

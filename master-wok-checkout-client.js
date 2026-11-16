@@ -118,12 +118,17 @@
    }catch(_){throw Error('We could not confirm the result. Please retry the same order so we can check it without duplicating it.');}
    if(response.ok&&body?.success===true&&typeof body.orderId==='string'&&typeof body.orderRef==='string'&&
     Number.isFinite(body.totals?.total)&&body.notification_status==='queued'){
-    storage.removeItem(storageKey);return {route:'MASTER_WOK',order:body};
+    storage.removeItem(storageKey);
+    if(input.reviewApprovalToken)root?.RTKClearApprovedReview?.();
+    return {route:'MASTER_WOK',order:body};
    }
    if(body?.committed===false&&[400,409,422].includes(response.status)){
     storage.removeItem(storageKey);
     const messages={CHECKOUT_PRICE_CHANGED:'Your price or loyalty balance has changed. Please refresh checkout and review the total.',
-     REVIEW_REQUIRED:'That time is no longer available for this order. Please choose another time.'};
+     REVIEW_REQUIRED:'That time is no longer available for this order. Please choose another time.',
+     REVIEW_APPROVAL_MISMATCH:'Your basket, details or time no longer match the restaurant’s approval. Reopen your agreed-time link to restore the reviewed order, or contact us.',
+     REVIEW_APPROVAL_INVALID:'This agreed-time link is no longer valid or has already been used. Please contact the restaurant.',
+     REVIEW_APPROVAL_EXPIRED:'This agreed-time link has expired. Please contact the restaurant to arrange a new link.'};
     throw Error(messages[body.reason||body.error]||body.message||'We could not book this order. Please review your details and selected time.');
    }
    throw Error('We could not confirm the result. Please retry the same order or contact the restaurant.');
