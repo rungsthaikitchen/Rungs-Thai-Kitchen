@@ -26,5 +26,12 @@ after asynchronous steps.
 
 Validation: 89 Node tests pass, including successful approval cleanup, uncertain
 outcome retention, known rejection retention, delivery quote sequencing and
-cancellation during the quote. Browser recheck pending.
+cancellation during the quote. Protected preview recheck passed at website
+commit 9599503 against staging Edge version 77: a fresh-session approval
+automatically verified the public landmark address, retained free delivery and
+the £48 total, and created RTK-212 for 20 November at 20:30. Its approval was
+consumed once. A subsequent Prawn Crackers collection basket had zero holding
+checkboxes and all 49 normal-window times available, with no expired-link error.
+
+Screenshots and the credential-free check summary are in `tests/evidence/`.
 No production deployment; staging scheduling candidate only.
