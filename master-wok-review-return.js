@@ -28,10 +28,15 @@
    root.RTKApprovedReview={...data.review,token};
    notice.textContent='The restaurant has allowed checkout for this basket at the agreed time. It is not yet booked: current capacity and prices will be checked on submission.';
    await root.RTKOpenReviewedCheckout();
+   if(generation!==restoreGeneration)return;
    for(const [id,value] of [['cust-name',data.review.customer.name],['cust-phone',data.review.customer.phone],['cust-address',data.review.customer.address]]){
     const input=document.getElementById(id);input.value=value;input.dispatchEvent(new Event('change',{bubbles:true}));
    }
    const type=document.querySelector('input[name="order-type"][value="'+data.review.orderType+'"]');type.checked=true;type.dispatchEvent(new Event('change',{bubbles:true}));
+   // Restoring a value does not blur the address field. Run the same trusted
+   // lookup explicitly so fresh sessions receive eligibility and route pricing.
+   if(data.review.orderType==='delivery')await root.RTKPrepareReviewedDelivery(data.review.customer.address);
+   if(generation!==restoreGeneration)return;
    const form=document.getElementById('cust-name').closest('form');
    const label=document.createElement('label'),ack=document.createElement('input');ack.type='checkbox';ack.id='review-holding-ack';ack.required=true;
    label.append(ack,document.createTextNode(' I confirm our discussion: some dishes may be prepared earlier than usual, up to '+data.review.maxHoldMinutes+' minutes before collection or arrival.'));

@@ -1420,6 +1420,7 @@ function updateCheckoutOrderSummary() {
 				}
 
 				
+				window.RTKPrepareReviewedDelivery = address => geocodeCustomerAddress(address);
 				async function geocodeCustomerAddress(address) {
 				  try {
 					const { data, error } = await sb.functions.invoke("geocode-address", {
@@ -3443,4 +3444,4 @@ resetCheckoutForNextOrder();
   }
 });
 
-  
+

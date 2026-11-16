@@ -17,6 +17,14 @@ known rejection or unknown outcome, keeping safe retry/idempotency behaviour.
 Starting another approval restore also clears old controls and invalidates any
 in-flight restore. Review failures now have actionable customer messages.
 
-Validation: 87 Node tests pass, including successful approval cleanup, uncertain
-outcome retention and known rejection retention. Browser recheck pending.
+The fresh preview also exposed a delivery-specific restore bug: setting the
+address and dispatching `change` did not invoke its existing `blur` geocoder.
+An approval opened in a fresh session therefore retained missing coordinates
+and a fallback delivery fee. Explicitly await the existing address lookup and
+pricing refresh before applying the agreed time; abandon obsolete restores
+after asynchronous steps.
+
+Validation: 89 Node tests pass, including successful approval cleanup, uncertain
+outcome retention, known rejection retention, delivery quote sequencing and
+cancellation during the quote. Browser recheck pending.
 No production deployment; staging scheduling candidate only.
