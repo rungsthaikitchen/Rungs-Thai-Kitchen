@@ -89,7 +89,7 @@ const EXTRAS = [
 		/*{ id: 'chicken-panang', name: 'Chicken Paneng Skewers🌶️🌶️', desc: 'A flavorful Thai-inspired dish combining tender chicken marinated in creamy, spicy Panang curry paste, coconut milk, and fish sauce.', price: 6.50, img: 'images/paneng_chicken.jpg', allergens: ['fish','soya'], badge: 'new' },
 		{ id: 'grill-chicken', name: 'Grilled Chicken Thigh (Gai Yang)', desc: 'A popular Thai street food dish consisting of marinated chicken thighs (skin-on, bone-in), grilled to a smoky, charred finish and topped with crispy onions', price: 7.50, img: 'images/grill_chicken.jpg', allergens: ['gluten','molluscs','soya'], badge: 'new' },
 		{ id: 'salt-wings', name: 'Thai-style Salt & Pepper Chicken Wings', desc: 'Tender, bite-sized pieces of battered chicken, stir-fried with fresh vegetables and chilli in our special sauce.',  price: 7.50, img: 'images/salt-wings.jpeg', allergens: ['soya','gluten','molluscs','sesame'], badge: 'new' },*/
-		{ id: 'salt-chicken', name: 'Thai-style Salt & Pepper Crispy Chicken🌶️', desc: 'Tender, bite-sized pieces of battered chicken, stir-fried with fresh vegetables and chilli in our special sauce.',  price: 6.50, img: 'images/salt-chicken.jpeg', spiceEnabled: true, spiceDefault: 1, kitchenLoad: 0, allergens: ['soya','gluten','molluscs'],  badge: 'new' },		
+		{ id: 'salt-chicken', name: 'Thai-style Salt & Pepper Crispy Chicken🌶️', desc: 'Tender, bite-sized pieces of battered chicken, stir-fried with fresh vegetables and chilli in our special sauce.',  price: 6.50, img: 'images/salt-chicken.jpeg', spiceEnabled: true, spiceDefault: 1, spiceMin: 1, spiceNote: 'This dish contains chilli in the base sauce and cannot be made completely non-spicy.', kitchenLoad: 0, allergens: ['soya','gluten','molluscs'],  badge: 'new' },		
 		{ id: 'spare-ribs', name: 'Thai Spare Ribs (Sii Khrong Moo Yang)', desc: 'Tender ribs with a sweet, salty and savoury flavour. Served with a sticky carmelised glaze.', price: 7.50, img: 'images/spareribs.jpg', allergens: ['soya','gluten','molluscs','sesame'] }
       ]},
       { id:'soup', title:'Soup', allowExtras:true, items:[
@@ -122,7 +122,7 @@ const EXTRAS = [
         { id: 'stir-yellow', name: 'Stir Fried Yellow Curry (Pad Pong Karee)', desc: 'Thai stir-fry dish made with a flavourful, savoury sauce of yellow curry powder, coconut milk, and egg, mixed with vegetables such as onions, bell peppers, and green onions', price: 8.50, img: 'images/padpong.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['egg','soya','mustard','dairy','molluscs','celery'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
         { id: 'stir-chilli', name: 'Stir Fried Chilli Paste (Pad Nam Prik Pao)🌶️🌶️', desc: 'A medium stir-fry, but dont let the chilli paste alarm you, it is not too spicy!', price: 8.00, img: 'images/padnamprikpao.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 2, allergens: ['soya','fish','gluten','mustard','celery'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
         { id: 'stir-pepper', name: 'Stir Fried Black Pepper Sauce', desc: 'A bold and aromatic Thai-style stir-fry featuring crisp vegetables wok-tossed in a black pepper sauce. ', price: 7.50, img: 'images/blackpepper.jpg', allowedModifiers: ['chicken','beef','pork','tofu','vegetable','prawn' ], modifierRequired: true, modifierMax: 1, spiceEnabled: true, spiceDefault: 1, allergens: ['soya','sesame','mustard'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'] },
-        { id: 'salt-chickenchips', name: 'Salt & Pepper Chicken & Chips🌶️', desc: 'Crispy chicken pieces and chunky chips, stir-fried with fresh vegetables and chilli in oyster sauce.', price: 9.00, img: 'images/salt-chickenchips.jpg', modifierRequired: false, allowedExtras: [], spiceEnabled: true, spiceDefault: 1, allergens: ['soya','molluscs','gluten'], badge: 'new' }
+        { id: 'salt-chickenchips', name: 'Salt & Pepper Chicken & Chips🌶️', desc: 'Crispy chicken pieces and chunky chips, stir-fried with fresh vegetables and chilli in oyster sauce.', price: 9.00, img: 'images/salt-chickenchips.jpg', modifierRequired: false, allowedExtras: [], spiceEnabled: true, spiceDefault: 1, spiceMin: 1, spiceNote: 'This dish contains chilli in the base sauce and cannot be made completely non-spicy.', allergens: ['soya','molluscs','gluten'], badge: 'new' }
       ]},
       { id:'noodles',  title:'Noodles & Rice', allowExtras:true, items:[
         { id: 'pad-thai', name: 'Pad Thai', desc: 'Balanced flavours using tamarind, fish sauce, and palm sugar accompanying bean sprouts, garlic and chives.', price: 8.00, img: 'images/padthai.jpg', allowedModifiers: ['chicken','tofu','pork','beef','vegetable','prawn'], modifierRequired: true, modifierMax: 1, spiceEnabled: false, spiceDefault: 0, allergens: ['egg','fish','peanuts'], allowedExtras: ['extra-chicken','extra-pork','extra-beef','extra-prawn','extra-tofu','extra-veg'], badge: 'popular' },
@@ -139,7 +139,7 @@ const EXTRAS = [
         { id: 'coconut-rice', name: 'Coconut Rice (Khao Man)', desc: 'Jasmine rice simmered in coconut milk.', price: 3.00, img: 'images/coconutrice.jpg', allergens: [] },
 		 { id: 'chips', name: 'Chips', desc: 'Deep fried chips. Because sometimes you just need them!', price: 3.00, img: 'images/chips.jpg', allergens: [] },
 		 { id: 'fried-egg', name: 'Fried egg', desc: 'Thai style fried eggs have crispy whites with a soft yolk. But please let us know how you like yours', price: 1.00, img: 'images/egg.jpg', allergens: ['egg'] },
-		 { id: 'salt-chips', name: 'Thai Style Salt & Pepper Chips🌶️', desc: 'Deep fried chips, stir-fried  with vegetables, chilli and our special sauce', price: 4.00, img: 'images/salt-chips.jpeg', kitchenLoad: 0, allergens: ['molluscs','gluten','soya'], spiceEnabled: true, spiceDefault: 1, badge: 'new' }
+		 { id: 'salt-chips', name: 'Thai Style Salt & Pepper Chips🌶️', desc: 'Deep fried chips, stir-fried  with vegetables, chilli and our special sauce', price: 4.00, img: 'images/salt-chips.jpeg', kitchenLoad: 0, allergens: ['molluscs','gluten','soya'], spiceEnabled: true, spiceDefault: 1, spiceMin: 1, spiceNote: 'This dish contains chilli in the base sauce and cannot be made completely non-spicy.', badge: 'new' }
       ]},
       /*{ id:'drinks',    title:'Soft Drinks', allowExtras:false, items:[
         { id: 'pepsi-max', name: 'Pepsi Max', price: 1.00, img: 'images/pepsimax1.jpg', allergens: [] },
@@ -1102,7 +1102,7 @@ function handleExtraClick(opt) {
   }
 
   const defaultSpice = (typeof item.spiceDefault === 'number') ? item.spiceDefault : 0;
-  buildSpiceSelector(!!item.spiceEnabled, defaultSpice);
+  buildSpiceSelector(!!item.spiceEnabled, defaultSpice, item.spiceMin, item.spiceNote);
 
   modal.style.display = 'flex';
 }
@@ -1291,7 +1291,16 @@ function handleExtraClick(opt) {
 	})();
 
 
-    function buildSpiceSelector(enabled, defaultLevel=0){
+    function buildSpiceSelector(enabled, defaultLevel=0, minimumLevel=0, note=''){
+      let spiceNote = document.getElementById('spice-note');
+      if (!spiceNote) {
+        spiceNote = document.createElement('div');
+        spiceNote.id = 'spice-note';
+        spiceNote.className = 'small';
+        spiceWrap.appendChild(spiceNote);
+      }
+      spiceNote.textContent = enabled ? note || '' : '';
+      spiceNote.hidden = !enabled || !note;
       if(!enabled){
         spiceWrap.style.display = 'none';
         spiceButtons.innerHTML = '';
@@ -1300,7 +1309,8 @@ function handleExtraClick(opt) {
       }
       spiceWrap.style.display = 'block';
       spiceButtons.innerHTML = '';
-      currentSpice = Math.max(0, Math.min(3, Number(defaultLevel)||0));
+      const minimum = Math.max(0, Math.min(3, Number(minimumLevel)||0));
+      currentSpice = Math.max(minimum, Math.min(3, Number(defaultLevel)||0));
 
       const labels = [
         {v:0, text:'No spice'},
@@ -1308,7 +1318,7 @@ function handleExtraClick(opt) {
         {v:2, text:'Medium 🌶️🌶️'},
         {v:3, text:'Very spicy 🌶️🌶️🌶️'}
       ];
-      labels.forEach(l=>{
+      labels.filter(l => l.v >= minimum).forEach(l=>{
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'spice-btn' + (l.v===currentSpice ? ' active':'');
@@ -1412,7 +1422,7 @@ if (Array.isArray(item.allowedExtras)) {
 	  }
 
 	  const defaultSpice = (typeof item.spiceDefault === 'number') ? item.spiceDefault : 0;
-	  buildSpiceSelector(!!item.spiceEnabled, defaultSpice);
+	  buildSpiceSelector(!!item.spiceEnabled, defaultSpice, item.spiceMin, item.spiceNote);
 
 	  modal.style.display = 'flex';
 	}
