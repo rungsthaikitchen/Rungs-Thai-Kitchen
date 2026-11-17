@@ -32,3 +32,13 @@ test('future dates check normal hours while today retains fulfilment through 22:
   vm.runInNewContext(source,context);assert.equal(context.result.length,count);assert.equal(context.result.at(-1).slice(11,16),last);
  }
 });
+
+test('changing order type clears old times before pricing awaits and ignores a superseded change',async()=>{
+ const source=html.slice(html.indexOf("document.addEventListener('change', async (e) => {"),html.indexOf("document.addEventListener('DOMContentLoaded', () => {",html.indexOf("document.addEventListener('change', async (e) => {")));
+ let handler,finish,cleared=0,cancelled=0,refreshed=0;
+ const context={document:{addEventListener:(_event,fn)=>{handler=fn;},getElementById:()=>({value:'2026-11-21'})},window:{RTKBookingClient:{cancelAvailability(){cancelled++;}}},preferredTimeGeneration:0,availabilityContextKey:()=> 'delivery',updateCheckoutSubmitButton(){},updateCheckoutOrderSummary(){},clearPreferredTimeSelect(){cleared++;},refreshCheckoutPricingAndRender:()=>new Promise(resolve=>{finish=resolve;}),populatePreferredTimeSelect:async()=>{refreshed++;},masterWokTimeHints:new Map(),masterWokUnverifiedTimes:new Set(),masterWokDriverBusyTimes:new Set()};
+ vm.runInNewContext(source,context);const first=handler({target:{matches:()=>true}});
+ assert.equal(cleared,1);assert.equal(cancelled,1);assert.equal(context.masterWokTimeHints,null);assert.equal(refreshed,0);
+ context.preferredTimeGeneration++;finish();await first;assert.equal(refreshed,0);
+ const second=handler({target:{matches:()=>true}});finish();await second;assert.equal(refreshed,1);
+});

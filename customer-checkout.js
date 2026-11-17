@@ -2325,9 +2325,17 @@ document.addEventListener('change', async (e) => {
 
     updateCheckoutSubmitButton();
     updateCheckoutOrderSummary();
-
+    // Old collection times must stop being selectable before delivery pricing
+    // or geocoding awaits. Supersede in-flight checks immediately as well.
+    const generation=++preferredTimeGeneration;
+    const date=document.getElementById('cust-preferred-date')?.value;
+    const context=availabilityContextKey(date);
+    window.RTKBookingClient?.cancelAvailability?.();
+    masterWokTimeHints=null;masterWokUnverifiedTimes=new Set();masterWokDriverBusyTimes=new Set();
+    clearPreferredTimeSelect('Checking times for your order type…');
     await refreshCheckoutPricingAndRender();
-    await populatePreferredTimeSelect(document.getElementById('cust-preferred-date')?.value);
+    if(generation!==preferredTimeGeneration||context!==availabilityContextKey(date))return;
+    await populatePreferredTimeSelect(date);
   }
 });
 
