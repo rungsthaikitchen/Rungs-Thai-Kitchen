@@ -138,7 +138,7 @@ test('whole-day availability uses bounded parallel batches and reports complete 
   return {ok:true,json:async()=>({success:true,bookingApprovalAllowed:false,hints:input.times.map(time=>({time,available:true}))})};
  },storage:{},crypto:{}});
  const result=await client.availability({times,orderType:'collection',items:[]},{onProgress:p=>progress.push(p)});
- assert.ok(batches.every(batch=>batch.length<=6));assert.equal(peak,2);
+ assert.ok(batches.every(batch=>batch.length<=16));assert.equal(peak,2);
  assert.deepEqual(result.hints.map(h=>h.time),times);assert.equal(progress[0].completed,0);assert.equal(progress.at(-1).completed,61);
  assert.ok(progress.every(p=>p.total===61));
 });
@@ -181,5 +181,5 @@ test('a worker CPU failure cannot discard successfully verified later times',asy
   if(batch[0]===times[0])return {ok:false,status:546,json:async()=>{throw Error('non-JSON worker error');}};
   return ok({success:true,bookingApprovalAllowed:false,hints:batch.map(time=>({time,available:true}))});
  },storage:{},crypto:{}});
- const r=await c.availability({times,items:[]});assert.deepEqual(r.hints.map(h=>h.time),times);assert.equal(r.hints.filter(h=>h.available).length,12);assert.equal(r.hints.filter(h=>h.unverified).length,6);assert.equal(calls.get(times[0]),2);
+ const r=await c.availability({times,items:[]});assert.deepEqual(r.hints.map(h=>h.time),times);assert.equal(r.hints.filter(h=>h.available).length,12);assert.equal(r.hints.filter(h=>h.unverified).length,6);assert.equal(calls.get(times[0]),4);
 });

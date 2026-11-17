@@ -331,6 +331,7 @@ function clearPreferredTimeSelect(message = 'Select a date first') {
 
 let masterWokTimeHints=null;
 let masterWokUnverifiedTimes=new Set();
+let masterWokDriverBusyTimes=new Set();
 let preferredTimeGeneration=0;
 function availabilityBasketKey(){return JSON.stringify((window.basket||[]).map(line=>[line.itemId,line.qty,(line.mods||[]).map(m=>m.id),line.spice??null,line.item_note||null]));}
 function availabilityContextKey(date){return JSON.stringify([date,availabilityBasketKey(),document.querySelector('input[name="order-type"]:checked')?.value||'collection',document.getElementById('cust-address')?.value?.trim()||'']);}
@@ -432,7 +433,7 @@ async function populatePreferredTimeSelect(dateString) {
   const generation=++preferredTimeGeneration;
   const requestedContext=availabilityContextKey(dateString);
   const current=()=>generation===preferredTimeGeneration&&requestedContext===availabilityContextKey(dateString);
-  masterWokTimeHints=null;masterWokUnverifiedTimes=new Set();
+  masterWokTimeHints=null;masterWokUnverifiedTimes=new Set();masterWokDriverBusyTimes=new Set();
   if (
     !preferredTimeSelect ||
     !preferredTimeHidden ||
@@ -517,7 +518,8 @@ let masterWokAssessment = false;
 try {
   if(!window.RTKBookingClient)throw Error('Ordering service is still loading. Please retry.');
   const times=[];
-  for(let slot=new Date(start);slot<=extendedEnd;slot=new Date(slot.getTime()+5*60*1000))times.push(slot.toISOString());
+  const hintEnd=(isToday&&now<=end)||window.RTKApprovedReview?.token?extendedEnd:end;
+  for(let slot=new Date(start);slot<=hintEnd;slot=new Date(slot.getTime()+5*60*1000))times.push(slot.toISOString());
   const preview=await window.RTKBookingClient.availability({times,reviewApprovalToken:window.RTKApprovedReview?.token,
     orderType:document.querySelector('input[name="order-type"]:checked')?.value||'collection',
     address:document.getElementById('cust-address')?.value?.trim()||'',items:basket.map(line=>({
@@ -530,6 +532,7 @@ try {
     masterWokAssessment = true;
     masterWokTimeHints=new Map(preview.hints.map(h=>[h.time,h.available]));
     masterWokUnverifiedTimes=new Set(preview.hints.filter(h=>h.unverified===true).map(h=>h.time));
+    masterWokDriverBusyTimes=new Set(preview.hints.filter(h=>h.availabilityReason==='DRIVER_BUSY').map(h=>h.time));
   }
   else await refreshKitchenSlotMap(serviceDate);
   if(generation!==preferredTimeGeneration||requestedContext!==availabilityContextKey(dateString))return;
@@ -599,6 +602,7 @@ let availableCount = 0;
       `${timeText} — Fully booked`;
   } else {
     option.textContent =
+      masterWokDriverBusyTimes.has(slot.toISOString())?`${timeText} — Delivery unavailable`:
       masterWokUnverifiedTimes.has(slot.toISOString())?`${timeText} — Not verified`:`${timeText} — Unavailable`;
   }
 
@@ -650,7 +654,8 @@ if (
       availableCount++;
     } else {
       option.textContent =
-        masterWokUnverifiedTimes.has(slot.toISOString())?`${timeText} — Not verified`:`${timeText} — Unavailable`;
+        masterWokDriverBusyTimes.has(slot.toISOString())?`${timeText} — Delivery unavailable`:
+      masterWokUnverifiedTimes.has(slot.toISOString())?`${timeText} — Not verified`:`${timeText} — Unavailable`;
 
       option.disabled = true;
     }

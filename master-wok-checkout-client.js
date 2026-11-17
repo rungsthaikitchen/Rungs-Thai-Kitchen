@@ -53,13 +53,11 @@
    }
    // Keep each worker assessment bounded. A whole-day search against existing
    // commitments can exceed hosting CPU limits even when many times fit.
-   const chunks=[];for(let i=0;i<input.times.length;i+=6)chunks.push(input.times.slice(i,i+6));
+   const chunks=[];for(let i=0;i<input.times.length;i+=16)chunks.push(input.times.slice(i,i+16));
    const hintsByChunk=new Array(chunks.length);let next=0,completed=0;
    const progress=()=>{assertCurrent();if(typeof onProgress==='function')onProgress({completed,total:input.times.length});};
    progress();
-   async function worker(){
-    while(next<chunks.length){
-     assertCurrent();const index=next++,times=chunks[index];
+   async function checkBatch(times){
      const options={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...input,times})};
      let result,body,transient=false;
      for(let attempt=0;attempt<2;attempt++){
@@ -71,16 +69,25 @@
       }catch(error){assertCurrent();transient=true;}
      }
      if(transient){
-      // A failed read says nothing about kitchen capacity. Preserve other
-      // verified batches and keep every unchecked time explicitly disabled.
-      hintsByChunk[index]=times.map(time=>({time,available:false,unverified:true}));
-      completed+=times.length;progress();continue;
+      // Larger worker failures fall back to the proven six-time bound.
+      // Sequential fallback preserves the two-worker concurrency ceiling.
+      if(times.length>6){
+       const hints=[];
+       for(let i=0;i<times.length;i+=6)hints.push(...await checkBatch(times.slice(i,i+6)));
+       return hints;
+      }
+      return times.map(time=>({time,available:false,unverified:true}));
      }
      if(!result.ok||body.success!==true||body.bookingApprovalAllowed!==false||!Array.isArray(body.hints)||
       body.hints.length!==times.length||new Set(body.hints.map(h=>h.time)).size!==times.length||
       body.hints.some(h=>!times.includes(h.time)||typeof h.available!=='boolean'))
       throw Error('Ordering availability could not be checked. Please retry.');
-     hintsByChunk[index]=body.hints;completed+=times.length;progress();
+     return body.hints;
+   }
+   async function worker(){
+    while(next<chunks.length){
+     assertCurrent();const index=next++,times=chunks[index];
+     hintsByChunk[index]=await checkBatch(times);completed+=times.length;progress();
     }
    }
    try{await Promise.all(Array.from({length:Math.min(2,chunks.length)},()=>worker()));}
