@@ -132,6 +132,7 @@
    if(body?.committed===false&&[400,409,422].includes(response.status)){
     storage.removeItem(storageKey);
     const messages={CHECKOUT_PRICE_CHANGED:'Your price or loyalty balance has changed. Please refresh checkout and review the total.',
+     PRIVATE_FIXTURE_EMAIL_REQUIRED:'This staging test requires an email ending in @example.invalid. Use david@example.invalid, then submit again. This attempt did not save an order.',
      REVIEW_REQUIRED:'That time is no longer available for this order. Please choose another time.',
      REVIEW_APPROVAL_MISMATCH:'Your basket, details or time no longer match the restaurant’s approval. Reopen your agreed-time link to restore the reviewed order, or contact us.',
      REVIEW_APPROVAL_INVALID:'This agreed-time link is no longer valid or has already been used. Please contact the restaurant.',

@@ -183,3 +183,19 @@ test('a worker CPU failure cannot discard successfully verified later times',asy
  },storage:{},crypto:{}});
  const r=await c.availability({times,items:[]});assert.deepEqual(r.hints.map(h=>h.time),times);assert.equal(r.hints.filter(h=>h.available).length,12);assert.equal(r.hints.filter(h=>h.unverified).length,6);assert.equal(calls.get(times[0]),4);
 });
+
+test('a confirmed staging email rejection releases a previously uncertain attempt before corrected details can use a new key',async()=>{
+ const storage=stored(),keys=[];let step=0;
+ const c=createClient({storage,crypto,fetch:async(url,options)=>{
+  if(url.includes('booking-mode'))return ok({mode:'MASTER_WOK'});
+  keys.push(JSON.parse(options.body).key);step++;
+  if(step===1)return {ok:false,status:503,json:async()=>({committed:false,error:'TRANSACTION_FAILED'})};
+  if(step===2)return {ok:false,status:409,json:async()=>({committed:false,error:'PRIVATE_FIXTURE_EMAIL_REQUIRED'})};
+  return success();
+ }});
+ const original={...input(),customer:{email:'customer@example.com'}};
+ await assert.rejects(c.submit(original),/could not confirm/);assert.ok(storage.getItem('rtk_master_wok_pending_checkout'));
+ await assert.rejects(c.submit(original),/@example.invalid/);assert.equal(storage.getItem('rtk_master_wok_pending_checkout'),null);
+ await c.submit({...original,customer:{email:'david@example.invalid'}});
+ assert.equal(keys[0],keys[1]);assert.notEqual(keys[1],keys[2]);
+});
