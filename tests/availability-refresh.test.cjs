@@ -23,3 +23,22 @@ test('availability transport bypasses browser cache without authorising a bookin
  const result=await client.availability({times:[time],orderType:'collection',items:[]});assert.equal(result.hints[0].available,true);
  assert.ok(calls.every(c=>c.options.cache==='no-store'));assert.ok(calls.every(c=>c.url!=='/api/booking'));
 });
+
+test('future dates check normal hours while today retains fulfilment through 22:00',()=>{
+ const start=html.indexOf('  const times=[];',html.indexOf('let masterWokAssessment'));
+ const end=html.indexOf('  const preview=',start),source=html.slice(start,end)+'\n result=times;';
+ for(const [isToday,clock,approved,count,last] of [[false,'12:00',false,49,'21:00'],[true,'20:59',false,61,'22:00'],[true,'21:01',false,49,'21:00'],[false,'12:00',true,61,'22:00']]){
+  const context={start:new Date('2026-11-21T17:00:00Z'),end:new Date('2026-11-21T21:00:00Z'),extendedEnd:new Date('2026-11-21T22:00:00Z'),now:new Date(`2026-11-21T${clock}:00Z`),isToday,window:{RTKApprovedReview:approved?{token:'staff-approved'}:null}};
+  vm.runInNewContext(source,context);assert.equal(context.result.length,count);assert.equal(context.result.at(-1).slice(11,16),last);
+ }
+});
+
+test('changing order type clears old times before pricing awaits and ignores a superseded change',async()=>{
+ const source=html.slice(html.indexOf("document.addEventListener('change', async (e) => {"),html.indexOf("document.addEventListener('DOMContentLoaded', () => {",html.indexOf("document.addEventListener('change', async (e) => {")));
+ let handler,finish,cleared=0,cancelled=0,refreshed=0;
+ const context={document:{addEventListener:(_event,fn)=>{handler=fn;},getElementById:()=>({value:'2026-11-21'})},window:{RTKBookingClient:{cancelAvailability(){cancelled++;}}},preferredTimeGeneration:0,availabilityContextKey:()=> 'delivery',updateCheckoutSubmitButton(){},updateCheckoutOrderSummary(){},clearPreferredTimeSelect(){cleared++;},refreshCheckoutPricingAndRender:()=>new Promise(resolve=>{finish=resolve;}),populatePreferredTimeSelect:async()=>{refreshed++;},masterWokTimeHints:new Map(),masterWokUnverifiedTimes:new Set(),masterWokDriverBusyTimes:new Set()};
+ vm.runInNewContext(source,context);const first=handler({target:{matches:()=>true}});
+ assert.equal(cleared,1);assert.equal(cancelled,1);assert.equal(context.masterWokTimeHints,null);assert.equal(refreshed,0);
+ context.preferredTimeGeneration++;finish();await first;assert.equal(refreshed,0);
+ const second=handler({target:{matches:()=>true}});finish();await second;assert.equal(refreshed,1);
+});

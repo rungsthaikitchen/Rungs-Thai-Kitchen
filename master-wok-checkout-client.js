@@ -53,13 +53,11 @@
    }
    // Keep each worker assessment bounded. A whole-day search against existing
    // commitments can exceed hosting CPU limits even when many times fit.
-   const chunks=[];for(let i=0;i<input.times.length;i+=6)chunks.push(input.times.slice(i,i+6));
+   const chunks=[];for(let i=0;i<input.times.length;i+=16)chunks.push(input.times.slice(i,i+16));
    const hintsByChunk=new Array(chunks.length);let next=0,completed=0;
    const progress=()=>{assertCurrent();if(typeof onProgress==='function')onProgress({completed,total:input.times.length});};
    progress();
-   async function worker(){
-    while(next<chunks.length){
-     assertCurrent();const index=next++,times=chunks[index];
+   async function checkBatch(times){
      const options={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...input,times})};
      let result,body,transient=false;
      for(let attempt=0;attempt<2;attempt++){
@@ -71,16 +69,25 @@
       }catch(error){assertCurrent();transient=true;}
      }
      if(transient){
-      // A failed read says nothing about kitchen capacity. Preserve other
-      // verified batches and keep every unchecked time explicitly disabled.
-      hintsByChunk[index]=times.map(time=>({time,available:false,unverified:true}));
-      completed+=times.length;progress();continue;
+      // Larger worker failures fall back to the proven six-time bound.
+      // Sequential fallback preserves the two-worker concurrency ceiling.
+      if(times.length>6){
+       const hints=[];
+       for(let i=0;i<times.length;i+=6)hints.push(...await checkBatch(times.slice(i,i+6)));
+       return hints;
+      }
+      return times.map(time=>({time,available:false,unverified:true}));
      }
      if(!result.ok||body.success!==true||body.bookingApprovalAllowed!==false||!Array.isArray(body.hints)||
       body.hints.length!==times.length||new Set(body.hints.map(h=>h.time)).size!==times.length||
       body.hints.some(h=>!times.includes(h.time)||typeof h.available!=='boolean'))
       throw Error('Ordering availability could not be checked. Please retry.');
-     hintsByChunk[index]=body.hints;completed+=times.length;progress();
+     return body.hints;
+   }
+   async function worker(){
+    while(next<chunks.length){
+     assertCurrent();const index=next++,times=chunks[index];
+     hintsByChunk[index]=await checkBatch(times);completed+=times.length;progress();
     }
    }
    try{await Promise.all(Array.from({length:Math.min(2,chunks.length)},()=>worker()));}
@@ -118,12 +125,18 @@
    }catch(_){throw Error('We could not confirm the result. Please retry the same order so we can check it without duplicating it.');}
    if(response.ok&&body?.success===true&&typeof body.orderId==='string'&&typeof body.orderRef==='string'&&
     Number.isFinite(body.totals?.total)&&body.notification_status==='queued'){
-    storage.removeItem(storageKey);return {route:'MASTER_WOK',order:body};
+    storage.removeItem(storageKey);
+    if(input.reviewApprovalToken)root?.RTKClearApprovedReview?.();
+    return {route:'MASTER_WOK',order:body};
    }
    if(body?.committed===false&&[400,409,422].includes(response.status)){
     storage.removeItem(storageKey);
     const messages={CHECKOUT_PRICE_CHANGED:'Your price or loyalty balance has changed. Please refresh checkout and review the total.',
-     REVIEW_REQUIRED:'That time is no longer available for this order. Please choose another time.'};
+     PRIVATE_FIXTURE_EMAIL_REQUIRED:'This staging test requires an email ending in @example.invalid. Use david@example.invalid, then submit again. This attempt did not save an order.',
+     REVIEW_REQUIRED:'That time is no longer available for this order. Please choose another time.',
+     REVIEW_APPROVAL_MISMATCH:'Your basket, details or time no longer match the restaurant’s approval. Reopen your agreed-time link to restore the reviewed order, or contact us.',
+     REVIEW_APPROVAL_INVALID:'This agreed-time link is no longer valid or has already been used. Please contact the restaurant.',
+     REVIEW_APPROVAL_EXPIRED:'This agreed-time link has expired. Please contact the restaurant to arrange a new link.'};
     throw Error(messages[body.reason||body.error]||body.message||'We could not book this order. Please review your details and selected time.');
    }
    throw Error('We could not confirm the result. Please retry the same order or contact the restaurant.');
