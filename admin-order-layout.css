@@ -1,0 +1,45 @@
+/* Keep the real table cell intact; arrange its controls inside the cell. */
+main > .wrap { max-width: 1800px; overflow-x: auto; }
+.orders-table { border-spacing: 0 6px; }
+#tbody > tr > td { padding: 8px; }
+#tbody > tr > td.actions {
+  display: table-cell;
+  width: 370px;
+  min-width: 350px;
+  white-space: normal;
+}
+.order-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  align-items: center;
+}
+.order-actions .btn-small {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 30px;
+  margin: 0;
+  padding: 5px 6px;
+  border: 1px solid rgba(20, 30, 40, .3);
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.order-actions__time {
+  grid-column: 1 / span 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.order-actions__time .suggest-time-input {
+  box-sizing: border-box;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+}
+.order-actions__time .btn-small { width: auto; flex: 0 0 auto; }
+.order-actions > .btn-paid { grid-column: span 2; }

@@ -11,6 +11,7 @@
 <script defer src="/master-wok-reconciliation.js?v=actual-amount-20261113"></script>
 <script defer src="/master-wok-reconciliation-admin.js?v=eod-autoprint-20261112"></script>
 <script src="/master-wok-delivery-admin.js"></script>
+  <link rel="stylesheet" href="/admin-order-layout.css?v=20261118" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>RTK — Admin Orders</title>
@@ -1014,7 +1015,7 @@ tbody#tbody tr.row-attention:hover > td {
 
   <main>
     <div class="wrap">
-      <table>
+      <table class="orders-table">
         <thead>
           <tr>
 		  <th>RTK Ref</th>
@@ -2668,16 +2669,17 @@ const discountLabel =
       <td class="nowrap">${fmtMoney(subtotal)}</td>
       <td class="nowrap">${fmtMoney(delivery)}</td>
       <td class="nowrap">${totalCellHtml}<div class="small muted" data-payment-summary data-order-id="${o.id}"></div></td>
-      <td class="actions" style="text-align:right">
+      <td class="actions"><div class="order-actions">
         <button class="btn-small" data-action="toggle">Details</button>
 		<button class="btn-small" data-action="print">Print</button>
 		<button class="btn-small" data-action="print-allergens">Allergens</button>
         ${o.order_type==='delivery'&&!o.is_test&&!['cancelled','declined','rejected','completed'].includes(status)?'<button class="btn-small btn-delivery-trip">Delivery trip</button>':''}
 
-        <div style="display:inline-flex;align-items:center;gap:4px;margin-left:8px">
+        <div class="order-actions__time">
           <input
             type="time"
             class="suggest-time-input"
+            aria-label="Propose a new time"
             data-order-id="${o.id}"
             style="font-size:12px;padding:3px 4px"
           >
@@ -2689,7 +2691,7 @@ const discountLabel =
         <button class="btn-small" data-amend-order="${o.id}" hidden>Amend</button>
         <button class="btn-small btn-paid" data-order-id="${o.id}">Mark paid</button>
         <button class="btn-small btn-complete" data-order-id="${o.id}">Completed</button>
-      </td>
+      </div></td>
     `;
 
     // ---- details row ----
@@ -2710,8 +2712,9 @@ const discountLabel =
     }
 
     const detailsRow = document.createElement('tr');
+    detailsRow.hidden = true;
     const detailsCell = document.createElement('td');
-    detailsCell.colSpan = 12;
+    detailsCell.colSpan = 11;
     detailsCell.appendChild(details);
     detailsRow.appendChild(detailsCell);
 
@@ -2719,6 +2722,7 @@ const discountLabel =
     if (toggleBtn) {
       toggleBtn.addEventListener('click', () => {
         details.style.display = (details.style.display === 'block') ? 'none' : 'block';
+        detailsRow.hidden = details.style.display !== 'block';
       });
     }
 
