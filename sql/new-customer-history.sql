@@ -26,14 +26,14 @@ BEGIN
        WHEN EXISTS (
          SELECT 1 FROM public.orders p
          WHERE p.id<>t.id AND p.created_at<t.created_at
-           AND p.status='completed' AND p.is_test IS FALSE
+           AND p.status='completed' AND p.is_test IS DISTINCT FROM TRUE
            AND p.customer_id=t.customer_id AND t.customer_id IS NOT NULL
        ) THEN 'returning'
        WHEN EXISTS (
          SELECT 1 FROM public.orders p
          JOIN public.customers pc ON pc.id=p.customer_id
          WHERE p.id<>t.id AND p.created_at<t.created_at
-           AND p.status='completed' AND p.is_test IS FALSE
+           AND p.status='completed' AND p.is_test IS DISTINCT FROM TRUE
            AND (
              (t.phone_key IS NOT NULL AND public.staff_review_phone_key(pc.phone)=t.phone_key)
              OR (t.email_key IS NOT NULL AND nullif(lower(btrim(pc.email)),'')=t.email_key)
