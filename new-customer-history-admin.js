@@ -19,6 +19,27 @@
    const heading=document.createElement('strong'),instruction=document.createElement('p');
    heading.textContent=info.heading;instruction.textContent=info.instruction;
    node.append(heading,instruction);
+   if(info.kind==='new'||info.kind==='possible'){
+    const select=document.createElement('select');
+    select.setAttribute('aria-label','Customer contact status');
+    for(const [value,label] of [['','Contact recommended'],['contacted','Contacted'],['unreachable','Unable to reach'],['not_required','Not required']]){
+     const option=document.createElement('option');option.value=value;option.textContent=label;select.append(option);
+    }
+    select.value=result?.contact?.status||'';
+    select.addEventListener('change',async()=>{
+     const selected=select.value;if(!selected)return;
+     select.disabled=true;
+     try{
+      const response=await fetch('/admin-api/new-customer-contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'record',orderId:row.dataset.orderId,status:selected}),redirect:'error',signal:AbortSignal.timeout(15000)});
+      const body=await response.json();
+      if(!response.ok||body.success!==true||body.contact?.status!==selected)throw Error('Contact update failed');
+      const entry=cache.get(row.dataset.orderId);
+      if(entry)entry.value={...entry.value,contact:body.contact};
+     }catch(_){select.value=result?.contact?.status||'';window.alert('Contact status could not be saved. Please retry.');}
+     finally{select.disabled=false;}
+    });
+    node.append(select);
+   }
   }
   async function refresh(){
    if(busy){again=true;return;}busy=true;again=false;
@@ -30,7 +51,9 @@
      const data=await response.json();
      if(!response.ok||data.success!==true||!Array.isArray(data.classifications)||
         data.classifications.some(x=>!ids.includes(x.order_id)||!['new','possibly_new','returning'].includes(x.classification)))throw Error('Lookup unavailable');
-     const results=new Map(data.classifications.map(x=>[x.order_id,x]));
+     if(!Array.isArray(data.contacts)||data.contacts.some(x=>!ids.includes(x.order_id)||!['contacted','unreachable','not_required'].includes(x.status)))throw Error('Contact lookup unavailable');
+     const contacts=new Map(data.contacts.map(x=>[x.order_id,x]));
+     const results=new Map(data.classifications.map(x=>[x.order_id,{...x,contact:contacts.get(x.order_id)||null}]));
      for(const row of batch)cache.set(row.dataset.orderId,{at:Date.now(),value:results.get(row.dataset.orderId)||null});
     }
     for(const row of rows())show(row,cache.get(row.dataset.orderId)?.value||null);
