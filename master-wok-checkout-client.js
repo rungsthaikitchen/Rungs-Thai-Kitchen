@@ -53,30 +53,34 @@
    }
    // Keep each worker assessment bounded. A whole-day search against existing
    // commitments can exceed hosting CPU limits even when many times fit.
-   const chunks=[];for(let i=0;i<input.times.length;i+=16)chunks.push(input.times.slice(i,i+16));
+   const batchSize=16;
+   const deadline=Date.now()+30000;
+   const chunks=[];for(let i=0;i<input.times.length;i+=batchSize)chunks.push(input.times.slice(i,i+batchSize));
    const hintsByChunk=new Array(chunks.length);let next=0,completed=0;
    const progress=()=>{assertCurrent();if(typeof onProgress==='function')onProgress({completed,total:input.times.length});};
    progress();
    async function checkBatch(times){
      const options={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...input,times})};
+     const unchecked=()=>times.map(time=>({time,available:false,unverified:true}));
+     if(Date.now()>=deadline)return unchecked();
      let result,body,transient=false;
-     for(let attempt=0;attempt<2;attempt++){
+     // Retrying an oversized CPU-failing batch repeats the same expensive
+     // work. Split it immediately; retry a singleton only once.
+     for(let attempt=0;attempt<(times.length===1?2:1);attempt++){
+      if(Date.now()>=deadline)return unchecked();
       try{
-       result=await read('/api/booking-availability',options);
+       result=await read('/api/booking-availability',options,Math.min(8000,deadline-Date.now()));
        transient=!result.ok&&[502,503,504,546].includes(result.status);
        if(transient)continue;
        body=await result.json();assertCurrent();transient=false;break;
       }catch(error){assertCurrent();transient=true;}
      }
      if(transient){
-      // Larger worker failures fall back to the proven six-time bound.
-      // Sequential fallback preserves the two-worker concurrency ceiling.
-      if(times.length>6){
-       const hints=[];
-       for(let i=0;i<times.length;i+=6)hints.push(...await checkBatch(times.slice(i,i+6)));
-       return hints;
+      if(times.length>1&&Date.now()<deadline){
+       const middle=Math.ceil(times.length/2);
+       return [...await checkBatch(times.slice(0,middle)),...await checkBatch(times.slice(middle))];
       }
-      return times.map(time=>({time,available:false,unverified:true}));
+      return unchecked();
      }
      if(!result.ok||body.success!==true||body.bookingApprovalAllowed!==false||!Array.isArray(body.hints)||
       body.hints.length!==times.length||new Set(body.hints.map(h=>h.time)).size!==times.length||
