@@ -181,7 +181,7 @@ test('a worker CPU failure cannot discard successfully verified later times',asy
   if(batch[0]===times[0])return {ok:false,status:546,json:async()=>{throw Error('non-JSON worker error');}};
   return ok({success:true,bookingApprovalAllowed:false,hints:batch.map(time=>({time,available:true}))});
  },storage:{},crypto:{}});
- const r=await c.availability({times,items:[]});assert.deepEqual(r.hints.map(h=>h.time),times);assert.equal(r.hints.filter(h=>h.available).length,12);assert.equal(r.hints.filter(h=>h.unverified).length,6);assert.equal(calls.get(times[0]),4);
+ const r=await c.availability({times,items:[]});assert.deepEqual(r.hints.map(h=>h.time),times);assert.equal(r.hints.filter(h=>h.available).length,17);assert.equal(r.hints.filter(h=>h.unverified).length,1);assert.equal(calls.get(times[0]),6);
 });
 
 test('a confirmed staging email rejection releases a previously uncertain attempt before corrected details can use a new key',async()=>{
@@ -198,4 +198,30 @@ test('a confirmed staging email rejection releases a previously uncertain attemp
  await assert.rejects(c.submit(original),/@example.invalid/);assert.equal(storage.getItem('rtk_master_wok_pending_checkout'),null);
  await c.submit({...original,customer:{email:'david@example.invalid'}});
  assert.equal(keys[0],keys[1]);assert.notEqual(keys[1],keys[2]);
+});
+
+test('delivery checks preserve all slots in bounded parallel batches',async()=>{
+ const times=Array.from({length:61},(_,i)=>new Date(Date.UTC(2026,10,18,17,i*5)).toISOString());
+ const batches=[];
+ const c=createClient({storage:{},crypto:{},fetch:async(url,options)=>{
+  if(url==='/api/booking-mode')return ok({mode:'MASTER_WOK'});
+  const batch=JSON.parse(options.body).times;batches.push(batch);
+  return ok({success:true,bookingApprovalAllowed:false,hints:batch.map(time=>({time,available:true}))});
+ }});
+ const r=await c.availability({times,items:[],orderType:'delivery'});
+ assert.ok(batches.every(b=>b.length<=16));assert.deepEqual(r.hints.map(h=>h.time),times);assert.ok(r.hints.every(h=>h.available));
+});
+test('availability stops retry amplification at the shared deadline and retains completed hints',async()=>{
+ const times=Array.from({length:35},(_,i)=>new Date(Date.UTC(2026,10,18,17,i*5)).toISOString());
+ const originalNow=Date.now;let now=0,posts=0;Date.now=()=>now;
+ try{
+  const c=createClient({storage:{},crypto:{},fetch:async(url,options)=>{
+   if(url==='/api/booking-mode')return ok({mode:'MASTER_WOK'});
+   posts++;const batch=JSON.parse(options.body).times;
+   if(posts===1)return ok({success:true,bookingApprovalAllowed:false,hints:batch.map(time=>({time,available:true}))});
+   now=30001;return {ok:false,status:503};
+  }});
+  const r=await c.availability({times,items:[],orderType:'delivery'});
+  assert.equal(posts,2);assert.equal(r.hints.filter(h=>h.available).length,16);assert.equal(r.hints.filter(h=>h.unverified).length,19);
+ }finally{Date.now=originalNow;}
 });
