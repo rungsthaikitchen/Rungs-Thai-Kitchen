@@ -21,6 +21,13 @@
     .map(t=>({...row,id:row.id+'@'+t,preferred_time:t,confirmed_time:t}));
   });
  }
+ function loyaltyAvailability(quote={}){
+  const nonnegative=value=>Number.isFinite(Number(value))?Math.max(0,Math.trunc(Number(value))):0;
+  const settledPoints=nonnegative(quote.settled_points_balance??quote.points_balance??0);
+  const reservedPoints=nonnegative(quote.reserved_points??0);
+  const availablePoints=Math.min(settledPoints,quote.available_points_balance==null?Math.max(0,settledPoints-reservedPoints):nonnegative(quote.available_points_balance));
+  return {settledPoints,reservedPoints,availablePoints};
+ }
  function createClient({fetch:transport,storage,crypto:cryptoApi,modeUrl='/api/booking-mode',bookingUrl='/api/booking',hostname=root?.location?.hostname??null}={}){
   const legacyAllowed=hostname===null||['rungsthaikitchen.co.uk','www.rungsthaikitchen.co.uk','localhost','127.0.0.1','::1'].includes(hostname);
   function requireLegacyHost(){if(!legacyAllowed)throw Error('Preview ordering is disabled until the staging booking service is ready.');}
@@ -141,12 +148,12 @@
      REVIEW_APPROVAL_MISMATCH:'Your basket, details or time no longer match the restaurant’s approval. Reopen your agreed-time link to restore the reviewed order, or contact us.',
      REVIEW_APPROVAL_INVALID:'This agreed-time link is no longer valid or has already been used. Please contact the restaurant.',
      REVIEW_APPROVAL_EXPIRED:'This agreed-time link has expired. Please contact the restaurant to arrange a new link.'};
-    throw Error(messages[body.reason||body.error]||body.message||'We could not book this order. Please review your details and selected time.');
+    const error=Error(messages[body.reason||body.error]||body.message||'We could not book this order. Please review your details and selected time.');error.code=body.reason||body.error;throw error;
    }
    throw Error('We could not confirm the result. Please retry the same order or contact the restaurant.');
   }};
  }
- const api={createClient,capacityRows};
+ const api={createClient,capacityRows,loyaltyAvailability};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;
- if(root){root.RTKBookingCapacityRows=capacityRows;root.RTKBookingClient=createClient({fetch:root.fetch.bind(root),storage:root.localStorage,crypto:root.crypto});}
+ if(root){root.RTKLoyaltyAvailability=loyaltyAvailability;root.RTKBookingCapacityRows=capacityRows;root.RTKBookingClient=createClient({fetch:root.fetch.bind(root),storage:root.localStorage,crypto:root.crypto});}
 })(typeof window!=='undefined'?window:null);

@@ -99,7 +99,7 @@ test('draining after a lost booking reply never claims the earlier order was not
 test('actual writer error field shows the expected changed-price review message',async()=>{
  const storage=stored();const c=createClient({storage,crypto,fetch:async u=>u.includes('booking-mode')?ok({mode:'MASTER_WOK'}):
   {ok:false,status:409,json:async()=>({committed:false,error:'CHECKOUT_PRICE_CHANGED'})}});
- await assert.rejects(c.submit(input()),/price or loyalty balance has changed/);
+ await assert.rejects(c.submit(input()),error=>error.code==='CHECKOUT_PRICE_CHANGED'&&/price or loyalty balance has changed/.test(error.message));
  assert.equal(storage.getItem('rtk_master_wok_pending_checkout'),null);
 });
 test('an agreed-time link displays only its granted time and can never fall through to legacy checkout',async()=>{
