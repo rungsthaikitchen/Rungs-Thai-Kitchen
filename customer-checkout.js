@@ -989,6 +989,9 @@ const LOYALTY_REWARD_VALUE = 5;    // £5 reward
 const loyaltyState = {
   pointsBalance: 0,
   lifetimePoints: 0,
+  settledPointsBalance: 0,
+  availablePointsBalance: 0,
+  reservedPoints: 0,
 
   // derived values
   rewardEligible: false,
@@ -1010,7 +1013,7 @@ function applyLoyaltyToTotals(foodSubtotal) {
   const settledPoints = Number(loyaltyState.settledPointsBalance || 0);
   const eligibleSubtotal = Number(foodSubtotal || 0);
 
-  const rewardEligible = settledPoints >= LOYALTY_REWARD_THRESHOLD;
+  const rewardEligible = Number(loyaltyState.availablePointsBalance || 0) >= LOYALTY_REWARD_THRESHOLD;
 
   const discountApplied = rewardEligible
     ? Math.min(LOYALTY_REWARD_VALUE, eligibleSubtotal)
@@ -1038,7 +1041,7 @@ function updateLoyaltyProjection(foodSubtotalAfterAllDiscounts) {
   const expectedBalance = settledPoints - pointsRedeemedPending + pointsEarnedPending;
   const pointsToNextReward = rewardEligible
   ? 0
-  : Math.max(0, LOYALTY_REWARD_THRESHOLD - settledPoints);
+  : Math.max(0, LOYALTY_REWARD_THRESHOLD - Number(loyaltyState.availablePointsBalance || 0));
 
   loyaltyState.pointsRedeemedPending = pointsRedeemedPending;
   loyaltyState.pointsEarnedPending = pointsEarnedPending;
@@ -1079,6 +1082,11 @@ if (rewardEligible && discountApplied > 0) {
   return;
 }
 
+  if (loyaltyState.reservedPoints > 0) {
+    el.innerHTML = `<strong>Loyalty reward reserved:</strong> ${loyaltyState.reservedPoints} points are already reserved on another pending order. You have <strong>${loyaltyState.availablePointsBalance} points available</strong> for this order.<br>This order: +${pointsEarnedPending} pending points.`;
+    return;
+  }
+
   el.innerHTML = `
     <strong>Loyalty points:</strong> You currently have ${points} points.<br>
     This order: +${pointsEarnedPending} pending points<br>
@@ -1097,7 +1105,7 @@ async function fetchLoyaltyBalance(phone) {
 
   try {
     const res = await fetch('https://order-backend-production.up.railway.app/loyalty-balance', {
-      method: 'POST',
+      method: 'POST', cache: 'no-store', signal: AbortSignal.timeout(8000),
       headers: {
         'Content-Type': 'application/json'
       },
@@ -2119,24 +2127,29 @@ function findNextAllowedFromNow() {
   const phoneInput = document.getElementById('cust-phone');
   if (!phoneInput) return;
 
+  let generation = 0;
   async function refreshLoyaltyFromPhone() {
-    const loyalty = await fetchLoyaltyBalance(phoneInput.value);
+    const current = ++generation, phone = phoneInput.value;
+    const loyalty = await fetchLoyaltyBalance(phone);
+    if (current !== generation || phone !== phoneInput.value) return false;
 	
 	  console.log('LOYALTY RESPONSE:', loyalty); // 👈 ADD THIS
 
 			if (loyalty) {
 			  loyaltyState.pointsBalance = Number(loyalty.points_balance || 0);
 
-			  // ⭐ NEW — use settled balance if available, fallback safely
-			  loyaltyState.settledPointsBalance = Number(
-				loyalty.settled_points_balance ?? loyalty.points_balance ?? 0
-			  );
+              const balances = window.RTKLoyaltyAvailability(loyalty);
+              loyaltyState.settledPointsBalance = balances.settledPoints;
+              loyaltyState.reservedPoints = balances.reservedPoints;
+              loyaltyState.availablePointsBalance = balances.availablePoints;
 
 			  loyaltyState.lifetimePoints = Number(loyalty.lifetime_points || 0);
 			  loyaltyState.pointsToNextReward = Number(loyalty.points_to_next_reward || 100);
 			} else {
 			  loyaltyState.pointsBalance = 0;
-			  loyaltyState.settledPointsBalance = 0; // ⭐ NEW
+			  loyaltyState.settledPointsBalance = 0;
+              loyaltyState.reservedPoints = 0;
+              loyaltyState.availablePointsBalance = 0;
 			  loyaltyState.lifetimePoints = 0;
 			  loyaltyState.pointsToNextReward = 100;
 			}
@@ -2146,7 +2159,9 @@ function findNextAllowedFromNow() {
 
     refreshCheckoutPricingAndRender();
     renderLoyaltyMessage();
+    return loyalty !== null;
   }
+  window.RTKRefreshLoyalty = refreshLoyaltyFromPhone;
 
   phoneInput.addEventListener('blur', refreshLoyaltyFromPhone);
   phoneInput.addEventListener('change', refreshLoyaltyFromPhone);
@@ -2234,6 +2249,7 @@ if (SERVICE_STATE.mode === 'paused') {
 
         // Refresh closures / fully-booked periods whenever checkout opens.
 // This prevents a customer using stale blackout data from an older page load.
+const loyaltyRefresh = window.RTKRefreshLoyalty?.();
 await loadBlackouts();
 
         // Refresh preferred-time availability whenever checkout opens.
@@ -2276,6 +2292,7 @@ if (
   }
 }
 
+      await loyaltyRefresh;
       if(openedBasketKey!==availabilityBasketKey())return;
       checkoutBaseSubtotal = Math.round(subtotal * 100) / 100;
       checkoutMsg.textContent = '';
@@ -3451,7 +3468,13 @@ resetCheckoutForNextOrder();
 
 
   } catch (err) {
-    fail('Unexpected error', err);
+    if (err?.code === 'CHECKOUT_PRICE_CHANGED') {
+      const refreshed = await window.RTKRefreshLoyalty?.();
+      checkoutMsg.style.color = '#b02a2a';
+      checkoutMsg.textContent = refreshed ? 'Your order has not been placed. Please review the refreshed total before submitting again.' : 'Your order has not been placed. Loyalty details could not be refreshed. Please try again.';
+    } else {
+      fail('Unexpected error', err);
+    }
   } finally {
     isSubmittingOrder = false;
     if (submitBtn) submitBtn.disabled = false;
