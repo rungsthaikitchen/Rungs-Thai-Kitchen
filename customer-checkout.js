@@ -2480,7 +2480,7 @@ document.getElementById("apply-discount-code-btn")?.addEventListener("click", as
 
 		  // header
 		  if (titleEl) {
-			titleEl.textContent = `Order confirmed — ${summary.ref}`;
+			titleEl.textContent = `${summary.holdingReviewRequired ? 'Order received' : 'Order confirmed'} — ${summary.ref}`;
 		  }
 
 		  // note
@@ -3441,7 +3441,8 @@ showOrderSuccess(
   itemsSnapshot,
   grandTotal,
   orderType,
-  prefPretty
+  prefPretty,
+  masterWokManaged && booking.order.holdingReviewRequired === true
 );
 
 // Order is safely complete.

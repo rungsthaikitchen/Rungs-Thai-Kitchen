@@ -1134,7 +1134,7 @@ function handleExtraClick(opt) {
   // 1) header
   const titleEl = document.getElementById('order-success-title');
   if (titleEl) {
-    titleEl.textContent = `Order confirmed — ${summary?.ref || ''}`;
+    titleEl.textContent = `${summary?.holdingReviewRequired ? 'Order received' : 'Order confirmed'} — ${summary?.ref || ''}`;
   }
 
     // 2) message
@@ -1250,7 +1250,7 @@ function handleExtraClick(opt) {
 	  }
 
 	  // expose a global helper we can call later (kept for backwards compatibility)
-	function showOrderSuccess(orderId, items, total, orderType, preferredTime) {
+	function showOrderSuccess(orderId, items, total, orderType, preferredTime, holdingReviewRequired = false) {
 	  // If the new-style function exists, delegate to it
 	  if (typeof window.showOrderSuccessNew === 'function') {
 		window.showOrderSuccessNew(
@@ -1263,7 +1263,8 @@ function handleExtraClick(opt) {
 			subtotal: 0,
 			delivery: 0,
 			total: total || 0,
-			orderType: orderType || 'collection'
+			orderType: orderType || 'collection',
+            holdingReviewRequired: holdingReviewRequired === true
 		  },
 		  items || [],
 		  preferredTime || null
