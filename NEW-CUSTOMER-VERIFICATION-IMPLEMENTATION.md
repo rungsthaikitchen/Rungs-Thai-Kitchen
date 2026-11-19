@@ -21,3 +21,10 @@ Status: development branch; NOT deployed.
 - A failed history lookup must display 'Verification unavailable', not claim NEW CUSTOMER.
 - 'Unable to reach' is an attempt, not proof of a bad customer.
 - Do not infer fraud from a new-customer classification.
+
+## Staging verification — 19 November 2026
+- Both isolated GitHub Actions workflows showed successful completion in the operator's GitHub screenshots (website 22 seconds; backend 15 seconds).
+- Executed a **read-only synthetic seven-scenario SQL classification query** on the Master Wok staging PostgreSQL project. All seven classifications matched expectations: first order, returning customer, shared phone, unique contact, earlier test order, earlier cancelled order, and missing contact keys.
+- This was **not execution of the deployed RPC** and **not an end-to-end Admin test**. Master Wok staging does not contain the production customers table or the production orders.customer_id field. No migrations were applied.
+- Read-only inspection of production orders schema confirmed `status`, `created_at`, `paid_at`, but **no completion timestamp**. A past order currently marked completed may have completed after a later order was created. Therefore the current lookup cannot establish "completed as of order creation" with certainty; this is a release blocker for that exact historical claim. Do not present historical classification as audited as-of-order truth until an appropriate completion event source is established or the product requirement is explicitly revised.
+- Before deployment: representative isolated database integration for both RPCs and audit transaction, authenticated proxy/UI end-to-end tests, and confirmation of historical completion semantics.
