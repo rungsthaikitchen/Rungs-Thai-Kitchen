@@ -34,6 +34,7 @@
      if(attempt&&attempt.fingerprint!==fingerprint&&attempt.uncertain)
       throw Error('Your previous request may have arrived. Please retry with the same details or call us before sending a different basket.');
      if(!attempt||attempt.fingerprint!==fingerprint)attempt={key:crypto.randomUUID(),fingerprint};
+     const previouslyUncertain=attempt.uncertain===true;
      attempt.uncertain=true;
      // Persist only a hash and request key, never contact details or the basket.
      storage.setItem(storageKey,JSON.stringify(attempt));
@@ -46,6 +47,13 @@
      }
      if(response.status===400){attempt.uncertain=false;storage.setItem(storageKey,JSON.stringify(attempt));
       throw Error('Please check your contact details, preferred time and basket before trying again.');}
+     if(response.status===409&&data.success===false&&data.reason==='REVIEW_TIME_CLOSED'&&data.bookingApprovalAllowed===false){
+      // This reply cannot resolve an earlier lost response. Retain its key.
+      if(!previouslyUncertain){attempt.uncertain=false;storage.setItem(storageKey,JSON.stringify(attempt));}
+      throw Error(previouslyUncertain
+       ? 'We’re closed at that time. Your previous request still needs checking; please call 0113 469 9564.'
+       : 'We’re closed at that time. Please choose another time or date. Your basket is saved.');
+     }
      throw Error('We could not confirm receipt. Please retry with the same details or call 0113 469 9564.');
     }finally{busy=false;}
    }

@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const source=require('./customer-source.cjs')(__dirname+'/../index.html');
-const helpers=source.slice(source.indexOf('function basketReviewDateMessage('),source.indexOf('function showUnavailableBasketDialog('));
+const helpers=source.slice(source.indexOf('function basketReviewClosureMessage('),source.indexOf('function showUnavailableBasketDialog('));
 const context={Intl,Date,OPEN_WINDOW:{end:'21:00'}};vm.runInNewContext(helpers,context);
 test('basket review uses the London ordering cutoff in winter and summer',()=>{
  for(const [date,before,at,after] of [
