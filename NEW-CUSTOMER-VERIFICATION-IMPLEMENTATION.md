@@ -28,3 +28,9 @@ Status: development branch; NOT deployed.
 - This was **not execution of the deployed RPC** and **not an end-to-end Admin test**. Master Wok staging does not contain the production customers table or the production orders.customer_id field. No migrations were applied.
 - Read-only inspection of production orders schema confirmed `status`, `created_at`, `paid_at`, but **no completion timestamp**. A past order currently marked completed may have completed after a later order was created. Therefore the current lookup cannot establish "completed as of order creation" with certainty; this is a release blocker for that exact historical claim. Do not present historical classification as audited as-of-order truth until an appropriate completion event source is established or the product requirement is explicitly revised.
 - Before deployment: representative isolated database integration for both RPCs and audit transaction, authenticated proxy/UI end-to-end tests, and confirmation of historical completion semantics.
+
+## Read-only production data compatibility — 19 November 2026
+- Verified that production has `staff_review_phone_key(text)`, but neither of the new RPCs nor the new contact table is installed. Master Wok staging lacks all four objects, as expected.
+- Ran the proposed classification SELECT directly against production orders from the preceding 30 days, **without invoking or installing the RPC** and returning **aggregate counts only**. Results: 34 new, 8 possibly new, 59 returning (101 orders total).
+- Counts are provisional, not independently verified identities or completion-at-order-time evidence. Do not use this query as a substitute for integration testing of the actual functions, protected endpoints, or Admin contact audit.
+- Production database and Master Wok staging database remained unchanged.
