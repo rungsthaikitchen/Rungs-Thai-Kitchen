@@ -15,4 +15,4 @@ jobs:
         with:
           node-version: '22'
       - name: Run isolated customer verification tests
-        run: node --test tests/new-customer-verification.test.cjs
+        run: node --test tests/new-customer-verification.test.cjs tests/new-customer-integration-contract.test.cjs
