@@ -26,3 +26,23 @@ test('preferred time uses UK daylight saving independently from browser timezone
  assert.equal(londonTime('2027-07-10','20:15'),'2027-07-10T19:15:00.000Z');
  assert.throws(()=>londonTime('2027-02-30','20:15'),/valid UK time/);
 });
+test('a definite first-request closure allows a new date without retaining an uncertain attempt',async()=>{
+ const sent=[];const {client,values}=setup(async(_url,options)=>{
+  sent.push(JSON.parse(options.body));
+  return sent.length===1?Response.json({success:false,reason:'REVIEW_TIME_CLOSED',bookingApprovalAllowed:false},{status:409}):Response.json({success:true,bookingApprovalAllowed:false,reviewId:'new-date'});
+ });
+ await assert.rejects(client.submit(payload),/closed at that time/);
+ assert.equal(JSON.parse([...values.values()][0]).uncertain,false);
+ await client.submit({...payload,preferredTime:'2026-11-13T20:15:00Z'});
+ assert.notEqual(sent[0].requestKey,sent[1].requestKey);
+});
+test('a closure reply does not erase uncertainty from an earlier lost response',async()=>{
+ let count=0;const {client,values}=setup(async()=>{
+  if(++count===1)throw Error('lost reply');
+  return Response.json({success:false,reason:'REVIEW_TIME_CLOSED',bookingApprovalAllowed:false},{status:409});
+ });
+ await assert.rejects(client.submit(payload),/lost reply/);
+ await assert.rejects(client.submit(payload),/previous request still needs checking/);
+ assert.equal(JSON.parse([...values.values()][0]).uncertain,true);
+ await assert.rejects(client.submit({...payload,preferredTime:'2026-11-13T20:15:00Z'}),/previous request may have arrived/);
+});

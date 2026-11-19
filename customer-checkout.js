@@ -344,6 +344,28 @@ window.addEventListener('rtk:basket-changed',()=>{
  if(checkoutModal?.style.display==='flex'&&preferredDateInput?.value)refreshPreferredTimes();
 });
 
+function basketReviewClosureMessage(dateString, timeString = '') {
+  if (!dateString) return '';
+  if (typeof CLOSED_DATES !== 'undefined' && CLOSED_DATES.includes(dateString)) {
+    return 'We’re closed on this date. Please choose another date. Your basket is saved.';
+  }
+  const ranges = typeof CLOSED_RANGES === 'undefined' ? [] : CLOSED_RANGES;
+  const londonTime = typeof window === 'undefined' ? null : window.RTKBasketReview?.londonTime;
+  if (!ranges.length || typeof londonTime !== 'function') return '';
+  const closedAt = time => {
+    const instant = Date.parse(londonTime(dateString, time));
+    return ranges.some(range => instant >= +new Date(range.start) && instant < +new Date(range.end));
+  };
+  if (timeString) return closedAt(timeString)
+    ? 'We’re closed at that time. Please choose another time or date. Your basket is saved.' : '';
+  const minutes = value => Number(value.slice(0, 2)) * 60 + Number(value.slice(3));
+  const end = minutes(OPEN_WINDOW.end) + (typeof KITCHEN_OVERRUN_MINUTES === 'number' ? KITCHEN_OVERRUN_MINUTES : 60);
+  for (let minute = minutes(OPEN_WINDOW.start); minute <= end; minute += 5) {
+    const time = String(Math.floor(minute / 60)).padStart(2, '0') + ':' + String(minute % 60).padStart(2, '0');
+    if (!closedAt(time)) return '';
+  }
+  return 'We’re closed on this date. Please choose another date. Your basket is saved.';
+}
 function basketReviewDateMessage(dateString, now = new Date()) {
   const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
     timeZone:'Europe/London', year:'numeric', month:'2-digit', day:'2-digit',
@@ -354,7 +376,7 @@ function basketReviewDateMessage(dateString, now = new Date()) {
   if (dateString === today && `${parts.hour}:${parts.minute}` >= OPEN_WINDOW.end) {
     return 'Ordering has finished for today. Please choose another date.';
   }
-  return '';
+  return basketReviewClosureMessage(dateString);
 }
 function stopExpiredBasketReview(dateString) {
   const message = basketReviewDateMessage(dateString);
@@ -404,7 +426,7 @@ function showUnavailableBasketDialog({availabilityUnknown = false} = {}) {
       form.onsubmit = async event => {
         event.preventDefault();
         const button = form.querySelector('button'), status = form.querySelector('[role="status"]');
-        const dateMessage = basketReviewDateMessage(form.elements.date.value);
+        const dateMessage = basketReviewDateMessage(form.elements.date.value) || basketReviewClosureMessage(form.elements.date.value, form.elements.time.value);
         if (dateMessage) { status.textContent = dateMessage; return; }
         button.disabled = true;
         status.textContent = 'Sending your basket…';
