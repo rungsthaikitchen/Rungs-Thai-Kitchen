@@ -231,8 +231,8 @@ function validatePreferredTime() {
   if (!raw) return true;
 
   const chosen = new Date(raw);
-  if(masterWokTimeHints){
-    const available=masterWokTimeHints.get(chosen.toISOString())===true;
+  if(checkoutAvailability.hints){
+    const available=checkoutAvailability.hints.get(chosen.toISOString())===true;
     if(submitBtn)submitBtn.disabled=!available;
     return available;
   }
@@ -293,498 +293,46 @@ function validatePreferredTime() {
 // PREFERRED DATE / TIME DROPDOWN
 // ============================================================
 
-const preferredDateInput =
-  document.getElementById('cust-preferred-date');
-
-const preferredTimeSelect =
-  document.getElementById('cust-preferred-time-select');
-
-const preferredTimeHidden =
-  document.getElementById('cust-preferred-time');
-
-
-function formatTimeHHMM(date) {
-  return date.toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  });
-}
-
-
-function clearPreferredTimeSelect(message = 'Select a date first') {
-  if (!preferredTimeSelect) return;
-
-  preferredTimeSelect.innerHTML = '';
-
-  const option = document.createElement('option');
-  option.value = '';
-  option.textContent = message;
-
-  preferredTimeSelect.appendChild(option);
-
-  if (preferredTimeHidden) {
-    preferredTimeHidden.value = '';
-  }
-}
-
-
-let masterWokTimeHints=null;
-let masterWokUnverifiedTimes=new Set();
-let masterWokDriverBusyTimes=new Set();
-let preferredTimeGeneration=0;
-function availabilityBasketKey(){return JSON.stringify((window.basket||[]).map(line=>[line.itemId,line.qty,(line.mods||[]).map(m=>m.id),line.spice??null,line.item_note||null]));}
-function availabilityContextKey(date){return JSON.stringify([date,availabilityBasketKey(),document.querySelector('input[name="order-type"]:checked')?.value||'collection',document.getElementById('cust-address')?.value?.trim()||'']);}
-let lastAvailabilityBasketKey=availabilityBasketKey();
-window.addEventListener('rtk:basket-changed',()=>{
- const key=availabilityBasketKey();if(key===lastAvailabilityBasketKey)return;lastAvailabilityBasketKey=key;
- ++preferredTimeGeneration;masterWokTimeHints=null;window.RTKBookingClient?.cancelAvailability?.();
- clearPreferredTimeSelect('Basket changed — refresh times');
- document.getElementById('unavailable-basket-dialog')?.close();
- if(checkoutModal?.style.display==='flex'&&preferredDateInput?.value)refreshPreferredTimes();
+// BEGIN checkout-availability boundary
+const checkoutAvailability = window.RTKCheckoutAvailability.create({
+window, document, console,
+get getBasketKitchenLoad(){return typeof getBasketKitchenLoad==='undefined'?undefined:getBasketKitchenLoad;},
+get getSelectedOrderType(){return typeof getSelectedOrderType==='undefined'?undefined:getSelectedOrderType;},
+get hidePreferredTimeMessage(){return typeof hidePreferredTimeMessage==='undefined'?undefined:hidePreferredTimeMessage;},
+get isAllowed(){return typeof isAllowed==='undefined'?undefined:isAllowed;},
+get isAllowedForAlternativeFulfilment(){return typeof isAllowedForAlternativeFulfilment==='undefined'?undefined:isAllowedForAlternativeFulfilment;},
+get isClosedDate(){return typeof isClosedDate==='undefined'?undefined:isClosedDate;},
+get isFullyBooked(){return typeof isFullyBooked==='undefined'?undefined:isFullyBooked;},
+get refreshKitchenSlotMap(){return typeof refreshKitchenSlotMap==='undefined'?undefined:refreshKitchenSlotMap;},
+get roundTo5Min(){return typeof roundTo5Min==='undefined'?undefined:roundTo5Min;},
+get setAvailabilityLoading(){return typeof setAvailabilityLoading==='undefined'?undefined:setAvailabilityLoading;},
+get showBlackoutBannerForDate(){return typeof showBlackoutBannerForDate==='undefined'?undefined:showBlackoutBannerForDate;},
+get showPreferredTimeMessage(){return typeof showPreferredTimeMessage==='undefined'?undefined:showPreferredTimeMessage;},
+get toYMD(){return typeof toYMD==='undefined'?undefined:toYMD;},
+get KITCHEN_OVERRUN_MINUTES(){return typeof KITCHEN_OVERRUN_MINUTES==='undefined'?undefined:KITCHEN_OVERRUN_MINUTES;},
+get LEAD_MINUTES(){return typeof LEAD_MINUTES==='undefined'?undefined:LEAD_MINUTES;},
+get OPEN_DAYS(){return typeof OPEN_DAYS==='undefined'?undefined:OPEN_DAYS;},
+get OPEN_WINDOW(){return typeof OPEN_WINDOW==='undefined'?undefined:OPEN_WINDOW;},
+get basket(){return typeof basket==='undefined'?undefined:basket;},
+get checkoutModal(){return typeof checkoutModal==='undefined'?undefined:checkoutModal;},
+get CLOSED_DATES(){return typeof CLOSED_DATES==='undefined'?undefined:CLOSED_DATES;},
+get CLOSED_RANGES(){return typeof CLOSED_RANGES==='undefined'?undefined:CLOSED_RANGES;},
+get Event(){return typeof Event==='undefined'?undefined:Event;},
 });
-
-function basketReviewClosureMessage(dateString, timeString = '') {
-  if (!dateString) return '';
-  if (typeof CLOSED_DATES !== 'undefined' && CLOSED_DATES.includes(dateString)) {
-    return 'We’re closed on this date. Please choose another date. Your basket is saved.';
-  }
-  const ranges = typeof CLOSED_RANGES === 'undefined' ? [] : CLOSED_RANGES;
-  const londonTime = typeof window === 'undefined' ? null : window.RTKBasketReview?.londonTime;
-  if (!ranges.length || typeof londonTime !== 'function') return '';
-  const closedAt = time => {
-    const instant = Date.parse(londonTime(dateString, time));
-    return ranges.some(range => instant >= +new Date(range.start) && instant < +new Date(range.end));
-  };
-  if (timeString) return closedAt(timeString)
-    ? 'We’re closed at that time. Please choose another time or date. Your basket is saved.' : '';
-  const minutes = value => Number(value.slice(0, 2)) * 60 + Number(value.slice(3));
-  const end = minutes(OPEN_WINDOW.end) + (typeof KITCHEN_OVERRUN_MINUTES === 'number' ? KITCHEN_OVERRUN_MINUTES : 60);
-  for (let minute = minutes(OPEN_WINDOW.start); minute <= end; minute += 5) {
-    const time = String(Math.floor(minute / 60)).padStart(2, '0') + ':' + String(minute % 60).padStart(2, '0');
-    if (!closedAt(time)) return '';
-  }
-  return 'We’re closed on this date. Please choose another date. Your basket is saved.';
-}
-function basketReviewDateMessage(dateString, now = new Date()) {
-  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
-    timeZone:'Europe/London', year:'numeric', month:'2-digit', day:'2-digit',
-    hour:'2-digit', minute:'2-digit', hourCycle:'h23'
-  }).formatToParts(now).map(part => [part.type, part.value]));
-  const today = `${parts.year}-${parts.month}-${parts.day}`;
-  if (dateString && dateString < today) return 'This date has passed. Please choose another date.';
-  if (dateString === today && `${parts.hour}:${parts.minute}` >= OPEN_WINDOW.end) {
-    return 'Ordering has finished for today. Please choose another date.';
-  }
-  return basketReviewClosureMessage(dateString);
-}
-function stopExpiredBasketReview(dateString) {
-  const message = basketReviewDateMessage(dateString);
-  if (!message) return false;
-  document.getElementById('unavailable-basket-dialog')?.close();
-  clearPreferredTimeSelect(message);
-  preferredTimeSelect.disabled = true;
-  showPreferredTimeMessage(message);
-  return true;
-}
-function showUnavailableBasketDialog({availabilityUnknown = false} = {}) {
-  if (stopExpiredBasketReview(preferredDateInput?.value)) return;
-  let dialog = document.getElementById('unavailable-basket-dialog');
-  if (!dialog) {
-    dialog = document.createElement('dialog');
-    dialog.id = 'unavailable-basket-dialog';
-    dialog.setAttribute('aria-labelledby', 'unavailable-basket-title');
-    dialog.style.cssText = 'max-width:420px;width:calc(100% - 48px);padding:24px;border:0;border-radius:16px;color:#18222c;background:white;box-sizing:border-box;max-height:85vh;overflow-y:auto';
-    dialog.innerHTML = '<h2 id="unavailable-basket-title">Let’s arrange your order</h2>'
-      + '<p>We couldn’t find an online collection time for this combination of dishes. Please call us on <a href="tel:01134699564">0113 469 9564</a> so we can help arrange it. Your basket is saved here.</p>'
-      + '<form method="dialog"><button type="submit" autofocus>Back to checkout</button></form>';
-    document.body.appendChild(dialog);
-  }
-  const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
-  const introduction = availabilityUnknown
-    ? 'Online times could not be checked. '
-    : 'We couldn’t find an online ' + (orderType === 'delivery' ? 'delivery' : 'collection') + ' time for this combination of dishes. ';
-  dialog.querySelector('p').innerHTML = introduction
-    + 'Please call us on <a href="tel:01134699564">0113 469 9564</a> so we can help arrange it. Your basket is saved here.';
-  if (!dialog.open) dialog.showModal();
-  if (!dialog.querySelector('[data-review-form]') && window.RTKBasketReview) {
-    window.RTKBasketReview.enabled().then(enabled => {
-      if (!enabled || dialog.querySelector('[data-review-form]') || stopExpiredBasketReview(preferredDateInput?.value)) return;
-      const form = document.createElement('form');
-      form.dataset.reviewForm = 'true';
-      form.innerHTML = '<h3>Send us your basket to review</h3>'
-        + '<p>This is a request for us to contact you. It is not a confirmed order or a reserved time.</p>'
-        + '<label>Your name <input name="name" autocomplete="name" required maxlength="200"></label><br>'
-        + '<label>Phone number <input name="phone" type="tel" autocomplete="tel" required maxlength="40"></label><br>'
-        + '<label>Preferred date <input name="date" type="date" required></label><br>'
-        + '<label>Preferred time <input name="time" type="time" step="300" min="17:00" max="22:00" required></label>'
-        + '<p>We will check the basket and discuss what we can arrange. Please call if you need an immediate answer.</p>'
-        + '<button type="submit">Send basket for review</button><p role="status" aria-live="polite"></p>';
-      form.elements.name.value = document.getElementById('cust-name')?.value || '';
-      form.elements.phone.value = document.getElementById('cust-phone')?.value || '';
-      form.elements.date.value = document.getElementById('cust-preferred-date')?.value || '';
-      form.onsubmit = async event => {
-        event.preventDefault();
-        const button = form.querySelector('button'), status = form.querySelector('[role="status"]');
-        const dateMessage = basketReviewDateMessage(form.elements.date.value) || basketReviewClosureMessage(form.elements.date.value, form.elements.time.value);
-        if (dateMessage) { status.textContent = dateMessage; return; }
-        button.disabled = true;
-        status.textContent = 'Sending your basket…';
-        try {
-          const result = await window.RTKBasketReview.submit({
-            customer:{name:form.elements.name.value.trim(),phone:form.elements.phone.value.trim()},
-            orderType:document.querySelector('input[name="order-type"]:checked')?.value || 'collection',
-            deliveryAddress:document.getElementById('cust-address')?.value?.trim() || '',
-            preferredTime:window.RTKBasketReview.londonTime(form.elements.date.value,form.elements.time.value),
-            items:basket.map(line=>({item_id:line.itemId,qty:line.qty,
-              modifiers:(line.mods||[]).map(mod=>({id:mod.id})),spice:line.spice??null,item_note:line.item_note||null}))
-          });
-          status.textContent = 'Basket received for review. Your order and preferred time are not confirmed. Please call us to discuss it.';
-          button.textContent = 'Basket sent';
-        } catch(error) {
-          status.textContent = error.message || 'Please retry with the same details or call us.';
-          button.disabled = false;
-        }
-      };
-      dialog.insertBefore(form, dialog.querySelector('form[method="dialog"]'));
-    });
-  }
-}
-
-async function populatePreferredTimeSelect(dateString) {
-  const generation=++preferredTimeGeneration;
-  const requestedContext=availabilityContextKey(dateString);
-  const current=()=>generation===preferredTimeGeneration&&requestedContext===availabilityContextKey(dateString);
-  masterWokTimeHints=null;masterWokUnverifiedTimes=new Set();masterWokDriverBusyTimes=new Set();
-  if (
-    !preferredTimeSelect ||
-    !preferredTimeHidden ||
-    !dateString
-  ) {
-    return;
-  }
-
-  if (stopExpiredBasketReview(dateString)) return;
-  const hintOrderType=document.querySelector('input[name="order-type"]:checked')?.value||'collection';
-  if(hintOrderType==='delivery'&&!(document.getElementById('cust-address')?.value||'').trim()){
-    clearPreferredTimeSelect('Enter your delivery address first');
-    showPreferredTimeMessage('Enter your delivery address to see arrival times.');
-    return;
-  }
-  setAvailabilityLoading(true);
-  try {
-  clearPreferredTimeSelect('Checking available times…');
-  preferredTimeSelect.disabled = true;
-
-  const serviceDate =
-    new Date(`${dateString}T12:00:00`);
-
-  // Load the latest kitchen commitments for this date.
-  // Select the authoritative hint source below after validating the date.
-
-  preferredTimeSelect.innerHTML = '';
-
-  const placeholder = document.createElement('option');
-  placeholder.value = '';
-  placeholder.textContent = 'Select a time';
-  placeholder.selected = true;
-
-  preferredTimeSelect.appendChild(placeholder);
-
-  const start =
-    new Date(`${dateString}T${OPEN_WINDOW.start}:00`);
-
-  const end =
-    new Date(`${dateString}T${OPEN_WINDOW.end}:00`);
-
-    // Overrun fulfilment may extend beyond normal closing time,
-// but should only be offered when the basket cannot fit
-// anywhere in the remaining normal service window.
-const extendedEnd = new Date(
-  end.getTime() +
-  KITCHEN_OVERRUN_MINUTES * 60 * 1000
-);
-
-  const now = new Date();
-
-  const earliestToday = new Date(now);
-  earliestToday.setMinutes(
-    earliestToday.getMinutes() + LEAD_MINUTES
-  );
-
-  const roundedEarliestToday =
-    roundTo5Min(earliestToday);
-
-  const todayKey = toYMD(now);
-const isToday = dateString === todayKey;
-
-// If this isn't one of our normal trading days,
-// don't generate a meaningless list of unavailable times.
-if (!OPEN_DAYS.includes(serviceDate.getDay())) {
-  preferredTimeSelect.innerHTML = '';
-
-  const option = document.createElement('option');
-  option.value = '';
-  option.textContent = 'Closed on this date';
-  option.selected = true;
-
-  preferredTimeSelect.appendChild(option);
-
-  preferredTimeSelect.disabled = true;
-  preferredTimeHidden.value = '';
-
-  return;
-}
-
-let masterWokAssessment = false;
-try {
-  if(!window.RTKBookingClient)throw Error('Ordering service is still loading. Please retry.');
-  const times=[];
-  const hintEnd=(isToday&&now<=end)||window.RTKApprovedReview?.token?extendedEnd:end;
-  for(let slot=new Date(start);slot<=hintEnd;slot=new Date(slot.getTime()+5*60*1000))times.push(slot.toISOString());
-  const preview=await window.RTKBookingClient.availability({times,reviewApprovalToken:window.RTKApprovedReview?.token,
-    orderType:document.querySelector('input[name="order-type"]:checked')?.value||'collection',
-    address:document.getElementById('cust-address')?.value?.trim()||'',items:basket.map(line=>({
-    item_id:line.itemId,qty:line.qty,modifiers:(line.mods||[]).map(mod=>({id:mod.id})),
-    spice:line.spice??null,item_note:line.item_note||null}))}, {onProgress:({completed,total})=>{
-      if (current()) showPreferredTimeMessage(`Checking available times… ${Math.round(completed / total * 100)}%`);
-    }});
-  if(generation!==preferredTimeGeneration||requestedContext!==availabilityContextKey(dateString))return;
-  if(preview.route==='MASTER_WOK'){
-    masterWokAssessment = true;
-    masterWokTimeHints=new Map(preview.hints.map(h=>[h.time,h.available]));
-    masterWokUnverifiedTimes=new Set(preview.hints.filter(h=>h.unverified===true).map(h=>h.time));
-    masterWokDriverBusyTimes=new Set(preview.hints.filter(h=>h.availabilityReason==='DRIVER_BUSY').map(h=>h.time));
-  }
-  else await refreshKitchenSlotMap(serviceDate);
-  if(generation!==preferredTimeGeneration||requestedContext!==availabilityContextKey(dateString))return;
-  hidePreferredTimeMessage();
-} catch(error) {
-  if(generation!==preferredTimeGeneration||requestedContext!==availabilityContextKey(dateString))return;
-  clearPreferredTimeSelect('Times unavailable — please retry');
-  showPreferredTimeMessage(error.message||'Times could not be checked. Please retry.');
-  // An unavailable service is not proof of an impossible basket. Offer the
-  // separately gated enquiry flow without enabling either booking writer.
-  if (window.RTKBasketReview && await window.RTKBasketReview.enabled()
-      && generation === preferredTimeGeneration) {
-    const message = document.getElementById('preferred-time-message');
-    if (message) {
-      const reviewButton = document.createElement('button');
-      reviewButton.type = 'button';
-      reviewButton.textContent = 'Ask us to review this basket';
-      reviewButton.style.cssText = 'display:block;margin-top:10px';
-      reviewButton.onclick = () => showUnavailableBasketDialog({availabilityUnknown:true});
-      message.appendChild(reviewButton);
-    }
-  }
-  return;
-}
-let availableCount = 0;
-  const isDelivery = getSelectedOrderType() === 'delivery';
-
-  for (
-    let slot = new Date(start);
-    slot <= end;
-    slot = new Date(slot.getTime() + (5 * 60 * 1000))
-  ) {
-    const option = document.createElement('option');
-    const timeText = formatTimeHHMM(slot);
-    if (isDelivery && window.isLateDeliverySlot(dateString, timeText)) continue;
-
-    option.value = timeText;
-
-    // Past / lead-time slots today are unavailable.
-    const insideLeadTime =
-      isToday && slot < roundedEarliestToday;
-
-    // Existing scheduler decides whether the basket can fit.
-    const schedulerAllows =
-      !insideLeadTime && isAllowed(slot);
-
-    if (schedulerAllows) {
-  option.textContent = timeText;
-  availableCount++;
-} else {
-
-  const closedBlackout =
-    typeof isClosedDate === 'function'
-      ? isClosedDate(slot)
-      : null;
-
-  const fullyBookedBlackout =
-    typeof isFullyBooked === 'function'
-      ? isFullyBooked(slot)
-      : null;
-
-  if (closedBlackout) {
-    option.textContent =
-      `${timeText} — Closed`;
-  } else if (fullyBookedBlackout) {
-    option.textContent =
-      `${timeText} — Fully booked`;
-  } else {
-    option.textContent =
-      masterWokDriverBusyTimes.has(slot.toISOString())?`${timeText} — Delivery unavailable`:
-      masterWokUnverifiedTimes.has(slot.toISOString())?`${timeText} — Not verified`:`${timeText} — Unavailable`;
-  }
-
-  option.disabled = true;
-}
-
-    preferredTimeSelect.appendChild(option);
-  }
-
-  // If nothing can accommodate this basket during the normal
-// service window, expose genuine overrun fulfilment options.
-// Overrun is only available for today's service while
-// the normal ordering window is still open.
-const isTodayService =
-  dateString === toYMD(now);
-
-const beforeNormalClose =
-  now <= end;
-
-if (
-  availableCount === 0 &&
-  isTodayService &&
-  beforeNormalClose
-) {
-
-  for (
-    let slot = new Date(
-      end.getTime() + (5 * 60 * 1000)
-    );
-    slot <= extendedEnd;
-    slot = new Date(
-      slot.getTime() + (5 * 60 * 1000)
-    )
-  ) {
-    const option =
-      document.createElement('option');
-
-    const timeText =
-      formatTimeHHMM(slot);
-
-    option.value = timeText;
-
-    if (isDelivery && window.isLateDeliverySlot(dateString, timeText)) continue;
-    const schedulerAllows =
-      isAllowedForAlternativeFulfilment(slot);
-
-    if (schedulerAllows) {
-      option.textContent = timeText;
-      availableCount++;
-    } else {
-      option.textContent =
-        masterWokDriverBusyTimes.has(slot.toISOString())?`${timeText} — Delivery unavailable`:
-      masterWokUnverifiedTimes.has(slot.toISOString())?`${timeText} — Not verified`:`${timeText} — Unavailable`;
-
-      option.disabled = true;
-    }
-
-    preferredTimeSelect.appendChild(option);
-  }
-}
-
-  if (availableCount === 0) {
-    placeholder.textContent =
-      'No times available on this date';
-    if (masterWokAssessment) showUnavailableBasketDialog({availabilityUnknown:true});
-
-    preferredTimeSelect.value = '';
-    preferredTimeHidden.value = '';
-  }
-
-  preferredTimeSelect.disabled = false;
-  if(window.RTKApprovedReview&&new Date(window.RTKApprovedReview.preferredTime).toISOString().slice(0,10)===dateString){
-    const agreedText=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(window.RTKApprovedReview.preferredTime));
-    if([...preferredTimeSelect.options].some(o=>o.value===agreedText&&!o.disabled)){
-      preferredTimeSelect.value=agreedText;
-      preferredTimeSelect.dispatchEvent(new Event('change',{bubbles:true}));
-    }
-  }
-
-  console.log(
-    '[preferred-time] generated slots:',
-    {
-      date: dateString,
-      availableCount,
-      basketLoad:
-        typeof getBasketKitchenLoad === 'function'
-          ? getBasketKitchenLoad()
-          : null
-    }
-  );
-  } finally {
-    if (current()) setAvailabilityLoading(false);
-  }
-}
-
-
-async function refreshPreferredTimes() {
-  const date=preferredDateInput?.value;
-  if(!date)return;
-  const previous=preferredTimeSelect?.value||'';
-  const generation=preferredTimeGeneration+1;
-  await populatePreferredTimeSelect(date);
-  if(generation!==preferredTimeGeneration)return;
-  const option=[...preferredTimeSelect.options].find(o=>o.value===previous&&!o.disabled);
-  if(previous&&option){
-    preferredTimeSelect.value=previous;
-    preferredTimeSelect.dispatchEvent(new Event('change',{bubbles:true}));
-  }else if(previous){
-    showPreferredTimeMessage('Please choose a time from the refreshed list.');
-  }
-}
-document.getElementById('refresh-preferred-times')?.addEventListener('click',refreshPreferredTimes);
-window.addEventListener('pageshow',event=>{
-  if(event.persisted&&document.getElementById('checkout-modal')?.style.display==='flex')refreshPreferredTimes();
-});
-
-if (preferredDateInput) {
-  preferredDateInput.addEventListener('change', async () => {
-    const dateString = preferredDateInput.value;
-
-    if (!dateString) {
-      clearPreferredTimeSelect();
-      return;
-    }
-
-    showBlackoutBannerForDate(
-    preferredDateInput.value
-  );
-
-    await populatePreferredTimeSelect(dateString);
-  });
-}
-
-
-document.addEventListener('change', event => {
-  if (event.target.name === 'order-type' && preferredDateInput?.value === '2026-11-06') {
-    populatePreferredTimeSelect(preferredDateInput.value);
-  }
-});
-
-if (preferredTimeSelect) {
-  preferredTimeSelect.addEventListener('change', () => {
-    if (
-      !preferredDateInput?.value ||
-      !preferredTimeSelect.value
-    ) {
-      preferredTimeHidden.value = '';
-      return;
-    }
-
-    preferredTimeHidden.value =
-      `${preferredDateInput.value}T${preferredTimeSelect.value}`;
-
-    console.log(
-      '[preferred-time] selected:',
-      preferredTimeHidden.value
-    );
-  });
-}
-
+const preferredDateInput=checkoutAvailability.preferredDateInput;
+const preferredTimeSelect=checkoutAvailability.preferredTimeSelect;
+const preferredTimeHidden=checkoutAvailability.preferredTimeHidden;
+function formatTimeHHMM(...args){return checkoutAvailability.formatTimeHHMM(...args);}
+function clearPreferredTimeSelect(...args){return checkoutAvailability.clearPreferredTimeSelect(...args);}
+function availabilityBasketKey(...args){return checkoutAvailability.availabilityBasketKey(...args);}
+function availabilityContextKey(...args){return checkoutAvailability.availabilityContextKey(...args);}
+function basketReviewClosureMessage(...args){return checkoutAvailability.basketReviewClosureMessage(...args);}
+function basketReviewDateMessage(...args){return checkoutAvailability.basketReviewDateMessage(...args);}
+function stopExpiredBasketReview(...args){return checkoutAvailability.stopExpiredBasketReview(...args);}
+function showUnavailableBasketDialog(...args){return checkoutAvailability.showUnavailableBasketDialog(...args);}
+function populatePreferredTimeSelect(...args){return checkoutAvailability.populatePreferredTimeSelect(...args);}
+function refreshPreferredTimes(...args){return checkoutAvailability.refreshPreferredTimes(...args);}
+// END checkout-availability boundary
 // Checkout modal helpers
 const checkoutModal = document.getElementById('checkout-modal');
 const checkoutClose = document.getElementById('checkout-close');
@@ -1923,7 +1471,7 @@ async function refreshKitchenScheduleForDateTime(dt) {
 }
 
 function isAllowed(dt){
-  if(masterWokTimeHints)return withinOpenHours(dt)&&masterWokTimeHints.get(dt.toISOString())===true;
+  if(checkoutAvailability.hints)return withinOpenHours(dt)&&checkoutAvailability.hints.get(dt.toISOString())===true;
   return withinOpenHours(dt) &&
          !isClosedDate(dt) &&
          !isFullyBooked(dt) &&
@@ -1931,7 +1479,7 @@ function isAllowed(dt){
 }
 
 function isAllowedForAlternativeFulfilment(dt) {
-  if(masterWokTimeHints)return masterWokTimeHints.get(dt.toISOString())===true;
+  if(checkoutAvailability.hints)return checkoutAvailability.hints.get(dt.toISOString())===true;
   // Must still be one of our trading days.
   if (!OPEN_DAYS.includes(dt.getDay())) {
     return false;
@@ -2263,14 +1811,14 @@ document.addEventListener('change', async (e) => {
     updateCheckoutOrderSummary();
     // Old collection times must stop being selectable before delivery pricing
     // or geocoding awaits. Supersede in-flight checks immediately as well.
-    const generation=++preferredTimeGeneration;
+    const generation=++checkoutAvailability.generation;
     const date=document.getElementById('cust-preferred-date')?.value;
     const context=availabilityContextKey(date);
     window.RTKBookingClient?.cancelAvailability?.();
-    masterWokTimeHints=null;masterWokUnverifiedTimes=new Set();masterWokDriverBusyTimes=new Set();
+    checkoutAvailability.hints=null;checkoutAvailability.unverifiedTimes=new Set();checkoutAvailability.driverBusyTimes=new Set();
     clearPreferredTimeSelect('Checking times for your order type…');
     await refreshCheckoutPricingAndRender();
-    if(generation!==preferredTimeGeneration||context!==availabilityContextKey(date))return;
+    if(generation!==checkoutAvailability.generation||context!==availabilityContextKey(date))return;
     await populatePreferredTimeSelect(date);
   }
 });
@@ -2293,7 +1841,7 @@ document.addEventListener('input', (e) => {
   if (e.target && e.target.id === 'cust-address') {
     updateCheckoutOrderSummary();
     if(document.querySelector('input[name="order-type"]:checked')?.value==='delivery'){
-      ++preferredTimeGeneration;masterWokTimeHints=null;
+      ++checkoutAvailability.generation;checkoutAvailability.hints=null;
       clearPreferredTimeSelect('Finish entering your delivery address');
     }
   }
@@ -2576,7 +2124,7 @@ document.getElementById("apply-discount-code-btn")?.addEventListener("click", as
 
 
 		// Prevent accidental double submit in the same session
-		let isSubmittingOrder = false;
+// Submission guard is private to its controller.
 
 		// One key per checkout attempt; reused on retries; cleared on success
 		function getIdempotencyKey() {
@@ -2684,720 +2232,46 @@ document.getElementById("apply-discount-code-btn")?.addEventListener("click", as
 }
 
 // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
-checkoutForm.addEventListener('submit', async (e) => {
+// BEGIN checkout-submission boundary
+checkoutForm.addEventListener('submit',window.RTKCheckoutSubmission.create({
+window, document, console,
+get applyWedThuDiscount(){return typeof applyWedThuDiscount==='undefined'?undefined:applyWedThuDiscount;},
+get getItemKitchenLoad(){return typeof getItemKitchenLoad==='undefined'?undefined:getItemKitchenLoad;},
+get getNextOrderRef(){return typeof getNextOrderRef==='undefined'?undefined:getNextOrderRef;},
+get getOrCreateCustomer(){return typeof getOrCreateCustomer==='undefined'?undefined:getOrCreateCustomer;},
+get getSelectedOrderType(){return typeof getSelectedOrderType==='undefined'?undefined:getSelectedOrderType;},
+get isAllowed(){return typeof isAllowed==='undefined'?undefined:isAllowed;},
+get isAllowedForAlternativeFulfilment(){return typeof isAllowedForAlternativeFulfilment==='undefined'?undefined:isAllowedForAlternativeFulfilment;},
+get loadServiceState(){return typeof loadServiceState==='undefined'?undefined:loadServiceState;},
+get populatePreferredTimeSelect(){return typeof populatePreferredTimeSelect==='undefined'?undefined:populatePreferredTimeSelect;},
+get recomputeCheckoutTotals(){return typeof recomputeCheckoutTotals==='undefined'?undefined:recomputeCheckoutTotals;},
+get refreshKitchenSlotMap(){return typeof refreshKitchenSlotMap==='undefined'?undefined:refreshKitchenSlotMap;},
+get renderOrder(){return typeof renderOrder==='undefined'?undefined:renderOrder;},
+get resetCheckoutForNextOrder(){return typeof resetCheckoutForNextOrder==='undefined'?undefined:resetCheckoutForNextOrder;},
+get showOrderSuccess(){return typeof showOrderSuccess==='undefined'?undefined:showOrderSuccess;},
+get showPausedOrderAlert(){return typeof showPausedOrderAlert==='undefined'?undefined:showPausedOrderAlert;},
+get showPreferredTimeMessage(){return typeof showPreferredTimeMessage==='undefined'?undefined:showPreferredTimeMessage;},
+get toYMD(){return typeof toYMD==='undefined'?undefined:toYMD;},
+get validatePreferredTime(){return typeof validatePreferredTime==='undefined'?undefined:validatePreferredTime;},
+get DELIVERY_FREE_THRESHOLD(){return typeof DELIVERY_FREE_THRESHOLD==='undefined'?undefined:DELIVERY_FREE_THRESHOLD;},
+get OPEN_WINDOW(){return typeof OPEN_WINDOW==='undefined'?undefined:OPEN_WINDOW;},
+get SERVICE_STATE(){return typeof SERVICE_STATE==='undefined'?undefined:SERVICE_STATE;},
+get appliedDiscountAmount(){return typeof appliedDiscountAmount==='undefined'?undefined:appliedDiscountAmount;},
+get appliedDiscountCode(){return typeof appliedDiscountCode==='undefined'?undefined:appliedDiscountCode;},
+get basket(){return typeof basket==='undefined'?undefined:basket;},
+get checkoutBaseSubtotal(){return typeof checkoutBaseSubtotal==='undefined'?undefined:checkoutBaseSubtotal;},
+get checkoutForm(){return typeof checkoutForm==='undefined'?undefined:checkoutForm;},
+get checkoutModal(){return typeof checkoutModal==='undefined'?undefined:checkoutModal;},
+get checkoutMsg(){return typeof checkoutMsg==='undefined'?undefined:checkoutMsg;},
+get deliveryMessageEl(){return typeof deliveryMessageEl==='undefined'?undefined:deliveryMessageEl;},
+get deliveryQuoteState(){return typeof deliveryQuoteState==='undefined'?undefined:deliveryQuoteState;},
+get preferredDateInput(){return typeof preferredDateInput==='undefined'?undefined:preferredDateInput;},
+get preferredTimeHidden(){return typeof preferredTimeHidden==='undefined'?undefined:preferredTimeHidden;},
+get preferredTimeSelect(){return typeof preferredTimeSelect==='undefined'?undefined:preferredTimeSelect;},
+get sb(){return typeof sb==='undefined'?undefined:sb;},
+set checkoutBaseSubtotal(value){checkoutBaseSubtotal=value;}
+}));
+// END checkout-submission boundary
 
-  e.preventDefault();
-
-  // HARD GUARD: date and time are mandatory
-  const submitDateValue =
-    document.getElementById('cust-preferred-date')?.value?.trim() || '';
-
-  const submitTimeSelectValue =
-    document.getElementById('cust-preferred-time-select')?.value?.trim() || '';
-
-  const submitPreferredTimeValue =
-    document.getElementById('cust-preferred-time')?.value?.trim() || '';
-
-  if (!submitDateValue) {
-    checkoutMsg.style.color = '#b02a2a';
-    checkoutMsg.textContent =
-      'Please select a date for your order.';
-
-    document.getElementById('cust-preferred-date')?.focus();
-    return;
-  }
-
-  if (!submitTimeSelectValue || !submitPreferredTimeValue) {
-    checkoutMsg.style.color = '#b02a2a';
-    checkoutMsg.textContent =
-      'Please select an available time for your order.';
-
-    document.getElementById('cust-preferred-time-select')?.focus();
-    return;
-  }
-
-  await loadServiceState();
-
-  if (SERVICE_STATE.mode === 'paused') {
-    showPausedOrderAlert(
-      SERVICE_STATE.customer_message
-    );
-
-    console.warn(
-      '[checkout] submit blocked - orders paused'
-    );
-    return;
-  }
-
-  const submitPreferredTimeEl =
-  document.getElementById('cust-preferred-time');
-
-if (submitPreferredTimeEl?.value) {
-
-  const selectedTime =
-    new Date(submitPreferredTimeEl.value);
-
-  // Get the very latest kitchen commitments
-  await refreshKitchenSlotMap(selectedTime);
-
-  // A time after normal closing may only be accepted as a
-// same-day overrun while today's normal ordering window is still open.
-const normalClose = new Date(selectedTime);
-const [closeHour, closeMinute] =
-  OPEN_WINDOW.end.split(':').map(Number);
-
-normalClose.setHours(
-  closeHour,
-  closeMinute,
-  0,
-  0
-);
-
-const nowForSubmit = new Date();
-
-const isOverrunTime =
-  selectedTime > normalClose;
-
-const isSameDayOrder =
-  toYMD(selectedTime) === toYMD(nowForSubmit);
-
-const beforeNormalClose =
-  nowForSubmit < normalClose;
-
-const selectedTimeIsAllowed =
-  isOverrunTime
-    ? (
-        isSameDayOrder &&
-        beforeNormalClose &&
-        isAllowedForAlternativeFulfilment(selectedTime)
-      )
-    : isAllowed(selectedTime);
-
- // Is the customer's selected slot still available?
-if (!selectedTimeIsAllowed) {
-  
-  const selectedTimeText =
-    selectedTime.toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-
-  // Rebuild the visible dropdown using the latest
-  // kitchen commitments we have just loaded.
-  if (
-    preferredDateInput?.value &&
-    typeof populatePreferredTimeSelect === 'function'
-  ) {
-    await populatePreferredTimeSelect(
-      preferredDateInput.value
-    );
-  }
-
-  // Do not silently move the customer's order.
-  preferredTimeHidden.value = '';
-
-  if (preferredTimeSelect) {
-    preferredTimeSelect.value = '';
-  }
-
-  showPreferredTimeMessage(
-    `Sorry — ${selectedTimeText} has just become unavailable. ` +
-    `Please choose another available time.`
-  );
-
-  console.log(
-    '[kitchen-schedule] submit blocked; selected time no longer available:',
-    selectedTime
-  );
-
-  return;
-}
-}
-
-  // Final safety check against closures / fully-booked windows
-  if (!validatePreferredTime()) {
-    return;
-  }
-
-  if (isSubmittingOrder) return;
-  isSubmittingOrder = true;
-
-  const submitBtn = checkoutForm.querySelector('button[type="submit"], input[type="submit"]');
-  if (submitBtn) submitBtn.disabled = true;
-
-  checkoutMsg.style.color = '';
-  checkoutMsg.textContent = 'Placing order…';
-
-  try {
-    const name      = document.getElementById('cust-name').value.trim();
-    const email     = document.getElementById('cust-email').value.trim();
-    const phone     = document.getElementById('cust-phone').value.trim();
-    const address   = document.getElementById('cust-address').value.trim();
-    const orderType = document.querySelector('input[name="order-type"]:checked')?.value || 'collection';
-    if (orderType === 'delivery' && window.isCollectionOnlyOrderDate?.(document.getElementById('cust-preferred-date')?.value)) {
-      checkoutMsg.style.color = '#b02a2a';
-      checkoutMsg.textContent = 'Delivery is unavailable on Saturday 31 October. Please select Collection.';
-      isSubmittingOrder = false;
-      if (submitBtn) submitBtn.disabled = false;
-      return;
-    }
-    const notes     = document.getElementById('cust-notes').value.trim() || null;
-
-    // ASAP checkbox
-    const asapCheckbox   = document.getElementById('cust-asap');
-    const asapRequested  = !!(asapCheckbox && asapCheckbox.checked);
-
-    // Preferred time input
-    const preferredInput   = document.getElementById('cust-preferred-time');
-    const preferredTimeRaw = preferredInput ? preferredInput.value : "";
-    if (orderType === 'delivery' && window.isLateDeliverySlot(preferredTimeRaw.slice(0, 10), preferredTimeRaw.slice(11, 16))) {
-      showPreferredTimeMessage('Please choose collection for slots from 7:30pm.');
-      return;
-    }
-    const selectedLocal    = preferredTimeRaw ? new Date(preferredTimeRaw) : null;
-
-    // Only store a preferred_time in DB if NOT ASAP
-    const preferredTimeISO =
-      (!asapRequested && selectedLocal) ? selectedLocal.toISOString() : null;
-
-    // Communication preference (sms / email)
-    const commPrefInput = document.querySelector(
-      'input[name="communication_preference"]:checked'
-    );
-    const communicationPreference = commPrefInput
-      ? commPrefInput.value
-      : 'sms';
-
-    // ---------- Basic validation ----------
-    if (!name){
-      checkoutMsg.style.color='#b02a2a';
-      checkoutMsg.textContent='Please enter your full name.';
-      return;
-    }
-    if (!email){
-      checkoutMsg.style.color='#b02a2a';
-      checkoutMsg.textContent='Please enter your email.';
-      return;
-    }
-    if (!phone){
-      checkoutMsg.style.color='#b02a2a';
-      checkoutMsg.textContent='Please enter your phone number.';
-      return;
-    }
-    if (orderType === 'delivery' && !address){
-      checkoutMsg.style.color='#b02a2a';
-      checkoutMsg.textContent='Please enter your delivery address.';
-      document.getElementById('cust-address').focus();
-      return;
-    }
-	
-	if (orderType === 'delivery') {
-  const subtotalNow = basket.reduce((sum, item) => {
-    return sum + (Number(item.unitPrice || 0) * Number(item.qty || 1));
-  }, 0);
-
-  const quote = window.deliveryQuoteState || {};
-  const deliveryFeeNow = Number(quote.fee || 0);
-  const routeMilesNow = Number(
-    quote.routeMiles ??
-    quote.route_miles ??
-    quote.distanceMiles ??
-    quote.distance_miles ??
-    0
-  );
-
-  if (quote.loading || quote.status === 'loading') {
-  checkoutMsg.style.color = '#b02a2a';
-  checkoutMsg.textContent =
-    'We are still checking your delivery address. Please wait a moment and try again.';
-  return;
-}
-
-const hasFreeDelivery = subtotalNow >= DELIVERY_FREE_THRESHOLD;
-
-if (!hasFreeDelivery && deliveryFeeNow <= 0) {
-  checkoutMsg.style.color = '#b02a2a';
-  checkoutMsg.textContent =
-    'Sorry, we could not calculate your delivery fee. Please check your address and try again.';
-  document.getElementById('cust-address').focus();
-  return;
-}
-
-if (!hasFreeDelivery && (!routeMilesNow || routeMilesNow <= 0)) {
-  checkoutMsg.style.color = '#b02a2a';
-  checkoutMsg.textContent =
-    'Sorry, we could not confirm your delivery distance. Please check your address and try again.';
-  document.getElementById('cust-address').focus();
-  return;
-}
-}
-			// ---------- Basket + totals ----------
-			const itemsSnapshot = basket.map(i => ({ ...i }));
-			const subtotal = Math.round(itemsSnapshot.reduce((s,i)=> s + i.unitPrice * i.qty, 0) * 100) / 100;
-
-			// fulfilment time + ASAP (match checkout rules) — use UNIQUE names here
-			const preferredTimeRawTotals =
-			  (document.getElementById('cust-preferred-time')?.value ||
-			   document.getElementById('preferred-time')?.value ||
-			   document.querySelector('input[name="preferred_time"]')?.value ||
-			   '').trim();
-
-			const asapRequestedTotals =
-			  !!document.querySelector('input[name="asap_requested"]:checked') ||
-			  !!document.getElementById('asap')?.checked ||
-			  !!document.getElementById('asap-requested')?.checked ||
-			  !!document.getElementById('asapRequested')?.checked;
-
-			// discount based on fulfilment day (Wed/Thu), ASAP uses "today" (Option A)
-			const disc = applyWedThuDiscount(subtotal, preferredTimeRawTotals, asapRequestedTotals);
-
-			const discountCodeAmount = Number(appliedDiscountAmount || 0);
-
-			const discountedSubtotal = Math.max(
-			  0,
-			  Number(disc.discountedSubtotal || subtotal) - discountCodeAmount
-			);
-
-			// ✅ Delivery threshold based on PRE-discount subtotal
-			const deliveryFee =
-			  (orderType === 'delivery' && subtotal < 20) ? 3.00 : 0.00;
-
-			// Final total used for checkout / order message
-			const total = Math.round((discountedSubtotal + deliveryFee) * 100) / 100;
-
-
-
-
-    function fail(step, err){
-      console.error(`[Checkout] ${step} failed:`, err);
-      checkoutMsg.style.color = '#b02a2a';
-      checkoutMsg.textContent =
-        `${step} failed: ${err?.message || err?.hint || 'Unknown error'}`;
-    }
-
-    let customerId=null,orderRef=null,orderId=null,submitTotals=null;
-    const previewTotals=recomputeCheckoutTotals();
-    if(!window.RTKBookingClient)throw new Error('Ordering service is still loading. Please reload and try again.');
-    const booking=await window.RTKBookingClient.submit({
-      preferredTime:preferredTimeISO,orderType,
-      ...(window.RTKApprovedReview?{reviewApprovalToken:window.RTKApprovedReview.token,reviewHoldingAcknowledged:document.getElementById('review-holding-ack')?.checked===true}:{}),
-      customer:{name,email,phone,address},notes,
-      items:itemsSnapshot.map(line=>({item_id:line.itemId,qty:line.qty,
-        modifiers:(line.mods||[]).map(mod=>({id:mod.id})),spice:line.spice??null,
-        item_note:line.item_note||null})),
-      discountCode:appliedDiscountCode||null,
-      paymentPreference:document.querySelector('input[name="paymentPreference"]:checked')?.value||'on_arrival',
-      communicationPreference,
-      expectedTotals:{subtotal:Number(previewTotals.subtotal),total:Number(previewTotals.total),
-        delivery_fee:Number(previewTotals.delivery_fee),loyalty_discount:Number(previewTotals.loyalty_discount||0),
-        discount:Math.round((Number(previewTotals.subtotal)+Number(previewTotals.delivery_fee)-Number(previewTotals.total))*100)/100}
-    });
-    const masterWokManaged=booking.route==='MASTER_WOK';
-    if(masterWokManaged){
-      orderId=booking.order.orderId;orderRef=booking.order.orderRef;customerId=booking.order.customerId;
-      // Keep the receipt's existing separate voucher/loyalty display contract.
-      submitTotals={...previewTotals,...booking.order.totals,discount:Number(booking.order.totals.discount_amount||0)};
-      window.__checkoutTotals=submitTotals;
-    }else{
-    // ---------- Get or create customer ----------
-    customerId = null;
-    try {
-      const row = await getOrCreateCustomer({
-        name,
-        email: email?.trim().toLowerCase() || null,
-        phone: phone?.trim() || null,
-        address
-      });
-      customerId = row?.id;
-    } catch (err) {
-      checkoutMsg.style.color = '#b02a2a';
-      checkoutMsg.textContent =
-        'Saving your details had a hiccup — trying again…';
-      const row = await getOrCreateCustomer({
-        name,
-        email: email?.trim().toLowerCase() || null,
-        phone: phone?.trim() || null,
-        address
-      });
-      customerId = row?.id;
-    }
-    if (!customerId) {
-      checkoutMsg.style.color = '#b02a2a';
-      checkoutMsg.textContent = 'Sorry — we could not save your details.';
-      return;
-    }
-
-    // ---------- Global sequential order ref ----------
-    orderRef = 'RTK-???';
-    try {
-      orderRef = await getNextOrderRef();
-    } catch (err) {
-      console.warn('Falling back to timestamp-based ref');
-      orderRef = 'RTK-' + Date.now();
-    }
-
-    // ---------- Payment preference ----------
-    const paymentPreferenceInput = document.querySelector(
-      'input[name="paymentPreference"]:checked'
-    );
-    const payment_preference = paymentPreferenceInput
-      ? paymentPreferenceInput.value
-      : 'on_arrival';
-	  
-				  if (getSelectedOrderType === "delivery") {
-				  const quote = window.deliveryQuoteState || deliveryQuoteState;
-
-				  // ✅ Outside radius wins over free-delivery messaging
-				  if (quote && quote.eligible === false) {
-					deliveryMessageEl.textContent =
-					  quote.reason || "Sorry, this address is outside our 3-mile delivery area. Please call us on 0113 469 9564 and we’ll see what we can do 😊";
-					deliveryMessageEl.className = "delivery-message delivery-error";
-					return;
-				  }
-
-				  // ✅ Only show free delivery upsell if still eligible / not yet known to be ineligible
-				  if (checkoutBaseSubtotal < 30) {
-					deliveryMessageEl.textContent = "🎉 Free delivery on orders over £30";
-					deliveryMessageEl.className = "delivery-message delivery-info";
-					return;
-				  }
-
-				  if (checkoutBaseSubtotal >= 30) {
-					deliveryMessageEl.textContent = "🎉 Free delivery applied";
-					deliveryMessageEl.className = "delivery-message delivery-success";
-					return;
-				  }
-				}
-
-			// 🚫 Block delivery orders outside delivery area
-				const latestTotals = recomputeCheckoutTotals();
-				const latestQuote = window.deliveryQuoteState || deliveryQuoteState;
-
-				if (getSelectedOrderType() === "delivery") {
-				  if (latestQuote?.loading) {
-					alert("Please wait while we check your delivery address.");
-					return;
-				  }
-
-				  if (latestQuote?.eligible === false || latestTotals?.delivery_blocked === true) {
-					alert(
-					  latestQuote?.reason ||
-					  "Sorry, this address is outside our 3-mile delivery radius. Please call us on 0113 469 9564 and we’ll see what we can do 😊"
-					);
-					return;
-				  }
-
-				  if (latestTotals.delivery_fee === null || latestTotals.delivery_fee === undefined) {
-					alert("We could not calculate delivery for this address. Please check the address or choose collection.");
-					return;
-				  }
-				}
-			
-			// ---------- Create order ----------
-			// ✅ NEW: generate a fresh idempotency key for THIS submit
-
-			// 🚚 DELIVERY VALIDATION — stop submit if delivery price/radius is not ready
-			if (getSelectedOrderType() === "delivery" && deliveryQuoteState.loading) {
-			  alert("Please wait a moment while we calculate the delivery charge.");
-			  return;
-			}
-
-			if (getSelectedOrderType() === "delivery" && !deliveryQuoteState.eligible) {
-			  alert(deliveryQuoteState.reason || "Sorry, you're outside our delivery area.");
-			  return;
-			}
-			
-				submitTotals = recomputeCheckoutTotals();
-
-				if (getSelectedOrderType() === "delivery") {
-
-  const hasDistance =
-    submitTotals.delivery_route_miles != null ||
-    submitTotals.delivery_straight_line_miles != null;
-
-  if (!hasDistance) {
-    alert(
-      "Please wait while we confirm your delivery distance and charge, then try again."
-    );
-    return;
-  }
-
-  if (
-    Number(submitTotals.subtotal || 0) < 30 &&
-    Number(submitTotals.delivery_fee || 0) <= 0
-  ) {
-    alert(
-      "Please wait while we calculate your delivery charge, then try again."
-    );
-    return;
-  }
-}
-
-			const idempotencyKey = crypto.randomUUID();
-
-			// ✅ keep this as recomputeCheckoutTotals()
-			// We want final exact totals synchronously at submit time
-			
-// keep this if disc already exists above in your submit handler
-const totalDiscount =
-  Number(disc?.discount || 0) + Number(submitTotals.loyalty_discount || 0);
-
-console.log('SUBMIT TOTALS:', submitTotals);
-console.log('ORDER PAYLOAD PREVIEW:', {
-  subtotal: submitTotals.subtotal,
-  loyalty_discount: submitTotals.loyalty_discount,
-  loyalty_points_earned_pending: submitTotals.loyalty_points_earned_pending,
-  loyalty_points_redeem_pending: submitTotals.loyalty_points_redeem_pending,
-  loyalty_reward_applied: submitTotals.loyalty_reward_applied,
-  total: submitTotals.total
-});
-
-const baseOrderPayload = {
-  customer_id: customerId,
-
-  subtotal: Number(submitTotals.subtotal.toFixed(2)),
-  discount: Number(totalDiscount.toFixed(2)),
-  discount_label:
-    submitTotals.loyalty_discount > 0
-      ? 'Loyalty reward'
-      : Number(disc?.discount || 0) > 0
-        ? 'Wed/Thu discount'
-        : null,
-
-  discount_code: appliedDiscountCode,
-  discount_amount: Number(appliedDiscountAmount || 0),
-  discount_label: appliedDiscountCode ? `Discount code ${appliedDiscountCode}` : null,
-
-  delivery_fee: Number(submitTotals.delivery_fee.toFixed(2)),
-
-delivery_straight_line_miles:
-  submitTotals.delivery_straight_line_miles != null
-    ? Number(Number(submitTotals.delivery_straight_line_miles).toFixed(2))
-    : null,
-
-delivery_route_miles:
-  submitTotals.delivery_route_miles != null
-    ? Number(Number(submitTotals.delivery_route_miles).toFixed(2))
-    : null,
-
-delivery_distance_source:
-  submitTotals.delivery_distance_source,
-
-total: Number(submitTotals.total.toFixed(2)),
-
-  // loyalty fields
-  loyalty_discount: Number((submitTotals.loyalty_discount || 0).toFixed(2)),
-  loyalty_points_redeem_pending: Number(submitTotals.loyalty_points_redeem_pending || 0),
-  loyalty_points_earned_pending: Number(submitTotals.loyalty_points_earned_pending || 0),
-  loyalty_reward_applied: !!submitTotals.loyalty_reward_applied,
-  loyalty_expected_balance: Number.isFinite(submitTotals.loyalty_expected_balance)
-    ? Number(submitTotals.loyalty_expected_balance)
-    : null,
-  loyalty_settled: false,
-
-  order_type: orderType,
-  notes,
-  order_ref: orderRef,
-  payment_preference,
-  preferred_time: preferredTimeISO,
-  asap_requested: asapRequested,
-  communication_preference: communicationPreference,
-
-  idempotency_key: idempotencyKey,
-};
-
-if (orderType === 'delivery') {
-  const deliveryFee = Number(baseOrderPayload.delivery_fee || 0);
-  const routeMiles = Number(baseOrderPayload.delivery_route_miles || 0);
-  const subtotal = Number(baseOrderPayload.subtotal || 0);
-
-  if (subtotal < DELIVERY_FREE_THRESHOLD && deliveryFee <= 0) {
-    return fail(
-      'Delivery charge',
-      'Sorry, we could not calculate your delivery fee. Please enter your full address including street, town and postcode, then try again.'
-    );
-  }
-
-const hasFreeDelivery = Number(subtotal || checkoutBaseSubtotal || 0) >= DELIVERY_FREE_THRESHOLD;
-
-if (!hasFreeDelivery && (!routeMiles || routeMiles <= 0)) {
-  return fail(
-    'Delivery distance',
-    'Sorry, we could not confirm your delivery distance. Please enter your full address including street, town and postcode, then try again.'
-  );
-}
-}
-
-if (orderType === 'delivery') {
-  const deliveryFee = Number(baseOrderPayload.delivery_fee || 0);
-  const routeMiles = Number(baseOrderPayload.delivery_route_miles || 0);
-  const subtotal = Number(baseOrderPayload.subtotal || 0);
-
-  if (subtotal < DELIVERY_FREE_THRESHOLD && deliveryFee <= 0) {
-    return fail(
-      'Delivery charge',
-      'Sorry, we could not calculate your delivery fee. Please enter your full address including street, town and postcode, then try again.'
-    );
-  }
-
-  const hasFreeDelivery = Number(subtotal || checkoutBaseSubtotal || 0) >= DELIVERY_FREE_THRESHOLD;
-
-if (!hasFreeDelivery && (!routeMiles || routeMiles <= 0)) {
-  return fail(
-    'Delivery distance',
-    'Sorry, we could not confirm your delivery distance. Please enter your full address including street, town and postcode, then try again.'
-  );
-}
-}
-
-console.log('BASE ORDER PAYLOAD:', baseOrderPayload);
-
-
-		const { data: orderRow, error: orderUpsertErr } = await sb
-		  .from('orders')
-		  .upsert(baseOrderPayload, { onConflict: 'idempotency_key' })
-		  .select('id')
-		  .single();
-
-		if (orderUpsertErr) return fail('Create order', orderUpsertErr);
-
-		orderId = orderRow.id;
-
-
-
-			// 4) Items (with safety check)
-			const rows = itemsSnapshot.map(line => {
-			  const item_id = line.itemId; // ✅ basket uses itemId
-
-			  if (!item_id) {
-				console.error('[ORDER_ITEMS] Missing itemId on line:', line);
-				throw new Error('Basket item missing itemId (cannot save order items).');
-			  }
-
-			  const menuItem = window.ITEMS_BY_ID.get(item_id);
-				const kitchenLoad = menuItem
-				  ? getItemKitchenLoad(menuItem)
-				  : 0;
-
-				return {
-				  order_id: orderId,
-				  item_id,
-				  name: line.name,
-				  unit_price: Number(line.unitPrice.toFixed(2)),
-				  qty: line.qty,
-				  modifiers: (line.mods ?? []).map(m => ({
-					id: m.id,
-					name: m.name,
-					delta: m.delta
-				  })),
-				  spice: (typeof line.spice === 'number') ? line.spice : null,
-				  img: line.img || null,
-				  kitchen_load: kitchenLoad
-				};
-			});
-
-			const { error: itemsErr } = await window.sb.from('order_items').insert(rows);
-			if (itemsErr) return fail('Add order items', itemsErr);
-    }
-
-
-
-			// ✅ Recompute and freeze totals once
-				window.__lastOrderTotals = submitTotals;
-				console.log('[CHECKOUT TOTALS @ SUBMIT]', submitTotals);
-
-				try {
-				  if(!masterWokManaged) await fetch('https://order-backend-production.up.railway.app/send-order-confirmation', {
-					method: 'POST',
-					headers: { 'Content-Type': 'text/plain' },
-					body: JSON.stringify({
-					  order_id: orderId,
-					  order_ref: orderRef,
-					  name,
-					  email,
-					  phone,
-					  order_type: orderType,
-					  preferred_time: preferredTimeRaw,
-
-						subtotal: submitTotals.subtotal,
-						discount: submitTotals.discount,
-						delivery_fee: submitTotals.delivery_fee,
-						total: submitTotals.total,
-
-						discount_label:
-						  appliedDiscountCode
-							? `Discount code ${appliedDiscountCode}`
-							: submitTotals.loyalty_discount > 0
-							  ? 'Loyalty reward'
-							  : submitTotals.discount > 0
-								? '10% Wed/Thu discount'
-								: null,
-
-						loyalty_discount: submitTotals.loyalty_discount,
-						loyalty_reward_applied: submitTotals.loyalty_reward_applied,
-						loyalty_points_balance: submitTotals.loyalty_points_balance,
-						loyalty_points_redeem_pending: submitTotals.loyalty_points_redeem_pending,
-						loyalty_points_earned_pending: submitTotals.loyalty_points_earned_pending,
-						loyalty_expected_balance: submitTotals.loyalty_expected_balance,
-						points_earning_food_subtotal: submitTotals.points_earning_food_subtotal,
-
-					  communication_preference: communicationPreference,
-					  asap_requested: asapRequested
-					})
-				  });
-				} catch (err) {
-				  console.warn('send-order-confirmation failed', err);
-				}
-
-
-
-    // --- SUCCESS UI ---
-    checkoutMsg.textContent = '';
-    checkoutModal.style.display = 'none';
-
-    // clear basket + re-render
-    basket.length = 0;
-    renderOrder();
-
-    // pretty time string
-    const prefPretty = preferredTimeRaw
-      ? new Date(preferredTimeRaw).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })
-      : null;
-
-    // ensure ref is a string like RTK-012
-    const refText = (orderRef && typeof orderRef === 'object')
-      ? ('RTK-' + String(Number(orderRef.assigned ?? orderRef.id ?? orderRef.value ?? 0)).padStart(3,'0'))
-      : String(orderRef);
-
-			// numeric total
-			const grandTotal = Number(submitTotals.total);
-
-showOrderSuccess(
-  refText,
-  itemsSnapshot,
-  grandTotal,
-  orderType,
-  prefPretty,
-  masterWokManaged && booking.order.holdingReviewRequired === true
-);
-
-// Order is safely complete.
-// Prepare checkout for the next customer.
-resetCheckoutForNextOrder();
-
-
-  } catch (err) {
-    if (err?.code === 'CHECKOUT_PRICE_CHANGED') {
-      const refreshed = await window.RTKRefreshLoyalty?.();
-      checkoutMsg.style.color = '#b02a2a';
-      checkoutMsg.textContent = refreshed ? 'Your order has not been placed. Please review the refreshed total before submitting again.' : 'Your order has not been placed. Loyalty details could not be refreshed. Please try again.';
-    } else {
-      fail('Unexpected error', err);
-    }
-  } finally {
-    isSubmittingOrder = false;
-    if (submitBtn) submitBtn.disabled = false;
-  }
-});
 
 

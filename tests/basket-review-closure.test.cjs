@@ -1,6 +1,6 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const {londonTime}=require('../master-wok-basket-review-client');
-const source=fs.readFileSync(require.resolve('../customer-checkout.js'),'utf8');
+const source=require('./checkout-refactor-source.cjs').reconstruct();
 const helpers=source.slice(source.indexOf('function basketReviewClosureMessage('),source.indexOf('function stopExpiredBasketReview('));
 function fixture(ranges=[]){
  const context={window:{RTKBasketReview:{londonTime}},Intl,Date,OPEN_WINDOW:{start:'17:00',end:'21:00'},KITCHEN_OVERRUN_MINUTES:60,CLOSED_RANGES:ranges,CLOSED_DATES:[]};

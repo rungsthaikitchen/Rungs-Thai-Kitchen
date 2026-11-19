@@ -1,7 +1,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),crypto=require('node:crypto');
 const {create}=require('../customer-checkout-dialog');
 const evidence=require('../CHECKOUT-DIALOG-EXTRACTION-2026-11-19.json');
-const bootstrap=fs.readFileSync(require.resolve('../customer-checkout.js'),'utf8'),moduleSource=fs.readFileSync(require.resolve('../customer-checkout-dialog.js'),'utf8');
+const bootstrap=require('./checkout-refactor-source.cjs').reconstruct(),moduleSource=fs.readFileSync(require.resolve('../customer-checkout-dialog.js'),'utf8');
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 test('the extracted lifecycle reconstructs the live baseline byte for byte',()=>{
  const parts={};

@@ -1,0 +1,1338 @@
+{
+  "baseCommit": "6f77a88c87d8871d8ffbe2335f0b2266d1d4a829",
+  "originalCheckoutSha256": "c316f2f0eb2039efc033f954bd912b58e726a1af49780c678b4f7b30460de6cf",
+  "availability": {
+    "originalSha256": "ba6057ed14322c0c6d226e46d8bbd33b0c58ea6e866fa800a453c5175c080ca6",
+    "edits": [
+      {
+        "start": 1790,
+        "end": 1803,
+        "from": "checkoutModal",
+        "to": "context.checkoutModal",
+        "newStart": 1790,
+        "newEnd": 1811
+      },
+      {
+        "start": 1995,
+        "end": 2007,
+        "from": "CLOSED_DATES",
+        "to": "context.CLOSED_DATES",
+        "newStart": 2003,
+        "newEnd": 2023
+      },
+      {
+        "start": 2027,
+        "end": 2039,
+        "from": "CLOSED_DATES",
+        "to": "context.CLOSED_DATES",
+        "newStart": 2043,
+        "newEnd": 2063
+      },
+      {
+        "start": 2183,
+        "end": 2196,
+        "from": "CLOSED_RANGES",
+        "to": "context.CLOSED_RANGES",
+        "newStart": 2207,
+        "newEnd": 2228
+      },
+      {
+        "start": 2220,
+        "end": 2233,
+        "from": "CLOSED_RANGES",
+        "to": "context.CLOSED_RANGES",
+        "newStart": 2252,
+        "newEnd": 2273
+      },
+      {
+        "start": 2849,
+        "end": 2860,
+        "from": "OPEN_WINDOW",
+        "to": "context.OPEN_WINDOW",
+        "newStart": 2889,
+        "newEnd": 2908
+      },
+      {
+        "start": 2876,
+        "end": 2899,
+        "from": "KITCHEN_OVERRUN_MINUTES",
+        "to": "context.KITCHEN_OVERRUN_MINUTES",
+        "newStart": 2924,
+        "newEnd": 2955
+      },
+      {
+        "start": 2915,
+        "end": 2938,
+        "from": "KITCHEN_OVERRUN_MINUTES",
+        "to": "context.KITCHEN_OVERRUN_MINUTES",
+        "newStart": 2971,
+        "newEnd": 3002
+      },
+      {
+        "start": 2974,
+        "end": 2985,
+        "from": "OPEN_WINDOW",
+        "to": "context.OPEN_WINDOW",
+        "newStart": 3038,
+        "newEnd": 3057
+      },
+      {
+        "start": 3823,
+        "end": 3834,
+        "from": "OPEN_WINDOW",
+        "to": "context.OPEN_WINDOW",
+        "newStart": 3895,
+        "newEnd": 3914
+      },
+      {
+        "start": 4247,
+        "end": 4271,
+        "from": "showPreferredTimeMessage",
+        "to": "(0, context.showPreferredTimeMessage)",
+        "newStart": 4327,
+        "newEnd": 4364
+      },
+      {
+        "start": 8308,
+        "end": 8314,
+        "from": "basket",
+        "to": "context.basket",
+        "newStart": 8401,
+        "newEnd": 8415
+      },
+      {
+        "start": 9761,
+        "end": 9785,
+        "from": "showPreferredTimeMessage",
+        "to": "(0, context.showPreferredTimeMessage)",
+        "newStart": 9862,
+        "newEnd": 9899
+      },
+      {
+        "start": 9858,
+        "end": 9880,
+        "from": "setAvailabilityLoading",
+        "to": "(0, context.setAvailabilityLoading)",
+        "newStart": 9972,
+        "newEnd": 10007
+      },
+      {
+        "start": 10499,
+        "end": 10510,
+        "from": "OPEN_WINDOW",
+        "to": "context.OPEN_WINDOW",
+        "newStart": 10626,
+        "newEnd": 10645
+      },
+      {
+        "start": 10572,
+        "end": 10583,
+        "from": "OPEN_WINDOW",
+        "to": "context.OPEN_WINDOW",
+        "newStart": 10707,
+        "newEnd": 10726
+      },
+      {
+        "start": 10827,
+        "end": 10850,
+        "from": "KITCHEN_OVERRUN_MINUTES",
+        "to": "context.KITCHEN_OVERRUN_MINUTES",
+        "newStart": 10970,
+        "newEnd": 11001
+      },
+      {
+        "start": 11001,
+        "end": 11013,
+        "from": "LEAD_MINUTES",
+        "to": "context.LEAD_MINUTES",
+        "newStart": 11152,
+        "newEnd": 11172
+      },
+      {
+        "start": 11059,
+        "end": 11070,
+        "from": "roundTo5Min",
+        "to": "(0, context.roundTo5Min)",
+        "newStart": 11218,
+        "newEnd": 11242
+      },
+      {
+        "start": 11109,
+        "end": 11114,
+        "from": "toYMD",
+        "to": "(0, context.toYMD)",
+        "newStart": 11281,
+        "newEnd": 11299
+      },
+      {
+        "start": 11281,
+        "end": 11290,
+        "from": "OPEN_DAYS",
+        "to": "context.OPEN_DAYS",
+        "newStart": 11466,
+        "newEnd": 11483
+      },
+      {
+        "start": 12302,
+        "end": 12308,
+        "from": "basket",
+        "to": "context.basket",
+        "newStart": 12495,
+        "newEnd": 12509
+      },
+      {
+        "start": 12529,
+        "end": 12553,
+        "from": "showPreferredTimeMessage",
+        "to": "(0, context.showPreferredTimeMessage)",
+        "newStart": 12730,
+        "newEnd": 12767
+      },
+      {
+        "start": 13114,
+        "end": 13135,
+        "from": "refreshKitchenSlotMap",
+        "to": "(0, context.refreshKitchenSlotMap)",
+        "newStart": 13328,
+        "newEnd": 13362
+      },
+      {
+        "start": 13257,
+        "end": 13281,
+        "from": "hidePreferredTimeMessage",
+        "to": "(0, context.hidePreferredTimeMessage)",
+        "newStart": 13484,
+        "newEnd": 13521
+      },
+      {
+        "start": 13473,
+        "end": 13497,
+        "from": "showPreferredTimeMessage",
+        "to": "(0, context.showPreferredTimeMessage)",
+        "newStart": 13713,
+        "newEnd": 13750
+      },
+      {
+        "start": 14353,
+        "end": 14373,
+        "from": "getSelectedOrderType",
+        "to": "(0, context.getSelectedOrderType)",
+        "newStart": 14606,
+        "newEnd": 14639
+      },
+      {
+        "start": 14979,
+        "end": 14988,
+        "from": "isAllowed",
+        "to": "(0, context.isAllowed)",
+        "newStart": 15245,
+        "newEnd": 15267
+      },
+      {
+        "start": 15131,
+        "end": 15143,
+        "from": "isClosedDate",
+        "to": "(0, context.isClosedDate)",
+        "newStart": 15410,
+        "newEnd": 15435
+      },
+      {
+        "start": 15168,
+        "end": 15180,
+        "from": "isClosedDate",
+        "to": "(0, context.isClosedDate)",
+        "newStart": 15460,
+        "newEnd": 15485
+      },
+      {
+        "start": 15247,
+        "end": 15260,
+        "from": "isFullyBooked",
+        "to": "(0, context.isFullyBooked)",
+        "newStart": 15552,
+        "newEnd": 15578
+      },
+      {
+        "start": 15285,
+        "end": 15298,
+        "from": "isFullyBooked",
+        "to": "(0, context.isFullyBooked)",
+        "newStart": 15603,
+        "newEnd": 15629
+      },
+      {
+        "start": 16111,
+        "end": 16116,
+        "from": "toYMD",
+        "to": "(0, context.toYMD)",
+        "newStart": 16442,
+        "newEnd": 16460
+      },
+      {
+        "start": 16701,
+        "end": 16734,
+        "from": "isAllowedForAlternativeFulfilment",
+        "to": "(0, context.isAllowedForAlternativeFulfilment)",
+        "newStart": 17045,
+        "newEnd": 17091
+      },
+      {
+        "start": 17980,
+        "end": 17985,
+        "from": "Event",
+        "to": "context.Event",
+        "newStart": 18337,
+        "newEnd": 18350
+      },
+      {
+        "start": 18172,
+        "end": 18192,
+        "from": "getBasketKitchenLoad",
+        "to": "(0, context.getBasketKitchenLoad)",
+        "newStart": 18537,
+        "newEnd": 18570
+      },
+      {
+        "start": 18221,
+        "end": 18241,
+        "from": "getBasketKitchenLoad",
+        "to": "(0, context.getBasketKitchenLoad)",
+        "newStart": 18599,
+        "newEnd": 18632
+      },
+      {
+        "start": 18309,
+        "end": 18331,
+        "from": "setAvailabilityLoading",
+        "to": "(0, context.setAvailabilityLoading)",
+        "newStart": 18700,
+        "newEnd": 18735
+      },
+      {
+        "start": 18835,
+        "end": 18840,
+        "from": "Event",
+        "to": "context.Event",
+        "newStart": 19239,
+        "newEnd": 19252
+      },
+      {
+        "start": 18894,
+        "end": 18918,
+        "from": "showPreferredTimeMessage",
+        "to": "(0, context.showPreferredTimeMessage)",
+        "newStart": 19306,
+        "newEnd": 19343
+      },
+      {
+        "start": 19467,
+        "end": 19492,
+        "from": "showBlackoutBannerForDate",
+        "to": "(0, context.showBlackoutBannerForDate)",
+        "newStart": 19892,
+        "newEnd": 19930
+      }
+    ],
+    "functionDependencies": [
+      "getBasketKitchenLoad",
+      "getSelectedOrderType",
+      "hidePreferredTimeMessage",
+      "isAllowed",
+      "isAllowedForAlternativeFulfilment",
+      "isClosedDate",
+      "isFullyBooked",
+      "refreshKitchenSlotMap",
+      "roundTo5Min",
+      "setAvailabilityLoading",
+      "showBlackoutBannerForDate",
+      "showPreferredTimeMessage",
+      "toYMD"
+    ],
+    "valueDependencies": [
+      "KITCHEN_OVERRUN_MINUTES",
+      "LEAD_MINUTES",
+      "OPEN_DAYS",
+      "OPEN_WINDOW",
+      "basket",
+      "checkoutModal",
+      "CLOSED_DATES",
+      "CLOSED_RANGES",
+      "Event"
+    ]
+  },
+  "submission": {
+    "originalSha256": "b792525e15e0ebb0de9699b0df5dd4bdac1f420c443bca9a4a22d99c74e9a174",
+    "edits": [
+      {
+        "start": 451,
+        "end": 462,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 451,
+        "newEnd": 470
+      },
+      {
+        "start": 493,
+        "end": 504,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 501,
+        "newEnd": 520
+      },
+      {
+        "start": 717,
+        "end": 728,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 733,
+        "newEnd": 752
+      },
+      {
+        "start": 759,
+        "end": 770,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 783,
+        "newEnd": 802
+      },
+      {
+        "start": 943,
+        "end": 959,
+        "from": "loadServiceState",
+        "to": "(0, context.loadServiceState)",
+        "newStart": 975,
+        "newEnd": 1004
+      },
+      {
+        "start": 972,
+        "end": 985,
+        "from": "SERVICE_STATE",
+        "to": "context.SERVICE_STATE",
+        "newStart": 1017,
+        "newEnd": 1038
+      },
+      {
+        "start": 1012,
+        "end": 1032,
+        "from": "showPausedOrderAlert",
+        "to": "(0, context.showPausedOrderAlert)",
+        "newStart": 1065,
+        "newEnd": 1098
+      },
+      {
+        "start": 1041,
+        "end": 1054,
+        "from": "SERVICE_STATE",
+        "to": "context.SERVICE_STATE",
+        "newStart": 1107,
+        "newEnd": 1128
+      },
+      {
+        "start": 1430,
+        "end": 1451,
+        "from": "refreshKitchenSlotMap",
+        "to": "(0, context.refreshKitchenSlotMap)",
+        "newStart": 1504,
+        "newEnd": 1538
+      },
+      {
+        "start": 1684,
+        "end": 1695,
+        "from": "OPEN_WINDOW",
+        "to": "context.OPEN_WINDOW",
+        "newStart": 1771,
+        "newEnd": 1790
+      },
+      {
+        "start": 1915,
+        "end": 1920,
+        "from": "toYMD",
+        "to": "(0, context.toYMD)",
+        "newStart": 2010,
+        "newEnd": 2028
+      },
+      {
+        "start": 1939,
+        "end": 1944,
+        "from": "toYMD",
+        "to": "(0, context.toYMD)",
+        "newStart": 2047,
+        "newEnd": 2065
+      },
+      {
+        "start": 2145,
+        "end": 2178,
+        "from": "isAllowedForAlternativeFulfilment",
+        "to": "(0, context.isAllowedForAlternativeFulfilment)",
+        "newStart": 2266,
+        "newEnd": 2312
+      },
+      {
+        "start": 2209,
+        "end": 2218,
+        "from": "isAllowed",
+        "to": "(0, context.isAllowed)",
+        "newStart": 2343,
+        "newEnd": 2365
+      },
+      {
+        "start": 2573,
+        "end": 2591,
+        "from": "preferredDateInput",
+        "to": "context.preferredDateInput",
+        "newStart": 2720,
+        "newEnd": 2746
+      },
+      {
+        "start": 2614,
+        "end": 2641,
+        "from": "populatePreferredTimeSelect",
+        "to": "(0, context.populatePreferredTimeSelect)",
+        "newStart": 2769,
+        "newEnd": 2809
+      },
+      {
+        "start": 2675,
+        "end": 2702,
+        "from": "populatePreferredTimeSelect",
+        "to": "(0, context.populatePreferredTimeSelect)",
+        "newStart": 2843,
+        "newEnd": 2883
+      },
+      {
+        "start": 2711,
+        "end": 2729,
+        "from": "preferredDateInput",
+        "to": "context.preferredDateInput",
+        "newStart": 2892,
+        "newEnd": 2918
+      },
+      {
+        "start": 2803,
+        "end": 2822,
+        "from": "preferredTimeHidden",
+        "to": "context.preferredTimeHidden",
+        "newStart": 2992,
+        "newEnd": 3019
+      },
+      {
+        "start": 2844,
+        "end": 2863,
+        "from": "preferredTimeSelect",
+        "to": "context.preferredTimeSelect",
+        "newStart": 3041,
+        "newEnd": 3068
+      },
+      {
+        "start": 2872,
+        "end": 2891,
+        "from": "preferredTimeSelect",
+        "to": "context.preferredTimeSelect",
+        "newStart": 3077,
+        "newEnd": 3104
+      },
+      {
+        "start": 2914,
+        "end": 2938,
+        "from": "showPreferredTimeMessage",
+        "to": "(0, context.showPreferredTimeMessage)",
+        "newStart": 3127,
+        "newEnd": 3164
+      },
+      {
+        "start": 3272,
+        "end": 3293,
+        "from": "validatePreferredTime",
+        "to": "(0, context.validatePreferredTime)",
+        "newStart": 3498,
+        "newEnd": 3532
+      },
+      {
+        "start": 3405,
+        "end": 3417,
+        "from": "checkoutForm",
+        "to": "context.checkoutForm",
+        "newStart": 3644,
+        "newEnd": 3664
+      },
+      {
+        "start": 3530,
+        "end": 3541,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 3777,
+        "newEnd": 3796
+      },
+      {
+        "start": 3563,
+        "end": 3574,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 3818,
+        "newEnd": 3837
+      },
+      {
+        "start": 4160,
+        "end": 4171,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 4423,
+        "newEnd": 4442
+      },
+      {
+        "start": 4203,
+        "end": 4214,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 4474,
+        "newEnd": 4493
+      },
+      {
+        "start": 4970,
+        "end": 4994,
+        "from": "showPreferredTimeMessage",
+        "to": "(0, context.showPreferredTimeMessage)",
+        "newStart": 5249,
+        "newEnd": 5286
+      },
+      {
+        "start": 5651,
+        "end": 5662,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 5943,
+        "newEnd": 5962
+      },
+      {
+        "start": 5693,
+        "end": 5704,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 5993,
+        "newEnd": 6012
+      },
+      {
+        "start": 5796,
+        "end": 5807,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 6104,
+        "newEnd": 6123
+      },
+      {
+        "start": 5838,
+        "end": 5849,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 6154,
+        "newEnd": 6173
+      },
+      {
+        "start": 5937,
+        "end": 5948,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 6261,
+        "newEnd": 6280
+      },
+      {
+        "start": 5979,
+        "end": 5990,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 6311,
+        "newEnd": 6330
+      },
+      {
+        "start": 6115,
+        "end": 6126,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 6455,
+        "newEnd": 6474
+      },
+      {
+        "start": 6157,
+        "end": 6168,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 6505,
+        "newEnd": 6524
+      },
+      {
+        "start": 6358,
+        "end": 6364,
+        "from": "basket",
+        "to": "context.basket",
+        "newStart": 6714,
+        "newEnd": 6728
+      },
+      {
+        "start": 6787,
+        "end": 6798,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 7151,
+        "newEnd": 7170
+      },
+      {
+        "start": 6827,
+        "end": 6838,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 7199,
+        "newEnd": 7218
+      },
+      {
+        "start": 6998,
+        "end": 7021,
+        "from": "DELIVERY_FREE_THRESHOLD",
+        "to": "context.DELIVERY_FREE_THRESHOLD",
+        "newStart": 7378,
+        "newEnd": 7409
+      },
+      {
+        "start": 7076,
+        "end": 7087,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 7464,
+        "newEnd": 7483
+      },
+      {
+        "start": 7116,
+        "end": 7127,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 7512,
+        "newEnd": 7531
+      },
+      {
+        "start": 7378,
+        "end": 7389,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 7782,
+        "newEnd": 7801
+      },
+      {
+        "start": 7418,
+        "end": 7429,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 7830,
+        "newEnd": 7849
+      },
+      {
+        "start": 7685,
+        "end": 7691,
+        "from": "basket",
+        "to": "context.basket",
+        "newStart": 8105,
+        "newEnd": 8119
+      },
+      {
+        "start": 8525,
+        "end": 8544,
+        "from": "applyWedThuDiscount",
+        "to": "(0, context.applyWedThuDiscount)",
+        "newStart": 8953,
+        "newEnd": 8985
+      },
+      {
+        "start": 8641,
+        "end": 8662,
+        "from": "appliedDiscountAmount",
+        "to": "context.appliedDiscountAmount",
+        "newStart": 9082,
+        "newEnd": 9111
+      },
+      {
+        "start": 9186,
+        "end": 9197,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 9635,
+        "newEnd": 9654
+      },
+      {
+        "start": 9230,
+        "end": 9241,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 9687,
+        "newEnd": 9706
+      },
+      {
+        "start": 9436,
+        "end": 9459,
+        "from": "recomputeCheckoutTotals",
+        "to": "(0, context.recomputeCheckoutTotals)",
+        "newStart": 9901,
+        "newEnd": 9937
+      },
+      {
+        "start": 10130,
+        "end": 10149,
+        "from": "appliedDiscountCode",
+        "to": "context.appliedDiscountCode",
+        "newStart": 10608,
+        "newEnd": 10635
+      },
+      {
+        "start": 11209,
+        "end": 11228,
+        "from": "getOrCreateCustomer",
+        "to": "(0, context.getOrCreateCustomer)",
+        "newStart": 11695,
+        "newEnd": 11727
+      },
+      {
+        "start": 11423,
+        "end": 11434,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 11922,
+        "newEnd": 11941
+      },
+      {
+        "start": 11467,
+        "end": 11478,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 11974,
+        "newEnd": 11993
+      },
+      {
+        "start": 11579,
+        "end": 11598,
+        "from": "getOrCreateCustomer",
+        "to": "(0, context.getOrCreateCustomer)",
+        "newStart": 12094,
+        "newEnd": 12126
+      },
+      {
+        "start": 11803,
+        "end": 11814,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 12331,
+        "newEnd": 12350
+      },
+      {
+        "start": 11847,
+        "end": 11858,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 12383,
+        "newEnd": 12402
+      },
+      {
+        "start": 12059,
+        "end": 12074,
+        "from": "getNextOrderRef",
+        "to": "(0, context.getNextOrderRef)",
+        "newStart": 12603,
+        "newEnd": 12631
+      },
+      {
+        "start": 12505,
+        "end": 12525,
+        "from": "getSelectedOrderType",
+        "to": "(0, context.getSelectedOrderType)",
+        "newStart": 13062,
+        "newEnd": 13095
+      },
+      {
+        "start": 12594,
+        "end": 12612,
+        "from": "deliveryQuoteState",
+        "to": "context.deliveryQuoteState",
+        "newStart": 13164,
+        "newEnd": 13190
+      },
+      {
+        "start": 12731,
+        "end": 12748,
+        "from": "deliveryMessageEl",
+        "to": "context.deliveryMessageEl",
+        "newStart": 13309,
+        "newEnd": 13334
+      },
+      {
+        "start": 12917,
+        "end": 12934,
+        "from": "deliveryMessageEl",
+        "to": "context.deliveryMessageEl",
+        "newStart": 13503,
+        "newEnd": 13528
+      },
+      {
+        "start": 13112,
+        "end": 13132,
+        "from": "checkoutBaseSubtotal",
+        "to": "context.checkoutBaseSubtotal",
+        "newStart": 13706,
+        "newEnd": 13734
+      },
+      {
+        "start": 13147,
+        "end": 13164,
+        "from": "deliveryMessageEl",
+        "to": "context.deliveryMessageEl",
+        "newStart": 13749,
+        "newEnd": 13774
+      },
+      {
+        "start": 13224,
+        "end": 13241,
+        "from": "deliveryMessageEl",
+        "to": "context.deliveryMessageEl",
+        "newStart": 13834,
+        "newEnd": 13859
+      },
+      {
+        "start": 13324,
+        "end": 13344,
+        "from": "checkoutBaseSubtotal",
+        "to": "context.checkoutBaseSubtotal",
+        "newStart": 13942,
+        "newEnd": 13970
+      },
+      {
+        "start": 13360,
+        "end": 13377,
+        "from": "deliveryMessageEl",
+        "to": "context.deliveryMessageEl",
+        "newStart": 13986,
+        "newEnd": 14011
+      },
+      {
+        "start": 13426,
+        "end": 13443,
+        "from": "deliveryMessageEl",
+        "to": "context.deliveryMessageEl",
+        "newStart": 14060,
+        "newEnd": 14085
+      },
+      {
+        "start": 13605,
+        "end": 13628,
+        "from": "recomputeCheckoutTotals",
+        "to": "(0, context.recomputeCheckoutTotals)",
+        "newStart": 14247,
+        "newEnd": 14283
+      },
+      {
+        "start": 13686,
+        "end": 13704,
+        "from": "deliveryQuoteState",
+        "to": "context.deliveryQuoteState",
+        "newStart": 14341,
+        "newEnd": 14367
+      },
+      {
+        "start": 13717,
+        "end": 13737,
+        "from": "getSelectedOrderType",
+        "to": "(0, context.getSelectedOrderType)",
+        "newStart": 14380,
+        "newEnd": 14413
+      },
+      {
+        "start": 14621,
+        "end": 14641,
+        "from": "getSelectedOrderType",
+        "to": "(0, context.getSelectedOrderType)",
+        "newStart": 15297,
+        "newEnd": 15330
+      },
+      {
+        "start": 14662,
+        "end": 14680,
+        "from": "deliveryQuoteState",
+        "to": "context.deliveryQuoteState",
+        "newStart": 15351,
+        "newEnd": 15377
+      },
+      {
+        "start": 14799,
+        "end": 14819,
+        "from": "getSelectedOrderType",
+        "to": "(0, context.getSelectedOrderType)",
+        "newStart": 15496,
+        "newEnd": 15529
+      },
+      {
+        "start": 14841,
+        "end": 14859,
+        "from": "deliveryQuoteState",
+        "to": "context.deliveryQuoteState",
+        "newStart": 15551,
+        "newEnd": 15577
+      },
+      {
+        "start": 14884,
+        "end": 14902,
+        "from": "deliveryQuoteState",
+        "to": "context.deliveryQuoteState",
+        "newStart": 15602,
+        "newEnd": 15628
+      },
+      {
+        "start": 15003,
+        "end": 15026,
+        "from": "recomputeCheckoutTotals",
+        "to": "(0, context.recomputeCheckoutTotals)",
+        "newStart": 15729,
+        "newEnd": 15765
+      },
+      {
+        "start": 15040,
+        "end": 15060,
+        "from": "getSelectedOrderType",
+        "to": "(0, context.getSelectedOrderType)",
+        "newStart": 15779,
+        "newEnd": 15812
+      },
+      {
+        "start": 16716,
+        "end": 16735,
+        "from": "appliedDiscountCode",
+        "to": "context.appliedDiscountCode",
+        "newStart": 17468,
+        "newEnd": 17495
+      },
+      {
+        "start": 16764,
+        "end": 16785,
+        "from": "appliedDiscountAmount",
+        "to": "context.appliedDiscountAmount",
+        "newStart": 17524,
+        "newEnd": 17553
+      },
+      {
+        "start": 16812,
+        "end": 16831,
+        "from": "appliedDiscountCode",
+        "to": "context.appliedDiscountCode",
+        "newStart": 17580,
+        "newEnd": 17607
+      },
+      {
+        "start": 16851,
+        "end": 16870,
+        "from": "appliedDiscountCode",
+        "to": "context.appliedDiscountCode",
+        "newStart": 17627,
+        "newEnd": 17654
+      },
+      {
+        "start": 18426,
+        "end": 18449,
+        "from": "DELIVERY_FREE_THRESHOLD",
+        "to": "context.DELIVERY_FREE_THRESHOLD",
+        "newStart": 19210,
+        "newEnd": 19241
+      },
+      {
+        "start": 18718,
+        "end": 18738,
+        "from": "checkoutBaseSubtotal",
+        "to": "context.checkoutBaseSubtotal",
+        "newStart": 19510,
+        "newEnd": 19538
+      },
+      {
+        "start": 18748,
+        "end": 18771,
+        "from": "DELIVERY_FREE_THRESHOLD",
+        "to": "context.DELIVERY_FREE_THRESHOLD",
+        "newStart": 19548,
+        "newEnd": 19579
+      },
+      {
+        "start": 19289,
+        "end": 19312,
+        "from": "DELIVERY_FREE_THRESHOLD",
+        "to": "context.DELIVERY_FREE_THRESHOLD",
+        "newStart": 20097,
+        "newEnd": 20128
+      },
+      {
+        "start": 19583,
+        "end": 19603,
+        "from": "checkoutBaseSubtotal",
+        "to": "context.checkoutBaseSubtotal",
+        "newStart": 20399,
+        "newEnd": 20427
+      },
+      {
+        "start": 19613,
+        "end": 19636,
+        "from": "DELIVERY_FREE_THRESHOLD",
+        "to": "context.DELIVERY_FREE_THRESHOLD",
+        "newStart": 20437,
+        "newEnd": 20468
+      },
+      {
+        "start": 20018,
+        "end": 20020,
+        "from": "sb",
+        "to": "context.sb",
+        "newStart": 20850,
+        "newEnd": 20860
+      },
+      {
+        "start": 20665,
+        "end": 20683,
+        "from": "getItemKitchenLoad",
+        "to": "(0, context.getItemKitchenLoad)",
+        "newStart": 21505,
+        "newEnd": 21536
+      },
+      {
+        "start": 22034,
+        "end": 22053,
+        "from": "appliedDiscountCode",
+        "to": "context.appliedDiscountCode",
+        "newStart": 22887,
+        "newEnd": 22914
+      },
+      {
+        "start": 22081,
+        "end": 22100,
+        "from": "appliedDiscountCode",
+        "to": "context.appliedDiscountCode",
+        "newStart": 22942,
+        "newEnd": 22969
+      },
+      {
+        "start": 23020,
+        "end": 23031,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 23889,
+        "newEnd": 23908
+      },
+      {
+        "start": 23055,
+        "end": 23068,
+        "from": "checkoutModal",
+        "to": "context.checkoutModal",
+        "newStart": 23932,
+        "newEnd": 23953
+      },
+      {
+        "start": 23133,
+        "end": 23139,
+        "from": "basket",
+        "to": "context.basket",
+        "newStart": 24018,
+        "newEnd": 24032
+      },
+      {
+        "start": 23157,
+        "end": 23168,
+        "from": "renderOrder",
+        "to": "(0, context.renderOrder)",
+        "newStart": 24050,
+        "newEnd": 24074
+      },
+      {
+        "start": 23678,
+        "end": 23694,
+        "from": "showOrderSuccess",
+        "to": "(0, context.showOrderSuccess)",
+        "newStart": 24584,
+        "newEnd": 24613
+      },
+      {
+        "start": 23919,
+        "end": 23944,
+        "from": "resetCheckoutForNextOrder",
+        "to": "(0, context.resetCheckoutForNextOrder)",
+        "newStart": 24838,
+        "newEnd": 24876
+      },
+      {
+        "start": 24090,
+        "end": 24101,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 25022,
+        "newEnd": 25041
+      },
+      {
+        "start": 24134,
+        "end": 24145,
+        "from": "checkoutMsg",
+        "to": "context.checkoutMsg",
+        "newStart": 25074,
+        "newEnd": 25093
+      }
+    ],
+    "listenerPrefix": "checkoutForm.addEventListener('submit', ",
+    "listenerSuffix": ");",
+    "originalGuard": "\t\tlet isSubmittingOrder = false;\r\n",
+    "guardMarker": "// Submission guard is private to its controller.\n",
+    "functionDependencies": [
+      "applyWedThuDiscount",
+      "getItemKitchenLoad",
+      "getNextOrderRef",
+      "getOrCreateCustomer",
+      "getSelectedOrderType",
+      "isAllowed",
+      "isAllowedForAlternativeFulfilment",
+      "loadServiceState",
+      "populatePreferredTimeSelect",
+      "recomputeCheckoutTotals",
+      "refreshKitchenSlotMap",
+      "renderOrder",
+      "resetCheckoutForNextOrder",
+      "showOrderSuccess",
+      "showPausedOrderAlert",
+      "showPreferredTimeMessage",
+      "toYMD",
+      "validatePreferredTime"
+    ],
+    "valueDependencies": [
+      "DELIVERY_FREE_THRESHOLD",
+      "OPEN_WINDOW",
+      "SERVICE_STATE",
+      "appliedDiscountAmount",
+      "appliedDiscountCode",
+      "basket",
+      "checkoutBaseSubtotal",
+      "checkoutForm",
+      "checkoutModal",
+      "checkoutMsg",
+      "deliveryMessageEl",
+      "deliveryQuoteState",
+      "preferredDateInput",
+      "preferredTimeHidden",
+      "preferredTimeSelect",
+      "sb"
+    ]
+  },
+  "bridgeEdits": [
+    {
+      "start": 6038,
+      "end": 6056,
+      "from": "masterWokTimeHints",
+      "to": "checkoutAvailability.hints",
+      "newStart": 6038,
+      "newEnd": 6064
+    },
+    {
+      "start": 6079,
+      "end": 6097,
+      "from": "masterWokTimeHints",
+      "to": "checkoutAvailability.hints",
+      "newStart": 6087,
+      "newEnd": 6113
+    },
+    {
+      "start": 43357,
+      "end": 43375,
+      "from": "masterWokTimeHints",
+      "to": "checkoutAvailability.hints",
+      "newStart": 43373,
+      "newEnd": 43399
+    },
+    {
+      "start": 43404,
+      "end": 43422,
+      "from": "masterWokTimeHints",
+      "to": "checkoutAvailability.hints",
+      "newStart": 43428,
+      "newEnd": 43454
+    },
+    {
+      "start": 43643,
+      "end": 43661,
+      "from": "masterWokTimeHints",
+      "to": "checkoutAvailability.hints",
+      "newStart": 43675,
+      "newEnd": 43701
+    },
+    {
+      "start": 43669,
+      "end": 43687,
+      "from": "masterWokTimeHints",
+      "to": "checkoutAvailability.hints",
+      "newStart": 43709,
+      "newEnd": 43735
+    },
+    {
+      "start": 53993,
+      "end": 54016,
+      "from": "preferredTimeGeneration",
+      "to": "checkoutAvailability.generation",
+      "newStart": 54041,
+      "newEnd": 54072
+    },
+    {
+      "start": 54193,
+      "end": 54211,
+      "from": "masterWokTimeHints",
+      "to": "checkoutAvailability.hints",
+      "newStart": 54249,
+      "newEnd": 54275
+    },
+    {
+      "start": 54217,
+      "end": 54241,
+      "from": "masterWokUnverifiedTimes",
+      "to": "checkoutAvailability.unverifiedTimes",
+      "newStart": 54281,
+      "newEnd": 54317
+    },
+    {
+      "start": 54252,
+      "end": 54276,
+      "from": "masterWokDriverBusyTimes",
+      "to": "checkoutAvailability.driverBusyTimes",
+      "newStart": 54328,
+      "newEnd": 54364
+    },
+    {
+      "start": 54422,
+      "end": 54445,
+      "from": "preferredTimeGeneration",
+      "to": "checkoutAvailability.generation",
+      "newStart": 54510,
+      "newEnd": 54541
+    },
+    {
+      "start": 55229,
+      "end": 55252,
+      "from": "preferredTimeGeneration",
+      "to": "checkoutAvailability.generation",
+      "newStart": 55325,
+      "newEnd": 55356
+    },
+    {
+      "start": 55253,
+      "end": 55271,
+      "from": "masterWokTimeHints",
+      "to": "checkoutAvailability.hints",
+      "newStart": 55357,
+      "newEnd": 55383
+    }
+  ],
+  "scope": "Structural extraction only; exact prior lifecycle preserved; no production deployment",
+  "validation": {
+    "websiteTestsPassed": 123,
+    "exactReconstructionToPreviousDraft": true,
+    "exactReconstructionChainToProduction": "4fe98474beda7bce04fd7212b40ce335dc3fb93e",
+    "browserVerification": "Pending; direct hosted HTTP access blocked by Cloudflare",
+    "productionDeployment": false
+  },
+  "moduleSha256": {
+    "customer-checkout.js": "128f7ae3a71b996d31fb1b02b62a740413341f4db0f7cce1c63de3f4c8f8fb3b",
+    "customer-checkout-availability.js": "17ef1a730f1f1370bac10dd8fc2d1cab2d00f0a4b8bf13288130795e606ffa75",
+    "customer-checkout-dialog.js": "b7ff38625cbb49f5965284a553cd81c46a51727cf818b34109461b6c5137ae54",
+    "customer-checkout-submission.js": "b5ef20ccb3419fbaf37163e408bd30b510d624d75c81614fef0b0f56baf269e0"
+  }
+}
