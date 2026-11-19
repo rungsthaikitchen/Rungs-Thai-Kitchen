@@ -12,7 +12,7 @@ BEGIN
  END IF;
  RETURN QUERY
  WITH target AS (
-   SELECT o.id,o.customer_id,o.created_at,
+   SELECT o.id,o.customer_id,o.created_at,o.is_test,
           public.staff_review_phone_key(c.phone) AS phone_key,
           nullif(lower(btrim(c.email)),'') AS email_key
    FROM public.orders o
@@ -21,6 +21,7 @@ BEGIN
  ), classified AS (
    SELECT t.id,
      CASE
+       WHEN t.is_test IS TRUE THEN 'possibly_new'
        WHEN t.customer_id IS NULL AND t.phone_key IS NULL AND t.email_key IS NULL
          THEN 'possibly_new'
        WHEN EXISTS (
@@ -41,7 +42,7 @@ BEGIN
          SELECT 1 FROM public.orders p
          JOIN public.customers pc ON pc.id=p.customer_id
          WHERE p.id<>t.id AND p.created_at<t.created_at
-           AND p.status='completed' AND p.is_test IS DISTINCT FROM TRUE
+           AND p.is_test IS DISTINCT FROM TRUE
            AND (
              (t.phone_key IS NOT NULL AND public.staff_review_phone_key(pc.phone)=t.phone_key)
              OR (t.email_key IS NOT NULL AND nullif(lower(btrim(pc.email)),'')=t.email_key)
