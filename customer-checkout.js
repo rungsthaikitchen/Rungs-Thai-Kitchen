@@ -2207,144 +2207,41 @@ function findNextAllowedFromNow() {
  document.getElementById('unavailable-basket-dialog')?.close();
 };
 window.RTKOpenReviewedCheckout=()=>openCheckout(basket.reduce((n,i)=>n+i.qty*i.unitPrice,0));
-let checkoutOpening = false;
-function setCheckoutOpening(loading) {
-  const status = document.getElementById('checkout-opening-status');
-  if (status) status.hidden = !loading;
-  for (const button of document.querySelectorAll('#open-checkout, #menu-checkout-btn')) {
-    button.disabled = loading;
-    button.setAttribute('aria-busy', String(loading));
-  }
-}
+// BEGIN checkout-dialog boundary
 function setAvailabilityLoading(loading) {
   preferredTimeSelect?.setAttribute('aria-busy', String(loading));
   const message = document.getElementById('preferred-time-message');
   if (message) message.dataset.loading = String(loading);
   if (loading) showPreferredTimeMessage('Checking available times…');
 }
-async function openCheckout(subtotal) {
-  if (checkoutOpening) return;
-  checkoutOpening = true;
-  setCheckoutOpening(true);
-  try {
-  const openedBasketKey=availabilityBasketKey();
-			  console.trace("[checkout] openCheckout called", { subtotal });
-			  
-const preferredTimeEl =
-  document.getElementById('cust-preferred-time');
-
-
-// Remember the date checkout has settled on
-if (preferredTimeEl?.value) {
-  lastPreferredDate =
-    preferredTimeEl.value.slice(0, 10);
-}
-
-			  if (Number(subtotal || 0) <= 0) {
-				console.warn("[checkout] openCheckout blocked - empty basket", { subtotal });
-				return;
-			  }
-
-await loadServiceState();
-
-if (SERVICE_STATE.mode === 'paused') {
-  if (orderMsg) {
-    orderMsg.textContent =
-      SERVICE_STATE.customer_message ||
-      'Online orders are temporarily paused. Please check back shortly.';
-    orderMsg.style.color = '#b02a2a';
-  }
-
-  console.warn(
-    '[checkout] openCheckout blocked - orders paused'
-  );
-
-  return;
-}
-
-        // Keep the customer's choice when reopening this checkout. Only use
-        // the initial collection default when neither option is selected.
-        if (!document.querySelector('input[name="order-type"]:checked')) {
-          const collection = document.querySelector('input[name="order-type"][value="collection"]');
-          if (collection) collection.checked = true;
-        }
-
-        // Refresh closures / fully-booked periods whenever checkout opens.
-// This prevents a customer using stale blackout data from an older page load.
-const loyaltyRefresh = window.RTKRefreshLoyalty?.();
-await loadBlackouts();
-
-        // Refresh preferred-time availability whenever checkout opens.
-// This ensures the dropdown reflects the latest orders in Supabase
-// and the current basket's kitchen load.
-if (
-  preferredDateInput?.value &&
-  typeof populatePreferredTimeSelect === 'function'
-) {
-  const previouslySelectedTime =
-    preferredTimeSelect?.value || '';
-
-  await populatePreferredTimeSelect(
-    preferredDateInput.value
-  );
-
-  // Restore the previous selection only if it is still available.
-  if (previouslySelectedTime && preferredTimeSelect) {
-    const previousOption =
-      Array.from(preferredTimeSelect.options)
-        .find(option =>
-          option.value === previouslySelectedTime &&
-          !option.disabled
-        );
-
-    if (previousOption) {
-      preferredTimeSelect.value =
-        previouslySelectedTime;
-
-      preferredTimeHidden.value =
-        `${preferredDateInput.value}T${previouslySelectedTime}`;
-    } else {
-      preferredTimeSelect.value = '';
-      preferredTimeHidden.value = '';
-
-      showPreferredTimeMessage(
-        'Your previously selected time is no longer available. Please choose another available time.'
-      );
-    }
-  }
-}
-
-      await loyaltyRefresh;
-      if(openedBasketKey!==availabilityBasketKey())return;
-      checkoutBaseSubtotal = Math.round(subtotal * 100) / 100;
-      checkoutMsg.textContent = '';
-      checkoutMsg.style.color = '';
-
-			  // Availability above uses the retained order type.
-
-			  recomputeCheckoutTotals();
-			  updateCheckoutSubmitButton();
-			  updateCheckoutOrderSummary();
-
-			  checkoutModal.style.display = 'flex';
-			  } finally {
-    checkoutOpening = false;
-    setCheckoutOpening(false);
-  }
-}
- 
-    // 3. Update submit button + show the modal
-	// updateCheckoutSubmitButton();
-	//updateCheckoutOrderSummary();
-	//checkoutModal.style.display = 'flex';
-
+const checkoutDialog = window.RTKCheckoutDialog.create({
+  window, document, console,
+  get availabilityBasketKey(){return availabilityBasketKey;},
+  get loadServiceState(){return loadServiceState;},
+  get loadBlackouts(){return loadBlackouts;},
+  get populatePreferredTimeSelect(){return populatePreferredTimeSelect;},
+  get showPreferredTimeMessage(){return showPreferredTimeMessage;},
+  get recomputeCheckoutTotals(){return recomputeCheckoutTotals;},
+  get updateCheckoutSubmitButton(){return updateCheckoutSubmitButton;},
+  get updateCheckoutOrderSummary(){return updateCheckoutOrderSummary;},
+  get lastPreferredDate(){return lastPreferredDate;},
+  set lastPreferredDate(value){lastPreferredDate=value;},
+  get SERVICE_STATE(){return SERVICE_STATE;},
+  get orderMsg(){return orderMsg;},
+  get preferredDateInput(){return preferredDateInput;},
+  get preferredTimeSelect(){return preferredTimeSelect;},
+  get preferredTimeHidden(){return preferredTimeHidden;},
+  get checkoutBaseSubtotal(){return checkoutBaseSubtotal;},
+  set checkoutBaseSubtotal(value){checkoutBaseSubtotal=value;},
+  get checkoutMsg(){return checkoutMsg;},
+  get checkoutModal(){return checkoutModal;},
+});
+function openCheckout(subtotal){return checkoutDialog.open(subtotal);}
+function closeCheckout(){return checkoutDialog.close();}
+// END checkout-dialog boundary
 // Ensure other code can call it
 window.openCheckout = openCheckout;
 
-
-function closeCheckout(){
-  if (checkoutModal) checkoutModal.style.display = 'none';
-}
 
 // safe listeners
 if (checkoutClose) {

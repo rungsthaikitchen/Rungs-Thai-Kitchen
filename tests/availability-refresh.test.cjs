@@ -1,11 +1,11 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
 const html=require('./customer-source.cjs')(process.env.CHECKOUT_INDEX||path.join(__dirname,'../index.html'));
-const opener=html.slice(html.indexOf('async function openCheckout(subtotal)'),html.indexOf('// Ensure other code can call it'));
+const {create:createDialog}=require('../customer-checkout-dialog');
 for(const initialMode of ['delivery','collection',null])test('reopening checkout retains '+(initialMode||'the initial collection default')+' and refreshes matching times',async()=>{
  let mode=initialMode;const requests=[];
  const radio={set checked(value){if(value)mode='collection';}};
- const context={checkoutOpening:false,setCheckoutOpening(){},availabilityBasketKey:()=>'',console:{trace(){},warn(){}},document:{getElementById:()=>({value:''}),querySelector:selector=>selector.includes(':checked')?(mode?{value:mode}:null):radio},window:{},loadServiceState:async()=>{},SERVICE_STATE:{mode:'normal'},loadBlackouts:async()=>{},preferredDateInput:{value:'2026-11-12'},preferredTimeSelect:{value:'',options:[]},preferredTimeHidden:{value:''},populatePreferredTimeSelect:async()=>requests.push(mode),hidePreferredTimeMessage(){},showPreferredTimeMessage(){},recomputeCheckoutTotals(){},updateCheckoutSubmitButton(){},updateCheckoutOrderSummary(){},checkoutMsg:{style:{}},checkoutModal:{style:{}},lastPreferredDate:null,checkoutBaseSubtotal:0};
- vm.runInNewContext(opener,context);await context.openCheckout(22.50);await context.openCheckout(22.50);
+ const context={checkoutOpening:false,setCheckoutOpening(){},availabilityBasketKey:()=>'',console:{trace(){},warn(){}},document:{querySelectorAll:()=>[],getElementById:()=>({value:''}),querySelector:selector=>selector.includes(':checked')?(mode?{value:mode}:null):radio},window:{},loadServiceState:async()=>{},SERVICE_STATE:{mode:'normal'},loadBlackouts:async()=>{},preferredDateInput:{value:'2026-11-12'},preferredTimeSelect:{value:'',options:[]},preferredTimeHidden:{value:''},populatePreferredTimeSelect:async()=>requests.push(mode),hidePreferredTimeMessage(){},showPreferredTimeMessage(){},recomputeCheckoutTotals(){},updateCheckoutSubmitButton(){},updateCheckoutOrderSummary(){},checkoutMsg:{style:{}},checkoutModal:{style:{}},lastPreferredDate:null,checkoutBaseSubtotal:0};
+ const dialog=createDialog(context);await dialog.open(22.50);await dialog.open(22.50);
  const expected=initialMode||'collection';assert.deepEqual(requests,[expected,expected]);assert.equal(mode,expected);assert.equal(context.checkoutModal.style.display,'flex');
 });
 const refreshSource=html.slice(html.indexOf('async function refreshPreferredTimes()'),html.indexOf("document.getElementById('refresh-preferred-times')?.addEventListener"));
