@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const source=fs.readFileSync(require.resolve('../customer-checkout.js'),'utf8');
+const source=require('./checkout-refactor-source.cjs').reconstruct();
 test('changing a quantity invalidates hints and the selected time; unchanged rerenders do not',()=>{
  let handler,cancelled=0,cleared=0,selected='18:30',dialogClosed=0;
  const context={window:{basket:[{itemId:'salt-chickenchips',qty:2,mods:[],spice:1}],RTKBookingClient:{cancelAvailability(){cancelled++;}},addEventListener(_name,fn){handler=fn;}},document:{getElementById:()=>({value:'',close(){dialogClosed++;}}),querySelector:()=>({value:'collection'})},clearPreferredTimeSelect(){cleared++;selected='';},checkoutModal:{style:{display:'none'}},preferredDateInput:{value:'2026-11-13'}};
