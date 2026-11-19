@@ -42,7 +42,7 @@ BEGIN
  END IF;
  INSERT INTO public.staff_customer_contact_status AS s(order_id,status,updated_by)
  VALUES(target_order_id,new_status,staff_actor)
- ON CONFLICT(order_id) DO UPDATE
+ ON CONFLICT ON CONSTRAINT staff_customer_contact_status_pkey DO UPDATE
  SET status=EXCLUDED.status,updated_by=EXCLUDED.updated_by,updated_at=clock_timestamp();
  INSERT INTO public.staff_customer_contact_audit(order_id,status,recorded_by)
  VALUES(target_order_id,new_status,staff_actor);
