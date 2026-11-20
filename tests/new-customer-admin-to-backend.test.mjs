@@ -12,7 +12,7 @@ const env={
  MASTER_WOK_REVIEW_ADMIN_EMAILS:'staff@example.test',
  MASTER_WOK_REVIEW_ADMIN_SECRET:'x'.repeat(40),
  RTK_PROXY_SECRET:'isolated-proxy-secret',
- RTK_ORDER_BACKEND_URL:'https://customer-verification-api-staging.up.railway.app'
+ RTK_CUSTOMER_VERIFICATION_BACKEND_URL:'https://customer-verification-api-staging.up.railway.app'
 };
 async function handler(path){
  const code=await readFile(new URL('../functions/admin-api/'+path,import.meta.url),'utf8');
@@ -33,7 +33,7 @@ test('verified Cloudflare proxy history -> contact -> history contract',async()=
  const fetch=async(url,options)=>{
   const path=new URL(url).pathname;
   calls.push({path,options});
-  assert.equal(new URL(url).origin,env.RTK_ORDER_BACKEND_URL);
+  assert.equal(new URL(url).origin,env.RTK_CUSTOMER_VERIFICATION_BACKEND_URL);
   assert.equal(options.headers['x-rtk-proxy-secret'],env.RTK_PROXY_SECRET);
   assert.equal(options.headers['x-rtk-review-admin-secret'],env.MASTER_WOK_REVIEW_ADMIN_SECRET);
   assert.equal(options.headers['x-rtk-review-actor'],'staff@example.test');
