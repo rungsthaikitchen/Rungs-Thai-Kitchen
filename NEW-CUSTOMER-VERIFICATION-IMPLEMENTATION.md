@@ -45,3 +45,6 @@ Status: development branch; NOT deployed.
 - Created a synthetic audit table in an isolated staging schema within a rolled-back transaction and applied the intended privilege pattern.
 - PostgreSQL has_table_privilege checks: anon SELECT=false, authenticated INSERT=false, service_role INSERT=true, service_role UPDATE=false, service_role DELETE=false.
 - This checks grants on a representative table, not the complete production feature's function grants, RLS policies, or Cloudflare/Flask authorization. Do not describe as complete security sign-off.
+
+## Exact contact migration privilege checks — 20 November 2026
+Executed the current sql/new-customer-contact-audit.sql in a temporary staging schema, replacing only the schema qualifier and adding a synthetic orders table, inside BEGIN/ROLLBACK. Verified 10 results: anon EXECUTE false, authenticated EXECUTE false, service_role EXECUTE true; anon status SELECT false, authenticated audit SELECT false; service_role audit INSERT true, UPDATE false, DELETE false; RLS enabled on both contact tables. This does not validate complete Cloudflare/Flask integration or real production RLS behavior. No permanent schema changes.
