@@ -54,7 +54,8 @@
      if(!response.ok||data.success!==true||!Array.isArray(data.classifications)||
         data.classifications.length!==new Set(ids).size||
         new Set(data.classifications.map(x=>x.order_id)).size!==new Set(ids).size||
-        data.classifications.some(x=>!ids.includes(x.order_id)||!['new','possibly_new','returning'].includes(x.classification)))throw Error('Lookup unavailable');
+        data.classifications.some(x=>!ids.includes(x.order_id)||!['new','possibly_new','returning'].includes(x.classification)||
+         (x.classification==='possibly_new'&&!['previous_order_not_confirmed','shared_contact','insufficient_identity','test_order'].includes(x.reason))))throw Error('Lookup unavailable');
      if(!Array.isArray(data.contacts)||data.contacts.some(x=>!ids.includes(x.order_id)||!['contacted','unreachable','not_required'].includes(x.status))||
         new Set(data.contacts.map(x=>x.order_id)).size!==data.contacts.length)throw Error('Contact lookup unavailable');
      const contacts=new Map(data.contacts.map(x=>[x.order_id,x]));
