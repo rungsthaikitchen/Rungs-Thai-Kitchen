@@ -25,7 +25,8 @@
     for(const [value,label] of [['','Contact recommended'],['contacted','Contacted'],['unreachable','Unable to reach'],['not_required','Not required']]){
      const option=document.createElement('option');option.value=value;option.textContent=label;select.append(option);
     }
-    select.value=result?.contact?.status||'';
+    let confirmedStatus=result?.contact?.status||'';
+    select.value=confirmedStatus;
     select.addEventListener('change',async()=>{
      const selected=select.value;if(!selected)return;
      select.disabled=true;
@@ -35,7 +36,8 @@
       if(!response.ok||body.success!==true||body.contact?.status!==selected)throw Error('Contact update failed');
       const entry=cache.get(row.dataset.orderId);
       if(entry)entry.value={...entry.value,contact:body.contact};
-     }catch(_){select.value=result?.contact?.status||'';window.alert('Contact status could not be saved. Please retry.');}
+      confirmedStatus=selected;
+     }catch(_){select.value=confirmedStatus;window.alert('Contact status could not be saved. Please retry.');}
      finally{select.disabled=false;}
     });
     node.append(select);
