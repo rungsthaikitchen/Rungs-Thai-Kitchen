@@ -20,11 +20,11 @@ const handlers={
  history:await loadHandler('new-customer-history.js'),
  contact:await loadHandler('new-customer-contact.js')
 };
-function setup(kind,{email='staff@example.test',originHeader=origin,validateReject=false,backendStatus=200,backendRedirect=false}={}){
+function setup(kind,{email='staff@example.test',originHeader=origin,validateReject=false,missingAudience=false,wrongAudience=false,backendStatus=200,backendRedirect=false}={}){
  const calls=[];
  const validate=()=>async context=>{
   if(validateReject)throw Error('Access assertion rejected');
-  context.data.cloudflareAccess={JWT:{payload:{email}}};
+  context.data.cloudflareAccess={JWT:{payload:{email,...(missingAudience?{}:{aud:[wrongAudience?'other-audience':env.MASTER_WOK_REVIEW_ACCESS_AUD]})}}};
   return context.next();
  };
  const fetch=async(url,options)=>{
@@ -41,6 +41,16 @@ for(const kind of ['history','contact']){
  test(kind+' rejects invalid Access assertion without backend call',async()=>{
   const s=setup(kind,{validateReject:true});
   assert.equal((await s.handler(s.context)).status,503);
+  assert.equal(s.calls.length,0);
+ });
+ test(kind+' rejects signed token missing audience',async()=>{
+  const s=setup(kind,{missingAudience:true});
+  assert.equal((await s.handler(s.context)).status,403);
+  assert.equal(s.calls.length,0);
+ });
+ test(kind+' rejects token for another Access application',async()=>{
+  const s=setup(kind,{wrongAudience:true});
+  assert.equal((await s.handler(s.context)).status,403);
   assert.equal(s.calls.length,0);
  });
  test(kind+' rejects unauthorized staff without backend call',async()=>{
