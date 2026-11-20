@@ -6,7 +6,7 @@ export function createHandler({validate=cloudflareAccessPlugin,fetch=globalThis.
   const json=(body,status)=>Response.json(body,{status,headers:{'Cache-Control':'no-store'}});
   const allowed=(env.MASTER_WOK_REVIEW_ADMIN_EMAILS||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
   if(!/^https:\/\/[a-z0-9-]+\.cloudflareaccess\.com$/.test(env.MASTER_WOK_REVIEW_ACCESS_DOMAIN||'')||
-   !env.MASTER_WOK_REVIEW_ACCESS_AUD||!allowed.length||!env.RTK_PROXY_SECRET||
+   !env.MASTER_WOK_REVIEW_ACCESS_AUD||!allowed.length||!env.RTK_CUSTOMER_VERIFICATION_BACKEND_URL||!env.RTK_PROXY_SECRET||
    (env.MASTER_WOK_REVIEW_ADMIN_SECRET||'').length<32)
    return json({error:'Customer history access is not configured'},503);
   if(request.method!=='POST')return json({error:'Method not allowed'},405);
@@ -20,14 +20,14 @@ export function createHandler({validate=cloudflareAccessPlugin,fetch=globalThis.
     if(typeof email!=='string'||!allowed.includes(email.toLowerCase()))return json({error:'Forbidden'},403);
     if(request.headers.get('origin')!==new URL(request.url).origin)return json({error:'Invalid origin'},403);
     const host=new URL(request.url).hostname;
-    if(!['rungsthaikitchen.co.uk','www.rungsthaikitchen.co.uk'].includes(host)&&!env.RTK_ORDER_BACKEND_URL)
+    if(!['rungsthaikitchen.co.uk','www.rungsthaikitchen.co.uk'].includes(host)&&!env.RTK_CUSTOMER_VERIFICATION_BACKEND_URL)
      return json({error:'Preview review backend is not configured'},503);
     let raw=await request.text();
     if(new TextEncoder().encode(raw).length>8192)return json({error:'Request too large'},413);
     const payload=JSON.parse(raw);
     if(payload?.action!=='classify')return json({error:'Invalid customer history lookup'},400);
     raw=JSON.stringify({...payload,staffActor:email});
-    const response=await fetch(new URL('/admin-new-customer-history',env.RTK_ORDER_BACKEND_URL||'https://order-backend-production.up.railway.app'),{
+    const response=await fetch(new URL('/admin-new-customer-history',env.RTK_CUSTOMER_VERIFICATION_BACKEND_URL),{
      method:'POST',headers:{'Content-Type':'application/json','x-rtk-proxy-secret':env.RTK_PROXY_SECRET,
       'x-rtk-review-admin-secret':env.MASTER_WOK_REVIEW_ADMIN_SECRET, 'x-rtk-review-actor':email},
      body:raw,redirect:'manual',signal:AbortSignal.timeout(25000)});
