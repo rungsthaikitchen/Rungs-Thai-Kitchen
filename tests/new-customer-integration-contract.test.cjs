@@ -43,3 +43,9 @@ test('Admin rejects missing and duplicate history rows before rendering',()=>{
 test('Admin rejects duplicate contact rows',()=>{
  assert.match(admin,/new Set\(data\.contacts\.map\(x=>x\.order_id\)\)\.size!==data\.contacts\.length/);
 });
+
+test('failed contact update restores last confirmed saved status',()=>{
+ assert.match(admin,/let confirmedStatus=result\?\.contact\?\.status\|\|''/);
+ assert.match(admin,/confirmedStatus=selected/);
+ assert.match(admin,/catch\(_\)\{select\.value=confirmedStatus/);
+});
