@@ -14,7 +14,9 @@ export function createHandler({validate=cloudflareAccessPlugin,fetch=globalThis.
   // Access assertion for this specific application before forwarding any PII.
   try{return await validate({domain:env.MASTER_WOK_REVIEW_ACCESS_DOMAIN,aud:env.MASTER_WOK_REVIEW_ACCESS_AUD})({
    ...context,next:async()=>{
-    const email=context.data?.cloudflareAccess?.JWT?.payload?.email;
+    const claims=context.data?.cloudflareAccess?.JWT?.payload;
+    if(!Array.isArray(claims?.aud)||!claims.aud.includes(env.MASTER_WOK_REVIEW_ACCESS_AUD))return json({error:'Forbidden'},403);
+    const email=claims?.email;
     if(typeof email!=='string'||!allowed.includes(email.toLowerCase()))return json({error:'Forbidden'},403);
     if(request.headers.get('origin')!==new URL(request.url).origin)return json({error:'Invalid origin'},403);
     const host=new URL(request.url).hostname;
