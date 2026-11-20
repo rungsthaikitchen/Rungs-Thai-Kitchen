@@ -60,7 +60,7 @@ test('completed earlier same-customer order is classified returning',()=>{
 });
 test('uncertain earlier order carries an explicit explanation',()=>{
  assert.match(history,/THEN 'previous_order_not_confirmed'/);
- assert.match(history,/THEN 'shared_contact'/);
+ assert.match(history,/ELSE 'shared_contact'/);
  assert.match(admin,/x\.classification==='possibly_new'/);
  assert.match(admin,/x\.reason/);
 });
