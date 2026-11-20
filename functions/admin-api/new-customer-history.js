@@ -5,10 +5,14 @@ export function createHandler({validate=cloudflareAccessPlugin,fetch=globalThis.
   const {env,request}=context;
   const json=(body,status)=>Response.json(body,{status,headers:{'Cache-Control':'no-store'}});
   const allowed=(env.MASTER_WOK_REVIEW_ADMIN_EMAILS||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
-  if(!/^https:\/\/[a-z0-9-]+\.cloudflareaccess\.com$/.test(env.MASTER_WOK_REVIEW_ACCESS_DOMAIN||'')||
-   !env.MASTER_WOK_REVIEW_ACCESS_AUD||!allowed.length||!env.RTK_CUSTOMER_VERIFICATION_BACKEND_URL||!env.RTK_CUSTOMER_VERIFICATION_PROXY_SECRET||
-   (env.RTK_CUSTOMER_VERIFICATION_ADMIN_SECRET||'').length<32)
-   return json({error:'Customer history access is not configured'},503);
+  const invalid=[];
+  if(!/^https:\\/\\/[a-z0-9-]+\\.cloudflareaccess\\.com$/.test(env.MASTER_WOK_REVIEW_ACCESS_DOMAIN||''))invalid.push('access_domain');
+  if(!env.MASTER_WOK_REVIEW_ACCESS_AUD)invalid.push('access_audience');
+  if(!allowed.length)invalid.push('staff_allowlist');
+  if(!env.RTK_CUSTOMER_VERIFICATION_BACKEND_URL)invalid.push('customer_backend_url');
+  if(!env.RTK_CUSTOMER_VERIFICATION_PROXY_SECRET)invalid.push('customer_proxy_secret');
+  if((env.RTK_CUSTOMER_VERIFICATION_ADMIN_SECRET||'').length<32)invalid.push('customer_admin_secret');
+  if(invalid.length)return json({error:'Customer history access is not configured',failed_checks:invalid},503);
   if(request.method!=='POST')return json({error:'Method not allowed'},405);
   // A browser-supplied identity header is insufficient. Validate its signed
   // Access assertion for this specific application before forwarding any PII.
