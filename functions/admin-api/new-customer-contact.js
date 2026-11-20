@@ -6,7 +6,7 @@ export function createHandler({validate=cloudflareAccessPlugin,fetch=globalThis.
   const json=(body,status)=>Response.json(body,{status,headers:{'Cache-Control':'no-store'}});
   const allowed=(env.MASTER_WOK_REVIEW_ADMIN_EMAILS||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
   const invalid=[];
-  if(!/^https:\\/\\/[a-z0-9-]+\\.cloudflareaccess\\.com$/.test(env.MASTER_WOK_REVIEW_ACCESS_DOMAIN||''))invalid.push('access_domain');
+  if(!/^https:\/\/[a-z0-9-]+\.cloudflareaccess\.com$/.test(env.MASTER_WOK_REVIEW_ACCESS_DOMAIN||''))invalid.push('access_domain');
   if(!env.MASTER_WOK_REVIEW_ACCESS_AUD)invalid.push('access_audience');
   if(!allowed.length)invalid.push('staff_allowlist');
   if(!env.RTK_CUSTOMER_VERIFICATION_BACKEND_URL)invalid.push('customer_backend_url');
