@@ -9,6 +9,7 @@
   not_required:'Not required'
  });
  const reasons=Object.freeze({
+  completion_timing_unknown:'Previous order is marked completed, but its completion date is unavailable.',
   previous_order_not_confirmed:'Previous order found, but completion not confirmed.',
   shared_contact:'Previous order found using shared contact details.',
   insufficient_identity:'Not enough contact details to verify previous orders.',
