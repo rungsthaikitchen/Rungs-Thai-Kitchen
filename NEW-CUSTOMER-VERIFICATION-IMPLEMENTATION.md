@@ -40,3 +40,8 @@ Status: development branch; NOT deployed.
 - Confirmed invalid status -> INVALID_CONTACT_UPDATE, nonexistent order -> ORDER_NOT_FOUND, malformed staff actor -> INVALID_CONTACT_UPDATE.
 - After all three rejected calls, current-status rows = 0 and audit rows = 0. Transaction rolled back; verified temporary schema absent.
 - This validates function-level rejection behavior, not production grants, Cloudflare Access authentication, or complete Admin end-to-end flow.
+
+## Isolated database privilege test — 20 November 2026
+- Created a synthetic audit table in an isolated staging schema within a rolled-back transaction and applied the intended privilege pattern.
+- PostgreSQL has_table_privilege checks: anon SELECT=false, authenticated INSERT=false, service_role INSERT=true, service_role UPDATE=false, service_role DELETE=false.
+- This checks grants on a representative table, not the complete production feature's function grants, RLS policies, or Cloudflare/Flask authorization. Do not describe as complete security sign-off.
