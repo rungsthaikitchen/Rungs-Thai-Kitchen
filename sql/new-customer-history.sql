@@ -24,10 +24,15 @@ BEGIN
        WHEN t.is_test IS TRUE THEN 'possibly_new'
        WHEN t.customer_id IS NULL AND t.phone_key IS NULL AND t.email_key IS NULL
          THEN 'possibly_new'
-       -- A current completed status does not establish completion before
-       -- this later order was created (no historical completion timestamp).
-       -- Earlier real orders with unresolved status are evidence of history,
-       -- but not proof of a previously completed order.
+       -- Operational policy: an earlier order currently marked completed
+       -- counts as returning; historical completion timing is not required.
+       WHEN EXISTS (
+         SELECT 1 FROM public.orders p
+         WHERE p.id<>t.id AND p.created_at<t.created_at
+           AND p.status='completed' AND p.is_test IS DISTINCT FROM TRUE
+           AND p.customer_id=t.customer_id AND t.customer_id IS NOT NULL
+       ) THEN 'returning'
+       -- Earlier real orders without completed status remain uncertain.
        WHEN EXISTS (
          SELECT 1 FROM public.orders p
          WHERE p.id<>t.id AND p.created_at<t.created_at
@@ -53,12 +58,6 @@ BEGIN
   WHEN c.result <> 'possibly_new' THEN NULL
   WHEN t.is_test IS TRUE THEN 'test_order'
   WHEN t.customer_id IS NULL AND t.phone_key IS NULL AND t.email_key IS NULL THEN 'insufficient_identity'
-  WHEN EXISTS (
-   SELECT 1 FROM public.orders p
-   WHERE p.id<>t.id AND p.created_at<t.created_at
-    AND p.is_test IS DISTINCT FROM TRUE AND p.status='completed'
-    AND p.customer_id=t.customer_id AND t.customer_id IS NOT NULL
-  ) THEN 'completion_timing_unknown'
   WHEN EXISTS (
    SELECT 1 FROM public.orders p
    WHERE p.id<>t.id AND p.created_at<t.created_at
