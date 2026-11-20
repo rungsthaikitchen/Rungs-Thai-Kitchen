@@ -2,7 +2,7 @@
 -- Requires staff_review_phone_key(text) from customer-review-flags.sql.
 BEGIN;
 CREATE FUNCTION public.staff_new_customer_history(order_ids uuid[])
-RETURNS TABLE(order_id uuid, classification text)
+RETURNS TABLE(order_id uuid, classification text, reason text)
 LANGUAGE plpgsql STABLE SECURITY INVOKER
 SET search_path = pg_catalog, public
 AS $$
@@ -52,7 +52,20 @@ BEGIN
      END AS result
    FROM target t
  )
- SELECT c.id,c.result FROM classified c;
+ SELECT c.id,c.result,
+ CASE
+  WHEN c.result <> 'possibly_new' THEN NULL
+  WHEN t.is_test IS TRUE THEN 'test_order'
+  WHEN t.customer_id IS NULL AND t.phone_key IS NULL AND t.email_key IS NULL THEN 'insufficient_identity'
+  WHEN EXISTS (
+   SELECT 1 FROM public.orders p
+   WHERE p.id<>t.id AND p.created_at<t.created_at
+    AND p.is_test IS DISTINCT FROM TRUE AND p.customer_id=t.customer_id
+    AND t.customer_id IS NOT NULL
+  ) THEN 'previous_order_not_confirmed'
+  ELSE 'shared_contact'
+ END AS reason
+ FROM classified c JOIN target t ON t.id=c.id;
 END;
 $$;
 REVOKE ALL ON FUNCTION public.staff_new_customer_history(uuid[]) FROM PUBLIC,anon,authenticated;
