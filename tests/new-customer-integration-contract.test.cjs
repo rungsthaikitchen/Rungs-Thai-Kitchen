@@ -35,3 +35,11 @@ test('admin loads new feature alongside existing review warnings',()=>{
  assert.match(page,/new-customer-verification\.js/);
  assert.match(page,/new-customer-history-admin\.js/);
 });
+
+test('Admin rejects missing and duplicate history rows before rendering',()=>{
+ assert.match(admin,/data\.classifications\.length!==new Set\(ids\)\.size/);
+ assert.match(admin,/new Set\(data\.classifications\.map\(x=>x\.order_id\)\)\.size!==new Set\(ids\)\.size/);
+});
+test('Admin rejects duplicate contact rows',()=>{
+ assert.match(admin,/new Set\(data\.contacts\.map\(x=>x\.order_id\)\)\.size!==data\.contacts\.length/);
+});
