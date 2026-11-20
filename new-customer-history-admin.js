@@ -50,8 +50,11 @@
      const response=await fetch('/admin-api/new-customer-history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'classify',orderIds:ids}),redirect:'error',signal:AbortSignal.timeout(15000)});
      const data=await response.json();
      if(!response.ok||data.success!==true||!Array.isArray(data.classifications)||
+        data.classifications.length!==new Set(ids).size||
+        new Set(data.classifications.map(x=>x.order_id)).size!==new Set(ids).size||
         data.classifications.some(x=>!ids.includes(x.order_id)||!['new','possibly_new','returning'].includes(x.classification)))throw Error('Lookup unavailable');
-     if(!Array.isArray(data.contacts)||data.contacts.some(x=>!ids.includes(x.order_id)||!['contacted','unreachable','not_required'].includes(x.status)))throw Error('Contact lookup unavailable');
+     if(!Array.isArray(data.contacts)||data.contacts.some(x=>!ids.includes(x.order_id)||!['contacted','unreachable','not_required'].includes(x.status))||
+        new Set(data.contacts.map(x=>x.order_id)).size!==data.contacts.length)throw Error('Contact lookup unavailable');
      const contacts=new Map(data.contacts.map(x=>[x.order_id,x]));
      const results=new Map(data.classifications.map(x=>[x.order_id,{...x,contact:contacts.get(x.order_id)||null}]));
      for(const row of batch)cache.set(row.dataset.orderId,{at:Date.now(),value:results.get(row.dataset.orderId)||null});
