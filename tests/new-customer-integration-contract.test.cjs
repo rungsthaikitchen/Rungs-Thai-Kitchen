@@ -49,3 +49,7 @@ test('failed contact update restores last confirmed saved status',()=>{
  assert.match(admin,/confirmedStatus=selected/);
  assert.match(admin,/catch\(_\)\{select\.value=confirmedStatus/);
 });
+
+test('contact RPC explicitly rejects null statuses',()=>{
+ assert.match(audit,/IF new_status IS NULL OR new_status NOT IN/);
+});
