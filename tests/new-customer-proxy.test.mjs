@@ -7,8 +7,8 @@ const env={
  MASTER_WOK_REVIEW_ACCESS_DOMAIN:'https://rtk.cloudflareaccess.com',
  MASTER_WOK_REVIEW_ACCESS_AUD:'test-audience',
  MASTER_WOK_REVIEW_ADMIN_EMAILS:'staff@example.test',
- MASTER_WOK_REVIEW_ADMIN_SECRET:'x'.repeat(40),
- RTK_PROXY_SECRET:'proxy-secret',
+ RTK_CUSTOMER_VERIFICATION_ADMIN_SECRET:'x'.repeat(40),
+ RTK_CUSTOMER_VERIFICATION_PROXY_SECRET:'proxy-secret',
  RTK_CUSTOMER_VERIFICATION_BACKEND_URL:'https://staging.example.test'
 };
 async function loadHandler(file){
@@ -78,7 +78,7 @@ for(const kind of ['history','contact']){
   assert.equal(s.calls.length,1);
   assert.equal(s.calls[0].options.headers['x-rtk-review-actor'],'staff@example.test');
   assert.equal(s.calls[0].options.headers['x-rtk-proxy-secret'],'proxy-secret');
-  assert.equal(s.calls[0].options.headers['x-rtk-review-admin-secret'],env.MASTER_WOK_REVIEW_ADMIN_SECRET);
+  assert.equal(s.calls[0].options.headers['x-rtk-review-admin-secret'],env.RTK_CUSTOMER_VERIFICATION_ADMIN_SECRET);
   assert.equal(new URL(s.calls[0].url).origin,'https://staging.example.test');
  });
 }
