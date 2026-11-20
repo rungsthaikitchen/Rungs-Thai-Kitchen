@@ -53,3 +53,14 @@ test('failed contact update restores last confirmed saved status',()=>{
 test('contact RPC explicitly rejects null statuses',()=>{
  assert.match(audit,/IF new_status IS NULL OR new_status NOT IN/);
 });
+
+test('completed earlier same-customer order is classified returning',()=>{
+ assert.match(history,/p\.status='completed' AND p\.is_test IS DISTINCT FROM TRUE/);
+ assert.match(history,/\) THEN 'returning'/);
+});
+test('uncertain earlier order carries an explicit explanation',()=>{
+ assert.match(history,/THEN 'previous_order_not_confirmed'/);
+ assert.match(history,/THEN 'shared_contact'/);
+ assert.match(admin,/x\.classification==='possibly_new'/);
+ assert.match(admin,/x\.reason/);
+});
