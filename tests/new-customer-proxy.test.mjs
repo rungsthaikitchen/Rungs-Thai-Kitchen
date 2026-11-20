@@ -20,7 +20,7 @@ const handlers={
  history:await loadHandler('new-customer-history.js'),
  contact:await loadHandler('new-customer-contact.js')
 };
-function setup(kind,{email='staff@example.test',originHeader=origin,validateReject=false,backendStatus=200}={}){
+function setup(kind,{email='staff@example.test',originHeader=origin,validateReject=false,backendStatus=200,backendRedirect=false}={}){
  const calls=[];
  const validate=()=>async context=>{
   if(validateReject)throw Error('Access assertion rejected');
@@ -29,7 +29,7 @@ function setup(kind,{email='staff@example.test',originHeader=origin,validateReje
  };
  const fetch=async(url,options)=>{
   calls.push({url:String(url),options});
-  return Response.json({success:true},{status:backendStatus});
+  return backendRedirect ? new Response(null,{status:302,headers:{Location:'https://other.example'}}) : Response.json({success:true},{status:backendStatus});
  };
  const request=new Request(origin+'/admin-api/new-customer-'+kind,{
   method:'POST',headers:{'Content-Type':'application/json',Origin:originHeader},
@@ -52,6 +52,15 @@ for(const kind of ['history','contact']){
   const s=setup(kind,{originHeader:'https://attacker.example'});
   assert.equal((await s.handler(s.context)).status,403);
   assert.equal(s.calls.length,0);
+ });
+ test(kind+' refuses backend redirects',async()=>{
+  const s=setup(kind,{backendRedirect:true});
+  assert.equal((await s.handler(s.context)).status,503);
+  assert.equal(s.calls.length,1);
+ });
+ test(kind+' propagates backend unavailable status',async()=>{
+  const s=setup(kind,{backendStatus:503});
+  assert.equal((await s.handler(s.context)).status,503);
  });
  test(kind+' forwards only verified staff identity and required backend secrets',async()=>{
   const s=setup(kind);
