@@ -21,3 +21,17 @@ test('contact statuses have safe defaults',()=>{
  assert.equal(contactLabel('not_required'),'Not required');
  assert.equal(contactLabel('garbage'),'Contact recommended');
 });
+
+test('possibly new reasons explain uncertainty without asserting non-delivery',()=>{
+ const cases={
+  previous_order_not_confirmed:/completion not confirmed/i,
+  shared_contact:/shared contact details/i,
+  insufficient_identity:/not enough contact details/i,
+  test_order:/test order/i
+ };
+ for(const [reason,expected] of Object.entries(cases)){
+  const result=describe({classification:'possibly_new',reason});
+  assert.equal(result.heading,'POSSIBLY NEW');
+  assert.match(result.instruction,expected);
+ }
+});
