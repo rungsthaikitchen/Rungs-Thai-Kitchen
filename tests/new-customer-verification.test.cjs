@@ -25,6 +25,7 @@ test('contact statuses have safe defaults',()=>{
 test('possibly new reasons explain uncertainty without asserting non-delivery',()=>{
  const cases={
   previous_order_not_confirmed:/completion not confirmed/i,
+  completion_timing_unknown:/completion date is unavailable/i,
   shared_contact:/shared contact details/i,
   insufficient_identity:/not enough contact details/i,
   test_order:/test order/i
