@@ -32,7 +32,7 @@ LANGUAGE plpgsql VOLATILE SECURITY INVOKER
 SET search_path=pg_catalog,public
 AS $$
 BEGIN
- IF new_status NOT IN ('contacted','unreachable','not_required')
+ IF new_status IS NULL OR new_status NOT IN ('contacted','unreachable','not_required')
     OR staff_actor IS NULL OR length(btrim(staff_actor)) NOT BETWEEN 3 AND 254
     OR staff_actor !~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$' THEN
    RAISE EXCEPTION 'INVALID_CONTACT_UPDATE';
