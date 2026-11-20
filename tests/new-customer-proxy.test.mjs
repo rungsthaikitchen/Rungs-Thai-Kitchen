@@ -9,7 +9,7 @@ const env={
  MASTER_WOK_REVIEW_ADMIN_EMAILS:'staff@example.test',
  MASTER_WOK_REVIEW_ADMIN_SECRET:'x'.repeat(40),
  RTK_PROXY_SECRET:'proxy-secret',
- RTK_ORDER_BACKEND_URL:'https://staging.example.test'
+ RTK_CUSTOMER_VERIFICATION_BACKEND_URL:'https://staging.example.test'
 };
 async function loadHandler(file){
  const source=await readFile(new URL('../functions/admin-api/'+file,import.meta.url),'utf8');
