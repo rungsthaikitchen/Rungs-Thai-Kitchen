@@ -34,3 +34,9 @@ Status: development branch; NOT deployed.
 - Ran the proposed classification SELECT directly against production orders from the preceding 30 days, **without invoking or installing the RPC** and returning **aggregate counts only**. Results: 34 new, 8 possibly new, 59 returning (101 orders total).
 - Counts are provisional, not independently verified identities or completion-at-order-time evidence. Do not use this query as a substitute for integration testing of the actual functions, protected endpoints, or Admin contact audit.
 - Production database and Master Wok staging database remained unchanged.
+
+## Isolated contact-function rejection tests — 20 November 2026
+- Executed a schema-adjusted copy of the contact-recording PL/pgSQL function in a transaction-only staging schema, using synthetic orders.
+- Confirmed invalid status -> INVALID_CONTACT_UPDATE, nonexistent order -> ORDER_NOT_FOUND, malformed staff actor -> INVALID_CONTACT_UPDATE.
+- After all three rejected calls, current-status rows = 0 and audit rows = 0. Transaction rolled back; verified temporary schema absent.
+- This validates function-level rejection behavior, not production grants, Cloudflare Access authentication, or complete Admin end-to-end flow.
