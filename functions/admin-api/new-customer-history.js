@@ -10,8 +10,8 @@ export function createHandler({validate=cloudflareAccessPlugin,fetch=globalThis.
   if(!env.MASTER_WOK_REVIEW_ACCESS_AUD)invalid.push('access_audience');
   if(!allowed.length)invalid.push('staff_allowlist');
   if(!env.RTK_CUSTOMER_VERIFICATION_BACKEND_URL)invalid.push('customer_backend_url');
-  if(!env.RTK_CUSTOMER_VERIFICATION_PROXY_SECRET)invalid.push('customer_proxy_secret');
-  if((env.RTK_CUSTOMER_VERIFICATION_ADMIN_SECRET||'').length<32)invalid.push('customer_admin_secret');
+  if(!env.RTK_PROXY_SECRET)invalid.push('customer_proxy_secret');
+  if((env.MASTER_WOK_REVIEW_ADMIN_SECRET||'').length<32)invalid.push('customer_admin_secret');
   if(invalid.length)return json({error:'Customer history access is not configured',failed_checks:invalid},503);
   if(request.method!=='POST')return json({error:'Method not allowed'},405);
   // A browser-supplied identity header is insufficient. Validate its signed
@@ -32,8 +32,8 @@ export function createHandler({validate=cloudflareAccessPlugin,fetch=globalThis.
     if(payload?.action!=='classify')return json({error:'Invalid customer history lookup'},400);
     raw=JSON.stringify({...payload,staffActor:email});
     const response=await fetch(new URL('/admin-new-customer-history',env.RTK_CUSTOMER_VERIFICATION_BACKEND_URL),{
-     method:'POST',headers:{'Content-Type':'application/json','x-rtk-proxy-secret':env.RTK_CUSTOMER_VERIFICATION_PROXY_SECRET,
-      'x-rtk-review-admin-secret':env.RTK_CUSTOMER_VERIFICATION_ADMIN_SECRET, 'x-rtk-review-actor':email},
+     method:'POST',headers:{'Content-Type':'application/json','x-rtk-proxy-secret':env.RTK_PROXY_SECRET,
+      'x-rtk-review-admin-secret':env.MASTER_WOK_REVIEW_ADMIN_SECRET, 'x-rtk-review-actor':email},
      body:raw,redirect:'manual',signal:AbortSignal.timeout(25000)});
     if(response.status>=300&&response.status<400)throw Error('REDIRECT_REFUSED');
     return new Response(await response.text(),{status:response.status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
