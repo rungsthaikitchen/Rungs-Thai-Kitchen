@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Customer verification — synthetic fixtures</title><style>body{font:16px system-ui;margin:30px}table{border-collapse:collapse;width:100%;max-width:1000px}td,th{padding:16px;border-bottom:1px solid #ddd;text-align:left}button{padding:8px 16px}</style></head>
+<body><h1>Customer verification — synthetic fixtures</h1><p>Preview-only test. No real orders, payments or customer notifications.</p><button id="refresh">Refresh</button><table><thead><tr><th>Fixture</th><th>Customer</th><th>Expected</th></tr></thead><tbody id="tbody"></tbody></table>
+<script>
+if(location.hostname.endsWith('.pages.dev') && location.hostname.split('.').length===4){
+ const fixtures=[['001','Synthetic first order','NEW CUSTOMER'],['002','Synthetic unfulfilled history','POSSIBLY NEW'],['003','Synthetic returning customer','No banner'],['004','Synthetic shared contact','POSSIBLY NEW']];
+ for(const [suffix,name,expected] of fixtures){const row=document.createElement('tr');row.dataset.orderId='00000000-0000-4000-8000-000000000'+suffix;row.dataset.orderRef='SYN-'+suffix;for(const value of [row.dataset.orderRef,name,expected]){const td=document.createElement('td');td.textContent=value;row.append(td);}document.getElementById('tbody').append(row);}
+ for(const src of ['/new-customer-verification.js','/new-customer-history-admin.js']){const s=document.createElement('script');s.src=src;s.async=false;document.body.append(s);}
+}else{document.body.replaceChildren(document.createTextNode('Unavailable outside preview.'));}
+</script></body></html>
