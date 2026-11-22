@@ -25,6 +25,27 @@ test('configured staging proxy forwards exact body and server secret without exp
  }finally{global.fetch=old;}
 });
 
+test('availability proxy preserves upstream 503 without retrying or leaking credentials',async()=>{
+ const old=global.fetch;let calls=0;
+ global.fetch=async(url,options)=>{
+  calls++;
+  assert.equal(String(url),'https://staging.example.invalid/booking-availability');
+  assert.equal(options.method,'POST');
+  assert.equal(options.redirect,'manual');
+  assert.equal(options.headers['x-rtk-proxy-secret'],'fixture-secret');
+  return Response.json({success:false,error:'MASTER_WOK_UNAVAILABLE_RETRY_SAME_REQUEST'},{status:503});
+ };
+ try{
+  const handler=(await file('functions/api/booking-availability.js')).onRequestPost;
+  const response=await handler({env:{RTK_ORDER_BACKEND_URL:'https://staging.example.invalid',RTK_PROXY_SECRET:'fixture-secret'},
+   request:new Request('https://review.rtk.pages.dev/api/booking-availability',{method:'POST',body:'{"times":["2026-11-22T18:00:00Z"]}'})});
+  assert.equal(response.status,503);
+  assert.equal(response.headers.get('Cache-Control'),'no-store');
+  assert.equal(calls,1);
+  assert.equal((await response.json()).success,false);
+ }finally{global.fetch=old;}
+});
+
 test('private rehearsal alias namespaces UUID retries only for its exact staging backend and synthetic email',async()=>{
  const old=global.fetch;const bodies=[];
  global.fetch=async(_url,options)=>{bodies.push(options.body);return Response.json({success:true});};
