@@ -1,0 +1,18 @@
+name: Master Wok checkout regression tests
+on:
+  pull_request:
+    paths:
+      - 'master-wok-checkout-client.js'
+      - 'tests/booking-client.test.cjs'
+      - '.github/workflows/master-wok-checkout-tests.yml'
+jobs:
+  checkout-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/booking-client.test.cjs
