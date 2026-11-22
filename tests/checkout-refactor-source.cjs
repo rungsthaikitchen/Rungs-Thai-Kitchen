@@ -11,7 +11,14 @@ function invert(text,edits){
 }
 function reconstruct(root=path.join(__dirname,'..')){
  const evidence=JSON.parse(fs.readFileSync(path.join(root,'CHECKOUT-CONTROLLERS-EXTRACTION-2026-11-19.json'),'utf8'));
- let source=invert(fs.readFileSync(path.join(root,'customer-checkout.js'),'utf8'),evidence.bridgeEdits);
+ let current=fs.readFileSync(path.join(root,'customer-checkout.js'),'utf8');
+ // Undo the documented subsequent message fix only for historical extraction
+ // proofs. Current delivery messages are executable-tested separately.
+ const messageChange=require('./delivery-message-change.json');
+ assert.equal(hash(messageChange.after),messageChange.afterSha256);
+ assert.equal(current.split(messageChange.after).length,2,'current delivery message block drift');
+ current=current.replace(messageChange.after,messageChange.before);
+ let source=invert(current,evidence.bridgeEdits);
  for(const name of ['availability','submission']){
   const module=fs.readFileSync(path.join(root,'customer-checkout-'+name+'.js'),'utf8');
   const start='// BEGIN extracted '+name+'\n',end='// END extracted '+name+'\n';

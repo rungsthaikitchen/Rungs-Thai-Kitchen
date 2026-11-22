@@ -841,13 +841,17 @@ if (typeof deliveryNote !== 'undefined' && deliveryNote) {
       deliveryNote.className = "";
       deliveryNote.textContent = "Calculating delivery charge…";
 
-    } else if (quote.eligible === false || quote.usedFallback) {
+    } else if (quote.eligible === false || (quote.usedFallback && !Number.isFinite(quote.straightLineMiles))) {
       deliveryNote.className = "delivery-error";
       deliveryNote.innerHTML = fullAddressMessage;
 
     } else if (getPreDiscountFoodSubtotal() >= DELIVERY_FREE_THRESHOLD) {
       deliveryNote.className = "";
       deliveryNote.textContent = "🎉 Free delivery on orders over £30";
+
+    } else if (quote.usedFallback) {
+      deliveryNote.className = "";
+      deliveryNote.textContent = `Delivery ${formatCurrency(Number(quote.fee ?? 0))} (standard charge; route pricing unavailable)`;
 
     } else {
       deliveryNote.className = "";
