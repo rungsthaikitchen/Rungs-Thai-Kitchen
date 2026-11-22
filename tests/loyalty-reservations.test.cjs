@@ -1,11 +1,10 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const {loyaltyAvailability}=require('../master-wok-checkout-client');
-const source=fs.readFileSync(require.resolve('../customer-checkout.js'),'utf8');
-const apply=source.slice(source.indexOf('function applyLoyaltyToTotals('),source.indexOf('function updateLoyaltyProjection('));
+const {create}=require('../customer-checkout-pricing');
 function discount(quote){
  const balance=loyaltyAvailability(quote),state={pointsBalance:quote.points_balance,settledPointsBalance:balance.settledPoints,availablePointsBalance:balance.availablePoints,reservedPoints:balance.reservedPoints};
  const context={loyaltyState:state,LOYALTY_REWARD_THRESHOLD:100,LOYALTY_REWARD_VALUE:5,console:{log(){}}};
- const amount=vm.runInNewContext(apply+';applyLoyaltyToTotals(103)',context);
+ const amount=create(context).applyLoyaltyToTotals(103);
  return {amount,state};
 }
 test('the visible checkout cannot reuse the first pending order reward',()=>{

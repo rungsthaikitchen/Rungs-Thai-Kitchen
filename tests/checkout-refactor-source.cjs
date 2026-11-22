@@ -11,7 +11,7 @@ function invert(text,edits){
 }
 function reconstruct(root=path.join(__dirname,'..')){
  const evidence=JSON.parse(fs.readFileSync(path.join(root,'CHECKOUT-CONTROLLERS-EXTRACTION-2026-11-19.json'),'utf8'));
- let current=fs.readFileSync(path.join(root,'customer-checkout.js'),'utf8');
+ let current=require('./pricing-source.cjs').reconstructPricing(root);
  // Undo the documented subsequent message fix only for historical extraction
  // proofs. Current delivery messages are executable-tested separately.
  const messageChange=require('./delivery-message-change.json');

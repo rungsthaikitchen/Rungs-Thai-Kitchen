@@ -142,14 +142,7 @@ function isWedThuLondon(d = new Date()){
   return day === 'Wed' || day === 'Thu';
 }
 
-			function applyWedThuDiscount(subtotal, preferredTimeRaw, asapRequested) {
-  // 🚫 TEMP DISABLED - midweek 10% discount paused
-  return {
-    eligible: false,
-    discount: 0,
-    discountedSubtotal: Math.round(subtotal * 100) / 100
-  };
-}
+			function applyWedThuDiscount(...args){return checkoutPricing.applyWedThuDiscount(...args);}
 
 
 
@@ -387,163 +380,9 @@ let appliedDiscountCode = null;
 let appliedDiscountAmount = 0;
 
 // Discount code validation
-async function validateDiscountCode(code, foodSubtotal) {
-  const cleanCode = String(code || "").trim().toUpperCase();
+function validateDiscountCode(...args){return checkoutPricing.validateDiscountCode(...args);}
 
-  if (!cleanCode) {
-    return { valid: false, reason: "Please enter a discount code." };
-  }
-
-  const { data, error } = await sb
-    .from("discount_codes")
-    .select("*")
-    .eq("code", cleanCode)
-    .eq("active", true)
-    .maybeSingle();
-
-  if (error || !data) {
-    return {
-      valid: false,
-      reason: "That discount code was not recognised."
-    };
-  }
-
-  const now = new Date();
-
-  if (data.starts_at && new Date(data.starts_at) > now) {
-    return {
-      valid: false,
-      reason: "This discount code is not active yet."
-    };
-  }
-
-  if (data.expires_at && new Date(data.expires_at) < now) {
-    return {
-      valid: false,
-      reason: "This discount code has expired."
-    };
-  }
- 
-
- // Restrict discount codes to selected order weekdays, where configured
-if (
-  Array.isArray(data.allowed_weekdays) &&
-  data.allowed_weekdays.length > 0
-) {
-  const selectedDateTimeValue =
-    document.getElementById("cust-preferred-time")?.value;
-
-  if (!selectedDateTimeValue) {
-    return {
-      valid: false,
-      reason: "Please select your collection or delivery time first."
-    };
-  }
-
-  const selectedDateTime =
-    new Date(selectedDateTimeValue);
-
-  const selectedWeekday =
-    selectedDateTime.getDay();
-
-  const allowedWeekdays =
-    data.allowed_weekdays.map(Number);
-
-  if (!allowedWeekdays.includes(selectedWeekday)) {
-    return {
-      valid: false,
-      reason: "This discount code is only valid for Wednesday and Thursday orders."
-    };
-  }
-}
-
-  if (
-    data.max_uses !== null &&
-    Number(data.used_count || 0) >= Number(data.max_uses)
-  ) {
-    return {
-      valid: false,
-      reason: "Sorry, this discount code has already been used."
-    };
-  }
-
-  if (foodSubtotal < Number(data.min_food_subtotal || 0)) {
-    return {
-      valid: false,
-      reason:
-        `This code requires a minimum food spend of £${Number(data.min_food_subtotal).toFixed(2)}.`
-    };
-  }
-
-  let discountAmount = 0;
-
-  if (data.discount_type === "fixed") {
-    discountAmount = Math.min(
-      Number(data.discount_value || 0),
-      foodSubtotal
-    );
-  }
-
-  if (data.discount_type === "percent") {
-    discountAmount =
-      foodSubtotal *
-      (Number(data.discount_value || 0) / 100);
-  }
-
-  discountAmount =
-    Math.round(discountAmount * 100) / 100;
-
-  return {
-    valid: true,
-    code: cleanCode,
-    discountAmount,
-    discount: data
-  };
-}
-
-async function refreshAppliedDiscountCode() {
-  if (!appliedDiscountCode) return;
-
-  // Recalculate current basket subtotal directly
-  const foodSubtotal = window.basket.reduce(
-    (sum, item) => sum + Number(item.unitPrice || 0) * Number(item.qty || 0),
-    0
-  );
-
-  // Keep checkout subtotal in sync
-  checkoutBaseSubtotal = foodSubtotal;
-
-  const result = await validateDiscountCode(
-    appliedDiscountCode,
-    foodSubtotal
-  );
-
-  const message = document.getElementById("discount-code-message");
-
-  if (!result.valid) {
-    appliedDiscountCode = null;
-    appliedDiscountAmount = 0;
-
-    if (message) {
-  message.textContent =
-    `Discount code removed — ${result.reason}`;
-  message.className = "discount-code-message error";
-}
-
-    recomputeCheckoutTotals();
-    return;
-  }
-
-  appliedDiscountAmount = result.discountAmount;
-
-  if (message) {
-    message.textContent =
-      `${appliedDiscountCode} applied: £${appliedDiscountAmount.toFixed(2)} off`;
-    message.className = "discount-code-message success";
-  }
-
-  recomputeCheckoutTotals();
-}
+function refreshAppliedDiscountCode(...args){return checkoutPricing.refreshAppliedDiscountCode(...args);}
 
 // ← ADD THIS HERE
 document
@@ -573,124 +412,41 @@ const loyaltyState = {
 };
 // ---------------- END LOYALTY STATE ----------------
 
-function applyLoyaltyToTotals(foodSubtotal) {
-  // ✅ USE SETTLED POINTS ONLY
-  	console.log('APPLY LOYALTY CHECK', {
-  pointsBalance: loyaltyState.pointsBalance,
-  settledPointsBalance: loyaltyState.settledPointsBalance,
-  threshold: LOYALTY_REWARD_THRESHOLD
+// BEGIN pricing initialization
+const checkoutPricing=window.RTKCheckoutPricing.create({
+ get window(){return window;},
+ get document(){return document;},
+ get console(){return console;},
+ get sb(){return sb;},
+ get fetch(){return fetch;},
+ get AbortSignal(){return AbortSignal;},
+ get checkoutBaseSubtotal(){return checkoutBaseSubtotal;},
+ set checkoutBaseSubtotal(value){checkoutBaseSubtotal=value;},
+ get appliedDiscountCode(){return appliedDiscountCode;},
+ set appliedDiscountCode(value){appliedDiscountCode=value;},
+ get appliedDiscountAmount(){return appliedDiscountAmount;},
+ set appliedDiscountAmount(value){appliedDiscountAmount=value;},
+ get loyaltyState(){return loyaltyState;},
+ get LOYALTY_REWARD_THRESHOLD(){return LOYALTY_REWARD_THRESHOLD;},
+ get LOYALTY_REWARD_VALUE(){return LOYALTY_REWARD_VALUE;},
+ get deliveryQuoteState(){return deliveryQuoteState;},
+ get deliveryNote(){return deliveryNote;},
+ get getSelectedOrderType(){return getSelectedOrderType;},
+ get DELIVERY_FREE_THRESHOLD(){return DELIVERY_FREE_THRESHOLD;},
+ get DELIVERY_FALLBACK_FEE(){return DELIVERY_FALLBACK_FEE;},
+ get formatCurrency(){return formatCurrency;}
 });
-  const settledPoints = Number(loyaltyState.settledPointsBalance || 0);
-  const eligibleSubtotal = Number(foodSubtotal || 0);
+// END pricing initialization
 
-  const rewardEligible = Number(loyaltyState.availablePointsBalance || 0) >= LOYALTY_REWARD_THRESHOLD;
+function applyLoyaltyToTotals(...args){return checkoutPricing.applyLoyaltyToTotals(...args);}
 
-  const discountApplied = rewardEligible
-    ? Math.min(LOYALTY_REWARD_VALUE, eligibleSubtotal)
-    : 0;
+function updateLoyaltyProjection(...args){return checkoutPricing.updateLoyaltyProjection(...args);}
 
-  loyaltyState.rewardEligible = rewardEligible;
-  loyaltyState.discountApplied = discountApplied;
+function renderLoyaltyMessage(...args){return checkoutPricing.renderLoyaltyMessage(...args);}
 
-  // Only redeem if actually eligible from settled balance
-  loyaltyState.pointsRedeemedPending = rewardEligible
-    ? LOYALTY_REWARD_THRESHOLD
-    : 0;
+function normalisePhone(...args){return checkoutPricing.normalisePhone(...args);}
 
-  return discountApplied;
-}
-
-function updateLoyaltyProjection(foodSubtotalAfterAllDiscounts) {
-  const settledPoints = Number(loyaltyState.settledPointsBalance || 0);
-  const rewardEligible = !!loyaltyState.rewardEligible;
-  const pointsRedeemedPending = rewardEligible ? LOYALTY_REWARD_THRESHOLD : 0;
-
-  // Earn points only on food actually paid for, after all discounts
-  const pointsEarnedPending = Math.max(0, Math.floor(Number(foodSubtotalAfterAllDiscounts || 0)));
-
-  const expectedBalance = settledPoints - pointsRedeemedPending + pointsEarnedPending;
-  const pointsToNextReward = rewardEligible
-  ? 0
-  : Math.max(0, LOYALTY_REWARD_THRESHOLD - Number(loyaltyState.availablePointsBalance || 0));
-
-  loyaltyState.pointsRedeemedPending = pointsRedeemedPending;
-  loyaltyState.pointsEarnedPending = pointsEarnedPending;
-  loyaltyState.expectedBalance = expectedBalance;
-  loyaltyState.pointsToNextReward = pointsToNextReward;
-  
-  console.log('LOYALTY STATE:', loyaltyState);
-}
-
-function renderLoyaltyMessage() {
-  const el = document.getElementById('loyalty-message');
-  if (!el) return;
-
-  const points = Number(loyaltyState.pointsBalance || 0);
-  const rewardEligible = !!loyaltyState.rewardEligible;
-  const discountApplied = Number(loyaltyState.discountApplied || 0);
-  const pointsRedeemedPending = Number(loyaltyState.pointsRedeemedPending || 0);
-  const pointsEarnedPending = Number(loyaltyState.pointsEarnedPending || 0);
-  const expectedBalance = Number(loyaltyState.expectedBalance || 0);
-  const needed = Number(loyaltyState.pointsToNextReward || LOYALTY_REWARD_THRESHOLD);
-
-  // Hide if no phone entered / no known balance yet
-  if (points <= 0 && !rewardEligible && pointsEarnedPending <= 0) {
-    el.hidden = true;
-    el.innerHTML = '';
-    return;
-  }
-
-  el.hidden = false;
-
-if (rewardEligible && discountApplied > 0) {
-  el.innerHTML = `
-    <strong>Loyalty reward applied:</strong> You have ${points} points, so <strong>£${discountApplied.toFixed(2)} off</strong> your food subtotal has been applied automatically.<br>
-    Redeeming on fulfilment: -${pointsRedeemedPending} points<br>
-    This order: +${pointsEarnedPending} pending points<br>
-    Expected balance after fulfilment: <strong>${expectedBalance}</strong>
-  `;
-  return;
-}
-
-  if (loyaltyState.reservedPoints > 0) {
-    el.innerHTML = `<strong>Loyalty reward reserved:</strong> ${loyaltyState.reservedPoints} points are already reserved on another pending order. You have <strong>${loyaltyState.availablePointsBalance} points available</strong> for this order.<br>This order: +${pointsEarnedPending} pending points.`;
-    return;
-  }
-
-  el.innerHTML = `
-    <strong>Loyalty points:</strong> You currently have ${points} points.<br>
-    This order: +${pointsEarnedPending} pending points<br>
-    Expected balance after fulfilment: <strong>${expectedBalance}</strong><br>
-    ${needed > 0 ? `Only ${needed} more points until your next £5 reward.` : ''}
-  `;
-}
-
-function normalisePhone(phone) {
-  return (phone || '').trim();
-}
-
-async function fetchLoyaltyBalance(phone) {
-  const cleanPhone = normalisePhone(phone);
-  if (!cleanPhone) return null;
-
-  try {
-    const res = await fetch('https://order-backend-production.up.railway.app/loyalty-balance', {
-      method: 'POST', cache: 'no-store', signal: AbortSignal.timeout(8000),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ phone: cleanPhone })
-    });
-
-    const data = await res.json();
-    if (!data.ok) return null;
-
-    return data.loyalty || null;
-  } catch (err) {
-    console.error('Failed to fetch loyalty balance:', err);
-    return null;
-  }
-}
+function fetchLoyaltyBalance(...args){return checkoutPricing.fetchLoyaltyBalance(...args);}
 // Recompute totals whenever fulfilment time / ASAP / order type changes
 (function wireCheckoutTotalRecompute() {
   const timeEl =
@@ -718,254 +474,13 @@ async function fetchLoyaltyBalance(phone) {
 })();
 
 
-			function calcDeliveryFee(subtotal, orderType){
-			  if(orderType !== 'delivery') return 0;
-			  return subtotal < DELIVERY_FREE_THRESHOLD ? DELIVERY_FALLBACK_FEE : 0;
-			}
+			function calcDeliveryFee(...args){return checkoutPricing.calcDeliveryFee(...args);}
 	
-			function getPreDiscountFoodSubtotal() {
-			  return Number(checkoutBaseSubtotal || 0);
-			}
+			function getPreDiscountFoodSubtotal(...args){return checkoutPricing.getPreDiscountFoodSubtotal(...args);}
 			
-			function updateFreeDeliveryHint() {
-  const hintEl = document.getElementById("freeDeliveryHint");
-  if (!hintEl) return;
-
-  const orderType = getSelectedOrderType();
-  const subtotal = Number(checkoutBaseSubtotal || 0);
-
-  if (orderType !== "delivery") {
-    hintEl.style.display = "none";
-    hintEl.textContent = "";
-    return;
-  }
-
-  if (subtotal >= DELIVERY_FREE_THRESHOLD) {
-    hintEl.textContent = "🎉 You’ve unlocked FREE delivery!";
-    hintEl.style.display = "block";
-    return;
-  }
-
-  const remaining = Math.max(0, DELIVERY_FREE_THRESHOLD - subtotal);
-
-  hintEl.textContent = `🚚 Add £${remaining.toFixed(2)} more for FREE delivery`;
-  hintEl.style.display = "block";
-}
+			function updateFreeDeliveryHint(...args){return checkoutPricing.updateFreeDeliveryHint(...args);}
 			
-			function recomputeCheckoutTotals() {
-			  const orderType = getSelectedOrderType();
-
-			  const quote = window.deliveryQuoteState || deliveryQuoteState || {
-				loading: false,
-				eligible: true,
-				fee: 0
-			  };
-
-			  console.log("[totals debug] checkoutBaseSubtotal:", checkoutBaseSubtotal);
-			  console.log("[totals debug] preDiscountSubtotal:", Number(checkoutBaseSubtotal || 0));
-			  console.log("[totals debug] deliveryQuoteState:", quote);
-			  console.log("[totals debug] order type:", orderType);
-
-			  let deliveryFee = 0;
-			  let deliveryBlocked = false;
-
-			  if (orderType === "delivery") {
-				if (quote.loading) {
-				  deliveryFee = 0;
-				} else if (quote.eligible === false) {
-				  deliveryFee = 0;
-				  deliveryBlocked = true;
-				} else {
-				  deliveryFee = Number(quote.fee ?? 0);
-				}
-			  }
-
-			  const subtotal = Math.round(Number(checkoutBaseSubtotal || 0) * 100) / 100;
-
-			  const preferredTimeRaw =
-				(document.getElementById('preferred-time')?.value ||
-				 document.querySelector('input[name="preferred_time"]')?.value ||
-				 '').trim();
-
-			  const asapRequested =
-				!!document.querySelector('input[name="asap_requested"]:checked') ||
-				!!document.getElementById('asap')?.checked ||
-				!!document.getElementById('asap-requested')?.checked ||
-				!!document.getElementById('asapRequested')?.checked;
-
-			  const disc = applyWedThuDiscount(subtotal, preferredTimeRaw, asapRequested);
-
-				const discountCodeAmount = Number(appliedDiscountAmount || 0);
-
-				const discountedSubtotal = Math.max(
-				  0,
-				  Number(disc.discountedSubtotal || subtotal) - discountCodeAmount
-				);
-			  
-
-			  const loyaltyDiscount = applyLoyaltyToTotals(discountedSubtotal);
-			  const foodSubtotalAfterAllDiscounts = Math.max(0, discountedSubtotal - loyaltyDiscount);
-
-			  updateLoyaltyProjection(foodSubtotalAfterAllDiscounts);
-
-			  const total = Math.round(
-				  (foodSubtotalAfterAllDiscounts + deliveryFee) * 100
-				) / 100;
-
-			  const checkoutSubtotalEl = document.getElementById('checkout-subtotal');
-			  const checkoutDeliveryEl = document.getElementById('checkout-delivery');
-			  const checkoutTotalEl = document.getElementById('checkout-total');
-
-			  if (checkoutSubtotalEl) {
-				checkoutSubtotalEl.textContent = formatCurrency(subtotal);
-			  }
-
-			  if (checkoutDeliveryEl) {
-				checkoutDeliveryEl.textContent = deliveryBlocked
-				  ? "Unavailable"
-				  : formatCurrency(deliveryFee);
-			  }
-
-			  if (checkoutTotalEl) {
-				checkoutTotalEl.textContent = formatCurrency(total);
-			  }
-
-if (typeof deliveryNote !== 'undefined' && deliveryNote) {
-  deliveryNote.style.display = (orderType === 'delivery') ? 'block' : 'none';
-
-  if (orderType === 'delivery') {
-    const fullAddressMessage =
-      'Sorry, we could not confirm this delivery address. Please enter your full address including street, town and postcode, for example: 30 Topcliffe Mews, Morley, LS27 8UL. If you are still having problems, please call us on <a href="tel:01134699564">0113 469 9564</a> and we’ll see what we can do 😊';
-
-    if (quote.loading) {
-      deliveryNote.className = "";
-      deliveryNote.textContent = "Calculating delivery charge…";
-
-    } else if (quote.eligible === false || (quote.usedFallback && !Number.isFinite(quote.straightLineMiles))) {
-      deliveryNote.className = "delivery-error";
-      deliveryNote.innerHTML = fullAddressMessage;
-
-    } else if (getPreDiscountFoodSubtotal() >= DELIVERY_FREE_THRESHOLD) {
-      deliveryNote.className = "";
-      deliveryNote.textContent = "🎉 Free delivery on orders over £30";
-
-    } else if (quote.usedFallback) {
-      deliveryNote.className = "";
-      deliveryNote.textContent = `Delivery ${formatCurrency(Number(quote.fee ?? 0))} (standard charge; route pricing unavailable)`;
-
-    } else {
-      deliveryNote.className = "";
-      deliveryNote.textContent =
-        `Delivery ${formatCurrency(Number(quote.fee ?? 0))}${
-          Number.isFinite(quote.routeMiles)
-            ? ` based on approx. route distance of ${quote.routeMiles.toFixed(1)} miles`
-            : ' based on approximate distance'
-        }`;
-    }
-  }
-}
-
-			  const discountRow = document.getElementById('discountRow');
-			  const discountValue = document.getElementById('discountValue');
-
-				if (discountRow && discountValue) {
-
-				  const existingDiscount =
-					Number(disc.discount || 0);
-
-				  const voucherDiscount =
-					Number(appliedDiscountAmount || 0);
-
-				  const totalDiscount =
-					existingDiscount + voucherDiscount;
-
-				  if (totalDiscount > 0) {
-
-					discountRow.style.display = 'flex';
-
-					let label = 'Discount';
-
-					if (appliedDiscountCode) {
-					  label += ` (${appliedDiscountCode})`;
-					}
-
-					const labelEl =
-					  discountRow.querySelector('.label');
-
-					if (labelEl) {
-					  labelEl.textContent = label;
-					}
-
-					discountValue.textContent =
-					  `-£${totalDiscount.toFixed(2)}`;
-
-				  } else {
-
-					discountRow.style.display = 'none';
-					discountValue.textContent = '';
-
-				  }
-				}
-
-			  const loyaltyRow = document.getElementById('loyaltyDiscountRow');
-			  const loyaltyValue = document.getElementById('loyaltyDiscountValue');
-
-			  if (loyaltyRow && loyaltyValue) {
-				if (loyaltyDiscount > 0) {
-				  loyaltyRow.style.display = 'flex';
-				  loyaltyValue.textContent = `-£${loyaltyDiscount.toFixed(2)}`;
-				} else {
-				  loyaltyRow.style.display = 'none';
-				  loyaltyValue.textContent = '';
-				}
-			  }
-
-			  renderLoyaltyMessage();
-
-				window.__checkoutTotals = {
-				  subtotal,
-
-				  discount: Number(appliedDiscountAmount || 0),
-				  discount_amount: Number(appliedDiscountAmount || 0),
-				  discount_code: appliedDiscountCode || "",
-				  discount_label: appliedDiscountCode
-					? `Voucher discount (${appliedDiscountCode})`
-					: "",
-
-				  discounted_subtotal: discountedSubtotal,
-
-				loyalty_discount: loyaltyDiscount,
-				loyalty_reward_applied: !!loyaltyState.rewardEligible,
-				loyalty_points_balance: Number(loyaltyState.pointsBalance || 0),
-				loyalty_points_redeem_pending: Number(loyaltyState.pointsRedeemedPending || 0),
-				loyalty_points_earned_pending: Number(loyaltyState.pointsEarnedPending || 0),
-				loyalty_expected_balance: Number(loyaltyState.expectedBalance || 0),
-
-				delivery_fee: deliveryBlocked ? null : deliveryFee,
-				delivery_blocked: deliveryBlocked,
-				delivery_block_reason: deliveryBlocked ? quote.reason : "",
-				delivery_straight_line_miles: quote?.straightLineMiles ?? null,
-				delivery_route_miles: quote?.routeMiles ?? null,
-				delivery_distance_source: quote?.usedFallback
-				  ? "straight_line_fallback"
-				  : (quote?.routeMiles != null ? "route" : null),
-
-				total,
-
-				order_type: orderType,
-				preferred_time: preferredTimeRaw,
-				asap_requested: asapRequested,
-				points_earning_food_subtotal: foodSubtotalAfterAllDiscounts
-			  };
-			  
-			  if (Number(subtotal || 0) > 0) {
-				  window.__lastGoodCheckoutTotals = { ...window.__checkoutTotals };
-				}
-			  
-			  updateFreeDeliveryHint();
-
-			  return window.__checkoutTotals;
-			}
+			function recomputeCheckoutTotals(...args){return checkoutPricing.recomputeCheckoutTotals(...args);}
 
 function updateCheckoutOrderSummary() {
   const box = document.getElementById('checkout-order-summary');
