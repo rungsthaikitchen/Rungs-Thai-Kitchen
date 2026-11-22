@@ -5,6 +5,7 @@ for(const initialMode of ['delivery','collection',null])test('reopening checkout
  let mode=initialMode;const requests=[];
  const radio={set checked(value){if(value)mode='collection';}};
  const context={checkoutOpening:false,setCheckoutOpening(){},availabilityBasketKey:()=>'',console:{trace(){},warn(){}},document:{querySelectorAll:()=>[],getElementById:()=>({value:''}),querySelector:selector=>selector.includes(':checked')?(mode?{value:mode}:null):radio},window:{},loadServiceState:async()=>{},SERVICE_STATE:{mode:'normal'},loadBlackouts:async()=>{},preferredDateInput:{value:'2026-11-12'},preferredTimeSelect:{value:'',options:[]},preferredTimeHidden:{value:''},populatePreferredTimeSelect:async()=>requests.push(mode),hidePreferredTimeMessage(){},showPreferredTimeMessage(){},recomputeCheckoutTotals(){},updateCheckoutSubmitButton(){},updateCheckoutOrderSummary(){},checkoutMsg:{style:{}},checkoutModal:{style:{}},lastPreferredDate:null,checkoutBaseSubtotal:0};
+ context.window.refreshCheckoutPricingAndRender=async()=>{};
  const dialog=createDialog(context);await dialog.open(22.50);await dialog.open(22.50);
  const expected=initialMode||'collection';assert.deepEqual(requests,[expected,expected]);assert.equal(mode,expected);assert.equal(context.checkoutModal.style.display,'flex');
 });

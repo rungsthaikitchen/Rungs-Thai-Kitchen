@@ -1,7 +1,10 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),crypto=require('node:crypto');
 const {create}=require('../customer-checkout-dialog');
 const evidence=require('../CHECKOUT-DIALOG-EXTRACTION-2026-11-19.json');
-const bootstrap=require('./checkout-refactor-source.cjs').reconstruct(),moduleSource=fs.readFileSync(require.resolve('../customer-checkout-dialog.js'),'utf8');
+const bootstrap=require('./checkout-refactor-source.cjs').reconstruct(),currentModuleSource=fs.readFileSync(require.resolve('../customer-checkout-dialog.js'),'utf8');
+const quoteChange=require('./quote-refresh-change.json');
+assert.equal(currentModuleSource.split(quoteChange.after).length,2);
+const moduleSource=currentModuleSource.replace(quoteChange.after,quoteChange.before);
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 test('the extracted lifecycle reconstructs the live baseline byte for byte',()=>{
  const parts={};
@@ -33,6 +36,7 @@ function fixture(){
   populatePreferredTimeSelect:async()=>{calls.push('times');context.preferredTimeSelect.options=[{value:'20:00',disabled:false}];},
   showPreferredTimeMessage:text=>calls.push(text),recomputeCheckoutTotals:()=>calls.push('totals'),updateCheckoutSubmitButton:()=>calls.push('button'),updateCheckoutOrderSummary:()=>calls.push('summary'),
   checkoutMsg:{style:{}},checkoutModal:{style:{display:'none'}},checkoutBaseSubtotal:0,lastPreferredDate:null};
+ context.window.refreshCheckoutPricingAndRender=async()=>{context.recomputeCheckoutTotals();context.updateCheckoutSubmitButton();context.updateCheckoutOrderSummary();};
  return {context,dialog:create(context),calls,buttons,status,setKey:value=>key=value,get mode(){return mode;}};
 }
 test('retained delivery, loyalty refresh and still-valid time survive opening and closing',async()=>{
@@ -59,4 +63,16 @@ test('opening waits for loyalty and discards a changed basket before displaying 
 });
 test('controller creation itself makes no requests and empty baskets cannot start loading data',async()=>{
  const f=fixture();assert.deepEqual(f.calls,[]);await f.dialog.open(0);assert.deepEqual(f.calls,[]);assert.equal(f.status.hidden,true);
+});
+test('opening refreshes pricing from the new subtotal and waits before showing checkout',async()=>{
+ const f=fixture();let finish,began;const started=new Promise(r=>began=r),waiting=new Promise(r=>finish=r);
+ f.context.window.refreshCheckoutPricingAndRender=async()=>{assert.equal(f.context.checkoutBaseSubtotal,30);began();await waiting;};
+ const opening=f.dialog.open(30);await started;assert.equal(f.context.checkoutModal.style.display,'none');
+ finish();await opening;assert.equal(f.context.checkoutModal.style.display,'flex');assert.equal(f.status.hidden,true);
+});
+test('a basket changed during the price refresh is not shown with an old subtotal',async()=>{
+ const f=fixture();let finish,began;const started=new Promise(r=>began=r),waiting=new Promise(r=>finish=r);
+ f.context.window.refreshCheckoutPricingAndRender=()=>{began();return waiting;};
+ const opening=f.dialog.open(30);await started;f.setKey('changed-during-quote');finish();await opening;
+ assert.equal(f.context.checkoutModal.style.display,'none');assert.equal(f.status.hidden,true);
 });
