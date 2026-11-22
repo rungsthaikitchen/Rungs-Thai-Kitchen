@@ -41,6 +41,25 @@ test('explicit CPU-limit response may split availability batches',async()=>{
  assert.equal(posts,7);
  assert.ok(result.hints.every(h=>h.available===true));
 });
+test('availability recovers on a fresh check after a transient 503 without multiplying calls',async()=>{
+ const times=Array.from({length:16},(_,i)=>new Date(Date.UTC(2026,10,22,17,i*5)).toISOString());
+ let calls=0,healthy=false;
+ const c=createClient({fetch:async(url,options)=>{
+  if(url==='/api/booking-mode')return ok({mode:'MASTER_WOK'});
+  calls++;
+  if(!healthy)return {ok:false,status:503};
+  const batch=JSON.parse(options.body).times;
+  return ok({success:true,bookingApprovalAllowed:false,hints:batch.map(time=>({time,available:true}))});
+ },storage:stored(),crypto});
+ const unavailable=await c.availability({times,items:input().items});
+ assert.equal(calls,1);
+ assert.ok(unavailable.hints.every(h=>h.unverified===true));
+ healthy=true;
+ const recovered=await c.availability({times,items:input().items});
+ assert.equal(calls,2);
+ assert.ok(recovered.hints.every(h=>h.available===true));
+});
+
 test('explicit legacy mode never posts an order to the new writer',async()=>{
  let posts=0;const c=createClient({fetch:async(_u,o)=>{if(o.method)posts++;return ok({mode:'LEGACY'});},storage:stored(),crypto});
  assert.equal((await c.submit(input())).route,'LEGACY');assert.equal(posts,0);
