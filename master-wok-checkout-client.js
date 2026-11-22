@@ -70,20 +70,21 @@
      const options={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...input,times})};
      const unchecked=()=>times.map(time=>({time,available:false,unverified:true}));
      if(Date.now()>=deadline)return unchecked();
-     let result,body,transient=false;
-     // Retrying an oversized CPU-failing batch repeats the same expensive
-     // work. Split it immediately; retry a singleton only once.
+     let result,body,transient=false,cpuLimit=false;
+     // Generic gateway/service errors must not fan out into dozens of requests.
+     // Only an explicit CPU-limit response permits bounded batch splitting.
      for(let attempt=0;attempt<(times.length===1?2:1);attempt++){
       if(Date.now()>=deadline)return unchecked();
       try{
        result=await read('/api/booking-availability',options,Math.min(8000,deadline-Date.now()));
+       cpuLimit=!result.ok&&result.status===546;
        transient=!result.ok&&[502,503,504,546].includes(result.status);
-       if(transient)continue;
-       body=await result.json();assertCurrent();transient=false;break;
-      }catch(error){assertCurrent();transient=true;}
+       if(transient)break;
+       body=await result.json();assertCurrent();break;
+      }catch(error){assertCurrent();transient=true;break;}
      }
      if(transient){
-      if(times.length>1&&Date.now()<deadline){
+      if(cpuLimit&&times.length>1&&Date.now()<deadline){
        const middle=Math.ceil(times.length/2);
        return [...await checkBatch(times.slice(0,middle)),...await checkBatch(times.slice(middle))];
       }
