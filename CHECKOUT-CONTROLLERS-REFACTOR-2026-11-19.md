@@ -19,4 +19,14 @@ The extraction uses recorded identifier-reference edits, excluding property keys
 
 Existing focused policy tests run against that hash-checked lexical reconstruction. Separate executable factory tests exercise the actual new dependency/state boundaries: latest date/type/address/basket payload, selected hidden time, late-response rejection, basket invalidation and cancellation, missing address, authoritative single submission under duplicate clicks, uncertainty retention, price/loyalty refresh, invalid-slot rejection and no legacy writer fallback after a managed booking error. Startup side effects, script order, syntax and the local browser-test asset routing are covered too.
 
-Full website suite: 123 tests pass. Hosted browser verification remains pending; direct HTTP reads received Cloudflare 403. Do not treat automated tests or preview deployment as a completed end-to-end checkout review. No customer order is needed for the next preview checks, and the draft is not merged into production.
+Full website suite: 123 tests pass, rechecked on 22 November. Availability-controller fixtures now pin the clock to 19 November instead of depending on the day the tests run. This changes tests only.
+
+Hosted browser checks on 20 November completed Cloudflare Access sign-in with the owner's authorisation. On preview `aa1975bd`, adding a menu item, opening feedback, closing/reopening, retained Delivery choice, basket retention and retained selected time were observed. No order or basket review was submitted.
+
+The initial 21 November availability search returned all slots unverified. Read-only staging investigation found two existing commitments and saved plan revision 6. The corrected validator rejects that plan with `COMMITTED_PLAN_RESOURCE_CLASH`; independent ring validation reports four `HOB_FOOTPRINT_CONFLICT` entries. Preserve this historical fixture rather than weakening the validator or silently rewriting it. Gateway availability requests returned HTTP 200 in approximately one second each.
+
+5 December was verified to have no staging commitments, saved plan or active blackout. The same browser basket returned all 49 normal-service times for Collection and Delivery. Selection of 18:30 and Delivery persisted after reopening. This is a narrow availability/lifecycle check, not a submitted-order or whole-service qualification.
+
+A separate delivery warning remained visible despite successful geocoding. Source comparison on 22 November confirms the entire delivery-message block is byte-identical to production baseline `4fe9847`: `quote.eligible === false || quote.usedFallback` selects the address-error message, so a route-pricing fallback can display an address failure. The earlier browser evidence does not prove which fallback caused that instance. Do not claim full delivery-pricing QA or change that policy as part of this extraction. The previous browser session was no longer available on 22 November; no fresh browser result is claimed.
+
+The refactor remains draft and has not been merged or deployed to production. Remaining work includes fuller basket/browser coverage and a separate decision on accurate fallback messaging.

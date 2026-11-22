@@ -1,6 +1,10 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const {create}=require('../customer-checkout-availability');
 const {reconstruct}=require('./checkout-refactor-source.cjs');
+// These fixtures assess tomorrow's service; keep wall-clock time independent
+// of the date on which the suite runs.
+test.beforeEach(t=>t.mock.timers.enable({apis:['Date'],now:new Date('2026-11-19T10:00:00Z')}));
+test.afterEach(t=>t.mock.timers.reset());
 test('availability and submission reconstruct the preceding draft exactly',()=>{
  assert.ok(reconstruct().includes('const checkoutDialog = window.RTKCheckoutDialog.create('));
 });
