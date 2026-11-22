@@ -1,0 +1,4 @@
+{
+  "before": "\t\t\t  (0, context.recomputeCheckoutTotals)();\r\n\t\t\t  (0, context.updateCheckoutSubmitButton)();\r\n\t\t\t  (0, context.updateCheckoutOrderSummary)();",
+  "after": "      // Requote using the newly committed subtotal before showing checkout.\n      await window.refreshCheckoutPricingAndRender();\n      if(openedBasketKey!==(0, context.availabilityBasketKey)())return;"
+}

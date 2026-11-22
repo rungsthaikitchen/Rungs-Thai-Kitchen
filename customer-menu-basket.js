@@ -182,6 +182,7 @@ const EXTRAS = [
     function roundToTwo(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
     function chilliIcons(n){ return '🌶️'.repeat(Math.max(0, Math.min(3, n||0))); }
 	
+var deliveryQuoteGeneration = 0;
 var deliveryQuoteState = {
   loading: false,
   eligible: true,
@@ -199,6 +200,7 @@ var refreshCheckoutPricingAndRender = async function () {
   if (getSelectedOrderType() === "delivery") {
     await window.refreshDeliveryQuote();
   } else {
+    ++deliveryQuoteGeneration; // Invalidate delivery replies after switching to collection.
     deliveryQuoteState = {
       loading: false,
       eligible: true,
@@ -346,6 +348,7 @@ function resetCheckoutForNextOrder() {
 }
 
 async function refreshDeliveryQuote() {
+  const generation = ++deliveryQuoteGeneration;
   const subtotal = Number(checkoutBaseSubtotal || 0);
 	const freeDeliveryRemaining = Math.max(0, DELIVERY_FREE_THRESHOLD - subtotal);
 	const freeDeliveryMessage =
@@ -456,6 +459,7 @@ async function refreshDeliveryQuote() {
     });
 
     const data = await resp.json().catch(() => null);
+    if (generation !== deliveryQuoteGeneration) return window.deliveryQuoteState;
 
     if (!resp.ok || !data?.ok || !Number.isFinite(data?.routeMiles)) {
       console.warn("[delivery] route lookup failed, using fallback");
@@ -498,6 +502,7 @@ async function refreshDeliveryQuote() {
     return deliveryQuoteState;
 
   } catch (err) {
+    if (generation !== deliveryQuoteGeneration) return window.deliveryQuoteState;
     console.warn("[delivery] route fetch exception, using fallback", err);
 
     deliveryQuoteState = {

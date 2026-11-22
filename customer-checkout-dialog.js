@@ -114,9 +114,9 @@ if (
 
 			  // Availability above uses the retained order type.
 
-			  (0, context.recomputeCheckoutTotals)();
-			  (0, context.updateCheckoutSubmitButton)();
-			  (0, context.updateCheckoutOrderSummary)();
+      // Requote using the newly committed subtotal before showing checkout.
+      await window.refreshCheckoutPricingAndRender();
+      if(openedBasketKey!==(0, context.availabilityBasketKey)())return;
 
 			  context.checkoutModal.style.display = 'flex';
 			  } finally {
