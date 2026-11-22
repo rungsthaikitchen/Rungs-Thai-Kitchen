@@ -79,9 +79,17 @@
        result=await read('/api/booking-availability',options,Math.min(8000,deadline-Date.now()));
        cpuLimit=!result.ok&&result.status===546;
        transient=!result.ok&&[502,503,504,546].includes(result.status);
-       if(transient)break;
+       if(transient){
+        // A singleton may retry once; never multiply a failed multi-slot batch.
+        if(times.length===1&&attempt===0)continue;
+        break;
+       }
        body=await result.json();assertCurrent();break;
-      }catch(error){assertCurrent();transient=true;break;}
+      }catch(error){
+       assertCurrent();transient=true;
+       if(times.length===1&&attempt===0)continue;
+       break;
+      }
      }
      if(transient){
       if(cpuLimit&&times.length>1&&Date.now()<deadline){
