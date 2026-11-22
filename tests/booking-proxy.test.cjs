@@ -46,6 +46,27 @@ test('availability proxy preserves upstream 503 without retrying or leaking cred
  }finally{global.fetch=old;}
 });
 
+test('checkout through Pages availability proxy does not amplify upstream 503',async()=>{
+ const {createClient}=require('../master-wok-checkout-client');
+ const old=global.fetch;let upstreamCalls=0;
+ const handler=(await file('functions/api/booking-availability.js')).onRequestPost;
+ const times=Array.from({length:16},(_,i)=>new Date(Date.UTC(2026,10,22,17,i*5)).toISOString());
+ global.fetch=async()=>{upstreamCalls++;return Response.json({success:false,error:'upstream unavailable'},{status:503});};
+ try{
+  const transport=async(url,options)=>{
+   if(url==='/api/booking-mode')return Response.json({mode:'MASTER_WOK'});
+   assert.equal(url,'/api/booking-availability');
+   return handler({env:{RTK_ORDER_BACKEND_URL:'https://staging.example.invalid',RTK_PROXY_SECRET:'fixture-secret'},
+    request:new Request('https://review.rtk.pages.dev/api/booking-availability',{method:'POST',body:options.body})});
+  };
+  const client=createClient({fetch:transport,storage:{},crypto:{}});
+  const result=await client.availability({times,items:[]});
+  assert.equal(upstreamCalls,1);
+  assert.equal(result.hints.length,16);
+  assert.ok(result.hints.every(h=>h.available===false&&h.unverified===true));
+ }finally{global.fetch=old;}
+});
+
 test('private rehearsal alias namespaces UUID retries only for its exact staging backend and synthetic email',async()=>{
  const old=global.fetch;const bodies=[];
  global.fetch=async(_url,options)=>{bodies.push(options.body);return Response.json({success:true});};
