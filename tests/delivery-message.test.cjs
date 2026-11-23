@@ -1,11 +1,11 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const source=fs.readFileSync(require.resolve('../customer-checkout.js'),'utf8');
-const start=source.indexOf("if (typeof deliveryNote !== 'undefined' && deliveryNote) {");
+const source=fs.readFileSync(require.resolve('../customer-checkout-pricing.js'),'utf8');
+const start=source.indexOf("if (typeof context.deliveryNote !== 'undefined' && context.deliveryNote) {");
 const end=source.indexOf('const discountRow',start);
 const block=source.slice(start,end);
 function render(quote,subtotal=29,orderType='delivery'){
  const deliveryNote={style:{},className:'',textContent:'',innerHTML:''};
- vm.runInNewContext(block,{deliveryNote,quote,orderType,getPreDiscountFoodSubtotal:()=>subtotal,DELIVERY_FREE_THRESHOLD:30,formatCurrency:n=>'£'+n.toFixed(2)});
+ vm.runInNewContext(block,{context:{deliveryNote,DELIVERY_FREE_THRESHOLD:30,formatCurrency:n=>'£'+n.toFixed(2)},deliveryNote,quote,orderType,getPreDiscountFoodSubtotal:()=>subtotal,DELIVERY_FREE_THRESHOLD:30,formatCurrency:n=>'£'+n.toFixed(2)});
  return deliveryNote;
 }
 test('verified radius with failed route pricing shows the fallback fee without rejecting the address',()=>{
