@@ -16,6 +16,50 @@ test('availability is read-only, validates complete hints and never creates a pe
  const bad=createClient({fetch:async u=>u.includes('booking-mode')?ok({mode:'MASTER_WOK'}):ok({success:true,bookingApprovalAllowed:false,hints:[]}),storage,crypto});
  await assert.rejects(bad.availability({times,items:input().items}));
 });
+test('generic 503 availability failure never recursively fans out into slot requests',async()=>{
+ const times=Array.from({length:16},(_,i)=>new Date(Date.UTC(2026,10,22,17,i*5)).toISOString());
+ let posts=0;
+ const c=createClient({fetch:async(u)=>{
+  if(u.includes('booking-mode'))return ok({mode:'MASTER_WOK'});
+  posts++;return {ok:false,status:503};
+ },storage:stored(),crypto});
+ const result=await c.availability({times,items:input().items});
+ assert.equal(posts,1);
+ assert.equal(result.hints.length,16);
+ assert.ok(result.hints.every(h=>h.available===false&&h.unverified===true));
+});
+test('explicit CPU-limit response may split availability batches',async()=>{
+ const times=Array.from({length:4},(_,i)=>new Date(Date.UTC(2026,10,22,17,i*5)).toISOString());
+ let posts=0;
+ const c=createClient({fetch:async(u,o)=>{
+  if(u.includes('booking-mode'))return ok({mode:'MASTER_WOK'});
+  posts++;const batch=JSON.parse(o.body).times;
+  if(batch.length>1)return {ok:false,status:546};
+  return ok({success:true,bookingApprovalAllowed:false,hints:[{time:batch[0],available:true}]});
+ },storage:stored(),crypto});
+ const result=await c.availability({times,items:input().items});
+ assert.equal(posts,7);
+ assert.ok(result.hints.every(h=>h.available===true));
+});
+test('availability recovers on a fresh check after a transient 503 without multiplying calls',async()=>{
+ const times=Array.from({length:16},(_,i)=>new Date(Date.UTC(2026,10,22,17,i*5)).toISOString());
+ let calls=0,healthy=false;
+ const c=createClient({fetch:async(url,options)=>{
+  if(url==='/api/booking-mode')return ok({mode:'MASTER_WOK'});
+  calls++;
+  if(!healthy)return {ok:false,status:503};
+  const batch=JSON.parse(options.body).times;
+  return ok({success:true,bookingApprovalAllowed:false,hints:batch.map(time=>({time,available:true}))});
+ },storage:stored(),crypto});
+ const unavailable=await c.availability({times,items:input().items});
+ assert.equal(calls,1);
+ assert.ok(unavailable.hints.every(h=>h.unverified===true));
+ healthy=true;
+ const recovered=await c.availability({times,items:input().items});
+ assert.equal(calls,2);
+ assert.ok(recovered.hints.every(h=>h.available===true));
+});
+
 test('explicit legacy mode never posts an order to the new writer',async()=>{
  let posts=0;const c=createClient({fetch:async(_u,o)=>{if(o.method)posts++;return ok({mode:'LEGACY'});},storage:stored(),crypto});
  assert.equal((await c.submit(input())).route,'LEGACY');assert.equal(posts,0);
