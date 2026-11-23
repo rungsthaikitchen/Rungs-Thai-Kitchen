@@ -5,7 +5,7 @@ function reconstructConfirmation(root=path.join(__dirname,'..')){
  const module=fs.readFileSync(path.join(root,'customer-checkout-confirmation.js'),'utf8');
  assert.equal(hash(module),evidence.moduleSha256);
  assert.ok(module.includes(evidence.block),'confirmation body must remain unchanged');
- const source=fs.readFileSync(path.join(root,'customer-checkout.js'),'utf8');
+ const source=require('./customer-data-source.cjs').reconstructCustomerData(root);
  assert.equal(source.split(evidence.initialization).length,2);
  const reconstructed=source.replace(evidence.initialization,evidence.block);
  assert.equal(hash(reconstructed),evidence.originalSha256,'reconstruct complete published bootstrap');
