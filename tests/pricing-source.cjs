@@ -4,7 +4,7 @@ function reconstructPricing(root=path.join(__dirname,'..')){
  const e=JSON.parse(fs.readFileSync(path.join(root,'CHECKOUT-PRICING-EXTRACTION-2026-11-22.json'),'utf8'));
  const module=fs.readFileSync(path.join(root,'customer-checkout-pricing.js'),'utf8');
  assert.equal(hash(module),e.moduleSha256,'pricing module drift');
- let source=fs.readFileSync(path.join(root,'customer-checkout.js'),'utf8');
+ let source=require('./confirmation-source.cjs').reconstructConfirmation(root);
  for(const r of e.regions){
   let original=r.after;
   for(const name of e.dependencies){original=original.replaceAll('(0, context.'+name+')',name).replaceAll('context.'+name,name);}
