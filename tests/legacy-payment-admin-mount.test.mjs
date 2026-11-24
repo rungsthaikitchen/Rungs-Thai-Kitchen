@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {mountLegacyPaymentControl} from '../legacy-payment-admin-mount.mjs';
 
 class Element{
- constructor(tag){this.tag=tag;this.children=[];this.handlers={};this.disabled=false;}
+ constructor(tag){this.tag=tag;this.children=[];this.handlers={};this.disabled=false;this.value='';}
  append(...nodes){this.children.push(...nodes)}
  prepend(...nodes){this.children.unshift(...nodes)}
  setAttribute(name,value){this[name]=value}
