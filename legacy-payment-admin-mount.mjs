@@ -17,7 +17,7 @@ export async function mountLegacyPaymentControl({
  status.setAttribute('role','status');
  status.textContent='Checking LEGACY payment eligibility…';
  container.append(button,status);
- let eligible=false,dialog=null;
+ let eligible=false,dialog=null,verifiedOrder=null;
  try{
   const response=await fetch('/admin-api/legacy-payment-preflight',{
    method:'POST',headers:{'Content-Type':'application/json'},
@@ -32,6 +32,11 @@ export async function mountLegacyPaymentControl({
    status.textContent='Payment needs review; recording is unavailable.';
    return {button,status,eligible:false};
   }
+  if(!/^\\d+(?:\\.\\d{1,2})?$/.test(String(data.total))){
+   status.textContent='Order total could not be verified.';
+   return {button,status,eligible:false};
+  }
+  verifiedOrder={...order,total:data.total};
   eligible=true;
   button.disabled=false;
   status.textContent='LEGACY payment ready for review.';
@@ -41,7 +46,7 @@ export async function mountLegacyPaymentControl({
  }
  button.addEventListener('click',()=>{
   if(!eligible||dialog)return;
-  dialog=createLegacyPaymentDialog({document,fetch,crypto,order,
+  dialog=createLegacyPaymentDialog({document,fetch,crypto,order:verifiedOrder,
    onRecorded:async result=>{
     eligible=false;button.disabled=true;
     status.textContent='Payment recorded. Refresh order details.';
