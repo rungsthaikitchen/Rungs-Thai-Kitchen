@@ -2749,6 +2749,24 @@ if (allergenBtn) {
 
     tbody.appendChild(tr);
     tbody.appendChild(detailsRow);
+
+    // LEGACY payment UI is OFF by default; activation requires separate approval.
+    if (window.RTK_LEGACY_PAYMENT_ADMIN_UI_ENABLED === true &&
+        o.capacity_scheduler === 'LEGACY' && !o.paid) {
+      const actions = tr.querySelector('[data-amend-order]')?.parentElement;
+      if (actions) {
+        const mountPoint = document.createElement('span');
+        mountPoint.className = 'legacy-payment-admin-control';
+        actions.appendChild(mountPoint);
+        import('/legacy-payment-admin-mount.mjs')
+          .then(({mountLegacyPaymentControl}) => mountLegacyPaymentControl({
+            document, fetch: window.fetch.bind(window), crypto: window.crypto,
+            order: o, container: mountPoint,
+            onRecorded: () => loadAndx()
+          }))
+          .catch(() => { mountPoint.textContent = 'LEGACY payment unavailable'; });
+      }
+    }
   });
 }
 
