@@ -2711,7 +2711,7 @@ const discountLabel =
         const orderId = e.target.dataset.orderId;
 
         await updateOrderStatus(orderId, newStatus);
-        loadAndx();
+        loadAndRender();
       });
     }
 
@@ -2769,7 +2769,7 @@ if (allergenBtn) {
           .then(({mountLegacyPaymentControl}) => mountLegacyPaymentControl({
             document, fetch: window.fetch.bind(window), crypto: window.crypto,
             order: o, container: mountPoint,
-            onRecorded: () => loadAndx()
+            onRecorded: () => loadAndRender()
           }))
           .catch(() => { mountPoint.textContent = 'LEGACY payment unavailable'; });
       }
