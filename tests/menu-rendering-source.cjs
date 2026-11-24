@@ -3,7 +3,7 @@ const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 function reconstructMenuRendering(root=path.join(__dirname,'..')){
  const e=JSON.parse(fs.readFileSync(path.join(root,'MENU-RENDERING-EXTRACTION-2026-11-24.json'),'utf8'));
  const module=fs.readFileSync(path.join(root,'customer-menu-rendering.js'),'utf8');assert.equal(hash(module),e.moduleSha256);
- let source=fs.readFileSync(path.join(root,'customer-menu-basket.js'),'utf8');
+ let source=require('./basket-controls-source.cjs').reconstructBasketControls(root);
  for(const r of e.regions){
   let reversed=r.after.replaceAll('context.MENU_CATEGORIES','MENU_CATEGORIES');
   for(const name of ['renderAllergenIconsCompact','formatCurrency','openCustomise'])reversed=reversed.replaceAll('(0, context.'+name+')',name);
