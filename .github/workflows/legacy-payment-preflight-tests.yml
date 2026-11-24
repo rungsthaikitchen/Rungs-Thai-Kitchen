@@ -7,7 +7,11 @@ on:
     paths:
       - 'functions/admin-api/legacy-payment-preflight.js'
       - 'tests/legacy-payment-preflight.test.mjs'
+      - 'tests/legacy-payment-cross-service.test.mjs'
+      - 'tests/legacy-preflight-flask-fixture.py'
       - '.github/workflows/legacy-payment-preflight-tests.yml'
+permissions:
+  contents: read
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -21,8 +25,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Require private backend read credential
+        env:
+          BACKEND_TOKEN: ${{ secrets.LEGACY_BACKEND_READ_TOKEN }}
+        run: |
+          if [ -z "$BACKEND_TOKEN" ]; then
+            echo "::error::Set LEGACY_BACKEND_READ_TOKEN as a repository Actions secret with read-only Contents access to rungsthaikitchen/order-backend."
+            exit 1
+          fi
       - uses: actions/checkout@v4
         with:
+          token: ${{ secrets.LEGACY_BACKEND_READ_TOKEN }}
+          persist-credentials: false
           repository: rungsthaikitchen/order-backend
           ref: feature/legacy-admin-compatibility-2026-11-22
           path: backend
