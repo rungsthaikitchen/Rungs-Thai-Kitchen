@@ -88,5 +88,5 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
    if(status.textContent.startsWith('Outcome unknown.')||status.textContent.includes('unavailable'))submit.disabled=false;
    cancel.disabled=false;}
  });
- return {dialog,open(){document.body.append(dialog);dialog.showModal()},close(){if(!busy)dialog.close()}};
+ return {dialog,hasSubmitted(){return submittedPayload!==null},open(){document.body.append(dialog);dialog.showModal()},close(){if(!busy)dialog.close()}};
 }
