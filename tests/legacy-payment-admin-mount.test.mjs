@@ -9,7 +9,7 @@ class Element{
  setAttribute(name,value){this[name]=value}
  addEventListener(name,callback){this.handlers[name]=callback}
  showModal(){this.open=true}
- close(){this.open=false}
+ close(){this.open=false;this.handlers.close?.()}
 }
 function fixture(fetch){
  const document={body:new Element('body'),createElement:tag=>new Element(tag)};
@@ -58,4 +58,44 @@ test('missing explicit payment evidence verification blocks recording',async()=>
  assert.equal(result.eligible,false);
  assert.equal(result.button.disabled,true);
  assert.match(result.status.textContent,/evidence could not be verified/i);
+});
+
+test('cancel before submission permits a fresh dialog',async()=>{
+ const ui=fixture(async()=>Response.json({
+  success:true,committed:false,paymentEvidenceChecked:true,orderId:ui.order.id,
+  total:'32.50',paid:false,payment:null,methodUnknown:false
+ }));
+ const result=await mountLegacyPaymentControl(ui);
+ result.button.handlers.click();
+ const first=ui.document.body.children.at(-1);
+ first.close();
+ result.button.handlers.click();
+ const second=ui.document.body.children.at(-1);
+ assert.notEqual(first,second);
+ assert.equal(second.open,true);
+});
+
+test('closing a submitted attempt preserves the dialog and its payment key',async()=>{
+ const sent=[];
+ const ui=fixture(async(url,options)=>{
+  if(url.endsWith('preflight'))return Response.json({
+   success:true,committed:false,paymentEvidenceChecked:true,orderId:ui.order.id,
+   total:'32.50',paid:false,payment:null,methodUnknown:false
+  });
+  sent.push(options.body);
+  throw Error('network uncertainty');
+ });
+ const result=await mountLegacyPaymentControl(ui);
+ result.button.handlers.click();
+ const first=ui.document.body.children.at(-1);
+ const form=first.children[0];
+ const find=(node,name)=>node.name===name?node:node.children.map(n=>find(n,name)).find(Boolean);
+ find(form,'billMethod').value='card';
+ await form.handlers.submit({preventDefault(){}});
+ first.close();
+ result.button.handlers.click();
+ assert.equal(ui.document.body.children.at(-1),first);
+ await form.handlers.submit({preventDefault(){}});
+ assert.equal(sent.length,2);
+ assert.equal(sent[0],sent[1]);
 });
