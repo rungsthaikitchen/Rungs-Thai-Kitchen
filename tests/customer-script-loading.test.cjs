@@ -12,9 +12,10 @@ test('customer classic scripts load once in the original dependency order',()=>{
  const rendering=html.indexOf('<script src="/customer-menu-rendering.js?');
  const controls=html.indexOf('<script src="/customer-basket-controls.js?');
  const customisation=html.indexOf('<script src="/customer-customisation-pricing.js?');
- assert.ok(catalogue>=0&&catalogue<rendering&&rendering<controls&&controls<customisation&&customisation<menu);
+ const selectors=html.indexOf('<script src="/customer-customisation-selectors.js?');
+ assert.ok(catalogue>=0&&catalogue<rendering&&rendering<controls&&controls<customisation&&customisation<selectors&&selectors<menu);
  assert.ok(html.indexOf('window.sb =')<menu&&menu<availability&&availability<dialog&&dialog<submission&&submission<checkout);
- for(const file of ['customer-customisation-pricing.js','customer-basket-controls.js','customer-menu-rendering.js','customer-menu-catalogue.js','customer-menu-basket.js','customer-checkout-availability.js','customer-checkout-dialog.js','customer-checkout-submission.js','customer-checkout-pricing.js','customer-checkout-confirmation.js','customer-checkout-customer-data.js','customer-checkout-display.js','customer-checkout-service.js','customer-checkout.js']){
+ for(const file of ['customer-customisation-selectors.js','customer-customisation-pricing.js','customer-basket-controls.js','customer-menu-rendering.js','customer-menu-catalogue.js','customer-menu-basket.js','customer-checkout-availability.js','customer-checkout-dialog.js','customer-checkout-submission.js','customer-checkout-pricing.js','customer-checkout-confirmation.js','customer-checkout-customer-data.js','customer-checkout-display.js','customer-checkout-service.js','customer-checkout.js']){
   assert.equal((html.match(new RegExp('<script src="/'+file.replaceAll('.','\\.')+'\\?','g'))||[]).length,1);
   const tag=html.match(new RegExp('<script[^>]+src="/'+file.replaceAll('.','\\.')+'[^>]+>'))[0];assert.doesNotMatch(tag,/\s(?:async|defer|type)(?:\s|=|>)/);
   assert.doesNotThrow(()=>new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file}));
