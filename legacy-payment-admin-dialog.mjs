@@ -40,7 +40,7 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
   event.preventDefault();if(busy)return;
   const total=Number(order.total),amount=Number(bill.value),tipAmount=Number(tip.value);
   if(!Number.isFinite(amount)||!Number.isFinite(tipAmount)||amount<0||tipAmount<0||
-     !/^\\d+(?:\\.\\d{1,2})?$/.test(bill.value)||!/^\\d+(?:\\.\\d{1,2})?$/.test(tip.value)){
+     !/^\d+(?:\.\d{1,2})?$/.test(bill.value)||!/^\d+(?:\.\d{1,2})?$/.test(tip.value)){
    status.textContent='Enter valid non-negative amounts.';return;
   }
   if(!submittedPayload&&amount!==total&&!reason.value.trim()){
