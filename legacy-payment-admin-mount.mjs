@@ -32,6 +32,10 @@ export async function mountLegacyPaymentControl({
    status.textContent='Payment needs review; recording is unavailable.';
    return {button,status,eligible:false};
   }
+  if(data.paymentEvidenceChecked !== true || data.committed !== false){
+   status.textContent='Payment evidence could not be verified.';
+   return {button,status,eligible:false};
+  }
   if(!/^\d+(?:\.\d{1,2})?$/.test(String(data.total))){
    status.textContent='Order total could not be verified.';
    return {button,status,eligible:false};
