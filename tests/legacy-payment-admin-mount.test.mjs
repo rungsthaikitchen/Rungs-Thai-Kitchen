@@ -25,7 +25,7 @@ test('feature disabled leaves payment control inaccessible',async()=>{
  assert.equal(result.button.handlers.click,undefined);
 });
 test('already-paid order cannot open recording dialog',async()=>{
- const ui=fixture(async()=>Response.json({success:true,orderId:ui.order.id,total:'32.50',paid:true,payment:null,methodUnknown:true}));
+ const ui=fixture(async()=>Response.json({success:true,committed:false,paymentEvidenceChecked:true,orderId:ui.order.id,total:'32.50',paid:true,payment:null,methodUnknown:true}));
  const result=await mountLegacyPaymentControl(ui);
  assert.equal(result.button.disabled,true);
 });
@@ -34,7 +34,7 @@ test('eligible order enables button only after preflight and uses verified total
  const ui=fixture(async(url)=>{
   assert.equal(url,'/admin-api/legacy-payment-preflight');
   preflightCount++;
-  return Response.json({success:true,orderId:ui.order.id,total:'32.50',paid:false,payment:null,methodUnknown:false});
+  return Response.json({success:true,committed:false,paymentEvidenceChecked:true,orderId:ui.order.id,total:'32.50',paid:false,payment:null,methodUnknown:false});
  });
  const result=await mountLegacyPaymentControl(ui);
  assert.equal(preflightCount,1);
@@ -47,4 +47,15 @@ test('eligible order enables button only after preflight and uses verified total
  const form=dialog.children[0];
  const input=form.children.flatMap(n=>n.children||[]).find(n=>n.name==='billAmount');
  assert.equal(input.value,'32.50');
+});
+
+test('missing explicit payment evidence verification blocks recording',async()=>{
+ const ui=fixture(async()=>Response.json({
+  success:true,committed:false,orderId:ui.order.id,total:'32.50',
+  paid:false,payment:null,methodUnknown:false
+ }));
+ const result=await mountLegacyPaymentControl(ui);
+ assert.equal(result.eligible,false);
+ assert.equal(result.button.disabled,true);
+ assert.match(result.status.textContent,/evidence could not be verified/i);
 });
