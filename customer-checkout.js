@@ -14,41 +14,7 @@ let CLOSED_RANGES = [];      // [{start:Date, end:Date, message?:string}]
 let FULLY_BOOKED  = [];      // same shape
 
 // Load active windows that intersect “now → +60 days” (tweak as needed)
-async function loadBlackouts() {
-  const now = new Date();
-  const horizon = new Date();
-  horizon.setDate(horizon.getDate() + 60);
-
-  const { data, error } = await sb
-    .from('booking_blackouts')
-    .select('kind,start_at,end_at,message,active')
-    .eq('active', true)
-    // overlap test (start < horizon && end > now)
-    .lt('start_at', horizon.toISOString())
-    .gt('end_at',  now.toISOString());
-
-  if (error) {
-    console.warn('[blackouts] fetch failed', error);
-    return;
-  }
-
-  CLOSED_RANGES = [];
-  FULLY_BOOKED  = [];
-
-  (data || []).forEach(row => {
-    const win = {
-      start: new Date(row.start_at),
-      end:   new Date(row.end_at),
-      message: row.message || ''
-    };
-    if (row.kind === 'closed')       CLOSED_RANGES.push(win);
-    if (row.kind === 'fully_booked') FULLY_BOOKED.push(win);
-  });
-  
-  console.log('[blackouts] loaded rows:', data);
-console.log('[blackouts] CLOSED_RANGES:', CLOSED_RANGES);
-console.log('[blackouts] FULLY_BOOKED:', FULLY_BOOKED);
-}
+async function loadBlackouts(...args){return checkoutService.loadBlackouts(...args);}
 
 const serviceStatusNotice =
   document.getElementById('service-status-notice');
@@ -60,79 +26,25 @@ let SERVICE_STATE = {
   effective_until: null
 };
 
-function renderServiceStatusNotice() {
-  if (!serviceStatusNotice) return;
+// BEGIN checkout-service boundary
+const checkoutService = window.RTKCheckoutService.create({
+ document, console, fetch,
+ get sb(){return sb;},
+ get serviceStatusNotice(){return serviceStatusNotice;},
+ get SERVICE_STATE(){return SERVICE_STATE;},
+ set SERVICE_STATE(value){SERVICE_STATE=value;},
+ get CLOSED_RANGES(){return CLOSED_RANGES;},
+ set CLOSED_RANGES(value){CLOSED_RANGES=value;},
+ get FULLY_BOOKED(){return FULLY_BOOKED;},
+ set FULLY_BOOKED(value){FULLY_BOOKED=value;}
+});
+// END checkout-service boundary
+function renderServiceStatusNotice(...args){return checkoutService.renderServiceStatusNotice(...args);}
 
-  const mode = SERVICE_STATE.mode || 'normal';
-
-  if (mode === 'normal') {
-    serviceStatusNotice.hidden = true;
-    serviceStatusNotice.innerHTML = '';
-    return;
-  }
-
-  const titleByMode = {
-    busy: '🍜 We’re a little busy tonight',
-    very_busy: '🔥 We’re very busy tonight',
-    paused: '⏸️ Online orders are temporarily paused'
-  };
-
-  const title = titleByMode[mode] || '';
-  const message = SERVICE_STATE.customer_message || '';
-
-  serviceStatusNotice.innerHTML =
-    `<strong>${title}</strong>`;
-
-  if (message) {
-    serviceStatusNotice.appendChild(
-      document.createElement('br')
-    );
-
-    serviceStatusNotice.appendChild(
-      document.createTextNode(message)
-    );
-  }
-
-  serviceStatusNotice.hidden = false;
-}
-
-async function loadServiceState() {
-  try {
-    const response = await fetch(
-      '/api/service-state'
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.error || 'Unable to load service state'
-      );
-    }
-
-    SERVICE_STATE =
-      data.effective_service_state || SERVICE_STATE;
-
-    renderServiceStatusNotice();
-
-    console.log(
-      '[service-state] loaded:',
-      SERVICE_STATE
-    );
-
-  } catch (error) {
-    console.warn(
-      '[service-state] fetch failed:',
-      error
-    );
-  }
-}
+async function loadServiceState(...args){return checkoutService.loadServiceState(...args);}
 
 // Helpers
-function inAnyWindow(dt, windows) {
-  const t = +dt;
-  return windows.find(w => t >= +w.start && t <= +w.end) || null;
-}
+function inAnyWindow(...args){return checkoutService.inAnyWindow(...args);}
 
 function isWedThuLondon(d = new Date()){
   const day = new Intl.DateTimeFormat('en-GB', {
@@ -147,50 +59,10 @@ function isWedThuLondon(d = new Date()){
 
 
 // Banner helpers
-function showCheckoutBanner(kind, msg) {
-  const el = document.getElementById('checkout-banner');
-  if (!el) return;
-  el.className = 'checkout-banner ' + (kind === 'closed'
-    ? 'checkout-banner--closed'
-    : 'checkout-banner--fullybooked');
+function showCheckoutBanner(...args){return checkoutService.showCheckoutBanner(...args);}
+function hideCheckoutBanner(...args){return checkoutService.hideCheckoutBanner(...args);}
 
-  el.innerHTML = `
-    <button class="x" aria-label="Dismiss" onclick="this.parentElement.style.display='none'">×</button>
-    ${msg}
-  `;
-  el.style.display = 'block';
-}
-function hideCheckoutBanner() {
-  const el = document.getElementById('checkout-banner');
-  if (el) { el.style.display = 'none'; el.textContent = ''; el.className = 'checkout-banner'; }
-}
-
-function showBlackoutBannerForDate(dateString) {
-  hideCheckoutBanner();
-
-  if (!dateString) return;
-
-  const dayStart =
-    new Date(`${dateString}T00:00:00`);
-
-  const dayEnd =
-    new Date(`${dateString}T23:59:59`);
-
-  // A closure takes priority if both kinds somehow overlap.
-  const closedWindow =
-    CLOSED_RANGES.find(win =>
-      win.start <= dayEnd &&
-      win.end >= dayStart
-    );
-
-  if (closedWindow) {
-    showCheckoutBanner(
-      'closed',
-      closedWindow.message ||
-        'Sorry, we are closed during this service.'
-    );
-  }
-}
+function showBlackoutBannerForDate(...args){return checkoutService.showBlackoutBannerForDate(...args);}
 
 /* ------------------------------
    Wire into your existing flow

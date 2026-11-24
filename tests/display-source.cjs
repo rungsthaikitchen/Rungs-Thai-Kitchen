@@ -4,7 +4,7 @@ function reconstructDisplay(root=path.join(__dirname,'..')){
  const e=JSON.parse(fs.readFileSync(path.join(root,'CHECKOUT-DISPLAY-EXTRACTION-2026-11-24.json'),'utf8'));
  const module=fs.readFileSync(path.join(root,'customer-checkout-display.js'),'utf8');
  assert.equal(hash(module),e.moduleSha256);
- let source=fs.readFileSync(path.join(root,'customer-checkout.js'),'utf8');
+ let source=require('./service-source.cjs').reconstructService(root);
  // Undo the separately tested address-required wiring fix for historical source proofs.
  for(const edit of [...require('./address-requirement-change.json').edits].reverse()){
   assert.equal(source.split(edit.after).length,2);source=source.replace(edit.after,edit.before);
