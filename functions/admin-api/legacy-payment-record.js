@@ -1,6 +1,6 @@
 import cloudflareAccessPlugin from '../../_vendor/cloudflare-access/index.mjs';
 
-// Separate read-only LEGACY recording. No write endpoint and no mode switch.
+// Separate gated LEGACY payment write proxy; disabled by default. No scheduler mode switch.
 export function createHandler({validate=cloudflareAccessPlugin,fetch=globalThis.fetch}={}){
  return async context=>{
   const {env,request}=context;
