@@ -49,19 +49,20 @@ export async function mountLegacyPaymentControl({
   return {button,status,eligible:false};
  }
  button.addEventListener('click',()=>{
-  if(!eligible||dialog)return;
+  if(!eligible)return;
+  // Reopen a submitted attempt with its original key, never generate another.
+  if(dialog){dialog.open();return;}
   dialog=createLegacyPaymentDialog({document,fetch,crypto,order:verifiedOrder,
    onRecorded:async result=>{
     eligible=false;button.disabled=true;
     status.textContent='Payment recorded. Refresh order details.';
     if(typeof onRecorded==='function')await onRecorded(result);
    }});
-  // A cancelled dialog is disposable: reopening creates fresh fields and key.
-  // A submitted dialog with an uncertain outcome must retain its retry key,
-  // so it cannot be closed until the request finishes.
+  // Discard an unsubmitted cancellation; retain submitted attempts and their
+  // idempotency keys across close/reopen, including uncertain outcomes.
   const current=dialog;
   current.dialog.addEventListener('close',()=>{
-   if(dialog===current)dialog=null;
+   if(dialog===current && !current.hasSubmitted())dialog=null;
   });
   current.open();
  });
