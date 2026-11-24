@@ -73,3 +73,22 @@ test('a definitive conflict blocks another submission',async()=>{
  const button=ui.form.children.find(n=>n.tag==='button'&&n.type==='submit');
  assert.equal(button.disabled,true);
 });
+
+test('confirmed payment remains confirmed if Admin refresh callback fails',async()=>{
+ const body=new Element('body');
+ const document={body,createElement:tag=>new Element(tag)};
+ const dialog=createLegacyPaymentDialog({
+  document,fetch:async()=>Response.json({success:true,committed:true}),
+  crypto:{randomUUID:()=> '00000000-0000-4000-8000-000000000002'},
+  order:{id:'00000000-0000-4000-8000-000000000001',total:'32.50'},
+  onRecorded:async()=>{throw Error('Admin refresh failed')}
+ });
+ const form=dialog.dialog.children[0];
+ const scan=(node,name)=>node.name===name?node:node.children.map(n=>scan(n,name)).find(Boolean);
+ scan(form,'billMethod').value='card';
+ await form.handlers.submit({preventDefault(){}});
+ const status=form.children.find(n=>n.role==='status');
+ const button=form.children.find(n=>n.type==='submit');
+ assert.match(status.textContent,/Payment recorded\. Admin refresh failed/);
+ assert.equal(button.disabled,true);
+});
