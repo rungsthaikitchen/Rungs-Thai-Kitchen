@@ -92,3 +92,13 @@ test('confirmed payment remains confirmed if Admin refresh callback fails',async
  assert.match(status.textContent,/Payment recorded\. Admin refresh failed/);
  assert.equal(button.disabled,true);
 });
+
+test('stale order total rejection tells staff to refresh rather than retry',async()=>{
+ const ui=fixture(async()=>Response.json({success:false,reason:'INVALID_PAYMENT_DETAILS'},{status:400}));
+ ui.find('billMethod').value='card';
+ await ui.submit();
+ const status=ui.form.children.find(n=>n.role==='status');
+ const submit=ui.form.children.find(n=>n.tag==='button'&&n.type==='submit');
+ assert.match(status.textContent,/Reload the order and run a fresh preflight/);
+ assert.equal(submit.disabled,true);
+});
