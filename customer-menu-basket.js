@@ -609,75 +609,31 @@ document.addEventListener('keydown', (e) => {
 	
 
 // include extras in the price calculation
-function sumExtras() {
-  return selectedExtras.reduce((s, e) => s + (e.delta || 0), 0);
-}
+function sumExtras(...args){return customisationPricing.sumExtras(...args);}
 
 const extrasWrap = document.getElementById('extras-wrap');
 const extrasEl   = document.getElementById('extras');
 
-function buildExtraChips() {
-  // No extras for this item/category → hide the whole block
-  if (!currentAllowExtras || !extrasWrap || !extrasEl) {
-    if (extrasWrap) extrasWrap.style.display = 'none';
-    return;
-  }
+// BEGIN customisation-pricing boundary
+const customisationPricing = window.RTKCustomisationPricing.create({
+ document,
+ get selectedExtras(){return selectedExtras;},
+ get currentAllowExtras(){return currentAllowExtras;},
+ get extrasWrap(){return extrasWrap;},
+ get extrasEl(){return extrasEl;},
+ get EXTRAS(){return EXTRAS;},
+ get selectedMods(){return selectedMods;},
+ get MODIFIERS(){return MODIFIERS;},
+ get modalBase(){return modalBase;},
+ get unitPriceEl(){return unitPriceEl;},
+ set selectedExtras(value){selectedExtras=value;},
+ get formatCurrency(){return formatCurrency;},
+ get roundToTwo(){return roundToTwo;}
+});
+// END customisation-pricing boundary
+function buildExtraChips(...args){return customisationPricing.buildExtraChips(...args);}
 
-  extrasWrap.style.display = 'block';
-  extrasEl.innerHTML = '';
-
-  // Decide which extras to show:
-  // - if currentAllowExtras is an array → only those IDs
-  // - otherwise → show all EXTRAS (current behaviour)
-  let extrasToRender = EXTRAS;
-
-  if (Array.isArray(currentAllowExtras)) {
-    extrasToRender = EXTRAS.filter(opt =>
-      currentAllowExtras.includes(opt.id)
-    );
-
-    // If filter removes everything, hide the block
-    if (extrasToRender.length === 0) {
-      extrasWrap.style.display = 'none';
-      return;
-    }
-  }
-
-  extrasToRender.forEach(opt => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'chip';
-
-    const isSelected = selectedExtras.some(x => x.id === opt.id);
-    if (isSelected) btn.classList.add('selected');
-
-    btn.textContent = `${opt.name} ${formatCurrency(opt.delta)}`;
-
-    btn.addEventListener('click', () => {
-      // we’ll handle the "only 1 extra" rule in the next section
-      handleExtraClick(opt);
-    });
-
-    extrasEl.appendChild(btn);
-  });
-}
-
-function handleExtraClick(opt) {
-  // If this extra is already selected → deselect it
-  const already = selectedExtras.findIndex(x => x.id === opt.id);
-
-  if (already >= 0) {
-    // clicking again removes the extra
-    selectedExtras.splice(already, 1);
-  } else {
-    // Only allow ONE extra → replace the array with just this option
-    selectedExtras = [{ ...opt }];
-  }
-
-  // Rebuild UI + refresh price
-  buildExtraChips();
-  updateUnitPricePreview();
-}
+function handleExtraClick(...args){return customisationPricing.handleExtraClick(...args);}
 
     function buildModifierChips(allowed, required=false, multi=false, max=null){
       modsEl.innerHTML = '';
@@ -1028,25 +984,7 @@ function handleExtraClick(opt) {
       buildSpiceSelector(false);
     }
 
-    function updateUnitPricePreview(){
-  const base = Number(modalBase.dataset.price) || 0;
-
-  // existing modifiers total…
-  let modsTotal = 0;
-  selectedMods.forEach(id => {
-    const m = MODIFIERS.find(x => x.id === id);
-    if (m) modsTotal += m.delta;
-  });
-
-  // extras total (only if allowed)
-  let extrasTotal = 0;
-  if (currentAllowExtras) {
-    extrasTotal = selectedExtras.reduce((s,e)=> s + (e.delta || 0), 0);
-  }
-
-  const total = roundToTwo(base + modsTotal + extrasTotal);
-  unitPriceEl.textContent = formatCurrency(total);
-}
+    function updateUnitPricePreview(...args){return customisationPricing.updateUnitPricePreview(...args);}
 
 
 // Safe wrapper so old calls still work
