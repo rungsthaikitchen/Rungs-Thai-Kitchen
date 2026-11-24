@@ -16,9 +16,17 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
   wrap.append(input);form.append(wrap);return input;
  };
  const bill=makeField('Amount received (£)','billAmount');bill.value=Number(order.total).toFixed(2);
- const method=makeField('Payment method (cash, card or bank_transfer)','billMethod');
+ const makeMethod=(label,name,required=true)=>{
+  const wrap=document.createElement('label');wrap.textContent=label+' ';
+  const select=document.createElement('select');select.name=name;select.required=required;
+  for(const [value,text] of [['','Choose method'],['cash','Cash'],['card','Card'],['bank_transfer','Bank transfer']]){
+   const option=document.createElement('option');option.value=value;option.textContent=text;select.append(option);
+  }
+  wrap.append(select);form.append(wrap);return select;
+ };
+ const method=makeMethod('Payment method','billMethod');
  const tip=makeField('Tip (£)','tipAmount');tip.value='0.00';
- const tipMethod=makeField('Tip method (cash, card or bank_transfer; blank if no tip)','tipMethod');tipMethod.required=false;
+ const tipMethod=makeMethod('Tip method (if applicable)','tipMethod',false);
  const reason=makeField('Reason if amount differs from order total','differenceReason');reason.required=false;
  const status=document.createElement('p');status.setAttribute('role','status');
  const submit=document.createElement('button');submit.type='submit';submit.textContent='Confirm and record payment';
@@ -31,7 +39,8 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
  form.addEventListener('submit',async event=>{
   event.preventDefault();if(busy)return;
   const total=Number(order.total),amount=Number(bill.value),tipAmount=Number(tip.value);
-  if(!Number.isFinite(amount)||!Number.isFinite(tipAmount)||amount<0||tipAmount<0){
+  if(!Number.isFinite(amount)||!Number.isFinite(tipAmount)||amount<0||tipAmount<0||
+     !/^\\d+(?:\\.\\d{1,2})?$/.test(bill.value)||!/^\\d+(?:\\.\\d{1,2})?$/.test(tip.value)){
    status.textContent='Enter valid non-negative amounts.';return;
   }
   if(!submittedPayload&&amount!==total&&!reason.value.trim()){
@@ -43,6 +52,7 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
   if(tipAmount>0&&!['cash','card','bank_transfer'].includes(tipMethod.value)){
    status.textContent='Choose a tip payment method.';return;
   }
+  if(tipAmount===0&&tipMethod.value){status.textContent='Clear the tip method when no tip is recorded.';return;}
   const payload=submittedPayload||{action:'record',orderId:order.id,idempotencyKey:key||(key=crypto.randomUUID()),
    billAmount:amount.toFixed(2),billMethod:method.value,tipAmount:tipAmount.toFixed(2),
    tipMethod:tipAmount>0?tipMethod.value:null,expectedTotal:total.toFixed(2),
@@ -57,7 +67,9 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
     redirect:'error',signal:AbortSignal.timeout(25000)});
    const data=await response.json();
    if(!response.ok||data.success!==true){
-    status.textContent='Payment not confirmed: '+(data.reason||data.error||'please check the order');
+    const reason=data.reason||data.error||'please check the order';
+    status.textContent='Payment not confirmed: '+reason+'. Review the order before retrying.';
+    if(response.status>=400&&response.status<500){submit.disabled=true;}
     return;
    }
    status.textContent=data.replayed?'Payment already recorded (verified retry).':'Payment recorded successfully.';
@@ -65,7 +77,9 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
    if(typeof onRecorded==='function')await onRecorded(data);
   }catch(_){
    status.textContent='Outcome unknown. Check the order before retrying; the same payment key will be reused.';
-  }finally{busy=false;if(!status.textContent.includes('successfully')&&!status.textContent.includes('verified retry'))submit.disabled=false;cancel.disabled=false;}
+  }finally{busy=false;
+   if(status.textContent.startsWith('Outcome unknown.')||status.textContent.includes('unavailable'))submit.disabled=false;
+   cancel.disabled=false;}
  });
  return {dialog,open(){document.body.append(dialog);dialog.showModal()},close(){if(!busy)dialog.close()}};
 }
