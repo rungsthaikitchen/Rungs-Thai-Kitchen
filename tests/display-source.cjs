@@ -5,6 +5,10 @@ function reconstructDisplay(root=path.join(__dirname,'..')){
  const module=fs.readFileSync(path.join(root,'customer-checkout-display.js'),'utf8');
  assert.equal(hash(module),e.moduleSha256);
  let source=fs.readFileSync(path.join(root,'customer-checkout.js'),'utf8');
+ // Undo the separately tested address-required wiring fix for historical source proofs.
+ for(const edit of [...require('./address-requirement-change.json').edits].reverse()){
+  assert.equal(source.split(edit.after).length,2);source=source.replace(edit.after,edit.before);
+ }
  for(const r of e.regions){
   assert.equal(r.after.replaceAll('context.checkoutForm','checkoutForm').replaceAll('context.deliveryQuoteState','deliveryQuoteState'),r.before);
   assert.ok(module.includes(r.after));assert.equal(source.split(r.wrapper).length,2);source=source.replace(r.wrapper,r.before);
