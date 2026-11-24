@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/legacy-payment-preflight-proxy-2026-11-24
+      - review/legacy-payment-reconciled-2026-11-24
   pull_request:
     paths:
       - 'functions/admin-api/legacy-payment-preflight.js'
