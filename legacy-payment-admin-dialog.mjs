@@ -74,7 +74,12 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
    }
    status.textContent=data.replayed?'Payment already recorded (verified retry).':'Payment recorded successfully.';
    submit.disabled=true;cancel.disabled=false;
-   if(typeof onRecorded==='function')await onRecorded(data);
+   // A successful server acknowledgement must never be reclassified as an
+   // unknown payment outcome merely because the Admin refresh callback fails.
+   if(typeof onRecorded==='function'){
+    try{await onRecorded(data)}
+    catch(_){status.textContent='Payment recorded. Admin refresh failed; reload the order manually.'}
+   }
   }catch(_){
    status.textContent='Outcome unknown. Check the order before retrying; the same payment key will be reused.';
   }finally{busy=false;
