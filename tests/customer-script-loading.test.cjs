@@ -5,9 +5,10 @@ test('customer classic scripts load once in the original dependency order',()=>{
  const pricing=html.indexOf('<script src="/customer-checkout-pricing.js?');
  const confirmation=html.indexOf('<script src="/customer-checkout-confirmation.js?');
  const customerData=html.indexOf('<script src="/customer-checkout-customer-data.js?');
- assert.ok(submission<pricing&&pricing<customerData&&customerData<confirmation&&confirmation<checkout);
+ const display=html.indexOf('<script src="/customer-checkout-display.js?');
+ assert.ok(submission<pricing&&pricing<display&&display<customerData&&customerData<confirmation&&confirmation<checkout);
  assert.ok(html.indexOf('window.sb =')<menu&&menu<availability&&availability<dialog&&dialog<submission&&submission<checkout);
- for(const file of ['customer-menu-basket.js','customer-checkout-availability.js','customer-checkout-dialog.js','customer-checkout-submission.js','customer-checkout-pricing.js','customer-checkout-confirmation.js','customer-checkout-customer-data.js','customer-checkout.js']){
+ for(const file of ['customer-menu-basket.js','customer-checkout-availability.js','customer-checkout-dialog.js','customer-checkout-submission.js','customer-checkout-pricing.js','customer-checkout-confirmation.js','customer-checkout-customer-data.js','customer-checkout-display.js','customer-checkout.js']){
   assert.equal((html.match(new RegExp('<script src="/'+file.replaceAll('.','\\.')+'\\?','g'))||[]).length,1);
   const tag=html.match(new RegExp('<script[^>]+src="/'+file.replaceAll('.','\\.')+'[^>]+>'))[0];assert.doesNotMatch(tag,/\s(?:async|defer|type)(?:\s|=|>)/);
   assert.doesNotThrow(()=>new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file}));

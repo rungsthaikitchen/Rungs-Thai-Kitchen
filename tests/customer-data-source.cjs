@@ -4,7 +4,7 @@ function reconstructCustomerData(root=path.join(__dirname,'..')){
  const e=JSON.parse(fs.readFileSync(path.join(root,'CHECKOUT-CUSTOMER-DATA-EXTRACTION-2026-11-23.json'),'utf8'));
  const module=fs.readFileSync(path.join(root,'customer-checkout-customer-data.js'),'utf8');
  assert.equal(hash(module),e.moduleSha256);
- let source=fs.readFileSync(path.join(root,'customer-checkout.js'),'utf8');
+ let source=require('./display-source.cjs').reconstructDisplay(root);
  for(const r of e.regions){assert.ok(module.includes(r.before));assert.equal(source.split(r.wrapper).length,2);source=source.replace(r.wrapper,r.before);}
  assert.equal(source.split(e.initialization).length,2);source=source.replace(e.initialization,'');
  assert.equal(hash(source),e.originalSha256,'reconstruct complete published bootstrap');
