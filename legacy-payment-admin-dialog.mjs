@@ -24,7 +24,9 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
  const submit=document.createElement('button');submit.type='submit';submit.textContent='Confirm and record payment';
  const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Cancel';
  form.prepend(heading,summary);form.append(submit,cancel,status);dialog.append(form);
- let busy=false,key=null;
+ let busy=false,key=null,submittedPayload=null;
+ const fields=[bill,method,tip,tipMethod,reason];
+ const lockFields=()=>fields.forEach(field=>{field.disabled=true});
  cancel.onclick=()=>{if(!busy)dialog.close()};
  form.addEventListener('submit',async event=>{
   event.preventDefault();if(busy)return;
@@ -32,7 +34,7 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
   if(!Number.isFinite(amount)||!Number.isFinite(tipAmount)||amount<0||tipAmount<0){
    status.textContent='Enter valid non-negative amounts.';return;
   }
-  if(amount!==total&&!reason.value.trim()){
+  if(!submittedPayload&&amount!==total&&!reason.value.trim()){
    status.textContent='Provide a reason for the difference.';return;
   }
   if(!['cash','card','bank_transfer'].includes(method.value)){
@@ -41,10 +43,12 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
   if(tipAmount>0&&!['cash','card','bank_transfer'].includes(tipMethod.value)){
    status.textContent='Choose a tip payment method.';return;
   }
-  const payload={action:'record',orderId:order.id,idempotencyKey:key||(key=crypto.randomUUID()),
+  const payload=submittedPayload||{action:'record',orderId:order.id,idempotencyKey:key||(key=crypto.randomUUID()),
    billAmount:amount.toFixed(2),billMethod:method.value,tipAmount:tipAmount.toFixed(2),
    tipMethod:tipAmount>0?tipMethod.value:null,expectedTotal:total.toFixed(2),
    differenceReason:reason.value.trim()||null};
+  submittedPayload=payload;
+  lockFields(); // Unknown outcomes must retry the exact same payload and key.
   busy=true;submit.disabled=true;cancel.disabled=true;
   status.textContent='Recording payment…';
   try{
