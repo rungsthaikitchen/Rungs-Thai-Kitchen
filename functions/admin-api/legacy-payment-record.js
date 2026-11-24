@@ -26,13 +26,15 @@ export function createHandler({validate=cloudflareAccessPlugin,fetch=globalThis.
     try{payload=JSON.parse(raw)}catch(_){return json({error:'Invalid JSON'},400)}
     if(!payload||Array.isArray(payload)||typeof payload!=='object'||payload.action!=='record'||
        typeof payload.orderId!=='string')return json({error:'Payment recording payload required'},400);
+    // The authenticated Access assertion, never browser JSON, supplies staff identity.
+    const {staffActor: _ignoredStaffActor, ...trustedPayload}=payload;
     const response=await fetch(new URL('/admin-legacy-payment-record',
       env.RTK_ORDER_BACKEND_URL||'https://order-backend-production.up.railway.app'),{
       method:'POST',headers:{'Content-Type':'application/json',
        'x-rtk-proxy-secret':env.RTK_PROXY_SECRET,
        'x-rtk-review-admin-secret':env.MASTER_WOK_REVIEW_ADMIN_SECRET,
        'x-rtk-review-actor':email},
-      body:JSON.stringify(payload),
+      body:JSON.stringify(trustedPayload),
       redirect:'manual',signal:AbortSignal.timeout(25000)});
     if(response.status>=300&&response.status<400)throw Error('REDIRECT_REFUSED');
     return new Response(await response.text(),{status:response.status,
