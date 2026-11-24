@@ -479,84 +479,18 @@ function buildMenu(...args){return menuRendering.buildMenu(...args);}
 
 
 // --------- Order rendering ----------
-function renderOrder(){
-  window.dispatchEvent(new CustomEvent('rtk:basket-changed'));
-  const orderListEl  = document.getElementById('order-list');
-  const orderTotalEl = document.getElementById('order-total');
-
-		  orderListEl.innerHTML = '';
-
-		  if (basket.length === 0){
-			orderListEl.innerHTML = '<div class="muted small">No items yet — add something from the menu.</div>';
-			orderTotalEl.textContent = formatCurrency(0);
-			return;
-		  }
-
-		  basket.forEach((row, idx) => {
-			const r = document.createElement('div');
-			r.className = 'order-row';
-
-			const leftWrap = document.createElement('div');
-			leftWrap.style.display = 'flex';
-			leftWrap.style.alignItems = 'center';
-			leftWrap.style.gap = '10px';
-
-			const img = document.createElement('img');
-			img.className = 'item-thumb';
-			img.alt = row.name;
-			img.loading = 'lazy';
-			img.src = (row.img && row.img.trim())
-			  ? row.img
-			  : 'data:image/svg+xml;utf8,' + encodeURIComponent(
-				`<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">
-				   <rect width="100%" height="100%" fill="#f1f1f1"/>
-				   <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle"
-						 font-family="sans-serif" font-size="12" fill="#999">No image</text>
-				 </svg>`
-			  );
-
-			// ✅ HERE: use clean name (no built-in chillies)
-			const cleanName = nameWithoutChillies(row.name);
-
-			const details = [];
-			if (row.mods && row.mods.length) {
-			  details.push(row.mods.map(m => m.name).join(', '));
-			}
-			if (typeof row.spice === 'number') {
-			  details.push(chilliIcons(row.spice));
-			}
-
-			const text = document.createElement('div');
-			text.innerHTML = `
-			  <div style="font-weight:700">
-				${cleanName}
-				${details.length ? ` <span class="muted small">• ${details.join(' • ')}</span>` : ''}
-			  </div>
-			  <div class="muted small">Unit: ${formatCurrency(row.unitPrice)}</div>
-			`;
-
-			const right = document.createElement('div');
-			right.style.textAlign = 'right';
-			right.innerHTML = `
-			  <div style="font-weight:800">${formatCurrency(roundToTwo(row.unitPrice * row.qty))}</div>
-			  <div style="margin-top:8px;display:flex;gap:8px;align-items:center;justify-content:flex-end">
-				<button class="btn btn-ghost" data-action="dec" data-idx="${idx}">-</button>
-				<div class="muted">${row.qty}</div>
-				<button class="btn btn-ghost" data-action="inc" data-idx="${idx}">+</button>
-				<button class="btn" style="background:transparent;color:#b02a2a;border:none;padding:6px 8px" data-action="remove" data-idx="${idx}">Remove</button>
-			  </div>
-			`;
-
-			leftWrap.appendChild(img);
-			leftWrap.appendChild(text);
-			r.appendChild(leftWrap);
-			r.appendChild(right);
-			orderListEl.appendChild(r);
-		  });
-
-		  const total = basket.reduce((s, i) => s + i.unitPrice * i.qty, 0);
-		  orderTotalEl.textContent = formatCurrency(roundToTwo(total));
-		}
+// BEGIN basket-controls boundary
+const basketControls = window.RTKBasketControls.create({
+ window, document, CustomEvent,
+ get basket(){return basket;},
+ get formatCurrency(){return formatCurrency;},
+ get roundToTwo(){return roundToTwo;},
+ get nameWithoutChillies(){return nameWithoutChillies;},
+ get chilliIcons(){return chilliIcons;},
+ get refreshAppliedDiscountCode(){return refreshAppliedDiscountCode;}
+});
+// END basket-controls boundary
+function renderOrder(...args){return basketControls.renderOrder(...args);}
 		
 		// ---------- Menu popup open / close ----------
 const menuOverlay     = document.getElementById('menu-overlay');
@@ -1272,31 +1206,7 @@ if (Array.isArray(item.allowedExtras)) {
 	  container.dataset.customBound = '1';
 	})();
 
-document.getElementById('order-panel').addEventListener('click', async e => {
-  const btn = e.target.closest('button');
-  if (!btn) return;
-
-  const action = btn.dataset.action;
-  const idx = Number(btn.dataset.idx);
-
-  if (action === 'inc') {
-    basket[idx].qty += 1;
-    renderOrder();
-    await refreshAppliedDiscountCode();
-  }
-
-  if (action === 'dec') {
-    basket[idx].qty = Math.max(1, basket[idx].qty - 1);
-    renderOrder();
-    await refreshAppliedDiscountCode();
-  }
-
-  if (action === 'remove') {
-    basket.splice(idx, 1);
-    renderOrder();
-    await refreshAppliedDiscountCode();
-  }
-});
+basketControls.bindControls();
 
 		// Lightbox
 	document.querySelectorAll('#food-grid img').forEach(img => {
