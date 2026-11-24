@@ -1,0 +1,117 @@
+name: LEGACY payment preflight proxy tests
+on:
+  push:
+    branches:
+      - feature/legacy-payment-preflight-proxy-2026-11-24
+  pull_request:
+    paths:
+      - 'functions/admin-api/legacy-payment-preflight.js'
+      - 'functions/admin-api/legacy-payment-record.js'
+      - 'tests/legacy-payment-preflight.test.mjs'
+      - 'tests/legacy-payment-record.test.mjs'
+      - 'legacy-payment-admin-dialog.mjs'
+      - 'legacy-payment-admin-mount.mjs'
+      - 'tests/legacy-payment-admin-mount.test.mjs'
+      - 'tests/legacy-payment-admin-wiring.test.mjs'
+      - 'admin.html'
+      - 'tests/legacy-payment-admin-dialog.test.mjs'
+      - 'tests/legacy-payment-record-cross-service.test.mjs'
+      - 'tests/legacy-record-flask-postgres-fixture.py'
+      - 'tests/legacy-payment-cross-service.test.mjs'
+      - 'tests/legacy-preflight-flask-fixture.py'
+      - '.github/workflows/legacy-payment-preflight-tests.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --experimental-default-type=module --test tests/legacy-payment-preflight.test.mjs tests/legacy-payment-record.test.mjs tests/legacy-payment-admin-dialog.test.mjs tests/legacy-payment-admin-mount.test.mjs tests/legacy-payment-admin-wiring.test.mjs
+  cross-service-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require private backend read credential
+        env:
+          BACKEND_TOKEN: ${{ secrets.LEGACY_BACKEND_READ_TOKEN }}
+        run: |
+          if [ -z "$BACKEND_TOKEN" ]; then
+            echo "::error::Set LEGACY_BACKEND_READ_TOKEN as a repository Actions secret with read-only Contents access to rungsthaikitchen/order-backend."
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.LEGACY_BACKEND_READ_TOKEN }}
+          persist-credentials: false
+          repository: rungsthaikitchen/order-backend
+          ref: feature/legacy-admin-compatibility-2026-11-22
+          path: backend
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install flask==3.1.1 requests==2.32.4
+      - name: Start isolated Flask backend fixture
+        run: |
+          python tests/legacy-preflight-flask-fixture.py > /tmp/legacy-preflight-flask.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:18765/booking-mode >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/legacy-preflight-flask.log
+          exit 1
+      - name: Verify Cloudflare-to-Flask HTTP contract
+        run: node --experimental-default-type=module --test tests/legacy-payment-cross-service.test.mjs
+
+  record-cross-service-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: legacy_test
+          POSTGRES_PASSWORD: legacy_test_password
+          POSTGRES_DB: legacy_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U legacy_test -d legacy_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      LEGACY_TEST_POSTGRES_DSN: postgresql://legacy_test:legacy_test_password@localhost:5432/legacy_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.LEGACY_BACKEND_READ_TOKEN }}
+          persist-credentials: false
+          repository: rungsthaikitchen/order-backend
+          ref: feature/legacy-admin-compatibility-2026-11-22
+          path: backend
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install flask==3.1.1 requests==2.32.4 psycopg2-binary==2.9.10
+      - name: Start isolated PostgreSQL-backed Flask fixture
+        run: |
+          python tests/legacy-record-flask-postgres-fixture.py > /tmp/legacy-record-flask.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -s -o /dev/null http://127.0.0.1:18766/booking-mode; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/legacy-record-flask.log
+          exit 1
+      - name: Verify Cloudflare-to-Flask-to-PostgreSQL payment contract
+        run: node --experimental-default-type=module --test tests/legacy-payment-record-cross-service.test.mjs
