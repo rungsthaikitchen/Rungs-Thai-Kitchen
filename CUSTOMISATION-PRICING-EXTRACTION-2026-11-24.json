@@ -1,0 +1,43 @@
+{
+  "base": "7f14e91e485eedd56cd0e15c2e10ff0674d11798",
+  "originalSha256": "c127be3cd3bbe2e7566e878ef435343e910512fcebe7ba0bdd227eb0df1a7b9f",
+  "moduleSha256": "7f5d6f6ccfdf61fd56ee61cbd9ecf1bf8c0048ff2f4dc3534518e6749a314f55",
+  "regions": [
+    {
+      "name": "sumExtras",
+      "before": "function sumExtras() {\r\n  return selectedExtras.reduce((s, e) => s + (e.delta || 0), 0);\r\n}",
+      "after": "function sumExtras() {\r\n  return context.selectedExtras.reduce((s, e) => s + (e.delta || 0), 0);\r\n}",
+      "wrapper": "function sumExtras(...args){return customisationPricing.sumExtras(...args);}"
+    },
+    {
+      "name": "buildExtraChips",
+      "before": "function buildExtraChips() {\r\n  // No extras for this item/category \u2192 hide the whole block\r\n  if (!currentAllowExtras || !extrasWrap || !extrasEl) {\r\n    if (extrasWrap) extrasWrap.style.display = 'none';\r\n    return;\r\n  }\r\n\r\n  extrasWrap.style.display = 'block';\r\n  extrasEl.innerHTML = '';\r\n\r\n  // Decide which extras to show:\r\n  // - if currentAllowExtras is an array \u2192 only those IDs\r\n  // - otherwise \u2192 show all EXTRAS (current behaviour)\r\n  let extrasToRender = EXTRAS;\r\n\r\n  if (Array.isArray(currentAllowExtras)) {\r\n    extrasToRender = EXTRAS.filter(opt =>\r\n      currentAllowExtras.includes(opt.id)\r\n    );\r\n\r\n    // If filter removes everything, hide the block\r\n    if (extrasToRender.length === 0) {\r\n      extrasWrap.style.display = 'none';\r\n      return;\r\n    }\r\n  }\r\n\r\n  extrasToRender.forEach(opt => {\r\n    const btn = document.createElement('button');\r\n    btn.type = 'button';\r\n    btn.className = 'chip';\r\n\r\n    const isSelected = selectedExtras.some(x => x.id === opt.id);\r\n    if (isSelected) btn.classList.add('selected');\r\n\r\n    btn.textContent = `${opt.name} ${formatCurrency(opt.delta)}`;\r\n\r\n    btn.addEventListener('click', () => {\r\n      // we\u2019ll handle the \"only 1 extra\" rule in the next section\r\n      handleExtraClick(opt);\r\n    });\r\n\r\n    extrasEl.appendChild(btn);\r\n  });\r\n}",
+      "after": "function buildExtraChips() {\r\n  // No extras for this item/category \u2192 hide the whole block\r\n  if (!context.currentAllowExtras || !context.extrasWrap || !context.extrasEl) {\r\n    if (context.extrasWrap) context.extrasWrap.style.display = 'none';\r\n    return;\r\n  }\r\n\r\n  context.extrasWrap.style.display = 'block';\r\n  context.extrasEl.innerHTML = '';\r\n\r\n  // Decide which extras to show:\r\n  // - if currentAllowExtras is an array \u2192 only those IDs\r\n  // - otherwise \u2192 show all EXTRAS (current behaviour)\r\n  let extrasToRender = context.EXTRAS;\r\n\r\n  if (Array.isArray(context.currentAllowExtras)) {\r\n    extrasToRender = context.EXTRAS.filter(opt =>\r\n      context.currentAllowExtras.includes(opt.id)\r\n    );\r\n\r\n    // If filter removes everything, hide the block\r\n    if (extrasToRender.length === 0) {\r\n      context.extrasWrap.style.display = 'none';\r\n      return;\r\n    }\r\n  }\r\n\r\n  extrasToRender.forEach(opt => {\r\n    const btn = document.createElement('button');\r\n    btn.type = 'button';\r\n    btn.className = 'chip';\r\n\r\n    const isSelected = context.selectedExtras.some(x => x.id === opt.id);\r\n    if (isSelected) btn.classList.add('selected');\r\n\r\n    btn.textContent = `${opt.name} ${(0, context.formatCurrency)(opt.delta)}`;\r\n\r\n    btn.addEventListener('click', () => {\r\n      // we\u2019ll handle the \"only 1 extra\" rule in the next section\r\n      handleExtraClick(opt);\r\n    });\r\n\r\n    context.extrasEl.appendChild(btn);\r\n  });\r\n}",
+      "wrapper": "function buildExtraChips(...args){return customisationPricing.buildExtraChips(...args);}"
+    },
+    {
+      "name": "handleExtraClick",
+      "before": "function handleExtraClick(opt) {\r\n  // If this extra is already selected \u2192 deselect it\r\n  const already = selectedExtras.findIndex(x => x.id === opt.id);\r\n\r\n  if (already >= 0) {\r\n    // clicking again removes the extra\r\n    selectedExtras.splice(already, 1);\r\n  } else {\r\n    // Only allow ONE extra \u2192 replace the array with just this option\r\n    selectedExtras = [{ ...opt }];\r\n  }\r\n\r\n  // Rebuild UI + refresh price\r\n  buildExtraChips();\r\n  updateUnitPricePreview();\r\n}",
+      "after": "function handleExtraClick(opt) {\r\n  // If this extra is already selected \u2192 deselect it\r\n  const already = context.selectedExtras.findIndex(x => x.id === opt.id);\r\n\r\n  if (already >= 0) {\r\n    // clicking again removes the extra\r\n    context.selectedExtras.splice(already, 1);\r\n  } else {\r\n    // Only allow ONE extra \u2192 replace the array with just this option\r\n    context.selectedExtras = [{ ...opt }];\r\n  }\r\n\r\n  // Rebuild UI + refresh price\r\n  buildExtraChips();\r\n  updateUnitPricePreview();\r\n}",
+      "wrapper": "function handleExtraClick(...args){return customisationPricing.handleExtraClick(...args);}"
+    },
+    {
+      "name": "updateUnitPricePreview",
+      "before": "function updateUnitPricePreview(){\r\n  const base = Number(modalBase.dataset.price) || 0;\r\n\r\n  // existing modifiers total\u2026\r\n  let modsTotal = 0;\r\n  selectedMods.forEach(id => {\r\n    const m = MODIFIERS.find(x => x.id === id);\r\n    if (m) modsTotal += m.delta;\r\n  });\r\n\r\n  // extras total (only if allowed)\r\n  let extrasTotal = 0;\r\n  if (currentAllowExtras) {\r\n    extrasTotal = selectedExtras.reduce((s,e)=> s + (e.delta || 0), 0);\r\n  }\r\n\r\n  const total = roundToTwo(base + modsTotal + extrasTotal);\r\n  unitPriceEl.textContent = formatCurrency(total);\r\n}",
+      "after": "function updateUnitPricePreview(){\r\n  const base = Number(context.modalBase.dataset.price) || 0;\r\n\r\n  // existing modifiers total\u2026\r\n  let modsTotal = 0;\r\n  context.selectedMods.forEach(id => {\r\n    const m = context.MODIFIERS.find(x => x.id === id);\r\n    if (m) modsTotal += m.delta;\r\n  });\r\n\r\n  // extras total (only if allowed)\r\n  let extrasTotal = 0;\r\n  if (context.currentAllowExtras) {\r\n    extrasTotal = context.selectedExtras.reduce((s,e)=> s + (e.delta || 0), 0);\r\n  }\r\n\r\n  const total = (0, context.roundToTwo)(base + modsTotal + extrasTotal);\r\n  context.unitPriceEl.textContent = (0, context.formatCurrency)(total);\r\n}",
+      "wrapper": "function updateUnitPricePreview(...args){return customisationPricing.updateUnitPricePreview(...args);}"
+    }
+  ],
+  "initialization": "// BEGIN customisation-pricing boundary\nconst customisationPricing = window.RTKCustomisationPricing.create({\n document,\n get selectedExtras(){return selectedExtras;},\n get currentAllowExtras(){return currentAllowExtras;},\n get extrasWrap(){return extrasWrap;},\n get extrasEl(){return extrasEl;},\n get EXTRAS(){return EXTRAS;},\n get selectedMods(){return selectedMods;},\n get MODIFIERS(){return MODIFIERS;},\n get modalBase(){return modalBase;},\n get unitPriceEl(){return unitPriceEl;},\n set selectedExtras(value){selectedExtras=value;},\n get formatCurrency(){return formatCurrency;},\n get roundToTwo(){return roundToTwo;}\n});\n// END customisation-pricing boundary\n",
+  "dependencies": [
+    "selectedExtras",
+    "currentAllowExtras",
+    "extrasWrap",
+    "extrasEl",
+    "EXTRAS",
+    "selectedMods",
+    "MODIFIERS",
+    "modalBase",
+    "unitPriceEl"
+  ]
+}

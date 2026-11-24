@@ -3,7 +3,7 @@ const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 function reconstructBasketControls(root=path.join(__dirname,'..')){
  const e=JSON.parse(fs.readFileSync(path.join(root,'BASKET-CONTROLS-EXTRACTION-2026-11-24.json'),'utf8'));
  const module=fs.readFileSync(path.join(root,'customer-basket-controls.js'),'utf8');assert.equal(hash(module),e.moduleSha256);
- let source=fs.readFileSync(path.join(root,'customer-menu-basket.js'),'utf8');
+ let source=require('./customisation-pricing-source.cjs').reconstructCustomisationPricing(root);
  for(const r of e.regions){let reversed=r.after.replaceAll('context.basket','basket');
   for(const name of ['formatCurrency','roundToTwo','nameWithoutChillies','chilliIcons','refreshAppliedDiscountCode'])reversed=reversed.replaceAll('(0, context.'+name+')',name);
   if(r.name==='bindControls')reversed=reversed.slice('function bindControls(){\n'.length,-2);
