@@ -68,7 +68,9 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
    const data=await response.json();
    if(!response.ok||data.success!==true){
     const reason=data.reason||data.error||'please check the order';
-    status.textContent='Payment not confirmed: '+reason+'. Review the order before retrying.';
+    status.textContent=reason==='INVALID_PAYMENT_DETAILS'
+     ? 'Payment not recorded. The order total or payment details may have changed. Reload the order and run a fresh preflight before trying again.'
+     : 'Payment not confirmed: '+reason+'. Review the order before retrying.';
     if(response.status>=400&&response.status<500){submit.disabled=true;}
     return;
    }
