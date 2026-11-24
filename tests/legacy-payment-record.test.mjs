@@ -67,3 +67,15 @@ test('rejects cross-origin request',async()=>{
  const response=await createHandler({validate,fetch:async()=>{throw Error('unexpected')}})(context);
  assert.equal(response.status,403);
 });
+
+test('ignores browser-supplied staff actor and forwards only signed identity',async()=>{
+ let forwarded;
+ const handler=createHandler({validate,fetch:async(_url,init)=>{
+  forwarded=init;
+  return Response.json({success:true,committed:true});
+ }});
+ const response=await handler(makeContext({action:'record',orderId:'00000000-0000-4000-8000-000000000001',staffActor:'intruder@example.invalid'}));
+ assert.equal(response.status,200);
+ assert.equal(forwarded.headers['x-rtk-review-actor'],identity);
+ assert.equal(JSON.parse(forwarded.body).staffActor,undefined);
+});
