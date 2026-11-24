@@ -19,3 +19,9 @@ test('legacy audited mode hides and blocks the old Mark paid shortcut',()=>{
  assert.match(html,/btn\.closest\('tr'\)\?\.dataset\.capacityScheduler === 'LEGACY'/);
  assert.match(html,/Use Record LEGACY payment for an audited payment record/);
 });
+
+test('Admin payment success refreshes using the real loadAndRender function',()=>{
+ assert.match(html,/async function loadAndRender\s*\(/);
+ assert.match(html,/onRecorded:\s*\(\)\s*=>\s*loadAndRender\(\)/);
+ assert.doesNotMatch(html,/loadAndx\s*\(/);
+});
