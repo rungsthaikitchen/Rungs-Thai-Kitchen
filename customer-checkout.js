@@ -489,6 +489,7 @@ const checkoutDisplay = window.RTKCheckoutDisplay.create({
  get deliveryQuoteState(){return deliveryQuoteState;}
 });
 // END checkout-display boundary
+updateAddressRequirement();
 function updateCheckoutOrderSummary(...args){return checkoutDisplay.updateCheckoutOrderSummary(...args);}
 
 
@@ -1263,7 +1264,7 @@ const checkoutDialog = window.RTKCheckoutDialog.create({
   get checkoutMsg(){return checkoutMsg;},
   get checkoutModal(){return checkoutModal;},
 });
-function openCheckout(subtotal){return checkoutDialog.open(subtotal);}
+function openCheckout(subtotal){updateAddressRequirement();return checkoutDialog.open(subtotal);}
 function closeCheckout(){return checkoutDialog.close();}
 // END checkout-dialog boundary
 // Ensure other code can call it
@@ -1286,6 +1287,7 @@ if (checkoutModal) {
 document.addEventListener('change', async (e) => {
   if (e.target && e.target.matches('input[name="order-type"]')) {
 
+    updateAddressRequirement();
     updateCheckoutSubmitButton();
     updateCheckoutOrderSummary();
     // Old collection times must stop being selectable before delivery pricing
