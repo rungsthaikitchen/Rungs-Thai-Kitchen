@@ -56,7 +56,14 @@ export async function mountLegacyPaymentControl({
     status.textContent='Payment recorded. Refresh order details.';
     if(typeof onRecorded==='function')await onRecorded(result);
    }});
-  dialog.open();
+  // A cancelled dialog is disposable: reopening creates fresh fields and key.
+  // A submitted dialog with an uncertain outcome must retain its retry key,
+  // so it cannot be closed until the request finishes.
+  const current=dialog;
+  current.dialog.addEventListener('close',()=>{
+   if(dialog===current)dialog=null;
+  });
+  current.open();
  });
  return {button,status,eligible};
 }
