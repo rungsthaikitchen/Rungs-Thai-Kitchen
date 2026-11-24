@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync(require.resolve('../customer-menu-basket.js'), 'utf8');
-const menu = vm.runInNewContext(source.slice(source.indexOf('const MENU_CATEGORIES ='), source.indexOf('let basket =')) + '; MENU_CATEGORIES');
+const menu = require('../customer-menu-catalogue').create().MENU_CATEGORIES;
 const items = menu.flatMap(category => category.items);
 function selector() {
  const elements = {};
