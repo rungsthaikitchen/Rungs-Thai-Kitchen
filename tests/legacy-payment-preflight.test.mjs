@@ -13,11 +13,11 @@ const env={
 };
 const identity='staff@example.invalid';
 const validate=()=>async context=>{
- context.data={cloudflareAccess:{JWT:{payload:{email:identity}}}};
+ context.data.cloudflareAccess={JWT:{payload:{email:identity}}};
  return context.next();
 };
 function makeContext(payload={action:'read',orderId:'00000000-0000-4000-8000-000000000001'},extra={}){
- return {env:{...env,...extra.env},
+ return {data:{},env:{...env,...extra.env},
   request:new Request('https://rungsthaikitchen.co.uk/admin-api/legacy-payment-preflight',{
    method:'POST',headers:{origin:'https://rungsthaikitchen.co.uk'},
    body:JSON.stringify(payload)})};
@@ -32,7 +32,7 @@ test('feature gate denies requests without reaching backend',async()=>{
 test('only signed allowlisted identity can proceed',async()=>{
  let called=false;
  const handler=createHandler({validate:()=>async context=>{
-  context.data={cloudflareAccess:{JWT:{payload:{email:'intruder@example.invalid'}}}};
+  context.data.cloudflareAccess={JWT:{payload:{email:'intruder@example.invalid'}}};
   return context.next();
  },fetch:async()=>{called=true;throw Error('unexpected')}});
  assert.equal((await handler(makeContext())).status,403);
