@@ -17,3 +17,30 @@ jobs:
         with:
           node-version: '22'
       - run: node --experimental-default-type=module --test tests/legacy-payment-preflight.test.mjs
+  cross-service-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: rungsthaikitchen/order-backend
+          ref: feature/legacy-admin-compatibility-2026-11-22
+          path: backend
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install flask==3.1.1 requests==2.32.4
+      - name: Start isolated Flask backend fixture
+        run: |
+          python tests/legacy-preflight-flask-fixture.py > /tmp/legacy-preflight-flask.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:18765/booking-mode >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/legacy-preflight-flask.log
+          exit 1
+      - name: Verify Cloudflare-to-Flask HTTP contract
+        run: node --experimental-default-type=module --test tests/legacy-payment-cross-service.test.mjs
