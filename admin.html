@@ -2768,10 +2768,10 @@ if (allergenBtn) {
         const mountPoint = document.createElement('span');
         mountPoint.className = 'legacy-payment-admin-control';
         actions.appendChild(mountPoint);
-        import('/legacy-payment-admin-mount.mjs')
+        import('/legacy-payment-admin-mount.mjs?v=on-demand-preflight-20261125')
           .then(({mountLegacyPaymentControl}) => mountLegacyPaymentControl({
             document, fetch: window.fetch.bind(window), crypto: window.crypto,
-            order: o, container: mountPoint,
+            order: o, container: mountPoint, deferPreflight: true,
             onRecorded: () => loadAndRender()
           }))
           .catch(() => { mountPoint.textContent = 'LEGACY payment unavailable'; });

@@ -99,3 +99,23 @@ test('closing a submitted attempt preserves the dialog and its payment key',asyn
  assert.equal(sent.length,2);
  assert.equal(sent[0],sent[1]);
 });
+
+test('Admin defers the preflight to the first payment click and blocks concurrent clicks',async()=>{
+ let requests=0;
+ const ui=fixture(async()=>{
+  requests++;
+  if(requests===1)return Response.json({error:'busy'},{status:503});
+  return Response.json({success:true,committed:false,paymentEvidenceChecked:true,
+   orderId:ui.order.id,total:'32.50',paid:false});
+ });
+ const {button}=await mountLegacyPaymentControl({...ui,deferPreflight:true});
+ assert.equal(requests,0);
+ const first=button.handlers.click();
+ await button.handlers.click();
+ await first;
+ assert.equal(requests,1);
+ assert.equal(ui.document.body.children.length,0);
+ await button.handlers.click();
+ assert.equal(requests,2);
+ assert.equal(ui.document.body.children.at(-1).open,true);
+});
