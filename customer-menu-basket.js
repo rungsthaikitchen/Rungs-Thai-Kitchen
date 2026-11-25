@@ -222,19 +222,9 @@ const menuCheckoutBtn = document.getElementById('menu-checkout-btn');
 const menuFab         = document.getElementById('menu-fab');
 
 // Open / close helpers
-function openMenuOverlay() {
-  if (!menuOverlay) return;
-  menuOverlay.classList.add('show');
-  menuOverlay.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden'; // stop background scroll
-}
+// Earlier openMenuOverlay declaration removed; the canonical wrapper below remains.
 
-function closeMenuOverlay() {
-  if (!menuOverlay) return;
-  menuOverlay.classList.remove('show');
-  menuOverlay.setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = '';
-}
+// Earlier closeMenuOverlay declaration removed; the canonical wrapper below remains.
 
 // BEGIN menu-overlay boundary
 const menuOverlayControls=window.RTKMenuOverlay.create({
@@ -366,57 +356,7 @@ const customisationDialog = window.RTKCustomisationDialog.create({
  set currentAllowedMods(value){currentAllowedMods=value;},
 });
 // END customisation-dialog boundary
-	function openCustomiseById(itemId) {
-  const item = window.ITEMS_BY_ID.get(String(itemId));
-  if (!item || !modal) {
-    console.warn('openCustomiseById: item not found', itemId);
-    return;
-  }
-
-  currentItem = item;
-  modalBase.dataset.id = item.id;   // ✅ ADD THIS LINE
-  selectedMods.clear();
-  selectedExtras = [];
-  currentAllowExtras = !!item.categoryAllowedExtras;
-
-  const allowed  = Array.isArray(item.allowedModifiers) ? item.allowedModifiers : null;
-  const requires = !!item.modifierRequired;
-  const isMulti  = !!item.modifierMax || !!item.modifiersMulti;
-  const max      = (typeof item.modifierMax === 'number' && item.modifierMax > 0)
-    ? item.modifierMax
-    : null;
-
-  buildModifierChips(allowed, requires, isMulti, max);
-  buildExtraChips();
-  modalTitle.textContent = `Customise — ${item.name}`;
-  modalBase.dataset.price = item.price;
-  modalBase.textContent   = `Base price: ${formatCurrency(item.price)}`;
-  qtyInput.value = 1;
-  updateUnitPricePreview();
-
-  if (modalImg) {
-    if (item.img) {
-      modalImg.src = item.img;
-      modalImg.style.display = 'block';
-    } else {
-      modalImg.removeAttribute('src');
-      modalImg.style.display = 'none';
-    }
-  }
-
-  if (item.allergens && item.allergens.length) {
-    modalAll.innerHTML = renderAllergenBadges(item.allergens);
-    modalAllWrap.style.display = 'block';
-  } else {
-    modalAll.innerHTML = '';
-    modalAllWrap.style.display = 'none';
-  }
-
-  const defaultSpice = (typeof item.spiceDefault === 'number') ? item.spiceDefault : 0;
-  buildSpiceSelector(!!item.spiceEnabled, defaultSpice, item.spiceMin, item.spiceNote);
-
-  modal.style.display = 'flex';
-}
+	// Earlier openCustomiseById declaration removed; the canonical wrapper below remains.
 
 	
 // BEGIN order-success compatibility boundary
