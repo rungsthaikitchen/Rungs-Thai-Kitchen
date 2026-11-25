@@ -1,0 +1,28 @@
+{
+  "base": "6bf5bf9c8b2775a1930ea1f151b0e9dbf6b0b5eb",
+  "originalSha256": "e33bbaa6bb1d3013355f66e08485da76fb951d7bce7aa5285e15fad8ca1451bb",
+  "moduleSha256": "fedcfad878c1c8446ec558f120ca4ff1db7cd057b472076cb28fe7091b8aa92f",
+  "initialization": "// BEGIN legacy-kitchen-allocator boundary\nconst legacyKitchenAllocator=window.RTKLegacyKitchenAllocator.create({SLOT_MINUTES,KITCHEN_START_HOUR,KITCHEN_START_MINUTE,KITCHEN_STEP_MINUTES});\n// END legacy-kitchen-allocator boundary\n",
+  "regions": [
+    {
+      "name": "getKitchenStartForDate",
+      "before": "function getKitchenStartForDate(dt) {\r\n  const start = new Date(dt);\r\n\r\n  start.setHours(\r\n    KITCHEN_START_HOUR,\r\n    KITCHEN_START_MINUTE,\r\n    0,\r\n    0\r\n  );\r\n\r\n  return start;\r\n}",
+      "wrapper": "function getKitchenStartForDate(...args){return legacyKitchenAllocator.getKitchenStartForDate(...args);}"
+    },
+    {
+      "name": "getLatestProductionSlotStart",
+      "before": "function getLatestProductionSlotStart(readyTime) {\r\n  // Find the latest COMPLETE 15-minute kitchen slot\r\n  // that finishes on or before the customer's ready time.\r\n  const t = new Date(\r\n    readyTime.getTime() -\r\n    SLOT_MINUTES * 60 * 1000\r\n  );\r\n\r\n  const minutes = t.getMinutes();\r\n\r\n  t.setMinutes(\r\n    Math.floor(minutes / SLOT_MINUTES) * SLOT_MINUTES,\r\n    0,\r\n    0\r\n  );\r\n\r\n  return t;\r\n}",
+      "wrapper": "function getLatestProductionSlotStart(...args){return legacyKitchenAllocator.getLatestProductionSlotStart(...args);}"
+    },
+    {
+      "name": "allocateLoadBackwards",
+      "before": "function allocateLoadBackwards(\r\n  readyTime,\r\n  load,\r\n  slotMap\r\n) {\r\n  const requiredSteps = Number(load || 0);\r\n\r\n  if (requiredSteps <= 0) {\r\n    return {\r\n      success: true,\r\n      slotMap\r\n    };\r\n  }\r\n\r\n  const kitchenStart =\r\n    getKitchenStartForDate(readyTime);\r\n\r\n  // Work backwards in continuous 5-minute steps\r\n  let slot = new Date(\r\n    readyTime.getTime() -\r\n    KITCHEN_STEP_MINUTES * 60 * 1000\r\n  );\r\n\r\n  const slotsNeeded = [];\r\n\r\n  for (let i = 0; i < requiredSteps; i++) {\r\n\r\n    // Would this push production before the kitchen starts?\r\n    if (slot < kitchenStart) {\r\n      return {\r\n        success: false,\r\n        slotMap\r\n      };\r\n    }\r\n\r\n    const key = slot.toISOString();\r\n\r\n    // Any occupied step breaks the continuous run\r\n    if ((slotMap.get(key) || 0) > 0) {\r\n      return {\r\n        success: false,\r\n        slotMap\r\n      };\r\n    }\r\n\r\n    slotsNeeded.push(key);\r\n\r\n    slot = new Date(\r\n      slot.getTime() -\r\n      KITCHEN_STEP_MINUTES * 60 * 1000\r\n    );\r\n  }\r\n\r\n  // Only reserve the slots once we've proved the\r\n  // ENTIRE continuous run is available.\r\n  for (const key of slotsNeeded) {\r\n    slotMap.set(key, 1);\r\n  }\r\n\r\n  return {\r\n    success: true,\r\n    slotMap\r\n  };\r\n}",
+      "wrapper": "function allocateLoadBackwards(...args){return legacyKitchenAllocator.allocateLoadBackwards(...args);}"
+    },
+    {
+      "name": "forceAllocateExistingLoad",
+      "before": "function forceAllocateExistingLoad(\r\n  readyTime,\r\n  load,\r\n  slotMap\r\n) {\r\n  const requiredSteps = Number(load || 0);\r\n\r\n  if (requiredSteps <= 0) {\r\n    return {\r\n      overCapacity: false,\r\n      conflicts: []\r\n    };\r\n  }\r\n\r\n  const kitchenStart =\r\n    getKitchenStartForDate(readyTime);\r\n\r\n  let slot = new Date(\r\n    readyTime.getTime() -\r\n    KITCHEN_STEP_MINUTES * 60 * 1000\r\n  );\r\n\r\n  const conflicts = [];\r\n\r\n  for (let i = 0; i < requiredSteps; i++) {\r\n    if (slot < kitchenStart) {\r\n      break;\r\n    }\r\n\r\n    const key = slot.toISOString();\r\n    const existingLoad = slotMap.get(key) || 0;\r\n\r\n    if (existingLoad > 0) {\r\n      conflicts.push({\r\n        time: key,\r\n        existingLoad,\r\n        newLoad: existingLoad + 1\r\n      });\r\n    }\r\n\r\n    slotMap.set(\r\n      key,\r\n      existingLoad + 1\r\n    );\r\n\r\n    slot = new Date(\r\n      slot.getTime() -\r\n      KITCHEN_STEP_MINUTES * 60 * 1000\r\n    );\r\n  }\r\n\r\n  return {\r\n    overCapacity: conflicts.length > 0,\r\n    conflicts\r\n  };\r\n}",
+      "wrapper": "function forceAllocateExistingLoad(...args){return legacyKitchenAllocator.forceAllocateExistingLoad(...args);}"
+    }
+  ]
+}
