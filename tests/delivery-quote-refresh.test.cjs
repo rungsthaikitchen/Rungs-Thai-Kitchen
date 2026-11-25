@@ -1,12 +1,10 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const source=fs.readFileSync(require.resolve('../customer-menu-basket.js'),'utf8');
-const render=source.slice(source.indexOf('var refreshCheckoutPricingAndRender ='),source.indexOf('window.refreshCheckoutPricingAndRender ='));
-const quote=source.slice(source.indexOf('async function refreshDeliveryQuote()'),source.indexOf('window.refreshDeliveryQuote ='));
+const {create}=require('../customer-delivery-quotes');
 function fixture(){
- const pending=[];let type='delivery',distance=1,coords=true;
- const context={window:{},console:{log(){},warn(){}},checkoutBaseSubtotal:29,DELIVERY_FREE_THRESHOLD:30,DELIVERY_FALLBACK_FEE:3,DELIVERY_MAX_STRAIGHT_LINE_MILES:3,DELIVERY_ROUTE_BANDS:[],SUPABASE_URL:'https://provider.invalid',SUPABASE_PUBLIC_KEY:'fixture',getSelectedOrderType:()=>type,getRestaurantLatLng:()=>({lat:1,lng:1}),getCustomerLatLng:()=>coords?{lat:1,lng:1}:null,haversineMiles:()=>distance,calculateBandFee:()=>2,recomputeCheckoutTotals(){},updateCheckoutSubmitButton(){},updateCheckoutOrderSummary(){},fetch:()=>new Promise((resolve,reject)=>pending.push({resolve,reject}))};
- vm.runInNewContext('var deliveryQuoteGeneration=0;var deliveryQuoteState={fee:3};'+quote+';window.refreshDeliveryQuote=refreshDeliveryQuote;'+render,context);
- return {context,pending,refresh:()=>context.refreshCheckoutPricingAndRender(),quote:()=>context.window.deliveryQuoteState,setType:v=>type=v,setDistance:v=>distance=v,setCoords:v=>coords=v};
+ const pending=[];let type='delivery';
+ const context={window:{customerLat:53.744437+1/69,customerLng:-1.576570},console:{log(){},warn(){}},deliveryQuoteGeneration:0,deliveryQuoteState:{fee:3},checkoutBaseSubtotal:29,DELIVERY_FREE_THRESHOLD:30,DELIVERY_FALLBACK_FEE:3,DELIVERY_MAX_STRAIGHT_LINE_MILES:3,DELIVERY_ROUTE_BANDS:[{maxMiles:1.5,fee:2},{maxMiles:2.5,fee:3},{maxMiles:4,fee:4}],SUPABASE_URL:'https://provider.invalid',SUPABASE_PUBLIC_KEY:'fixture',getSelectedOrderType:()=>type,recomputeCheckoutTotals(){},updateCheckoutSubmitButton(){},updateCheckoutOrderSummary(){},fetch:()=>new Promise((resolve,reject)=>pending.push({resolve,reject}))};
+ const api=create(context);context.window.refreshDeliveryQuote=api.refreshDeliveryQuote;
+ return {context,pending,refresh:()=>api.refreshCheckoutPricingAndRender(),quote:()=>context.window.deliveryQuoteState,setType:v=>type=v,setDistance:v=>context.window.customerLat=53.744437+v/69,setCoords:v=>{context.window.customerLat=v?53.744437+1/69:undefined;}};
 }
 const response=()=>({ok:true,json:async()=>({ok:true,routeMiles:1.25})});
 test('crossing the free-delivery threshold invalidates an older successful route reply',async()=>{
