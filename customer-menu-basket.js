@@ -635,64 +635,32 @@ function buildExtraChips(...args){return customisationPricing.buildExtraChips(..
 
 function handleExtraClick(...args){return customisationPricing.handleExtraClick(...args);}
 
-    function buildModifierChips(allowed, required=false, multi=false, max=null){
-      modsEl.innerHTML = '';
-      selectedMods.clear();
-      currentAllowedMods = Array.isArray(allowed) && allowed.length ? allowed.slice() : null;
-      currentRequires = !!required;
-      currentMulti = !!multi || (typeof max === 'number' && max > 0);
-      currentMax = (typeof max === 'number' && max > 0) ? max : null;
-
-      if(currentRequires && currentAllowedMods){ modRequiredNote.style.display = 'block'; modalAdd.disabled = true; }
-      else { modRequiredNote.style.display = 'none'; modalAdd.disabled = false; }
-
-      if(currentMulti && currentMax){ modLimitNote.style.display = 'block'; modLimitNote.textContent = `Choose up to ${currentMax} options`; }
-      else { modLimitNote.style.display = 'none'; }
-
-      if(!currentAllowedMods){ modsEl.style.display = 'none'; return; }
-      modsEl.style.display = 'flex';
-
-      MODIFIERS.forEach(m => {
-        if(!currentAllowedMods.includes(m.id)) return;
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'chip';
-        btn.innerHTML = `${m.name}${m.delta ? ` (+${formatCurrency(m.delta)})` : ''}`;
-        btn.dataset.id = m.id;
-
-        btn.addEventListener('click', () => {
-          if(currentMulti){
-            if(selectedMods.has(m.id)){
-              selectedMods.delete(m.id);
-              btn.classList.remove('selected');
-            } else {
-              if(currentMax && selectedMods.size >= currentMax){
-                btn.animate([{transform:'translateY(-2px)'},{transform:'translateY(0)'}],{duration:140});
-                return;
-              }
-              selectedMods.add(m.id);
-              btn.classList.add('selected');
-            }
-            if(currentRequires) modalAdd.disabled = (selectedMods.size === 0);
-            if(currentMax && currentMulti){ modLimitNote.textContent = `Selected ${selectedMods.size}/${currentMax}`; }
-          } else {
-            if(selectedMods.has(m.id)){
-              selectedMods.delete(m.id);
-              btn.classList.remove('selected');
-            } else {
-              selectedMods.clear();
-              modsEl.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
-              selectedMods.add(m.id);
-              btn.classList.add('selected');
-            }
-            if(currentRequires) modalAdd.disabled = (selectedMods.size === 0);
-          }
-          updateUnitPricePreview();
-        });
-
-        modsEl.appendChild(btn);
-      });
-    }
+    // BEGIN customisation-selectors boundary
+const customisationSelectors = window.RTKCustomisationSelectors.create({
+ document,
+ get modsEl(){return modsEl;},
+ get selectedMods(){return selectedMods;},
+ get currentAllowedMods(){return currentAllowedMods;},
+ get currentRequires(){return currentRequires;},
+ get currentMulti(){return currentMulti;},
+ get currentMax(){return currentMax;},
+ get modRequiredNote(){return modRequiredNote;},
+ get modalAdd(){return modalAdd;},
+ get modLimitNote(){return modLimitNote;},
+ get MODIFIERS(){return MODIFIERS;},
+ get spiceWrap(){return spiceWrap;},
+ get spiceButtons(){return spiceButtons;},
+ get currentSpice(){return currentSpice;},
+ set currentAllowedMods(value){currentAllowedMods=value;},
+ set currentRequires(value){currentRequires=value;},
+ set currentMulti(value){currentMulti=value;},
+ set currentMax(value){currentMax=value;},
+ set currentSpice(value){currentSpice=value;},
+ get formatCurrency(){return formatCurrency;},
+ get updateUnitPricePreview(){return updateUnitPricePreview;}
+});
+// END customisation-selectors boundary
+function buildModifierChips(...args){return customisationSelectors.buildModifierChips(...args);}
 	
 	function openCustomiseById(itemId) {
   const item = window.ITEMS_BY_ID.get(String(itemId));
@@ -931,49 +899,7 @@ function handleExtraClick(...args){return customisationPricing.handleExtraClick(
 	})();
 
 
-    function buildSpiceSelector(enabled, defaultLevel=0, minimumLevel=0, note=''){
-      let spiceNote = document.getElementById('spice-note');
-      if (!spiceNote) {
-        spiceNote = document.createElement('div');
-        spiceNote.id = 'spice-note';
-        spiceNote.className = 'small';
-        spiceWrap.appendChild(spiceNote);
-      }
-      spiceNote.textContent = enabled ? note || '' : '';
-      spiceNote.hidden = !enabled || !note;
-      if(!enabled){
-        spiceWrap.style.display = 'none';
-        spiceButtons.innerHTML = '';
-        currentSpice = null;
-        return;
-      }
-      spiceWrap.style.display = 'block';
-      spiceButtons.innerHTML = '';
-      const minimum = Math.max(0, Math.min(3, Number(minimumLevel)||0));
-      currentSpice = Math.max(minimum, Math.min(3, Number(defaultLevel)||0));
-
-      const labels = [
-        {v:0, text:'No spice'},
-        {v:1, text:'Mild 🌶️'},
-        {v:2, text:'Medium 🌶️🌶️'},
-        {v:3, text:'Very spicy 🌶️🌶️🌶️'}
-      ];
-      labels.filter(l => l.v >= minimum).forEach(l=>{
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'spice-btn' + (l.v===currentSpice ? ' active':'');
-        b.textContent = l.text;
-        b.setAttribute('aria-pressed', l.v===currentSpice ? 'true':'false');
-        b.addEventListener('click', ()=>{
-          currentSpice = l.v;
-          [...spiceButtons.querySelectorAll('.spice-btn')].forEach(x=>{
-            x.classList.remove('active'); x.setAttribute('aria-pressed','false');
-          });
-          b.classList.add('active'); b.setAttribute('aria-pressed','true');
-        });
-        spiceButtons.appendChild(b);
-      });
-    }
+    function buildSpiceSelector(...args){return customisationSelectors.buildSpiceSelector(...args);}
 
     function closeModal(){
       modal.style.display = 'none';

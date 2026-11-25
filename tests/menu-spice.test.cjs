@@ -9,9 +9,7 @@ function selector() {
  const elements = {};
  function element() { return { style: {}, children: [], classList: {add(){},remove(){}}, setAttribute(){}, addEventListener(event, fn){this.click=fn;}, appendChild(child){this.children.push(child);if(child.id)elements[child.id]=child;}, querySelectorAll(){return this.children;}, set innerHTML(value){this.children=[];} }; }
  const context = {document:{getElementById:id=>elements[id],createElement:element},spiceWrap:element(),spiceButtons:element(),currentSpice:null};
- vm.createContext(context);
- const start = source.indexOf('function buildSpiceSelector(');
- vm.runInContext(source.slice(start, source.indexOf('function closeModal()', start)), context);
+ context.buildSpiceSelector = require('../customer-customisation-selectors').create(context).buildSpiceSelector;
  return context;
 }
 test('all six restricted dishes offer mild or hotter and explain the heat', () => {
