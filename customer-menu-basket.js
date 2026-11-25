@@ -514,70 +514,19 @@ function closeMenuOverlay() {
   document.body.style.overflow = '';
 }
 
-// Header nav "Menu" link
-if (menuLink) {
-  menuLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    openMenuOverlay();
-  });
-}
-
-// Floating FAB "Menu" button
-if (menuFab) {
-  menuFab.addEventListener('click', (e) => {
-    e.preventDefault();
-    openMenuOverlay();
-  });
-}
-
-if (menuFab) {
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 300) {
-      menuFab.classList.remove('hidden');
-    } else {
-      menuFab.classList.add('hidden');
-    }
-  });
-}
-
-// Close X in overlay
-if (menuClose) {
-  menuClose.addEventListener('click', closeMenuOverlay);
-}
-
-// Click outside sheet closes
-if (menuOverlay) {
-  menuOverlay.addEventListener('click', (e) => {
-    if (e.target === menuOverlay) closeMenuOverlay();
-  });
-}
-
-// Proceed to checkout button in overlay
-if (menuCheckoutBtn) {
-  menuCheckoutBtn.addEventListener('click', () => {
-    if (!basket || basket.length === 0) {
-      alert('Please add at least one dish before proceeding to checkout.');
-      return;
-    }
-
-    // close the menu overlay
-    closeMenuOverlay();
-
-    // compute subtotal from basket and open checkout
-    const subtotal = basket.reduce(
-      (sum, line) => sum + line.unitPrice * line.qty,
-      0
-    );
-    openCheckout(subtotal);
-  });
-}
-
-// ESC key closes popup too
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && menuOverlay?.classList.contains('show')) {
-    closeMenuOverlay();
-  }
+// BEGIN menu-overlay boundary
+const menuOverlayControls=window.RTKMenuOverlay.create({
+ document,window,alert,
+ get menuOverlay(){return menuOverlay;},
+ get menuLink(){return menuLink;},
+ get menuClose(){return menuClose;},
+ get menuCheckoutBtn(){return menuCheckoutBtn;},
+ get menuFab(){return menuFab;},
+ get basket(){return basket;},
+ get openCheckout(){return openCheckout;},
 });
+// END menu-overlay boundary
+menuOverlayControls.bindEarly();
 
 
     // ---------- Modal (customise) ----------
@@ -877,48 +826,10 @@ menuRendering.bindSearch();
 	window.nameWithoutChillies= nameWithoutChillies;
 
 	  
-	  function openMenuOverlay() {
-	  if (!menuOverlay) return;
-	  menuOverlay.classList.add('show');
-	  document.body.style.overflow = 'hidden';   // stop background scroll
-	  document.body.classList.add('menu-open');  // 👈 NEW: flag that menu is open
-	}
+	  function openMenuOverlay(...args){return menuOverlayControls.openMenuOverlay(...args);}
+	function closeMenuOverlay(...args){return menuOverlayControls.closeMenuOverlay(...args);}
 
-	function closeMenuOverlay() {
-	  if (!menuOverlay) return;
-	  menuOverlay.classList.remove('show');
-	  document.body.style.overflow = '';
-	  document.body.classList.remove('menu-open'); // 👈 NEW: remove flag
-	}
-
-
-	  if (menuLink) {
-		menuLink.addEventListener('click', (e) => {
-		  e.preventDefault();
-		  openMenuOverlay();
-		});
-	  }
-
-	  if (menuClose) {
-		menuClose.addEventListener('click', () => {
-		  closeMenuOverlay();
-		});
-	  }
-
-	  if (menuOverlay) {
-		// click outside the inner card closes
-		menuOverlay.addEventListener('click', (e) => {
-		  if (e.target === menuOverlay) closeMenuOverlay();
-		});
-	  }
-
-	  // ESC key closes popup too
-	  document.addEventListener('keydown', (e) => {
-		if (e.key === 'Escape' && menuOverlay?.classList.contains('show')) {
-		  closeMenuOverlay();
-		}
-	  });
-
+menuOverlayControls.bindLate();
 	function cancelOrder(order, reason, meta = {}) {
 	  order.status = 'cancelled';
 	  order.cancelReason = reason;            // <- short code/string

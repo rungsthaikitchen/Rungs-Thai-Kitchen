@@ -15,10 +15,11 @@ test('customer classic scripts load once in the original dependency order',()=>{
  const selectors=html.indexOf('<script src="/customer-customisation-selectors.js?');
  const customDialog=html.indexOf('<script src="/customer-customisation-dialog.js?');
  const successCompat=html.indexOf('<script src="/customer-order-success-compat.js?');
- assert.ok(selectors<customDialog&&customDialog<successCompat&&successCompat<menu);
+ const overlay=html.indexOf('<script src="/customer-menu-overlay.js?');
+ assert.ok(selectors<customDialog&&customDialog<successCompat&&successCompat<overlay&&overlay<menu);
  assert.ok(catalogue>=0&&catalogue<rendering&&rendering<controls&&controls<customisation&&customisation<selectors&&selectors<menu);
  assert.ok(html.indexOf('window.sb =')<menu&&menu<availability&&availability<dialog&&dialog<submission&&submission<checkout);
- for(const file of ['customer-order-success-compat.js','customer-customisation-dialog.js','customer-customisation-selectors.js','customer-customisation-pricing.js','customer-basket-controls.js','customer-menu-rendering.js','customer-menu-catalogue.js','customer-menu-basket.js','customer-checkout-availability.js','customer-checkout-dialog.js','customer-checkout-submission.js','customer-checkout-pricing.js','customer-checkout-confirmation.js','customer-checkout-customer-data.js','customer-checkout-display.js','customer-checkout-service.js','customer-checkout.js']){
+ for(const file of ['customer-menu-overlay.js','customer-order-success-compat.js','customer-customisation-dialog.js','customer-customisation-selectors.js','customer-customisation-pricing.js','customer-basket-controls.js','customer-menu-rendering.js','customer-menu-catalogue.js','customer-menu-basket.js','customer-checkout-availability.js','customer-checkout-dialog.js','customer-checkout-submission.js','customer-checkout-pricing.js','customer-checkout-confirmation.js','customer-checkout-customer-data.js','customer-checkout-display.js','customer-checkout-service.js','customer-checkout.js']){
   assert.equal((html.match(new RegExp('<script src="/'+file.replaceAll('.','\\.')+'\\?','g'))||[]).length,1);
   const tag=html.match(new RegExp('<script[^>]+src="/'+file.replaceAll('.','\\.')+'[^>]+>'))[0];assert.doesNotMatch(tag,/\s(?:async|defer|type)(?:\s|=|>)/);
   assert.doesNotThrow(()=>new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file}));
