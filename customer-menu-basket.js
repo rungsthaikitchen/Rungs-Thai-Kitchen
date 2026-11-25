@@ -399,55 +399,28 @@ customisationDialog.bindControls();
 
 
 	// One delegated handler for all customise buttons inside the popup
-	(function bindCustomiseClicks() {
-	  const container = document.getElementById('menu-list');
-	  if (!container || container.dataset.customBound) return;
-
-	  container.addEventListener('click', (e) => {
-		// works for either a button or the whole card if we later add data-id there
-		const btn = e.target.closest('[data-id]');
-		if (!btn) return;
-
-		const id = btn.getAttribute('data-id');
-		if (!id) return;
-
-		// call our canonical opener
-		if (typeof openCustomise === 'function') {
-		  openCustomise(id);
-		} else if (typeof window.openCustomise === 'function') {
-		  window.openCustomise(id);
-		}
-	  });
-
-	  container.dataset.customBound = '1';
-	})();
+// BEGIN customer-interactions boundary
+const customerInteractions=window.RTKCustomerInteractions.create({
+ document,window,
+ get modal(){return modal;},
+ get checkoutModal(){return checkoutModal;},
+ get openCustomise(){return typeof openCustomise==='function'?openCustomise:undefined;},
+ get closeModal(){return typeof closeModal==='function'?closeModal:undefined;},
+ get closeCheckout(){return typeof closeCheckout==='function'?closeCheckout:undefined;},
+ get hideOrderSuccess(){return typeof hideOrderSuccess==='function'?hideOrderSuccess:undefined;},
+});
+// END customer-interactions boundary
+customerInteractions.bindCustomiseEarly();
 
 basketControls.bindControls();
 
 		// Lightbox
 pageControls.bindLightbox();
 
-		document.addEventListener('keydown', (e) => {
-	  if (e.key === 'Escape') {
-		if (typeof closeModal === 'function' && modal?.style.display === 'flex') closeModal();
-		if (typeof closeCheckout === 'function' && checkoutModal?.style.display === 'flex') closeCheckout();
-		if (typeof hideOrderSuccess === 'function') hideOrderSuccess();
-	  }
-	});
+customerInteractions.bindEscape();
 
 	// --- One handler for all "customise" buttons in the popup menu ---
-	const menuListEl = document.getElementById('menu-list');
-
-	if (menuListEl) {
-	  menuListEl.addEventListener('click', (e) => {
-		const btn = e.target.closest('button[data-id]');
-		if (!btn) return;
-
-		const id = btn.dataset.id;
-		// just open customise – do NOT close menu
-		openCustomise(id);
-	  });
-	}
+customerInteractions.bindCustomiseLate();
 
 	function filterMenu(...args){return menuRendering.filterMenu(...args);}
 
