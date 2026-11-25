@@ -102,3 +102,33 @@ test('stale order total rejection tells staff to refresh rather than retry',asyn
  assert.match(status.textContent,/Reload the order and run a fresh preflight/);
  assert.equal(submit.disabled,true);
 });
+
+test('partial or excess bill payment is blocked before contacting backend',async()=>{
+ let calls=0;
+ const ui=fixture(async()=>{calls++;return Response.json({success:true})});
+ ui.find('billMethod').value='card';
+ for(const amount of ['30.00','35.00']){
+  ui.find('billAmount').value=amount;
+  await ui.submit();
+ }
+ assert.equal(calls,0);
+ const status=ui.form.children.find(n=>n.role==='status');
+ assert.match(status.textContent,/bill must be paid in full/i);
+ assert.equal(ui.find('differenceReason'),undefined);
+});
+test('full cash bill and separate card tip remains supported',async()=>{
+ let payload;
+ const ui=fixture(async(_url,options)=>{
+  payload=JSON.parse(options.body);
+  return Response.json({success:true,committed:true});
+ });
+ ui.find('billMethod').value='cash';
+ ui.find('tipAmount').value='3.00';
+ ui.find('tipMethod').value='card';
+ await ui.submit();
+ assert.equal(payload.billAmount,'32.50');
+ assert.equal(payload.billMethod,'cash');
+ assert.equal(payload.tipAmount,'3.00');
+ assert.equal(payload.tipMethod,'card');
+ assert.equal(payload.differenceReason,null);
+});
