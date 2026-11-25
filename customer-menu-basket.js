@@ -44,29 +44,27 @@ var deliveryQuoteState = {
 
 window.deliveryQuoteState = deliveryQuoteState;
 
-var refreshCheckoutPricingAndRender = async function () {
-  if (getSelectedOrderType() === "delivery") {
-    await window.refreshDeliveryQuote();
-  } else {
-    ++deliveryQuoteGeneration; // Invalidate delivery replies after switching to collection.
-    deliveryQuoteState = {
-      loading: false,
-      eligible: true,
-      reason: "",
-      straightLineMiles: null,
-      routeMiles: null,
-      fee: 0,
-      usedFallback: false,
-      lastUpdated: Date.now()
-    };
-
-    window.deliveryQuoteState = deliveryQuoteState;
-  }
-
-  recomputeCheckoutTotals();
-  updateCheckoutSubmitButton();
-  updateCheckoutOrderSummary();
-};
+// BEGIN delivery-quotes boundary
+const deliveryQuotes=window.RTKDeliveryQuotes.create({
+ window,console,fetch,
+ get deliveryQuoteGeneration(){return deliveryQuoteGeneration;},
+ get deliveryQuoteState(){return deliveryQuoteState;},
+ get checkoutBaseSubtotal(){return checkoutBaseSubtotal;},
+ get DELIVERY_FREE_THRESHOLD(){return DELIVERY_FREE_THRESHOLD;},
+ get DELIVERY_FALLBACK_FEE(){return DELIVERY_FALLBACK_FEE;},
+ get DELIVERY_MAX_STRAIGHT_LINE_MILES(){return DELIVERY_MAX_STRAIGHT_LINE_MILES;},
+ get DELIVERY_ROUTE_BANDS(){return DELIVERY_ROUTE_BANDS;},
+ get SUPABASE_URL(){return SUPABASE_URL;},
+ get SUPABASE_PUBLIC_KEY(){return SUPABASE_PUBLIC_KEY;},
+ get getSelectedOrderType(){return getSelectedOrderType;},
+ get recomputeCheckoutTotals(){return recomputeCheckoutTotals;},
+ get updateCheckoutSubmitButton(){return updateCheckoutSubmitButton;},
+ get updateCheckoutOrderSummary(){return updateCheckoutOrderSummary;},
+ set deliveryQuoteGeneration(value){deliveryQuoteGeneration=value;},
+ set deliveryQuoteState(value){deliveryQuoteState=value;},
+});
+// END delivery-quotes boundary
+var refreshCheckoutPricingAndRender = function (...args){return deliveryQuotes.refreshCheckoutPricingAndRender(...args);};
 
 window.refreshCheckoutPricingAndRender = refreshCheckoutPricingAndRender;
 			
@@ -83,39 +81,13 @@ var DELIVERY_ROUTE_BANDS = [
 
 var DELIVERY_FALLBACK_FEE = 3.0;
 
-function toRadians(deg) {
-  return deg * (Math.PI / 180);
-}
+function toRadians(...args){return deliveryQuotes.toRadians(...args);}
 
-function haversineMiles(lat1, lng1, lat2, lng2) {
-  const R = 3958.8;
-  const dLat = toRadians(lat2 - lat1);
-  const dLng = toRadians(lng2 - lng1);
+function haversineMiles(...args){return deliveryQuotes.haversineMiles(...args);}
 
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRadians(lat1)) *
-    Math.cos(toRadians(lat2)) *
-    Math.sin(dLng / 2) ** 2;
+function roundMiles(...args){return deliveryQuotes.roundMiles(...args);}
 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
-function roundMiles(value) {
-  if (value == null || Number.isNaN(value)) return null;
-  return Math.round(value * 10) / 10;
-}
-
-function calculateBandFee(miles, bands) {
-  if (miles == null || Number.isNaN(miles)) return null;
-
-  for (const band of bands) {
-    if (miles <= band.maxMiles) return band.fee;
-  }
-
-  return null;
-}
+function calculateBandFee(...args){return deliveryQuotes.calculateBandFee(...args);}
 
 function getSelectedOrderType() {
   const selected = document.querySelector('input[name="order-type"]:checked');
@@ -126,20 +98,9 @@ function getPreDiscountFoodSubtotal() {
   return Number(checkoutBaseSubtotal || 0);
 }
 
-function getRestaurantLatLng() {
-  return {
-    lat: 53.744437,
-    lng: -1.576570
-  };
-}
+function getRestaurantLatLng(...args){return deliveryQuotes.getRestaurantLatLng(...args);}
 
-function getCustomerLatLng() {
-  const lat = Number(window.customerLat);
-  const lng = Number(window.customerLng);
-
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-  return { lat, lng };
-}
+function getCustomerLatLng(...args){return deliveryQuotes.getCustomerLatLng(...args);}
 
 function resetCheckoutForNextOrder() {
   console.log('[checkout] resetting state for next order');
@@ -195,177 +156,7 @@ function resetCheckoutForNextOrder() {
   console.log('[checkout] reset complete');
 }
 
-async function refreshDeliveryQuote() {
-  const generation = ++deliveryQuoteGeneration;
-  const subtotal = Number(checkoutBaseSubtotal || 0);
-	const freeDeliveryRemaining = Math.max(0, DELIVERY_FREE_THRESHOLD - subtotal);
-	const freeDeliveryMessage =
-	  subtotal >= DELIVERY_FREE_THRESHOLD
-		? "🎉 You’ve unlocked FREE delivery!"
-		: `Add £${freeDeliveryRemaining.toFixed(2)} more for FREE delivery 🚚`;
-  const restaurant = getRestaurantLatLng();
-  const customer = getCustomerLatLng();
-
-			  // 🚫 No coords = cannot prove address is in delivery radius
-			  if (!restaurant || !customer) {
-			  deliveryQuoteState = {
-				loading: false,
-				eligible: true,
-				reason: "",
-				straightLineMiles: null,
-				routeMiles: null,
-				fee: DELIVERY_FALLBACK_FEE,
-				usedFallback: true,
-				freeDeliveryRemaining,
-				freeDeliveryMessage,
-				lastUpdated: Date.now()
-			  };
-
-			  window.deliveryQuoteState = deliveryQuoteState;
-
-			  console.warn("[delivery] blocked - missing coords for radius check", {
-				restaurant,
-				customer
-			  });
-
-			  return deliveryQuoteState;
-			}
-
-  const straightLineMiles = haversineMiles(
-    restaurant.lat,
-    restaurant.lng,
-    customer.lat,
-    customer.lng
-  );
-
-  // 🚫 Hard 3-mile radius gate
-  if (straightLineMiles > DELIVERY_MAX_STRAIGHT_LINE_MILES) {
-    deliveryQuoteState = {
-      loading: false,
-      eligible: false,
-      reason: "Sorry, this address is outside our 3-mile delivery radius. Please call us on 0113 469 9564 and we’ll see what we can do 😊",
-      straightLineMiles,
-      routeMiles: null,
-      fee: null,
-      usedFallback: false,
-      lastUpdated: Date.now()
-    };
-
-    window.deliveryQuoteState = deliveryQuoteState;
-
-    console.warn("[delivery] outside radius", {
-      straightLineMiles
-    });
-
-    return deliveryQuoteState;
-  }
-
-  // ✅ Free delivery only AFTER radius check
-  if (subtotal >= DELIVERY_FREE_THRESHOLD) {
-    deliveryQuoteState = {
-      loading: false,
-      eligible: true,
-      reason: "",
-      straightLineMiles,
-      routeMiles: null,
-      fee: 0,
-      usedFallback: false,
-      lastUpdated: Date.now()
-    };
-
-    window.deliveryQuoteState = deliveryQuoteState;
-
-    console.log("[delivery] free delivery threshold met within radius");
-    return deliveryQuoteState;
-  }
-
-  // ✅ Inside radius, under free delivery threshold: use fallback while route quote loads
-  deliveryQuoteState = {
-    loading: true,
-    eligible: true,
-    reason: "",
-    straightLineMiles,
-    routeMiles: null,
-    fee: DELIVERY_FALLBACK_FEE,
-    usedFallback: true,
-    lastUpdated: Date.now()
-  };
-
-  window.deliveryQuoteState = deliveryQuoteState;
-
-  try {
-    const resp = await fetch(`${SUPABASE_URL}/functions/v1/get-delivery-route-quote`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_PUBLIC_KEY
-      },
-      body: JSON.stringify({
-        origin: restaurant,
-        destination: customer
-      })
-    });
-
-    const data = await resp.json().catch(() => null);
-    if (generation !== deliveryQuoteGeneration) return window.deliveryQuoteState;
-
-    if (!resp.ok || !data?.ok || !Number.isFinite(data?.routeMiles)) {
-      console.warn("[delivery] route lookup failed, using fallback");
-
-      deliveryQuoteState = {
-        ...deliveryQuoteState,
-        loading: false,
-        eligible: true,
-        fee: DELIVERY_FALLBACK_FEE,
-        usedFallback: true,
-        lastUpdated: Date.now()
-      };
-
-      window.deliveryQuoteState = deliveryQuoteState;
-      return deliveryQuoteState;
-    }
-
-    const routeMiles = Number(data.routeMiles);
-    const routeFee = calculateBandFee(routeMiles, DELIVERY_ROUTE_BANDS);
-
-    deliveryQuoteState = {
-      loading: false,
-      eligible: true,
-      reason: "",
-      straightLineMiles,
-      routeMiles,
-      fee: routeFee ?? DELIVERY_FALLBACK_FEE,
-      usedFallback: routeFee == null,
-      lastUpdated: Date.now()
-    };
-
-    window.deliveryQuoteState = deliveryQuoteState;
-
-    console.log("[delivery] route pricing applied", {
-      straightLineMiles,
-      routeMiles,
-      fee: deliveryQuoteState.fee
-    });
-
-    return deliveryQuoteState;
-
-  } catch (err) {
-    if (generation !== deliveryQuoteGeneration) return window.deliveryQuoteState;
-    console.warn("[delivery] route fetch exception, using fallback", err);
-
-    deliveryQuoteState = {
-      ...deliveryQuoteState,
-      loading: false,
-      eligible: true,
-      fee: DELIVERY_FALLBACK_FEE,
-      usedFallback: true,
-      lastUpdated: Date.now()
-    };
-
-    window.deliveryQuoteState = deliveryQuoteState;
-    return deliveryQuoteState;
-  }
-}
+function refreshDeliveryQuote(...args){return deliveryQuotes.refreshDeliveryQuote(...args);}
 
 window.refreshDeliveryQuote = refreshDeliveryQuote;
 
