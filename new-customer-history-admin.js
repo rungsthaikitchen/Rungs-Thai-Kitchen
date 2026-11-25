@@ -43,28 +43,56 @@
     node.append(select);
    }
   }
+  async function requestHistory(ids){
+   const body=JSON.stringify({action:'classify',orderIds:ids});
+   for(let attempt=0;attempt<2;attempt++){
+    try{
+     const response=await fetch('/admin-api/new-customer-history',{method:'POST',headers:{'Content-Type':'application/json'},body,redirect:'error',signal:AbortSignal.timeout(15000)});
+     if(response.status<500||attempt===1)return response;
+     await response.body?.cancel();
+    }catch(error){
+     if(attempt===1)throw error;
+    }
+   }
+  }
+  async function lookup(ids){
+   const response=await requestHistory(ids);
+   if(!response.ok)throw Error('Lookup unavailable');
+   const data=await response.json();
+   if(data.success!==true||!Array.isArray(data.classifications)||
+      data.classifications.length!==new Set(ids).size||
+      new Set(data.classifications.map(x=>x.order_id)).size!==new Set(ids).size||
+      data.classifications.some(x=>!ids.includes(x.order_id)||!['new','possibly_new','returning'].includes(x.classification)||
+       (x.classification==='possibly_new'&&!['completion_timing_unknown','previous_order_not_confirmed','shared_contact','insufficient_identity','test_order'].includes(x.reason))))throw Error('Lookup unavailable');
+   if(!Array.isArray(data.contacts)||data.contacts.some(x=>!ids.includes(x.order_id)||!['contacted','unreachable','not_required'].includes(x.status))||
+      new Set(data.contacts.map(x=>x.order_id)).size!==data.contacts.length)throw Error('Contact lookup unavailable');
+   const contacts=new Map(data.contacts.map(x=>[x.order_id,x]));
+   return new Map(data.classifications.map(x=>[x.order_id,{...x,contact:contacts.get(x.order_id)||null}]));
+  }
   async function refresh(){
    if(busy){again=true;return;}busy=true;again=false;
    try{
     const wanted=rows().filter(row=>!cache.has(row.dataset.orderId)||Date.now()-cache.get(row.dataset.orderId).at>30000);
-    for(let offset=0;offset<wanted.length;offset+=100){
-     const batch=wanted.slice(offset,offset+100),ids=batch.map(row=>row.dataset.orderId);
-     const response=await fetch('/admin-api/new-customer-history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'classify',orderIds:ids}),redirect:'error',signal:AbortSignal.timeout(15000)});
-     const data=await response.json();
-     if(!response.ok||data.success!==true||!Array.isArray(data.classifications)||
-        data.classifications.length!==new Set(ids).size||
-        new Set(data.classifications.map(x=>x.order_id)).size!==new Set(ids).size||
-        data.classifications.some(x=>!ids.includes(x.order_id)||!['new','possibly_new','returning'].includes(x.classification)||
-         (x.classification==='possibly_new'&&!['completion_timing_unknown','previous_order_not_confirmed','shared_contact','insufficient_identity','test_order'].includes(x.reason))))throw Error('Lookup unavailable');
-     if(!Array.isArray(data.contacts)||data.contacts.some(x=>!ids.includes(x.order_id)||!['contacted','unreachable','not_required'].includes(x.status))||
-        new Set(data.contacts.map(x=>x.order_id)).size!==data.contacts.length)throw Error('Contact lookup unavailable');
-     const contacts=new Map(data.contacts.map(x=>[x.order_id,x]));
-     const results=new Map(data.classifications.map(x=>[x.order_id,{...x,contact:contacts.get(x.order_id)||null}]));
-     for(const row of batch)cache.set(row.dataset.orderId,{at:Date.now(),value:results.get(row.dataset.orderId)||null});
+    for(const row of rows()){
+     const entry=cache.get(row.dataset.orderId);
+     if(entry)show(row,entry.value);
     }
-    for(const row of rows())show(row,cache.get(row.dataset.orderId)?.value||null);
-   }catch(_){
-    for(const row of rows())show(row,null);
+    for(let offset=0;offset<wanted.length;offset+=100){
+     const batch=wanted.slice(offset,offset+100);
+     try{
+      const results=await lookup(batch.map(row=>row.dataset.orderId));
+      for(const row of batch){
+       const value=results.get(row.dataset.orderId);
+       cache.set(row.dataset.orderId,{at:Date.now(),value});
+      }
+     }catch(_){
+      for(const row of batch)cache.delete(row.dataset.orderId);
+     }
+     const updated=new Set(batch.map(row=>row.dataset.orderId));
+     for(const row of rows()){
+      if(updated.has(row.dataset.orderId))show(row,cache.get(row.dataset.orderId)?.value||null);
+     }
+    }
    }finally{busy=false;if(again)schedule();}
   }
   function schedule(){clearTimeout(timer);timer=setTimeout(refresh,100);}
