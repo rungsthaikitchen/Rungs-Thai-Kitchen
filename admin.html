@@ -2581,6 +2581,7 @@ function render(orders) {
   orders.forEach(o => {
     const tr = document.createElement('tr');
     tr.classList.add('row');
+    tr.dataset.capacityScheduler = o.capacity_scheduler || '';
 
     const isFuture = isFutureUkDay(o);
     if (isFuture) tr.classList.add('row-attention');
@@ -2710,7 +2711,7 @@ const discountLabel =
         const orderId = e.target.dataset.orderId;
 
         await updateOrderStatus(orderId, newStatus);
-        loadAndx();
+        loadAndRender();
       });
     }
 
@@ -2749,6 +2750,30 @@ if (allergenBtn) {
 
     tbody.appendChild(tr);
     tbody.appendChild(detailsRow);
+
+    // LEGACY payment UI is OFF by default; activation requires separate approval.
+    if (window.RTK_LEGACY_PAYMENT_ADMIN_UI_ENABLED === true &&
+        o.capacity_scheduler === 'LEGACY' && !o.paid) {
+      // Never expose the unaudited shortcut alongside the audited LEGACY flow.
+      const oldMarkPaid = tr.querySelector('.btn-paid');
+      if (oldMarkPaid) {
+        oldMarkPaid.hidden = true;
+        oldMarkPaid.disabled = true;
+      }
+      const actions = tr.querySelector('[data-amend-order]')?.parentElement;
+      if (actions) {
+        const mountPoint = document.createElement('span');
+        mountPoint.className = 'legacy-payment-admin-control';
+        actions.appendChild(mountPoint);
+        import('/legacy-payment-admin-mount.mjs')
+          .then(({mountLegacyPaymentControl}) => mountLegacyPaymentControl({
+            document, fetch: window.fetch.bind(window), crypto: window.crypto,
+            order: o, container: mountPoint,
+            onRecorded: () => loadAndRender()
+          }))
+          .catch(() => { mountPoint.textContent = 'LEGACY payment unavailable'; });
+      }
+    }
   });
 }
 
@@ -4561,6 +4586,12 @@ if (btn.classList.contains("btn-suggest")) {
 }
   /* ---------------- MARK PAID ---------------- */
   if (btn.classList.contains("btn-paid")) {
+    // Defense in depth: refuse legacy shortcut even if a hidden button is triggered.
+    if (window.RTK_LEGACY_PAYMENT_ADMIN_UI_ENABLED === true &&
+        btn.closest('tr')?.dataset.capacityScheduler === 'LEGACY') {
+      alert('Use Record LEGACY payment for an audited payment record.');
+      return;
+    }
     if (!confirm("Mark this order as paid?")) return;
 
     const result = await callOrderAction({
