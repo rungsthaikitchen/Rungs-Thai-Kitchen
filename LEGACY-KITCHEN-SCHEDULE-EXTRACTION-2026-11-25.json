@@ -1,0 +1,28 @@
+{
+  "base": "636c6ebacdc5085bea93ee1a8beccd9981f00f60",
+  "originalSha256": "1dfda0362331cafd746428d827f8eae5e1bac806696d8972c735caa49e1b721f",
+  "moduleSha256": "c103ce8ddf3b74744d7f8c395f61c842e9aa5a508d8a4fd24b8e0d2326eceb7a",
+  "initialization": "// BEGIN legacy-kitchen-schedule boundary\nconst legacyKitchenSchedule=window.RTKLegacyKitchenSchedule.create({sb,window,allocateLoadBackwards,forceAllocateExistingLoad});\n// END legacy-kitchen-schedule boundary\n",
+  "regions": [
+    {
+      "name": "getEffectiveOrderTime",
+      "before": "function getEffectiveOrderTime(order) {\r\n  // An explicitly confirmed adjusted time is always authoritative.\r\n  if (order.confirmed_time) {\r\n    return order.confirmed_time;\r\n  }\r\n\r\n  // Customer rejected the proposed time.\r\n  // The original requested time was already unavailable,\r\n  // so don't reserve capacity until another time is agreed/offered.\r\n  if (\r\n    order.status === 'pending' &&\r\n    order.proposed_time\r\n  ) {\r\n    return null;\r\n  }\r\n\r\n  // A proposed replacement time is the best operational time we have.\r\n  // This covers both an active proposal and an order subsequently\r\n  // progressed/completed without confirmed_time being populated.\r\n  if (order.proposed_time) {\r\n    return order.proposed_time;\r\n  }\r\n\r\n  // Normal untouched order.\r\n  return order.preferred_time;\r\n}",
+      "wrapper": "function getEffectiveOrderTime(...args){return legacyKitchenSchedule.getEffectiveOrderTime(...args);}"
+    },
+    {
+      "name": "buildKitchenProductionMap",
+      "before": "function buildKitchenProductionMap(orders) {\r\n  const productionMap = new Map();\r\n\r\n  const sortedOrders = [...orders].sort(\r\n    (a, b) =>\r\n      new Date(getEffectiveOrderTime(a)) -\r\n      new Date(getEffectiveOrderTime(b))\r\n  );\r\n\r\n  for (const order of sortedOrders) {\r\n    const effectiveTime = getEffectiveOrderTime(order);\r\n\r\n    if (!effectiveTime) continue;\r\n\r\n    const load =\r\n      getExistingOrderKitchenLoad(order);\r\n\r\n    if (load <= 0) continue;\r\n\r\n    const readyTime =\r\n      new Date(effectiveTime);\r\n\r\n    const result = allocateLoadBackwards(\r\n      readyTime,\r\n      load,\r\n      productionMap\r\n    );\r\n\r\n    if (!result.success) {\r\n  const forced =\r\n    forceAllocateExistingLoad(\r\n      readyTime,\r\n      load,\r\n      productionMap\r\n    );\r\n\r\n  console.warn(\r\n    '[kitchen-schedule] existing order exceeds available capacity:',\r\n    {\r\n      orderId: order.id,\r\n      preferredTime: order.preferred_time,\r\n      proposedTime: order.proposed_time,\r\n      confirmedTime: order.confirmed_time,\r\n      effectiveTime,\r\n      load,\r\n      conflicts: forced.conflicts\r\n    }\r\n  );\r\n}\r\n  }\r\n\r\n  return productionMap;\r\n}",
+      "wrapper": "function buildKitchenProductionMap(...args){return legacyKitchenSchedule.buildKitchenProductionMap(...args);}"
+    },
+    {
+      "name": "loadKitchenScheduleForDate",
+      "before": "async function loadKitchenScheduleForDate(serviceDate) {\r\n  const start = new Date(serviceDate);\r\n  start.setHours(0, 0, 0, 0);\r\n\r\n  const end = new Date(start);\r\n  end.setDate(end.getDate() + 1);\r\n\r\n  const { data, error } = await sb\r\n    .from('orders')\r\n    .select(`\r\n      id,\r\n      preferred_time,\r\n      proposed_time,\r\n      confirmed_time,\r\n      status,\r\n      is_test,\r\n      capacity_scheduler,\n      order_items (\r\n        qty,\r\n        kitchen_load\r\n      )\r\n    `)\r\n    .or([\n      `and(preferred_time.gte.${start.toISOString()},preferred_time.lt.${end.toISOString()})`,\n      `and(proposed_time.gte.${start.toISOString()},proposed_time.lt.${end.toISOString()})`,\n      `and(confirmed_time.gte.${start.toISOString()},confirmed_time.lt.${end.toISOString()})`\n    ].join(','))\n    .eq('is_test', false);\r\n\r\n  if (error) {\r\n    console.warn('[kitchen-schedule] fetch failed', error);\r\n    return [];\r\n  }\r\n\r\n  return window.RTKBookingCapacityRows(data||[],start,end);\n}",
+      "wrapper": "async function loadKitchenScheduleForDate(...args){return legacyKitchenSchedule.loadKitchenScheduleForDate(...args);}"
+    },
+    {
+      "name": "getExistingOrderKitchenLoad",
+      "before": "function getExistingOrderKitchenLoad(order) {\r\n  return (order.order_items || []).reduce(\r\n    (total, line) =>\r\n      total +\r\n      Number(line.kitchen_load || 0) *\r\n      Number(line.qty || 0),\r\n    0\r\n  );\r\n}",
+      "wrapper": "function getExistingOrderKitchenLoad(...args){return legacyKitchenSchedule.getExistingOrderKitchenLoad(...args);}"
+    }
+  ]
+}
