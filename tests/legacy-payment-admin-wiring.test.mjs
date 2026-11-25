@@ -10,7 +10,7 @@ test('only LEGACY unpaid order rows can mount payment UI',()=>{
  assert.match(html,/o\.capacity_scheduler === 'LEGACY'/);
  assert.match(html,/if \(actions && !o\.paid\)/);
  assert.match(html,/src="\/admin-api\/legacy-payment-ui-config"/);
- assert.match(html,/import\('\/legacy-payment-admin-mount\.mjs'\)/);
+ assert.match(html,/import\('\/legacy-payment-admin-mount\.mjs\?v=[^']+'\)/);
  assert.match(html,/mountLegacyPaymentControl/);
 });
 
