@@ -498,51 +498,27 @@ kitchenSlotMap = buildKitchenProductionMap(schedule);
   return kitchenSlotMap;
 }
 
-function toYMD(d){
-  const pad = n => String(n).padStart(2,'0');
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-}
-function parseHm(dateRef, hm){ // "HH:MM" -> Date on same Y/M/D
-  const [h,m] = hm.split(':').map(Number);
-  const d = new Date(dateRef);
-  d.setHours(h, m, 0, 0);
-  return d;
-}
+// BEGIN checkout-time-eligibility boundary
+const checkoutTimeEligibility=window.RTKCheckoutTimeEligibility.create({
+ get OPEN_DAYS(){return OPEN_DAYS;},
+ get OPEN_WINDOW(){return OPEN_WINDOW;},
+ get CLOSED_DATES(){return CLOSED_DATES;},
+ get CLOSED_RANGES(){return CLOSED_RANGES;},
+ get FULLY_BOOKED(){return FULLY_BOOKED;},
+ get KITCHEN_OVERRUN_MINUTES(){return KITCHEN_OVERRUN_MINUTES;},
+ get checkoutAvailability(){return checkoutAvailability;},
+ get canBasketFitInSlot(){return canBasketFitInSlot;},
+ get refreshKitchenSlotMap(){return refreshKitchenSlotMap;}
+});
+// END checkout-time-eligibility boundary
+function toYMD(...args){return checkoutTimeEligibility.toYMD(...args);}
+function parseHm(...args){return checkoutTimeEligibility.parseHm(...args);}
 function isBetween(d, start, end){ return d >= start && d <= end; }
-function roundTo5Min(d){
-  const ms = 5 * 60 * 1000;
-  return new Date(Math.ceil(d.getTime() / ms) * ms);
-}
-function withinOpenHours(d){
-  // day
-  if (!OPEN_DAYS.includes(d.getDay())) return false;
-  // time
-  const start = parseHm(d, OPEN_WINDOW.start);
-  const end   = parseHm(d, OPEN_WINDOW.end);
-  return d >= start && d <= end;
-}
-function isClosedDate(d){
-  const ymd = toYMD(d);
+function roundTo5Min(...args){return checkoutTimeEligibility.roundTo5Min(...args);}
+function withinOpenHours(...args){return checkoutTimeEligibility.withinOpenHours(...args);}
+function isClosedDate(...args){return checkoutTimeEligibility.isClosedDate(...args);}
 
-  if (CLOSED_DATES.includes(ymd)) return true;
-
-  for (const r of CLOSED_RANGES){
-    const rs = new Date(r.start);
-    const re = new Date(r.end);
-
-    // Blackout end times are exclusive:
-    // 18:00–18:30 closes 18:00 through 18:25.
-    if (d >= rs && d < re) return true;
-  }
-
-  return false;
-}
-
-function isFullyBooked(d) {
-  return FULLY_BOOKED.some(win =>
-    d >= win.start && d < win.end
-  );
-}
+function isFullyBooked(...args){return checkoutTimeEligibility.isFullyBooked(...args);}
 async function loadKitchenScheduleForDate(...args){return legacyKitchenSchedule.loadKitchenScheduleForDate(...args);}
 
 function getExistingOrderKitchenLoad(...args){return legacyKitchenSchedule.getExistingOrderKitchenLoad(...args);}
@@ -578,88 +554,13 @@ async function refreshKitchenScheduleForDateTime(dt) {
   }
 }
 
-function isAllowed(dt){
-  if(checkoutAvailability.hints)return withinOpenHours(dt)&&checkoutAvailability.hints.get(dt.toISOString())===true;
-  return withinOpenHours(dt) &&
-         !isClosedDate(dt) &&
-         !isFullyBooked(dt) &&
-         canBasketFitInSlot(dt);
-}
+function isAllowed(...args){return checkoutTimeEligibility.isAllowed(...args);}
 
-function isAllowedForAlternativeFulfilment(dt) {
-  if(checkoutAvailability.hints)return checkoutAvailability.hints.get(dt.toISOString())===true;
-  // Must still be one of our trading days.
-  if (!OPEN_DAYS.includes(dt.getDay())) {
-    return false;
-  }
+function isAllowedForAlternativeFulfilment(...args){return checkoutTimeEligibility.isAllowedForAlternativeFulfilment(...args);}
 
-  // Respect closures / fully-booked periods.
-  if (isClosedDate(dt) || isFullyBooked(dt)) {
-    return false;
-  }
+function nextAllowed(...args){return checkoutTimeEligibility.nextAllowed(...args);}
 
-  const normalStart = parseHm(dt, OPEN_WINDOW.start);
-  const normalEnd = parseHm(dt, OPEN_WINDOW.end);
-
-  const extendedEnd = new Date(
-    normalEnd.getTime() +
-    KITCHEN_OVERRUN_MINUTES * 60 * 1000
-  );
-
-  // Alternative fulfilment may run beyond normal closing,
-  // but must not begin before the normal customer opening time.
-  if (dt < normalStart || dt > extendedEnd) {
-    return false;
-  }
-
-  return canBasketFitInSlot(dt);
-}
-
-function nextAllowed(from) {
-  // walk forward in 5-minute steps until we find an allowed slot (cap at +30 days)
-  const cap = new Date(from);
-  cap.setDate(cap.getDate() + 30);
-
-  let t = new Date(from);
-  t = roundTo5Min(t);
-
-  while (t <= cap) {
-    if (isAllowed(t)) return t;
-    t = new Date(t.getTime() + 5 * 60 * 1000);
-  }
-
-  return null;
-}
-
-async function nextAlternativeFulfilment(from) {
-  const cap = new Date(from);
-  cap.setDate(cap.getDate() + 30);
-
-  let t = roundTo5Min(new Date(from));
-
-  let loadedDateKey = null;
-
-  while (t <= cap) {
-    const dateKey = toYMD(t);
-
-    // The kitchen production map is date-specific.
-    // Reload it whenever the search crosses onto another day.
-    if (dateKey !== loadedDateKey) {
-      await refreshKitchenSlotMap(t);
-      loadedDateKey = dateKey;
-    }
-
-    if (isAllowedForAlternativeFulfilment(t)) {
-      return t;
-    }
-
-    t = new Date(
-      t.getTime() + 5 * 60 * 1000
-    );
-  }
-
-  return null;
-}
+async function nextAlternativeFulfilment(...args){return checkoutTimeEligibility.nextAlternativeFulfilment(...args);}
 function showPreferredTimeMessage(...args){return checkoutDisplay.showPreferredTimeMessage(...args);}
 
 function hidePreferredTimeMessage(...args){return checkoutDisplay.hidePreferredTimeMessage(...args);}
