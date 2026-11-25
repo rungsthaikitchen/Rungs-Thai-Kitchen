@@ -2,6 +2,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script src="/admin-api/legacy-payment-ui-config"></script>
 <script defer src="/master-wok-basket-review-client.js"></script>
 <script defer src="/master-wok-basket-review-admin.js"></script>
 <script src="/master-wok-admin-client.js"></script>
@@ -20,6 +21,7 @@
   <title>RTK — Admin Orders</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;800&display=swap" rel="stylesheet">
   <style>
+    .legacy-payment-test-row .order-actions > :not(.legacy-payment-admin-control) { display: none; }
     :root{
       --accent:#d9464a; --muted:#6b7280; --card:#fff;
       --shadow: 0 8px 24px rgba(15,23,42,0.06);
@@ -2582,6 +2584,7 @@ function render(orders) {
     const tr = document.createElement('tr');
     tr.classList.add('row');
     tr.dataset.capacityScheduler = o.capacity_scheduler || '';
+    if (showLegacyPaymentTest) tr.classList.add('legacy-payment-test-row');
 
     const isFuture = isFutureUkDay(o);
     if (isFuture) tr.classList.add('row-attention');
@@ -2753,7 +2756,7 @@ if (allergenBtn) {
 
     // LEGACY payment UI is OFF by default; activation requires separate approval.
     if (window.RTK_LEGACY_PAYMENT_ADMIN_UI_ENABLED === true &&
-        o.capacity_scheduler === 'LEGACY' && !o.paid) {
+        o.capacity_scheduler === 'LEGACY') {
       // Never expose the unaudited shortcut alongside the audited LEGACY flow.
       const oldMarkPaid = tr.querySelector('.btn-paid');
       if (oldMarkPaid) {
@@ -2761,7 +2764,7 @@ if (allergenBtn) {
         oldMarkPaid.disabled = true;
       }
       const actions = tr.querySelector('[data-amend-order]')?.parentElement;
-      if (actions) {
+      if (actions && !o.paid) {
         const mountPoint = document.createElement('span');
         mountPoint.className = 'legacy-payment-admin-control';
         actions.appendChild(mountPoint);
@@ -2823,13 +2826,20 @@ async function updateOrderStatus(orderId, newStatus) {
 		// --- LOAD + RENDER WITH NEW-ORDER DETECTION ------------------------
 
 					
+            const legacyPaymentTestRef = new URLSearchParams(location.search).get('legacyPaymentTest');
+            const showLegacyPaymentTest = window.RTK_LEGACY_PAYMENT_ADMIN_UI_ENABLED === true &&
+              /^RTK-[0-9]+$/.test(legacyPaymentTestRef || '');
+
 			async function loadAndRender() {
-			  const { data: orders, error } = await window.MasterWokAdminClient.loadOrders(() => sb
+			  const { data: orders, error } = await window.MasterWokAdminClient.loadOrders(() => {
+                const query = sb
 			  .from('orders')
 			  .select(`
 					  id,
 					  customer_id,
 					  order_ref,
+                      is_test,
+                      paid,
                       capacity_scheduler,
 					  created_at,
 					  confirmed_time,
@@ -2871,8 +2881,12 @@ async function updateOrderStatus(orderId, newStatus) {
 						*
 					  )
 					`)
-			  .eq('is_test', false)
-			  .order('created_at', { ascending: false }));
+			  .eq('is_test', showLegacyPaymentTest)
+              .order('created_at', { ascending: false });
+                return showLegacyPaymentTest
+                  ? query.eq('order_ref', legacyPaymentTestRef).eq('capacity_scheduler', 'LEGACY')
+                  : query;
+              });
 
 
 		  if (error) {
@@ -2880,6 +2894,11 @@ async function updateOrderStatus(orderId, newStatus) {
 			return;
 		  }
 				 if (!orders) return;
+                 if (showLegacyPaymentTest) {
+                   render(orders.filter(order => order.is_test === true &&
+                     order.order_ref === legacyPaymentTestRef && order.capacity_scheduler === 'LEGACY'));
+                   return;
+                 }
 				 
 				 // Safety net: retry missing staff notifications
 				 //	for (const o of orders) {
