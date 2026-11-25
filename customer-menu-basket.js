@@ -102,59 +102,16 @@ function getRestaurantLatLng(...args){return deliveryQuotes.getRestaurantLatLng(
 
 function getCustomerLatLng(...args){return deliveryQuotes.getCustomerLatLng(...args);}
 
-function resetCheckoutForNextOrder() {
-  console.log('[checkout] resetting state for next order');
-
-  // Clear customer-entered checkout fields
-  const fieldsToClear = [
-    'cust-name',
-    'cust-email',
-    'cust-phone',
-    'cust-address',
-    'cust-notes',
-    'cust-preferred-time'
-  ];
-
-  fieldsToClear.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-
-  // Clear discount state
-  appliedDiscountCode = null;
-  appliedDiscountAmount = 0;
-
-  const discountMessage =
-    document.getElementById('discount-code-message');
-
-  if (discountMessage) {
-    discountMessage.textContent = '';
-    discountMessage.className = 'discount-code-message';
-  }
-
-  // Try to clear the discount-code input without assuming one exact ID
-  const discountInput =
-    document.getElementById('discount-code') ||
-    document.querySelector('input[name="discount_code"]');
-
-  if (discountInput) {
-    discountInput.value = '';
-  }
-
-  // Clear preferred-time scheduler state
-  lastPreferredDate = null;
-
-  hidePreferredTimeMessage();
-
-  // Clear delivery calculation from previous customer
-  window.deliveryQuoteState = {};
-
-  // IMPORTANT:
-  // next order must get a brand-new idempotency key
-  localStorage.removeItem('checkout_idempotency_key');
-
-  console.log('[checkout] reset complete');
-}
+// BEGIN checkout-reset boundary
+const checkoutReset=window.RTKCheckoutReset.create({
+ document,window,console,localStorage,crypto,
+ set appliedDiscountCode(value){appliedDiscountCode=value;},
+ set appliedDiscountAmount(value){appliedDiscountAmount=value;},
+ set lastPreferredDate(value){lastPreferredDate=value;},
+ get hidePreferredTimeMessage(){return hidePreferredTimeMessage;}
+});
+// END checkout-reset boundary
+function resetCheckoutForNextOrder(...args){return checkoutReset.resetCheckoutForNextOrder(...args);}
 
 function refreshDeliveryQuote(...args){return deliveryQuotes.refreshDeliveryQuote(...args);}
 
@@ -214,14 +171,7 @@ pageControls.bindHeader();
 		})();
 		
 		// === Order idempotency ===
-		function getIdempotencyKey() {
-		  const existing = localStorage.getItem("checkout_idempotency_key");
-		  if (existing) return existing;
-
-		  const key = crypto.randomUUID();
-		  localStorage.setItem("checkout_idempotency_key", key);
-		  return key;
-		}
+		function getIdempotencyKey(...args){return checkoutReset.getIdempotencyKey(...args);}
 
 
 // === Customise globals (place near top, before buildMenu) ===
