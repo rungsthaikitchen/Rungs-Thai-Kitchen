@@ -3,7 +3,7 @@ const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 function reconstructCustomisationSelectors(root=path.join(__dirname,'..')){
  const e=JSON.parse(fs.readFileSync(path.join(root,'CUSTOMISATION-SELECTORS-EXTRACTION-2026-11-24.json'),'utf8'));
  const module=fs.readFileSync(path.join(root,'customer-customisation-selectors.js'),'utf8');assert.equal(hash(module),e.moduleSha256);
- let source=fs.readFileSync(path.join(root,'customer-menu-basket.js'),'utf8');
+ let source=require('./customisation-dialog-source.cjs').reconstructCustomisationDialog(root);
  for(const r of e.regions){let reversed=r.after;for(const dep of e.dependencies)reversed=reversed.replaceAll('context.'+dep,dep);
   for(const fn of ['formatCurrency','updateUnitPricePreview'])reversed=reversed.replaceAll('(0, context.'+fn+')',fn);
   assert.equal(reversed,r.before);assert.ok(module.includes(r.after));assert.equal(source.split(r.wrapper).length,2);source=source.replace(r.wrapper,r.before);

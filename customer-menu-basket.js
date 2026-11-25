@@ -662,6 +662,39 @@ const customisationSelectors = window.RTKCustomisationSelectors.create({
 // END customisation-selectors boundary
 function buildModifierChips(...args){return customisationSelectors.buildModifierChips(...args);}
 	
+// BEGIN customisation-dialog boundary
+const customisationDialog = window.RTKCustomisationDialog.create({
+ document, window, console,
+ get currentItem(){return currentItem;},
+ get selectedMods(){return selectedMods;},
+ get selectedExtras(){return selectedExtras;},
+ get currentAllowExtras(){return currentAllowExtras;},
+ get modal(){return modal;},
+ get modalTitle(){return modalTitle;},
+ get modalBase(){return modalBase;},
+ get qtyInput(){return qtyInput;},
+ get modalImg(){return modalImg;},
+ get modalAll(){return modalAll;},
+ get modalAllWrap(){return modalAllWrap;},
+ get currentAllowedMods(){return currentAllowedMods;},
+ get currentSpice(){return currentSpice;},
+ get MODIFIERS(){return MODIFIERS;},
+ get basket(){return basket;},
+ get buildModifierChips(){return buildModifierChips;},
+ get buildExtraChips(){return buildExtraChips;},
+ get formatCurrency(){return formatCurrency;},
+ get updateUnitPricePreview(){return updateUnitPricePreview;},
+ get renderAllergenBadges(){return renderAllergenBadges;},
+ get buildSpiceSelector(){return buildSpiceSelector;},
+ get roundToTwo(){return roundToTwo;},
+ get renderOrder(){return renderOrder;},
+ get refreshAppliedDiscountCode(){return refreshAppliedDiscountCode;},
+ set currentItem(value){currentItem=value;},
+ set selectedExtras(value){selectedExtras=value;},
+ set currentAllowExtras(value){currentAllowExtras=value;},
+ set currentAllowedMods(value){currentAllowedMods=value;},
+});
+// END customisation-dialog boundary
 	function openCustomiseById(itemId) {
   const item = window.ITEMS_BY_ID.get(String(itemId));
   if (!item || !modal) {
@@ -901,14 +934,7 @@ function buildModifierChips(...args){return customisationSelectors.buildModifier
 
     function buildSpiceSelector(...args){return customisationSelectors.buildSpiceSelector(...args);}
 
-    function closeModal(){
-      modal.style.display = 'none';
-      currentItem = null;
-      selectedMods.clear();
-      currentAllowedMods = null;
-      if (modalImg){ modalImg.removeAttribute('src'); modalImg.style.display = 'none'; }
-      buildSpiceSelector(false);
-    }
+    function closeModal(...args){return customisationDialog.closeModal(...args);}
 
     function updateUnitPricePreview(...args){return customisationPricing.updateUnitPricePreview(...args);}
 
@@ -918,62 +944,7 @@ function opencustomise(id){ openCustomize(id); }
 
 
 // Canonical customise opener
-function openCustomiseById(itemId) {
-  const item = window.ITEMS_BY_ID.get(String(itemId));
-  if (!item || !modal) {
-    console.warn('openCustomiseById: item not found', itemId);
-    return;
-  }
-
-  currentItem = item;
-  selectedMods.clear();
-  selectedExtras = [];
-
-	  // NEW: per-item extras control
-if (Array.isArray(item.allowedExtras)) {
-  currentAllowExtras = item.allowedExtras;        // [] means no extras
-} else {
-  currentAllowExtras = !!item.categoryAllowedExtras; // existing behaviour
-}
-
-	  const allowed  = Array.isArray(item.allowedModifiers) ? item.allowedModifiers : null;
-	  const requires = !!item.modifierRequired;
-	  const isMulti  = !!item.modifierMax || !!item.modifiersMulti;
-	  const max      = (typeof item.modifierMax === 'number' && item.modifierMax > 0)
-		? item.modifierMax
-		: null;
-
-	  buildModifierChips(allowed, requires, isMulti, max);
-	  buildExtraChips();
-	  modalTitle.textContent = `Customise — ${item.name}`;
-	  modalBase.dataset.price = item.price;
-	  modalBase.textContent   = `Base price: ${formatCurrency(item.price)}`;
-	  qtyInput.value = 1;
-	  updateUnitPricePreview();
-
-	  if (modalImg) {
-		if (item.img) {
-		  modalImg.src = item.img;
-		  modalImg.style.display = 'block';
-		} else {
-		  modalImg.removeAttribute('src');
-		  modalImg.style.display = 'none';
-		}
-	  }
-
-	  if (item.allergens && item.allergens.length) {
-		modalAll.innerHTML = renderAllergenBadges(item.allergens);
-		modalAllWrap.style.display = 'block';
-	  } else {
-		modalAll.innerHTML = '';
-		modalAllWrap.style.display = 'none';
-	  }
-
-	  const defaultSpice = (typeof item.spiceDefault === 'number') ? item.spiceDefault : 0;
-	  buildSpiceSelector(!!item.spiceEnabled, defaultSpice, item.spiceMin, item.spiceNote);
-
-	  modal.style.display = 'flex';
-	}
+function openCustomiseById(...args){return customisationDialog.openCustomiseById(...args);}
 	function openCustomise(itemId) {
 	  // Backwards-compat wrapper so old code still works
 	  return openCustomiseById(itemId);
@@ -992,58 +963,7 @@ if (Array.isArray(item.allowedExtras)) {
 
 
 
-		document.getElementById('qty-incr').addEventListener('click', ()=>{ qtyInput.value = Math.max(1, parseInt(qtyInput.value || '1') + 1); });
-		document.getElementById('qty-decr').addEventListener('click', ()=>{ qtyInput.value = Math.max(1, parseInt(qtyInput.value || '1') - 1); });
-
-		document.getElementById('modal-close').addEventListener('click', closeModal);
-		document.getElementById('modal-cancel').addEventListener('click', closeModal);
-		modal.addEventListener('click', (ev) => { if(ev.target === modal) closeModal(); });
-
-		document.getElementById('modal-add').addEventListener('click', () => {
-	  // … your existing checks …
-
-	  const base = Number(modalBase.dataset.price) || 0;
-
-	  let modsTotal = 0;
-	  const modsArr = [];
-	  selectedMods.forEach(id => {
-		const m = MODIFIERS.find(x => x.id === id);
-		if (m) { modsTotal += m.delta; modsArr.push(m); }
-	  });
-
-	  const extrasArr = currentAllowExtras
-		? selectedExtras.map(e => ({ id:e.id, name:e.name, delta:e.delta, type:'extra' }))
-		: [];
-
-	  const extrasTotal = currentAllowExtras
-		? selectedExtras.reduce((s,e)=> s + (e.delta || 0), 0)
-		: 0;
-
-	  const unitPrice = roundToTwo(base + modsTotal + extrasTotal);
-	  const qty = Math.max(1, parseInt(qtyInput.value || '1'));
-	  
-	const item = currentItem;
-	if (!item) {
-	  console.error('[Customise] No currentItem set — modal opened without selecting an item');
-	  return;
-	}
-	const itemId = item.id;
-
-	  basket.push({
-		name: item.name,
-		itemId: item.id,
-		mods: [...modsArr, ...extrasArr],   // put extras in mods for downstream reuse
-		unitPrice,
-		qty,
-		img: item.img || '',
-		spice: currentSpice ?? null
-	  });
-
-	  closeModal();
-	  renderOrder();
-	  refreshAppliedDiscountCode();
-	});
-
+customisationDialog.bindControls();
 
 
 	// One delegated handler for all customise buttons inside the popup
