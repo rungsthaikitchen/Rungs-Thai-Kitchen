@@ -468,159 +468,16 @@ function buildKitchenSlotMap(orders) {
   return slotMap;
 }
 
-function getKitchenStartForDate(dt) {
-  const start = new Date(dt);
+// BEGIN legacy-kitchen-allocator boundary
+const legacyKitchenAllocator=window.RTKLegacyKitchenAllocator.create({SLOT_MINUTES,KITCHEN_START_HOUR,KITCHEN_START_MINUTE,KITCHEN_STEP_MINUTES});
+// END legacy-kitchen-allocator boundary
+function getKitchenStartForDate(...args){return legacyKitchenAllocator.getKitchenStartForDate(...args);}
 
-  start.setHours(
-    KITCHEN_START_HOUR,
-    KITCHEN_START_MINUTE,
-    0,
-    0
-  );
+function getLatestProductionSlotStart(...args){return legacyKitchenAllocator.getLatestProductionSlotStart(...args);}
 
-  return start;
-}
+function allocateLoadBackwards(...args){return legacyKitchenAllocator.allocateLoadBackwards(...args);}
 
-function getLatestProductionSlotStart(readyTime) {
-  // Find the latest COMPLETE 15-minute kitchen slot
-  // that finishes on or before the customer's ready time.
-  const t = new Date(
-    readyTime.getTime() -
-    SLOT_MINUTES * 60 * 1000
-  );
-
-  const minutes = t.getMinutes();
-
-  t.setMinutes(
-    Math.floor(minutes / SLOT_MINUTES) * SLOT_MINUTES,
-    0,
-    0
-  );
-
-  return t;
-}
-
-function allocateLoadBackwards(
-  readyTime,
-  load,
-  slotMap
-) {
-  const requiredSteps = Number(load || 0);
-
-  if (requiredSteps <= 0) {
-    return {
-      success: true,
-      slotMap
-    };
-  }
-
-  const kitchenStart =
-    getKitchenStartForDate(readyTime);
-
-  // Work backwards in continuous 5-minute steps
-  let slot = new Date(
-    readyTime.getTime() -
-    KITCHEN_STEP_MINUTES * 60 * 1000
-  );
-
-  const slotsNeeded = [];
-
-  for (let i = 0; i < requiredSteps; i++) {
-
-    // Would this push production before the kitchen starts?
-    if (slot < kitchenStart) {
-      return {
-        success: false,
-        slotMap
-      };
-    }
-
-    const key = slot.toISOString();
-
-    // Any occupied step breaks the continuous run
-    if ((slotMap.get(key) || 0) > 0) {
-      return {
-        success: false,
-        slotMap
-      };
-    }
-
-    slotsNeeded.push(key);
-
-    slot = new Date(
-      slot.getTime() -
-      KITCHEN_STEP_MINUTES * 60 * 1000
-    );
-  }
-
-  // Only reserve the slots once we've proved the
-  // ENTIRE continuous run is available.
-  for (const key of slotsNeeded) {
-    slotMap.set(key, 1);
-  }
-
-  return {
-    success: true,
-    slotMap
-  };
-}
-
-function forceAllocateExistingLoad(
-  readyTime,
-  load,
-  slotMap
-) {
-  const requiredSteps = Number(load || 0);
-
-  if (requiredSteps <= 0) {
-    return {
-      overCapacity: false,
-      conflicts: []
-    };
-  }
-
-  const kitchenStart =
-    getKitchenStartForDate(readyTime);
-
-  let slot = new Date(
-    readyTime.getTime() -
-    KITCHEN_STEP_MINUTES * 60 * 1000
-  );
-
-  const conflicts = [];
-
-  for (let i = 0; i < requiredSteps; i++) {
-    if (slot < kitchenStart) {
-      break;
-    }
-
-    const key = slot.toISOString();
-    const existingLoad = slotMap.get(key) || 0;
-
-    if (existingLoad > 0) {
-      conflicts.push({
-        time: key,
-        existingLoad,
-        newLoad: existingLoad + 1
-      });
-    }
-
-    slotMap.set(
-      key,
-      existingLoad + 1
-    );
-
-    slot = new Date(
-      slot.getTime() -
-      KITCHEN_STEP_MINUTES * 60 * 1000
-    );
-  }
-
-  return {
-    overCapacity: conflicts.length > 0,
-    conflicts
-  };
-}
+function forceAllocateExistingLoad(...args){return legacyKitchenAllocator.forceAllocateExistingLoad(...args);}
 
 function getEffectiveOrderTime(order) {
   // An explicitly confirmed adjusted time is always authoritative.
