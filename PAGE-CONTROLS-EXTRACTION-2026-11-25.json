@@ -1,0 +1,38 @@
+{
+  "base": "496fd5acd28edbac573882ab881160b18b85ab05",
+  "originalSha256": "7e00398e1f0b68dae48ed00e79180f957c353e126cd325851c29f354b41f1cb1",
+  "moduleSha256": "03932a6e08066ac67eca46e975b96814c07f433b63479ab583075268126c3cfc",
+  "initialization": "// BEGIN page-controls boundary\nconst pageControls=window.RTKPageControls.create({document,window,navigator});\n// END page-controls boundary\n",
+  "regions": [
+    {
+      "name": "computeHeaderOffset",
+      "before": "function computeHeaderOffset() {\r\n  const root = document.documentElement;\r\n  const headerSlidUp = root.classList.contains('header-slid-up'); // when header is hidden past Allergens\r\n  if (headerSlidUp) return 12; // tiny gap when header isn’t covering content\r\n  const h = (document.querySelector('.site-header') || document.querySelector('header'));\r\n  return (h ? Math.round(h.getBoundingClientRect().height) : 0) + 12;\r\n}",
+      "wrapper": "function computeHeaderOffset(...args){return pageControls.computeHeaderOffset(...args);}",
+      "exported": "function computeHeaderOffset() {\r\n  const root = document.documentElement;\r\n  const headerSlidUp = root.classList.contains('header-slid-up'); // when header is hidden past Allergens\r\n  if (headerSlidUp) return 12; // tiny gap when header isn’t covering content\r\n  const h = (document.querySelector('.site-header') || document.querySelector('header'));\r\n  return (h ? Math.round(h.getBoundingClientRect().height) : 0) + 12;\r\n}"
+    },
+    {
+      "name": "applyHeaderOffset",
+      "before": "function applyHeaderOffset() {\r\n  document.documentElement.style.setProperty('--header-offset', computeHeaderOffset() + 'px');\r\n}",
+      "wrapper": "function applyHeaderOffset(...args){return pageControls.applyHeaderOffset(...args);}",
+      "exported": "function applyHeaderOffset() {\r\n  document.documentElement.style.setProperty('--header-offset', computeHeaderOffset() + 'px');\r\n}"
+    },
+    {
+      "name": "smoothScrollToElTop",
+      "before": "function smoothScrollToElTop(el){\r\n\t  if (!el) return;\r\n\t  const offset = computeHeaderOffset();\r\n\t  const target = el.getBoundingClientRect().top + window.scrollY - offset;\r\n\t  const maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);\r\n\t  const top = Math.max(0, Math.min(target, maxTop));\r\n\r\n\t  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;\r\n\t  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);\r\n\t  window.scrollTo({ top, behavior: (isIOS || prefersReduced) ? 'auto' : 'smooth' });\r\n\t}",
+      "wrapper": "function smoothScrollToElTop(...args){return pageControls.smoothScrollToElTop(...args);}",
+      "exported": "function smoothScrollToElTop(el){\r\n\t  if (!el) return;\r\n\t  const offset = computeHeaderOffset();\r\n\t  const target = el.getBoundingClientRect().top + window.scrollY - offset;\r\n\t  const maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);\r\n\t  const top = Math.max(0, Math.min(target, maxTop));\r\n\r\n\t  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;\r\n\t  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);\r\n\t  window.scrollTo({ top, behavior: (isIOS || prefersReduced) ? 'auto' : 'smooth' });\r\n\t}"
+    },
+    {
+      "name": "bindHeader",
+      "before": "window.addEventListener('load', applyHeaderOffset, { passive:true });\r\nwindow.addEventListener('resize', applyHeaderOffset, { passive:true });\r\nwindow.addEventListener('orientationchange', applyHeaderOffset, { passive:true });\r\nwindow.addEventListener('scroll', applyHeaderOffset, { passive:true }); // keep it fresh while you move\r\napplyHeaderOffset();",
+      "wrapper": "pageControls.bindHeader();",
+      "exported": "function bindHeader(){\nwindow.addEventListener('load', applyHeaderOffset, { passive:true });\r\nwindow.addEventListener('resize', applyHeaderOffset, { passive:true });\r\nwindow.addEventListener('orientationchange', applyHeaderOffset, { passive:true });\r\nwindow.addEventListener('scroll', applyHeaderOffset, { passive:true }); // keep it fresh while you move\r\napplyHeaderOffset();\n}"
+    },
+    {
+      "name": "bindLightbox",
+      "before": "\tdocument.querySelectorAll('#food-grid img').forEach(img => {\r\n\t  img.addEventListener('click', ()=> {\r\n\t\tconst lb = document.getElementById('lightbox');\r\n\t\tconst lbImg = document.getElementById('lightbox-img');\r\n\t\tif (!lb || !lbImg) return;\r\n\t\tlbImg.src = img.src || '';\r\n\t\tlb.style.display = 'flex';\r\n\t  });\r\n\t});\r\n\tconst lbRoot = document.getElementById('lightbox');\r\n\tif (lbRoot) {\r\n\t  lbRoot.addEventListener('click', (e) => {\r\n\t\tif(e.target.id === 'lightbox' || e.target.id === 'lightbox-img') lbRoot.style.display = 'none';\r\n\t  });\r\n\t};",
+      "wrapper": "pageControls.bindLightbox();",
+      "exported": "function bindLightbox(){\n\tdocument.querySelectorAll('#food-grid img').forEach(img => {\r\n\t  img.addEventListener('click', ()=> {\r\n\t\tconst lb = document.getElementById('lightbox');\r\n\t\tconst lbImg = document.getElementById('lightbox-img');\r\n\t\tif (!lb || !lbImg) return;\r\n\t\tlbImg.src = img.src || '';\r\n\t\tlb.style.display = 'flex';\r\n\t  });\r\n\t});\r\n\tconst lbRoot = document.getElementById('lightbox');\r\n\tif (lbRoot) {\r\n\t  lbRoot.addEventListener('click', (e) => {\r\n\t\tif(e.target.id === 'lightbox' || e.target.id === 'lightbox-img') lbRoot.style.display = 'none';\r\n\t  });\r\n\t};\n}"
+    }
+  ]
+}
