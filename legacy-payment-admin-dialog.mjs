@@ -27,13 +27,12 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
  const method=makeMethod('Payment method','billMethod');
  const tip=makeField('Tip (£)','tipAmount');tip.value='0.00';
  const tipMethod=makeMethod('Tip method (if applicable)','tipMethod',false);
- const reason=makeField('Reason if amount differs from order total','differenceReason');reason.required=false;
  const status=document.createElement('p');status.setAttribute('role','status');
  const submit=document.createElement('button');submit.type='submit';submit.textContent='Confirm and record payment';
  const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Cancel';
  form.prepend(heading,summary);form.append(submit,cancel,status);dialog.append(form);
  let busy=false,key=null,submittedPayload=null;
- const fields=[bill,method,tip,tipMethod,reason];
+ const fields=[bill,method,tip,tipMethod];
  const lockFields=()=>fields.forEach(field=>{field.disabled=true});
  cancel.onclick=()=>{if(!busy)dialog.close()};
  form.addEventListener('submit',async event=>{
@@ -43,8 +42,8 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
      !/^\d+(?:\.\d{1,2})?$/.test(bill.value)||!/^\d+(?:\.\d{1,2})?$/.test(tip.value)){
    status.textContent='Enter valid non-negative amounts.';return;
   }
-  if(!submittedPayload&&amount!==total&&!reason.value.trim()){
-   status.textContent='Provide a reason for the difference.';return;
+  if(!submittedPayload&&amount!==total){
+   status.textContent='The bill must be paid in full. Enter the verified order total.';return;
   }
   if(!['cash','card','bank_transfer'].includes(method.value)){
    status.textContent='Choose cash, card or bank_transfer.';return;
@@ -56,7 +55,7 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
   const payload=submittedPayload||{action:'record',orderId:order.id,idempotencyKey:key||(key=crypto.randomUUID()),
    billAmount:amount.toFixed(2),billMethod:method.value,tipAmount:tipAmount.toFixed(2),
    tipMethod:tipAmount>0?tipMethod.value:null,expectedTotal:total.toFixed(2),
-   differenceReason:reason.value.trim()||null};
+   differenceReason:null};
   submittedPayload=payload;
   lockFields(); // Unknown outcomes must retry the exact same payload and key.
   busy=true;submit.disabled=true;cancel.disabled=true;
