@@ -371,38 +371,19 @@ window.refreshDeliveryQuote = refreshDeliveryQuote;
 
 // Single source of truth for how much space to keep above scrolled content
 // Single source of truth for how much space to keep above targets
-function computeHeaderOffset() {
-  const root = document.documentElement;
-  const headerSlidUp = root.classList.contains('header-slid-up'); // when header is hidden past Allergens
-  if (headerSlidUp) return 12; // tiny gap when header isn’t covering content
-  const h = (document.querySelector('.site-header') || document.querySelector('header'));
-  return (h ? Math.round(h.getBoundingClientRect().height) : 0) + 12;
-}
+// BEGIN page-controls boundary
+const pageControls=window.RTKPageControls.create({document,window,navigator});
+// END page-controls boundary
+function computeHeaderOffset(...args){return pageControls.computeHeaderOffset(...args);}
 
-function applyHeaderOffset() {
-  document.documentElement.style.setProperty('--header-offset', computeHeaderOffset() + 'px');
-}
+function applyHeaderOffset(...args){return pageControls.applyHeaderOffset(...args);}
 
-window.addEventListener('load', applyHeaderOffset, { passive:true });
-window.addEventListener('resize', applyHeaderOffset, { passive:true });
-window.addEventListener('orientationchange', applyHeaderOffset, { passive:true });
-window.addEventListener('scroll', applyHeaderOffset, { passive:true }); // keep it fresh while you move
-applyHeaderOffset();
+pageControls.bindHeader();
 
 			
 	
 	// robust smooth scroll that clamps to page bounds (prevents “footer snaps”)
-	function smoothScrollToElTop(el){
-	  if (!el) return;
-	  const offset = computeHeaderOffset();
-	  const target = el.getBoundingClientRect().top + window.scrollY - offset;
-	  const maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-	  const top = Math.max(0, Math.min(target, maxTop));
-
-	  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-	  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-	  window.scrollTo({ top, behavior: (isIOS || prefersReduced) ? 'auto' : 'smooth' });
-	}
+	function smoothScrollToElTop(...args){return pageControls.smoothScrollToElTop(...args);}
 	
 					
 	// ---- Holiday / fully-booked ticker ----
@@ -761,21 +742,7 @@ customisationDialog.bindControls();
 basketControls.bindControls();
 
 		// Lightbox
-	document.querySelectorAll('#food-grid img').forEach(img => {
-	  img.addEventListener('click', ()=> {
-		const lb = document.getElementById('lightbox');
-		const lbImg = document.getElementById('lightbox-img');
-		if (!lb || !lbImg) return;
-		lbImg.src = img.src || '';
-		lb.style.display = 'flex';
-	  });
-	});
-	const lbRoot = document.getElementById('lightbox');
-	if (lbRoot) {
-	  lbRoot.addEventListener('click', (e) => {
-		if(e.target.id === 'lightbox' || e.target.id === 'lightbox-img') lbRoot.style.display = 'none';
-	  });
-	};
+pageControls.bindLightbox();
 
 		document.addEventListener('keydown', (e) => {
 	  if (e.key === 'Escape') {
