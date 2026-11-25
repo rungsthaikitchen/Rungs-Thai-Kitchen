@@ -1,0 +1,14 @@
+{
+  "base": "21beaa1810d7ee779a6d55f70684d41fe526fba7",
+  "originalSha256": "e5431dbfbcd1783b1db0bb66a62dc81c2f6e85e125352840738a2c4e19cc07d4",
+  "revisedSha256": "282dc731107fd89d2282a061de9fc0202324f8d8f0b662044bed142ea9c218b9",
+  "oldModuleSha256": "5745b074f9e22c42056366a960a955ce6bbb84bfe6950162618c30819f8cae1a",
+  "moduleSha256": "6cf2930984deed1d361b26770a000e427fe4f66bc8fc8e5a180bc4d354daac88",
+  "before": "window.RTKRestoreReviewedBasket=items=>{\n  if(basket.length&&!confirm('Replace your current basket with the basket reviewed by the restaurant?'))return false;\n  const restored=items.map(line=>({itemId:line.item_id,name:line.name,mods:line.modifiers,\n   unitPrice:line.unit_price,qty:line.qty,img:line.img||'',spice:line.spice,item_note:line.item_note}));\n  basket.splice(0,basket.length,...restored);renderOrder();return true;\n };",
+  "after": "function restoreReviewedBasket(items){\n  if(context.basket.length&&!(0, context.confirm)('Replace your current basket with the basket reviewed by the restaurant?'))return false;\n  const restored=items.map(line=>({itemId:line.item_id,name:line.name,mods:line.modifiers,\n   unitPrice:line.unit_price,qty:line.qty,img:line.img||'',spice:line.spice,item_note:line.item_note}));\n  context.basket.splice(0,context.basket.length,...restored);(0, context.renderOrder)();return true;\n}",
+  "wrapper": "window.RTKRestoreReviewedBasket=(...args)=>basketControls.restoreReviewedBasket(...args);",
+  "addition": " get confirm(){return confirm;},\n get renderOrder(){return renderOrder;},\n",
+  "marker": "const basketControls = window.RTKBasketControls.create({\n window, document, CustomEvent,\n",
+  "oldReturn": "return {renderOrder,bindControls};",
+  "newReturn": "return {renderOrder,bindControls,restoreReviewedBasket};"
+}

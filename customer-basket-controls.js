@@ -107,7 +107,13 @@ document.getElementById('order-panel').addEventListener('click', async e => {
   }
 });
 }
-return {renderOrder,bindControls};
+function restoreReviewedBasket(items){
+  if(context.basket.length&&!(0, context.confirm)('Replace your current basket with the basket reviewed by the restaurant?'))return false;
+  const restored=items.map(line=>({itemId:line.item_id,name:line.name,mods:line.modifiers,
+   unitPrice:line.unit_price,qty:line.qty,img:line.img||'',spice:line.spice,item_note:line.item_note}));
+  context.basket.splice(0,context.basket.length,...restored);(0, context.renderOrder)();return true;
+}
+return {renderOrder,bindControls,restoreReviewedBasket};
 }
 const api={create};
 if(typeof module==='object'&&module.exports)module.exports=api;

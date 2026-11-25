@@ -204,6 +204,8 @@ function buildMenu(...args){return menuRendering.buildMenu(...args);}
 // BEGIN basket-controls boundary
 const basketControls = window.RTKBasketControls.create({
  window, document, CustomEvent,
+ get confirm(){return confirm;},
+ get renderOrder(){return renderOrder;},
  get basket(){return basket;},
  get formatCurrency(){return formatCurrency;},
  get roundToTwo(){return roundToTwo;},
@@ -463,12 +465,7 @@ menuRendering.bindSearch();
 	window.orderMsg           = document.getElementById('order-msg');
 	window.basket             = basket;
 	window.renderOrder        = renderOrder;
- window.RTKRestoreReviewedBasket=items=>{
-  if(basket.length&&!confirm('Replace your current basket with the basket reviewed by the restaurant?'))return false;
-  const restored=items.map(line=>({itemId:line.item_id,name:line.name,mods:line.modifiers,
-   unitPrice:line.unit_price,qty:line.qty,img:line.img||'',spice:line.spice,item_note:line.item_note}));
-  basket.splice(0,basket.length,...restored);renderOrder();return true;
- };
+ window.RTKRestoreReviewedBasket=(...args)=>basketControls.restoreReviewedBasket(...args);
 	window.roundToTwo         = roundToTwo;
 	window.chilliIcons        = chilliIcons;
 	window.nameWithoutChillies= nameWithoutChillies;
