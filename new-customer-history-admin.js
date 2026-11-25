@@ -30,18 +30,38 @@
     select.addEventListener('change',async()=>{
      const selected=select.value;if(!selected)return;
      select.disabled=true;
+     const orderId=row.dataset.orderId;
      try{
-      const response=await fetch('/admin-api/new-customer-contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'record',orderId:row.dataset.orderId,status:selected}),redirect:'error',signal:AbortSignal.timeout(15000)});
-      const body=await response.json();
-      if(!response.ok||body.success!==true||body.contact?.status!==selected)throw Error('Contact update failed');
-      const entry=cache.get(row.dataset.orderId);
-      if(entry)entry.value={...entry.value,contact:body.contact};
+      const contact=await recordContact(orderId,selected);
+      const entry=cache.get(orderId);
+      if(entry)entry.value={...entry.value,contact};
       confirmedStatus=selected;
-     }catch(_){select.value=confirmedStatus;window.alert('Contact status could not be saved. Please retry.');}
-     finally{select.disabled=false;}
+      const currentRow=rows().find(candidate=>candidate.dataset.orderId===orderId);
+      if(currentRow&&entry)show(currentRow,entry.value);
+     }catch(_){
+      select.value=confirmedStatus;
+      window.alert('Admin could not confirm the contact status. Refresh Admin to check the saved status before trying again.');
+     }finally{select.disabled=false;}
     });
     node.append(select);
    }
+  }
+  async function recordContact(orderId,status){
+   try{
+    const response=await fetch('/admin-api/new-customer-contact',{
+     method:'POST',headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({action:'record',orderId,status}),
+     redirect:'error',signal:AbortSignal.timeout(30000)
+    });
+    const body=await response.json();
+    if(response.ok&&body.success===true&&body.contact?.order_id===orderId&&body.contact.status===status)
+     return body.contact;
+   }catch(_){
+    // The server may have committed before the browser lost the response.
+   }
+   const saved=(await lookup([orderId])).get(orderId)?.contact;
+   if(saved?.status===status)return saved;
+   throw Error('Contact update could not be confirmed');
   }
   async function requestHistory(ids){
    const body=JSON.stringify({action:'classify',orderIds:ids});
