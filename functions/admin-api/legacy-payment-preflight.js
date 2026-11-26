@@ -25,7 +25,7 @@ export function createHandler({validate=cloudflareAccessPlugin,fetch=globalThis.
     let payload;
     try{payload=JSON.parse(raw)}catch(_){return json({error:'Invalid JSON'},400)}
     const single=payload?.action==='read'&&typeof payload.orderId==='string';
-    const batch=env.LEGACY_END_OF_DAY==='enabled'&&payload?.action==='list'&&
+    const batch=env.LEGACY_PAYMENT_RECORDING==='enabled'&&payload?.action==='list'&&
       Array.isArray(payload.orderIds)&&payload.orderIds.length<=60&&payload.orderIds.every(id=>typeof id==='string');
     if(!single&&!batch)return json({error:'Read-only order lookup required'},400);
     const response=await fetch(new URL('/admin-legacy-payment-preflight',
