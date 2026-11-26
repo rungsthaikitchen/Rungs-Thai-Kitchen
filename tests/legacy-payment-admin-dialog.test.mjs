@@ -11,14 +11,14 @@ class Element{
  showModal(){this.open=true}
  close(){this.open=false}
 }
-function fixture(fetch){
+function fixture(fetch,onComplete){
  const body=new Element('body');
  const document={body,createElement:tag=>new Element(tag)};
- const dialog=createLegacyPaymentDialog({document,fetch,crypto:{randomUUID:()=> '00000000-0000-4000-8000-000000000002'},
+ const dialog=createLegacyPaymentDialog({document,fetch,onComplete,crypto:{randomUUID:()=> '00000000-0000-4000-8000-000000000002'},
   order:{id:'00000000-0000-4000-8000-000000000001',order_ref:'RTK-TEST',total:'32.50'}});
  const form=dialog.dialog.children[0];
  const find=name=>{
-  const scan=node=>node.name===name?node:node.children.map(scan).find(Boolean);
+  const scan=node=>node.name===name?node:node.children?.map(scan).find(Boolean);
   return scan(form);
  };
  const submit=()=>form.handlers.submit({preventDefault(){}});
@@ -89,7 +89,7 @@ test('confirmed payment remains confirmed if Admin refresh callback fails',async
  await form.handlers.submit({preventDefault(){}});
  const status=form.children.find(n=>n.role==='status');
  const button=form.children.find(n=>n.type==='submit');
- assert.match(status.textContent,/Payment recorded\. Admin refresh failed/);
+ assert.match(status.textContent,/Payment recorded successfully\. Admin refresh failed/);
  assert.equal(button.disabled,true);
 });
 
@@ -131,4 +131,35 @@ test('full cash bill and separate card tip remains supported',async()=>{
  assert.equal(payload.tipAmount,'3.00');
  assert.equal(payload.tipMethod,'card');
  assert.equal(payload.differenceReason,null);
+});
+
+test('optional completion runs only after payment is confirmed',async()=>{
+ const steps=[];
+ const ui=fixture(async()=>{
+  steps.push('payment');
+  return Response.json({success:true});
+ },async()=>{steps.push('complete');});
+ ui.find('billMethod').value='card';
+
+ assert.notEqual(ui.find('completeOrder').checked,true);
+ ui.find('completeOrder').checked=true;
+ await ui.submit();
+ assert.deepEqual(steps,['payment','complete']);
+ assert.match(ui.form.children.at(-1).textContent,/payment recorded and order completed/i);
+});
+
+test('payment stays recorded when optional completion fails',async()=>{
+ const ui=fixture(async()=>Response.json({success:true}),async()=>{throw Error('timeout');});
+ ui.find('billMethod').value='card';
+ ui.find('completeOrder').checked=true;
+ await ui.submit();
+ assert.match(ui.form.children.at(-1).textContent,/payment recorded\. completion could not be confirmed/i);
+});
+
+test('leaving completion unchecked records payment alone',async()=>{
+ let completed=false;
+ const ui=fixture(async()=>Response.json({success:true}),async()=>{completed=true;});
+ ui.find('billMethod').value='card';
+ await ui.submit();
+ assert.equal(completed,false);
 });
