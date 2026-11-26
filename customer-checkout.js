@@ -257,11 +257,21 @@ function validateDiscountCode(...args){return checkoutPricing.validateDiscountCo
 function refreshAppliedDiscountCode(...args){return checkoutPricing.refreshAppliedDiscountCode(...args);}
 
 // ← ADD THIS HERE
-document
-  .getElementById("cust-preferred-time")
-  ?.addEventListener("change", async () => {
-    await refreshAppliedDiscountCode();
-  });
+// BEGIN checkout-pricing-events boundary
+const checkoutPricingEvents=window.RTKCheckoutEvents.createPricingBindings({
+ get document(){return document;},
+ get refreshAppliedDiscountCode(){return refreshAppliedDiscountCode;},
+ get recomputeCheckoutTotals(){return recomputeCheckoutTotals;},
+ get orderTypeRadios(){return typeof orderTypeRadios==='undefined'?undefined:orderTypeRadios;},
+ get checkoutBaseSubtotal(){return checkoutBaseSubtotal;},
+ get validateDiscountCode(){return validateDiscountCode;},
+ get appliedDiscountCode(){return appliedDiscountCode;},
+ get appliedDiscountAmount(){return appliedDiscountAmount;},
+ set appliedDiscountCode(value){appliedDiscountCode=value;},
+ set appliedDiscountAmount(value){appliedDiscountAmount=value;}
+});
+// END checkout-pricing-events boundary
+checkoutPricingEvents.bindPreferredTimeDiscount();
 
 // ---------------- LOYALTY STATE ----------------
 const LOYALTY_REWARD_THRESHOLD = 100;   // 100 points unlocks reward
@@ -320,30 +330,7 @@ function normalisePhone(...args){return checkoutPricing.normalisePhone(...args);
 
 function fetchLoyaltyBalance(...args){return checkoutPricing.fetchLoyaltyBalance(...args);}
 // Recompute totals whenever fulfilment time / ASAP / order type changes
-(function wireCheckoutTotalRecompute() {
-  const timeEl =
-    document.getElementById('preferred-time') ||
-    document.querySelector('input[name="preferred_time"]');
-
-  const asapEl =
-    document.getElementById('asap') ||
-    document.getElementById('asap-requested') ||
-    document.getElementById('asapRequested') ||
-    document.querySelector('input[name="asap_requested"]');
-
-  if (timeEl) {
-    timeEl.addEventListener('input', recomputeCheckoutTotals);
-    timeEl.addEventListener('change', recomputeCheckoutTotals);
-  }
-
-  if (asapEl) {
-    asapEl.addEventListener('change', recomputeCheckoutTotals);
-  }
-
-  if (typeof orderTypeRadios !== 'undefined' && orderTypeRadios?.length) {
-    orderTypeRadios.forEach(r => r.addEventListener('change', recomputeCheckoutTotals));
-  }
-})();
+checkoutPricingEvents.bindTotalRecompute();
 
 
 			function calcDeliveryFee(...args){return checkoutPricing.calcDeliveryFee(...args);}
@@ -365,7 +352,7 @@ updateAddressRequirement();
 function updateCheckoutOrderSummary(...args){return checkoutDisplay.updateCheckoutOrderSummary(...args);}
 
 
-    orderTypeRadios.forEach(r => r.addEventListener('change', recomputeCheckoutTotals));
+    checkoutPricingEvents.bindOrderTypeTotals();
 	
 				// ---- Address required only for delivery ----
 				function updateAddressRequirement(...args){return checkoutDisplay.updateAddressRequirement(...args);}
@@ -760,52 +747,7 @@ checkoutEvents.bind();
 // END checkout-events boundary
 // 👇 ADD THE DISCOUNT CODE LISTENER HERE
 
-document.getElementById("apply-discount-code-btn")?.addEventListener("click", async () => {
-
-  const input = document.getElementById("discount-code-input");
-  const message = document.getElementById("discount-code-message");
-
-  const foodSubtotal = Number(checkoutBaseSubtotal || 0);
-
-  const result = await validateDiscountCode(
-    input.value,
-    foodSubtotal
-  );
-
-  if (!result.valid) {
-
-    appliedDiscountCode = null;
-    appliedDiscountAmount = 0;
-
-    if (message) {
-      message.textContent = result.reason;
-      message.className = "discount-code-message error";
-    }
-
-    recomputeCheckoutTotals();
-    return;
-	
-	  appliedDiscountAmount =
-    result.discountAmount;
-
-  // 👇 ADD THIS
-  recomputeCheckoutTotals();
-  }
-
-  appliedDiscountCode = result.code;
-  appliedDiscountAmount = result.discountAmount;
-
-  if (message) {
-    message.textContent =
-      `${result.code} applied: £${result.discountAmount.toFixed(2)} off`;
-
-    message.className =
-      "discount-code-message success";
-  }
-
-  recomputeCheckoutTotals();
-
-});
+checkoutPricingEvents.bindDiscountCode();
 
 	
 		// ---------- Helpers to call Supabase RPC & REST ----------

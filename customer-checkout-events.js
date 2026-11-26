@@ -84,6 +84,93 @@ if (deps.openCheckoutBtn) {
 }
 return {bind};
 }
-if(typeof module==='object'&&module.exports)module.exports={create};
-if(root)root.RTKCheckoutEvents={create};
+function createPricingBindings(deps){
+function bindPreferredTimeDiscount(){
+deps.document
+  .getElementById("cust-preferred-time")
+  ?.addEventListener("change", async () => {
+    await deps.refreshAppliedDiscountCode();
+  });
+}
+function bindTotalRecompute(){
+(function wireCheckoutTotalRecompute() {
+  const timeEl =
+    deps.document.getElementById('preferred-time') ||
+    deps.document.querySelector('input[name="preferred_time"]');
+
+  const asapEl =
+    deps.document.getElementById('asap') ||
+    deps.document.getElementById('asap-requested') ||
+    deps.document.getElementById('asapRequested') ||
+    deps.document.querySelector('input[name="asap_requested"]');
+
+  if (timeEl) {
+    timeEl.addEventListener('input', deps.recomputeCheckoutTotals);
+    timeEl.addEventListener('change', deps.recomputeCheckoutTotals);
+  }
+
+  if (asapEl) {
+    asapEl.addEventListener('change', deps.recomputeCheckoutTotals);
+  }
+
+  if (typeof deps.orderTypeRadios !== 'undefined' && deps.orderTypeRadios?.length) {
+    deps.orderTypeRadios.forEach(r => r.addEventListener('change', deps.recomputeCheckoutTotals));
+  }
+})();
+}
+function bindOrderTypeTotals(){
+deps.orderTypeRadios.forEach(r => r.addEventListener('change', deps.recomputeCheckoutTotals));
+}
+function bindDiscountCode(){
+deps.document.getElementById("apply-discount-code-btn")?.addEventListener("click", async () => {
+
+  const input = deps.document.getElementById("discount-code-input");
+  const message = deps.document.getElementById("discount-code-message");
+
+  const foodSubtotal = Number(deps.checkoutBaseSubtotal || 0);
+
+  const result = await deps.validateDiscountCode(
+    input.value,
+    foodSubtotal
+  );
+
+  if (!result.valid) {
+
+    deps.appliedDiscountCode = null;
+    deps.appliedDiscountAmount = 0;
+
+    if (message) {
+      message.textContent = result.reason;
+      message.className = "discount-code-message error";
+    }
+
+    deps.recomputeCheckoutTotals();
+    return;
+
+	  deps.appliedDiscountAmount =
+    result.discountAmount;
+
+  // 👇 ADD THIS
+  deps.recomputeCheckoutTotals();
+  }
+
+  deps.appliedDiscountCode = result.code;
+  deps.appliedDiscountAmount = result.discountAmount;
+
+  if (message) {
+    message.textContent =
+      `${result.code} applied: £${result.discountAmount.toFixed(2)} off`;
+
+    message.className =
+      "discount-code-message success";
+  }
+
+  deps.recomputeCheckoutTotals();
+
+});
+}
+return {bindPreferredTimeDiscount,bindTotalRecompute,bindOrderTypeTotals,bindDiscountCode};
+}
+if(typeof module==='object'&&module.exports)module.exports={create,createPricingBindings};
+if(root)root.RTKCheckoutEvents={create,createPricingBindings};
 })(typeof window!=='undefined'?window:null);
