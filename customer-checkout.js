@@ -768,65 +768,23 @@ function stripChillies(...args){return checkoutConfirmation.stripChillies(...arg
 // Submission guard is private to its controller.
 
 		// One key per checkout attempt; reused on retries; cleared on success
-		function getIdempotencyKey() {
-		  const existing = localStorage.getItem("checkout_idempotency_key");
-		  if (existing) return existing;
-
-		  const key = crypto.randomUUID();
-		  localStorage.setItem("checkout_idempotency_key", key);
-		  return key;
-		}
+		// BEGIN checkout-reset-compat boundary
+const checkoutResetCompat=window.RTKCheckoutReset.createCheckoutCompatibility({
+ document,window,console,localStorage,crypto,
+ get appliedDiscountCode(){return appliedDiscountCode;},
+ set appliedDiscountCode(value){appliedDiscountCode=value;},
+ get appliedDiscountAmount(){return appliedDiscountAmount;},
+ set appliedDiscountAmount(value){appliedDiscountAmount=value;},
+ get lastPreferredDate(){return lastPreferredDate;},
+ set lastPreferredDate(value){lastPreferredDate=value;},
+ get hidePreferredTimeMessage(){return hidePreferredTimeMessage;}
+});
+// END checkout-reset-compat boundary
+function getIdempotencyKey(...args){return checkoutResetCompat.getIdempotencyKey(...args);}
 		
 			function updateCheckoutSubmitButton(...args){return checkoutDisplay.updateCheckoutSubmitButton(...args);}
 
-	  function resetCheckoutForNextOrder() {
-  console.log('[checkout] resetting state for next order');
-
-  const fieldsToClear = [
-    'cust-name',
-    'cust-email',
-    'cust-phone',
-    'cust-address',
-    'cust-notes',
-    'cust-preferred-time'
-  ];
-
-  fieldsToClear.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-
-  appliedDiscountCode = null;
-  appliedDiscountAmount = 0;
-
-  const discountMessage =
-    document.getElementById('discount-code-message');
-
-  if (discountMessage) {
-    discountMessage.textContent = '';
-    discountMessage.className = 'discount-code-message';
-  }
-
-  const discountInput =
-    document.getElementById('discount-code') ||
-    document.querySelector('input[name="discount_code"]');
-
-  if (discountInput) {
-    discountInput.value = '';
-  }
-
-  lastPreferredDate = null;
-
-  if (typeof hidePreferredTimeMessage === 'function') {
-    hidePreferredTimeMessage();
-  }
-
-  window.deliveryQuoteState = {};
-
-  localStorage.removeItem('checkout_idempotency_key');
-
-  console.log('[checkout] reset complete');
-}
+	  function resetCheckoutForNextOrder(...args){return checkoutResetCompat.resetCheckoutForNextOrder(...args);}
 
 // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
 // BEGIN checkout-submission boundary
