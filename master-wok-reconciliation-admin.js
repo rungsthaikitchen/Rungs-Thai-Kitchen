@@ -1,7 +1,15 @@
 (function(){
  'use strict';
  async function mount(){
-  try{const r=await fetch('/api/payments',{cache:'no-store'});if(!r.ok||(await r.json()).enabled!==true)return;}catch(_){return;}
+  async function enabled(path){
+   try{const response=await fetch(path,{cache:'no-store',signal:AbortSignal.timeout(6000)});return response.ok&&(await response.json()).enabled===true;}
+   catch(_){return false;}
+  }
+  const [legacyEnabled,masterWokEnabled]=await Promise.all([
+   enabled('/admin-api/legacy-end-of-day'),enabled('/api/payments')
+  ]);
+  if(!legacyEnabled&&!masterWokEnabled)return;
+  const paymentLookup=legacyEnabled?'/admin-api/legacy-payment-preflight':'/admin-api/payments';
   const api=window.MasterWokReconciliation,toolbar=document.getElementById('refresh')?.parentElement;if(!api||!toolbar)return;
   const button=document.createElement('button');button.className='btn';button.textContent='End of day';button.type='button';toolbar.prepend(button);
   const dialog=document.createElement('dialog');dialog.setAttribute('aria-label','End of day reconciliation');dialog.style.cssText='width:440px;max-width:calc(100% - 32px);border:1px solid #ddd;border-radius:12px;padding:20px';
@@ -25,7 +33,7 @@
   async function loadPayments(orders){
    const results=[];
    for(let i=0;i<orders.length;i+=60){
-    const r=await fetch('/admin-api/payments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list',orderIds:orders.slice(i,i+60).map(o=>o.id)}),redirect:'error',signal:AbortSignal.timeout(25000)});
+    const r=await fetch(paymentLookup,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list',orderIds:orders.slice(i,i+60).map(o=>o.id)}),redirect:'error',signal:AbortSignal.timeout(25000)});
     const data=await r.json();if(!r.ok||data.success!==true||!Array.isArray(data.payments))throw Error('Payment details could not be verified. No partial receipt will be printed.');results.push(...data.payments);
    }
    return results;
