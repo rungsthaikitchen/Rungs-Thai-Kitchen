@@ -21,8 +21,7 @@ test('opening retained delivery and collection updates requirement before dialog
 test('actual order-type listener updates native validation immediately in both directions',async()=>{
  const f=fixture();let release;const pending=new Promise(resolve=>release=resolve);
  Object.assign(f,{updateCheckoutSubmitButton(){},updateCheckoutOrderSummary(){},checkoutAvailability:{generation:0},availabilityContextKey:()=>'',window:{},clearPreferredTimeSelect(){},refreshCheckoutPricingAndRender:()=>pending,populatePreferredTimeSelect:async()=>{}});
- const start=source.indexOf("document.addEventListener('change', async (e) => {");const end=source.indexOf("document.addEventListener('DOMContentLoaded'",start);
- vm.runInNewContext(source.slice(start,end),f);
+ require('../customer-checkout-events').create(f).bind();
  const event={target:{matches:()=>true}};
  f.orderType='delivery';const first=f.listeners.change(event);assert.equal(f.address.required,true);
  f.orderType='collection';const second=f.listeners.change(event);assert.equal(f.address.required,false);assert.equal(f.hint.style.opacity,'0.6');
