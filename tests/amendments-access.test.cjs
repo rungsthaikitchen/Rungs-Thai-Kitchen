@@ -57,3 +57,25 @@ test('staff time correction requires a signed allowed identity and ignores a for
  assert.equal((await handler(make())).status,200);assert.equal(forwarded.staffActor,'owner@example.invalid');assert.equal(forwarded.action,'amend_confirm_time');
  identity='customer@example.invalid';assert.equal((await handler(make())).status,403);assert.equal(calls,1);
 });
+
+test('LEGACY pricing routes only allowed actions through its own opt-in writer',async()=>{
+ const {createHandler}=await modulePromise;
+ let calls=0;
+ const handler=createHandler({
+  fetch:async(url,options)=>{
+   calls++;
+   assert.equal(String(url),'https://staging.example.invalid/admin-legacy-amendments');
+   assert.equal(JSON.parse(options.body).staffActor,'owner@example.invalid');
+   return Response.json({success:true});
+  },
+  validate:()=>async c=>{c.data.cloudflareAccess={JWT:{payload:{email:'owner@example.invalid'}}};return c.next();}
+ });
+ const make=(action,flags)=>context({env:flags,request:new Request('https://review.pages.dev/admin-api/amendments',{
+  method:'POST',headers:{Origin:'https://review.pages.dev'},body:JSON.stringify({action,scheduler:'LEGACY',staffActor:'forged'})
+ })});
+ const flags={...env,MASTER_WOK_PAYMENTS:'disabled',LEGACY_AMENDMENTS:'enabled'};
+ assert.equal((await handler(make('amend_save',env))).status,503);
+ assert.equal((await handler(make('amend_confirm_time',flags))).status,400);
+ assert.equal((await handler(make('amend_save',flags))).status,200);
+ assert.equal(calls,1);
+});
