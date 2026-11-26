@@ -686,49 +686,18 @@ function findNextAllowedFromNow() {
 			}
 			
 			// ---------------- LOYALTY PHONE LOOKUP ----------------
-(function wireLoyaltyPhoneLookup() {
-  const phoneInput = document.getElementById('cust-phone');
-  if (!phoneInput) return;
-
-  let generation = 0;
-  async function refreshLoyaltyFromPhone() {
-    const current = ++generation, phone = phoneInput.value;
-    const loyalty = await fetchLoyaltyBalance(phone);
-    if (current !== generation || phone !== phoneInput.value) return false;
-	
-	  console.log('LOYALTY RESPONSE:', loyalty); // 👈 ADD THIS
-
-			if (loyalty) {
-			  loyaltyState.pointsBalance = Number(loyalty.points_balance || 0);
-
-              const balances = window.RTKLoyaltyAvailability(loyalty);
-              loyaltyState.settledPointsBalance = balances.settledPoints;
-              loyaltyState.reservedPoints = balances.reservedPoints;
-              loyaltyState.availablePointsBalance = balances.availablePoints;
-
-			  loyaltyState.lifetimePoints = Number(loyalty.lifetime_points || 0);
-			  loyaltyState.pointsToNextReward = Number(loyalty.points_to_next_reward || 100);
-			} else {
-			  loyaltyState.pointsBalance = 0;
-			  loyaltyState.settledPointsBalance = 0;
-              loyaltyState.reservedPoints = 0;
-              loyaltyState.availablePointsBalance = 0;
-			  loyaltyState.lifetimePoints = 0;
-			  loyaltyState.pointsToNextReward = 100;
-			}
-			
-			console.log('LOYALTY RESPONSE FROM BACKEND:', loyalty);
-			console.log('LOYALTY STATE AFTER LOAD:', loyaltyState);
-
-    refreshCheckoutPricingAndRender();
-    renderLoyaltyMessage();
-    return loyalty !== null;
-  }
-  window.RTKRefreshLoyalty = refreshLoyaltyFromPhone;
-
-  phoneInput.addEventListener('blur', refreshLoyaltyFromPhone);
-  phoneInput.addEventListener('change', refreshLoyaltyFromPhone);
-})();
+// BEGIN checkout-loyalty-phone boundary
+const checkoutLoyaltyPhone=window.RTKCheckoutLoyaltyPhone.create({
+ get document(){return document;},
+ get fetchLoyaltyBalance(){return fetchLoyaltyBalance;},
+ get console(){return console;},
+ get loyaltyState(){return loyaltyState;},
+ get window(){return window;},
+ get refreshCheckoutPricingAndRender(){return refreshCheckoutPricingAndRender;},
+ get renderLoyaltyMessage(){return renderLoyaltyMessage;}
+});
+checkoutLoyaltyPhone.bind();
+// END checkout-loyalty-phone boundary
 // ---------------- END LOYALTY PHONE LOOKUP ----------------
 
 

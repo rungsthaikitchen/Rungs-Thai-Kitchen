@@ -11,7 +11,8 @@ test('customer classic scripts load once in the original dependency order',()=>{
  const schedule=html.indexOf('<script src="/customer-legacy-kitchen-schedule.js?');
  const eligibility=html.indexOf('<script src="/customer-checkout-time-eligibility.js?');
  const events=html.indexOf('<script src="/customer-checkout-events.js?');
- assert.ok(confirmation<allocator&&allocator<schedule&&schedule<eligibility&&eligibility<events&&events<checkout);
+ const loyaltyPhone=html.indexOf('<script src="/customer-checkout-loyalty-phone.js?');
+ assert.ok(confirmation<allocator&&allocator<schedule&&schedule<eligibility&&eligibility<events&&events<loyaltyPhone&&loyaltyPhone<checkout);
  assert.ok(submission<pricing&&pricing<service&&service<display&&display<customerData&&customerData<confirmation&&confirmation<checkout);
  const catalogue=html.indexOf('<script src="/customer-menu-catalogue.js?');
  const rendering=html.indexOf('<script src="/customer-menu-rendering.js?');
@@ -28,7 +29,7 @@ test('customer classic scripts load once in the original dependency order',()=>{
  assert.ok(selectors<customDialog&&customDialog<successCompat&&successCompat<overlay&&overlay<pageControls&&pageControls<deliveryQuotes&&deliveryQuotes<checkoutReset&&checkoutReset<interactions&&interactions<menu);
  assert.ok(catalogue>=0&&catalogue<rendering&&rendering<controls&&controls<customisation&&customisation<selectors&&selectors<menu);
  assert.ok(html.indexOf('window.sb =')<menu&&menu<availability&&availability<dialog&&dialog<submission&&submission<checkout);
- for(const file of ['customer-checkout-events.js','customer-checkout-time-eligibility.js','customer-legacy-kitchen-schedule.js','customer-legacy-kitchen-allocator.js','customer-interactions.js','customer-checkout-reset.js','customer-delivery-quotes.js','customer-page-controls.js','customer-menu-overlay.js','customer-order-success-compat.js','customer-customisation-dialog.js','customer-customisation-selectors.js','customer-customisation-pricing.js','customer-basket-controls.js','customer-menu-rendering.js','customer-menu-catalogue.js','customer-menu-basket.js','customer-checkout-availability.js','customer-checkout-dialog.js','customer-checkout-submission.js','customer-checkout-pricing.js','customer-checkout-confirmation.js','customer-checkout-customer-data.js','customer-checkout-display.js','customer-checkout-service.js','customer-checkout.js']){
+ for(const file of ['customer-checkout-loyalty-phone.js','customer-checkout-events.js','customer-checkout-time-eligibility.js','customer-legacy-kitchen-schedule.js','customer-legacy-kitchen-allocator.js','customer-interactions.js','customer-checkout-reset.js','customer-delivery-quotes.js','customer-page-controls.js','customer-menu-overlay.js','customer-order-success-compat.js','customer-customisation-dialog.js','customer-customisation-selectors.js','customer-customisation-pricing.js','customer-basket-controls.js','customer-menu-rendering.js','customer-menu-catalogue.js','customer-menu-basket.js','customer-checkout-availability.js','customer-checkout-dialog.js','customer-checkout-submission.js','customer-checkout-pricing.js','customer-checkout-confirmation.js','customer-checkout-customer-data.js','customer-checkout-display.js','customer-checkout-service.js','customer-checkout.js']){
   assert.equal((html.match(new RegExp('<script src="/'+file.replaceAll('.','\\.')+'\\?','g'))||[]).length,1);
   const tag=html.match(new RegExp('<script[^>]+src="/'+file.replaceAll('.','\\.')+'[^>]+>'))[0];assert.doesNotMatch(tag,/\s(?:async|defer|type)(?:\s|=|>)/);
   assert.doesNotThrow(()=>new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file}));
