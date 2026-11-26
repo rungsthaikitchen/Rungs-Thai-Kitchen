@@ -1,0 +1,12 @@
+{
+  "base": "883bfc2678f3b85735d2d6764d73c87c1ebc59d5",
+  "originalSha256": "d76d01475b8feab794d6561296fcafa205542c896d544563c22ad83aeb453b36",
+  "moduleSha256": "4015722b6ea4b3c0de5cd6fe52f49781cb15a1d16e40f43dc3550521d6db8972",
+  "oldModuleSha256": "f504e9173c057c2ee5707f39670232276b38def829f2f07966911ba9e8119b5a",
+  "before": "async function geocodeCustomerAddress(address) {\r\n\t\t\t\t  try {\r\n\t\t\t\t\tconst { data, error } = await sb.functions.invoke(\"geocode-address\", {\r\n\t\t\t\t\t  body: { customer_address: address },\r\n\t\t\t\t\t});\r\n\r\n\t\t\t\t\tif (error || !data?.ok) {\r\n\t\t\t\t\t  console.warn(\"[geocode] failed\", error || data);\r\n\t\t\t\t\t  return;\r\n\t\t\t\t\t}\r\n\r\n\t\t\t\t\twindow.customerLat = data.customer_lat;\r\n\t\t\t\t\twindow.customerLng = data.customer_lng;\r\n\r\n\t\t\t\t\tconsole.log(\"[geocode] success\", window.customerLat, window.customerLng);\r\n\r\n\t\t\t\t\tawait window.refreshCheckoutPricingAndRender();\r\n\r\n\t\t\t\t  } catch (err) {\r\n\t\t\t\t\tconsole.error(\"[geocode] error\", err);\r\n\t\t\t\t  }\r\n\t\t\t\t}",
+  "addition": "function createGeocoder({sb,window,console}){\nasync function geocodeCustomerAddress(address) {\r\n\t\t\t\t  try {\r\n\t\t\t\t\tconst { data, error } = await sb.functions.invoke(\"geocode-address\", {\r\n\t\t\t\t\t  body: { customer_address: address },\r\n\t\t\t\t\t});\r\n\r\n\t\t\t\t\tif (error || !data?.ok) {\r\n\t\t\t\t\t  console.warn(\"[geocode] failed\", error || data);\r\n\t\t\t\t\t  return;\r\n\t\t\t\t\t}\r\n\r\n\t\t\t\t\twindow.customerLat = data.customer_lat;\r\n\t\t\t\t\twindow.customerLng = data.customer_lng;\r\n\r\n\t\t\t\t\tconsole.log(\"[geocode] success\", window.customerLat, window.customerLng);\r\n\r\n\t\t\t\t\tawait window.refreshCheckoutPricingAndRender();\r\n\r\n\t\t\t\t  } catch (err) {\r\n\t\t\t\t\tconsole.error(\"[geocode] error\", err);\r\n\t\t\t\t  }\r\n\t\t\t\t}\nreturn {geocodeCustomerAddress};\n}\n",
+  "oldExport": "if(typeof module==='object'&&module.exports)module.exports={create};\nif(root)root.RTKDeliveryQuotes={create};",
+  "newExport": "if(typeof module==='object'&&module.exports)module.exports={create,createGeocoder};\nif(root)root.RTKDeliveryQuotes={create,createGeocoder};",
+  "initialization": "// BEGIN checkout-geocoder boundary\nconst checkoutGeocoder=window.RTKDeliveryQuotes.createGeocoder({sb,window,console});\n// END checkout-geocoder boundary\n",
+  "wrapper": "async function geocodeCustomerAddress(...args){return checkoutGeocoder.geocodeCustomerAddress(...args);}"
+}

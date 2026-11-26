@@ -372,28 +372,10 @@ function updateCheckoutOrderSummary(...args){return checkoutDisplay.updateChecko
 
 				
 				window.RTKPrepareReviewedDelivery = address => geocodeCustomerAddress(address);
-				async function geocodeCustomerAddress(address) {
-				  try {
-					const { data, error } = await sb.functions.invoke("geocode-address", {
-					  body: { customer_address: address },
-					});
-
-					if (error || !data?.ok) {
-					  console.warn("[geocode] failed", error || data);
-					  return;
-					}
-
-					window.customerLat = data.customer_lat;
-					window.customerLng = data.customer_lng;
-
-					console.log("[geocode] success", window.customerLat, window.customerLng);
-
-					await window.refreshCheckoutPricingAndRender();
-
-				  } catch (err) {
-					console.error("[geocode] error", err);
-				  }
-				}
+				// BEGIN checkout-geocoder boundary
+const checkoutGeocoder=window.RTKDeliveryQuotes.createGeocoder({sb,window,console});
+// END checkout-geocoder boundary
+async function geocodeCustomerAddress(...args){return checkoutGeocoder.geocodeCustomerAddress(...args);}
 
 		
 // ====== CONFIG YOU CAN EDIT ======
