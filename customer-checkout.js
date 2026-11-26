@@ -784,84 +784,29 @@ function closeCheckout(){return checkoutDialog.close();}
 window.openCheckout = openCheckout;
 
 
-// safe listeners
-if (checkoutClose) {
-  checkoutClose.addEventListener('click', closeCheckout);
-}
-if (checkoutCancel) {
-  checkoutCancel.addEventListener('click', closeCheckout);
-}
-if (checkoutModal) {
-  checkoutModal.addEventListener('click', (e) => {
-    if (e.target === checkoutModal) closeCheckout();
-  });
-}
-
-document.addEventListener('change', async (e) => {
-  if (e.target && e.target.matches('input[name="order-type"]')) {
-
-    updateAddressRequirement();
-    updateCheckoutSubmitButton();
-    updateCheckoutOrderSummary();
-    // Old collection times must stop being selectable before delivery pricing
-    // or geocoding awaits. Supersede in-flight checks immediately as well.
-    const generation=++checkoutAvailability.generation;
-    const date=document.getElementById('cust-preferred-date')?.value;
-    const context=availabilityContextKey(date);
-    window.RTKBookingClient?.cancelAvailability?.();
-    checkoutAvailability.hints=null;checkoutAvailability.unverifiedTimes=new Set();checkoutAvailability.driverBusyTimes=new Set();
-    clearPreferredTimeSelect('Checking times for your order type…');
-    await refreshCheckoutPricingAndRender();
-    if(generation!==checkoutAvailability.generation||context!==availabilityContextKey(date))return;
-    await populatePreferredTimeSelect(date);
-  }
+// BEGIN checkout-events boundary
+const checkoutEvents=window.RTKCheckoutEvents.create({
+ get window(){return window;},
+ get document(){return document;},
+ get checkoutClose(){return checkoutClose;},
+ get checkoutCancel(){return checkoutCancel;},
+ get checkoutModal(){return checkoutModal;},
+ get closeCheckout(){return closeCheckout;},
+ get updateAddressRequirement(){return updateAddressRequirement;},
+ get updateCheckoutSubmitButton(){return updateCheckoutSubmitButton;},
+ get updateCheckoutOrderSummary(){return updateCheckoutOrderSummary;},
+ get checkoutAvailability(){return checkoutAvailability;},
+ get availabilityContextKey(){return availabilityContextKey;},
+ get clearPreferredTimeSelect(){return clearPreferredTimeSelect;},
+ get refreshCheckoutPricingAndRender(){return refreshCheckoutPricingAndRender;},
+ get populatePreferredTimeSelect(){return populatePreferredTimeSelect;},
+ get geocodeCustomerAddress(){return geocodeCustomerAddress;},
+ get openCheckoutBtn(){return openCheckoutBtn;},
+ get orderMsg(){return orderMsg;},
+ get openCheckout(){return openCheckout;}
 });
-
-document.addEventListener('DOMContentLoaded', () => {
-  const addressInput = document.getElementById('cust-address');
-
-  if (addressInput) {
-    addressInput.addEventListener('blur', (e) => {
-      const address = e.target.value;
-
-      if (address && address.length > 5) {
-        geocodeCustomerAddress(address).then(()=>populatePreferredTimeSelect(document.getElementById('cust-preferred-date')?.value));
-      }
-    });
-  }
-});
-
-document.addEventListener('input', (e) => {
-  if (e.target && e.target.id === 'cust-address') {
-    updateCheckoutOrderSummary();
-    if(document.querySelector('input[name="order-type"]:checked')?.value==='delivery'){
-      ++checkoutAvailability.generation;checkoutAvailability.hints=null;
-      clearPreferredTimeSelect('Finish entering your delivery address');
-    }
-  }
-});
-
-// Open checkout (safe)
-if (openCheckoutBtn) {
-  openCheckoutBtn.addEventListener('click', () => {
-    if (!window.basket || window.basket.length === 0) {
-      if (orderMsg) {
-        orderMsg.textContent = 'Your basket is empty.';
-        orderMsg.style.color = '#b02a2a';
-      }
-      return;
-    }
-
-    if (orderMsg) {
-      orderMsg.textContent = '';
-      orderMsg.style.color = '';
-    }
-    const subtotal = window.basket.reduce((s, i) => s + i.unitPrice * i.qty, 0);
-    openCheckout(subtotal);
-  });
-}
-
-
+checkoutEvents.bind();
+// END checkout-events boundary
 // 👇 ADD THE DISCOUNT CODE LISTENER HERE
 
 document.getElementById("apply-discount-code-btn")?.addEventListener("click", async () => {
