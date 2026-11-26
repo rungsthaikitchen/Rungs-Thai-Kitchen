@@ -248,6 +248,31 @@ var refreshCheckoutPricingAndRender = async function () {
 };
 return {toRadians,haversineMiles,roundMiles,calculateBandFee,getRestaurantLatLng,getCustomerLatLng,refreshDeliveryQuote,refreshCheckoutPricingAndRender};
 }
-if(typeof module==='object'&&module.exports)module.exports={create};
-if(root)root.RTKDeliveryQuotes={create};
+function createGeocoder({sb,window,console}){
+async function geocodeCustomerAddress(address) {
+				  try {
+					const { data, error } = await sb.functions.invoke("geocode-address", {
+					  body: { customer_address: address },
+					});
+
+					if (error || !data?.ok) {
+					  console.warn("[geocode] failed", error || data);
+					  return;
+					}
+
+					window.customerLat = data.customer_lat;
+					window.customerLng = data.customer_lng;
+
+					console.log("[geocode] success", window.customerLat, window.customerLng);
+
+					await window.refreshCheckoutPricingAndRender();
+
+				  } catch (err) {
+					console.error("[geocode] error", err);
+				  }
+				}
+return {geocodeCustomerAddress};
+}
+if(typeof module==='object'&&module.exports)module.exports={create,createGeocoder};
+if(root)root.RTKDeliveryQuotes={create,createGeocoder};
 })(typeof window!=='undefined'?window:null);
