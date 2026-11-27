@@ -370,40 +370,9 @@ const KITCHEN_STEP_MINUTES = 5;
 
 let kitchenSlotMap = new Map();
 
-function getSlotStart(dt) {
-  const slot = new Date(dt);
 
-  const minutes = slot.getMinutes();
-  const floored =
-    Math.floor(minutes / SLOT_MINUTES) * SLOT_MINUTES;
 
-  slot.setMinutes(floored, 0, 0);
 
-  return slot;
-}
-
-function buildKitchenSlotMap(orders) {
-  const slotMap = new Map();
-
-  for (const order of orders) {
-    if (!order.preferred_time) continue;
-
-    const orderTime = new Date(order.preferred_time);
-    const slotStart = getSlotStart(orderTime);
-
-    const key = slotStart.toISOString();
-
-    const orderLoad =
-      getExistingOrderKitchenLoad(order);
-
-    slotMap.set(
-      key,
-      (slotMap.get(key) || 0) + orderLoad
-    );
-  }
-
-  return slotMap;
-}
 
 // BEGIN legacy-kitchen-allocator boundary
 const legacyKitchenAllocator=window.RTKLegacyKitchenAllocator.create({SLOT_MINUTES,KITCHEN_START_HOUR,KITCHEN_START_MINUTE,KITCHEN_STEP_MINUTES});
@@ -452,7 +421,7 @@ const checkoutTimeEligibility=window.RTKCheckoutTimeEligibility.create({
 // END checkout-time-eligibility boundary
 function toYMD(...args){return checkoutTimeEligibility.toYMD(...args);}
 function parseHm(...args){return checkoutTimeEligibility.parseHm(...args);}
-function isBetween(d, start, end){ return d >= start && d <= end; }
+
 function roundTo5Min(...args){return checkoutTimeEligibility.roundTo5Min(...args);}
 function withinOpenHours(...args){return checkoutTimeEligibility.withinOpenHours(...args);}
 function isClosedDate(...args){return checkoutTimeEligibility.isClosedDate(...args);}
@@ -462,36 +431,7 @@ async function loadKitchenScheduleForDate(...args){return legacyKitchenSchedule.
 
 function getExistingOrderKitchenLoad(...args){return legacyKitchenSchedule.getExistingOrderKitchenLoad(...args);}
 
-async function refreshKitchenScheduleForDateTime(dt) {
-  if (!dt) return;
 
-  await refreshKitchenSlotMap(dt);
-
-  const preferredTimeEl =
-    document.getElementById('cust-preferred-time');
-
-  if (!preferredTimeEl?.value) return;
-
-  const currentlySelected =
-    new Date(preferredTimeEl.value);
-
-  if (!isAllowed(currentlySelected)) {
-    const nextAvailable =
-      await nextAlternativeFulfilment(
-        currentlySelected
-      );
-
-    if (nextAvailable) {
-      preferredTimeEl.value =
-        toLocalInputValue(nextAvailable);
-
-      console.log(
-        '[kitchen-schedule] preferred time moved to:',
-        preferredTimeEl.value
-      );
-    }
-  }
-}
 
 function isAllowed(...args){return checkoutTimeEligibility.isAllowed(...args);}
 
@@ -537,52 +477,9 @@ function canBasketFitInSlot(...args){return checkoutCapacityProbes.canBasketFitI
  * Starting from now + LEAD_MINUTES, find the next allowed slot
  * using your existing nextAllowed/isAllowed logic.
  */
-function findNextAllowedFromNow() {
-  const start = new Date();
-  start.setMinutes(start.getMinutes() + LEAD_MINUTES);
-  return nextAllowed(start);  // may return null if nothing within +30 days
-}
 
-			function isWedThuLondonForFulfilment(preferredTimeRaw, asapRequested) {
-			  // Option A: ASAP uses "today" in London
-			  if (asapRequested) return isWedThuLondon();
 
-			  try {
-				const raw = String(preferredTimeRaw || '').trim();
-				if (!raw) return false;
 
-				let y, m, d;
-
-				// Format A: "YYYY-MM-DDTHH:MM" or "YYYY-MM-DD HH:MM"
-				if (/^\d{4}-\d{2}-\d{2}/.test(raw)) {
-				  const datePart = raw.split('T')[0].split(' ')[0];
-				  const parts = datePart.split('-').map(n => parseInt(n, 10));
-				  [y, m, d] = parts;
-				}
-				// Format B: "DD/MM/YYYY HH:MM" (your UI)
-				else if (/^\d{2}\/\d{2}\/\d{4}/.test(raw)) {
-				  const datePart = raw.split(' ')[0];
-				  const parts = datePart.split('/').map(n => parseInt(n, 10));
-				  [d, m, y] = parts;
-				} else {
-				  return false;
-				}
-
-				if (![y, m, d].every(Number.isFinite)) return false;
-
-				// Noon UTC avoids DST edge cases
-				const dt = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
-
-				const weekday = new Intl.DateTimeFormat('en-GB', {
-				  timeZone: 'Europe/London',
-				  weekday: 'short'
-				}).format(dt);
-
-				return weekday === 'Wed' || weekday === 'Thu';
-			  } catch {
-				return false;
-			  }
-			}
 			
 			// ---------------- LOYALTY PHONE LOOKUP ----------------
 // BEGIN checkout-loyalty-phone boundary

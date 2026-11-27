@@ -1,0 +1,49 @@
+{
+  "base": "0d8c3f502c220305c6688ebebc7443b3d0b7cb2a",
+  "originalSha256": "7d70c4badf5cb3937fbe713f14770b4db033df6f2c464a3ce52d75075176556e",
+  "revisedSha256": "43b5673537ade2900c7ff9e1df30259786614ef789948d2af46961404060b302",
+  "regions": [
+    {
+      "name": "getSlotStart",
+      "start": 16543,
+      "end": 16773,
+      "before": "function getSlotStart(dt) {\r\n  const slot = new Date(dt);\r\n\r\n  const minutes = slot.getMinutes();\r\n  const floored =\r\n    Math.floor(minutes / SLOT_MINUTES) * SLOT_MINUTES;\r\n\r\n  slot.setMinutes(floored, 0, 0);\r\n\r\n  return slot;\r\n}",
+      "newStart": 16543
+    },
+    {
+      "name": "buildKitchenSlotMap",
+      "start": 16777,
+      "end": 17251,
+      "before": "function buildKitchenSlotMap(orders) {\r\n  const slotMap = new Map();\r\n\r\n  for (const order of orders) {\r\n    if (!order.preferred_time) continue;\r\n\r\n    const orderTime = new Date(order.preferred_time);\r\n    const slotStart = getSlotStart(orderTime);\r\n\r\n    const key = slotStart.toISOString();\r\n\r\n    const orderLoad =\r\n      getExistingOrderKitchenLoad(order);\r\n\r\n    slotMap.set(\r\n      key,\r\n      (slotMap.get(key) || 0) + orderLoad\r\n    );\r\n  }\r\n\r\n  return slotMap;\r\n}",
+      "newStart": 16547
+    },
+    {
+      "name": "isBetween",
+      "start": 19837,
+      "end": 19904,
+      "before": "function isBetween(d, start, end){ return d >= start && d <= end; }",
+      "newStart": 19133
+    },
+    {
+      "name": "refreshKitchenScheduleForDateTime",
+      "start": 20500,
+      "end": 21187,
+      "before": "async function refreshKitchenScheduleForDateTime(dt) {\r\n  if (!dt) return;\r\n\r\n  await refreshKitchenSlotMap(dt);\r\n\r\n  const preferredTimeEl =\r\n    document.getElementById('cust-preferred-time');\r\n\r\n  if (!preferredTimeEl?.value) return;\r\n\r\n  const currentlySelected =\r\n    new Date(preferredTimeEl.value);\r\n\r\n  if (!isAllowed(currentlySelected)) {\r\n    const nextAvailable =\r\n      await nextAlternativeFulfilment(\r\n        currentlySelected\r\n      );\r\n\r\n    if (nextAvailable) {\r\n      preferredTimeEl.value =\r\n        toLocalInputValue(nextAvailable);\r\n\r\n      console.log(\r\n        '[kitchen-schedule] preferred time moved to:',\r\n        preferredTimeEl.value\r\n      );\r\n    }\r\n  }\r\n}",
+      "newStart": 19729
+    },
+    {
+      "name": "findNextAllowedFromNow",
+      "start": 22863,
+      "end": 23063,
+      "before": "function findNextAllowedFromNow() {\r\n  const start = new Date();\r\n  start.setMinutes(start.getMinutes() + LEAD_MINUTES);\r\n  return nextAllowed(start);  // may return null if nothing within +30 days\r\n}",
+      "newStart": 21405
+    },
+    {
+      "name": "isWedThuLondonForFulfilment",
+      "start": 23067,
+      "end": 24294,
+      "before": "\t\t\tfunction isWedThuLondonForFulfilment(preferredTimeRaw, asapRequested) {\r\n\t\t\t  // Option A: ASAP uses \"today\" in London\r\n\t\t\t  if (asapRequested) return isWedThuLondon();\r\n\r\n\t\t\t  try {\r\n\t\t\t\tconst raw = String(preferredTimeRaw || '').trim();\r\n\t\t\t\tif (!raw) return false;\r\n\r\n\t\t\t\tlet y, m, d;\r\n\r\n\t\t\t\t// Format A: \"YYYY-MM-DDTHH:MM\" or \"YYYY-MM-DD HH:MM\"\r\n\t\t\t\tif (/^\\d{4}-\\d{2}-\\d{2}/.test(raw)) {\r\n\t\t\t\t  const datePart = raw.split('T')[0].split(' ')[0];\r\n\t\t\t\t  const parts = datePart.split('-').map(n => parseInt(n, 10));\r\n\t\t\t\t  [y, m, d] = parts;\r\n\t\t\t\t}\r\n\t\t\t\t// Format B: \"DD/MM/YYYY HH:MM\" (your UI)\r\n\t\t\t\telse if (/^\\d{2}\\/\\d{2}\\/\\d{4}/.test(raw)) {\r\n\t\t\t\t  const datePart = raw.split(' ')[0];\r\n\t\t\t\t  const parts = datePart.split('/').map(n => parseInt(n, 10));\r\n\t\t\t\t  [d, m, y] = parts;\r\n\t\t\t\t} else {\r\n\t\t\t\t  return false;\r\n\t\t\t\t}\r\n\r\n\t\t\t\tif (![y, m, d].every(Number.isFinite)) return false;\r\n\r\n\t\t\t\t// Noon UTC avoids DST edge cases\r\n\t\t\t\tconst dt = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));\r\n\r\n\t\t\t\tconst weekday = new Intl.DateTimeFormat('en-GB', {\r\n\t\t\t\t  timeZone: 'Europe/London',\r\n\t\t\t\t  weekday: 'short'\r\n\t\t\t\t}).format(dt);\r\n\r\n\t\t\t\treturn weekday === 'Wed' || weekday === 'Thu';\r\n\t\t\t  } catch {\r\n\t\t\t\treturn false;\r\n\t\t\t  }\r\n\t\t\t}",
+      "newStart": 21409
+    }
+  ]
+}
