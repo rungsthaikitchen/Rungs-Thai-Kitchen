@@ -358,7 +358,20 @@ function updateCheckoutOrderSummary(...args){return checkoutDisplay.updateChecko
 				function updateAddressRequirement(...args){return checkoutDisplay.updateAddressRequirement(...args);}
 
 				
-				window.RTKPrepareReviewedDelivery = address => geocodeCustomerAddress(address);
+				// BEGIN reviewed-checkout-handoff boundary
+const reviewedCheckoutHandoff=window.RTKCheckoutDialog.createReviewedHandoff({
+ Event,
+ get window(){return window;},
+ get document(){return document;},
+ get geocodeCustomerAddress(){return geocodeCustomerAddress;},
+ get preferredDateInput(){return preferredDateInput;},
+ get populatePreferredTimeSelect(){return populatePreferredTimeSelect;},
+ get preferredTimeSelect(){return preferredTimeSelect;},
+ get openCheckout(){return openCheckout;},
+ get basket(){return basket;}
+});
+// END reviewed-checkout-handoff boundary
+reviewedCheckoutHandoff.installDelivery();
 				// BEGIN checkout-geocoder boundary
 const checkoutGeocoder=window.RTKDeliveryQuotes.createGeocoder({sb,window,console});
 // END checkout-geocoder boundary
@@ -676,17 +689,7 @@ checkoutLoyaltyPhone.bind();
 
 			
 		// Single, clean checkout opener
-			window.RTKApplyReviewedTime=async instant=>{
- const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(instant)).map(p=>[p.type,p.value]));
- const date=parts.year+'-'+parts.month+'-'+parts.day;
- preferredDateInput.value=date;
- await populatePreferredTimeSelect(date);
- preferredTimeSelect.value=parts.hour+':'+parts.minute;
- preferredTimeSelect.dispatchEvent(new Event('change',{bubbles:true}));
- document.getElementById('unavailable-basket-dialog')?.close();
-};
-window.RTKOpenReviewedCheckout=()=>openCheckout(basket.reduce((n,i)=>n+i.qty*i.unitPrice,0));
-// BEGIN checkout-dialog boundary
+			reviewedCheckoutHandoff.installTimeAndOpen();// BEGIN checkout-dialog boundary
 function setAvailabilityLoading(loading) {
   preferredTimeSelect?.setAttribute('aria-busy', String(loading));
   const message = document.getElementById('preferred-time-message');

@@ -1,0 +1,24 @@
+{
+  "base": "f65fa429f8bf6833aff72cd74ed6a0411bbe78f3",
+  "originalSha256": "9dd8a2d6552fd1faa9fcb86b6377894f5e5adea95f93ac0d0b581fb3a442259b",
+  "moduleSha256": "9a907fdccd911afd84f116138e11472dcd2467c3e081511fb3d82894e6acb82b",
+  "oldModuleSha256": "6cf568b15e55a42b62f754b8cc9dca91eb518087fa5dc9899d8ef9e8411b5182",
+  "addition": "function createReviewedHandoff(context){\nfunction installDelivery(){\ncontext.window.RTKPrepareReviewedDelivery = address => context.geocodeCustomerAddress(address);\n}\nfunction installTimeAndOpen(){\ncontext.window.RTKApplyReviewedTime=async instant=>{\n const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(instant)).map(p=>[p.type,p.value]));\n const date=parts.year+'-'+parts.month+'-'+parts.day;\n context.preferredDateInput.value=date;\n await context.populatePreferredTimeSelect(date);\n context.preferredTimeSelect.value=parts.hour+':'+parts.minute;\n context.preferredTimeSelect.dispatchEvent(new context.Event('change',{bubbles:true}));\n context.document.getElementById('unavailable-context.basket-dialog')?.close();\n};\ncontext.window.RTKOpenReviewedCheckout=()=>context.openCheckout(context.basket.reduce((n,i)=>n+i.qty*i.unitPrice,0));\n\n}\nreturn {installDelivery,installTimeAndOpen};\n}\n",
+  "oldExport": " const api=Object.freeze({create});",
+  "newExport": " const api=Object.freeze({create,createReviewedHandoff});",
+  "initialization": "// BEGIN reviewed-checkout-handoff boundary\nconst reviewedCheckoutHandoff=window.RTKCheckoutDialog.createReviewedHandoff({\n Event,\n get window(){return window;},\n get document(){return document;},\n get geocodeCustomerAddress(){return geocodeCustomerAddress;},\n get preferredDateInput(){return preferredDateInput;},\n get populatePreferredTimeSelect(){return populatePreferredTimeSelect;},\n get preferredTimeSelect(){return preferredTimeSelect;},\n get openCheckout(){return openCheckout;},\n get basket(){return basket;}\n});\n// END reviewed-checkout-handoff boundary\n",
+  "regions": [
+    {
+      "name": "installDelivery",
+      "before": "window.RTKPrepareReviewedDelivery = address => geocodeCustomerAddress(address);",
+      "after": "context.window.RTKPrepareReviewedDelivery = address => context.geocodeCustomerAddress(address);",
+      "wrapper": "reviewedCheckoutHandoff.installDelivery();"
+    },
+    {
+      "name": "installTimeAndOpen",
+      "before": "window.RTKApplyReviewedTime=async instant=>{\n const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(instant)).map(p=>[p.type,p.value]));\n const date=parts.year+'-'+parts.month+'-'+parts.day;\n preferredDateInput.value=date;\n await populatePreferredTimeSelect(date);\n preferredTimeSelect.value=parts.hour+':'+parts.minute;\n preferredTimeSelect.dispatchEvent(new Event('change',{bubbles:true}));\n document.getElementById('unavailable-basket-dialog')?.close();\n};\nwindow.RTKOpenReviewedCheckout=()=>openCheckout(basket.reduce((n,i)=>n+i.qty*i.unitPrice,0));\n",
+      "after": "context.window.RTKApplyReviewedTime=async instant=>{\n const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(instant)).map(p=>[p.type,p.value]));\n const date=parts.year+'-'+parts.month+'-'+parts.day;\n context.preferredDateInput.value=date;\n await context.populatePreferredTimeSelect(date);\n context.preferredTimeSelect.value=parts.hour+':'+parts.minute;\n context.preferredTimeSelect.dispatchEvent(new context.Event('change',{bubbles:true}));\n context.document.getElementById('unavailable-context.basket-dialog')?.close();\n};\ncontext.window.RTKOpenReviewedCheckout=()=>context.openCheckout(context.basket.reduce((n,i)=>n+i.qty*i.unitPrice,0));\n",
+      "wrapper": "reviewedCheckoutHandoff.installTimeAndOpen();"
+    }
+  ]
+}
