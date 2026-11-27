@@ -86,51 +86,22 @@ const preferredTimeInput =
   
   let lastPreferredDate = null;
 
-function validatePreferredTime() {
-  hideCheckoutBanner();
-
-  const submitBtn =
-    document.getElementById('checkout-submit');
-
-  const raw = preferredTimeInput?.value;
-  if (!raw) return true;
-
-  const chosen = new Date(raw);
-  if(checkoutAvailability.hints){
-    const available=checkoutAvailability.hints.get(chosen.toISOString())===true;
-    if(submitBtn)submitBtn.disabled=!available;
-    return available;
-  }
-
-  const isClosed = inAnyWindow(chosen, CLOSED_RANGES);
-  const isFull   = inAnyWindow(chosen, FULLY_BOOKED);
-
-  if (isClosed) {
-    showCheckoutBanner(
-      'closed',
-      isClosed.message ||
-        'Sorry, we are closed at the selected time.'
-    );
-
-    if (submitBtn) submitBtn.disabled = true;
-    return false;
-  }
-
-  if (isFull) {
-    showCheckoutBanner(
-      'fully_booked',
-      isFull.message ||
-        'We’re fully booked at the selected time.'
-    );
-
-    if (submitBtn) submitBtn.disabled = true;
-    return false;
-  }
-
-  if (submitBtn) submitBtn.disabled = false;
-
-  return true;
-}
+// BEGIN checkout-validation-alerts boundary
+const checkoutValidationAlerts=window.RTKCheckoutDisplay.createValidationAlerts({
+ get hideCheckoutBanner(){return hideCheckoutBanner;},
+ get document(){return document;},
+ get preferredTimeInput(){return preferredTimeInput;},
+ get checkoutAvailability(){return checkoutAvailability;},
+ get inAnyWindow(){return inAnyWindow;},
+ get CLOSED_RANGES(){return CLOSED_RANGES;},
+ get FULLY_BOOKED(){return FULLY_BOOKED;},
+ get showCheckoutBanner(){return showCheckoutBanner;},
+ get pausedOrderAlert(){return pausedOrderAlert;},
+ get pausedOrderAlertMessage(){return pausedOrderAlertMessage;},
+ get pausedOrderAlertOk(){return pausedOrderAlertOk;}
+});
+// END checkout-validation-alerts boundary
+function validatePreferredTime(...args){return checkoutValidationAlerts.validatePreferredTime(...args);}
 
 // 3) Guard your submit handler (fail fast if invalid)
 //    In your existing `checkoutForm.addEventListener('submit', async (e) => { ... })`,
@@ -219,25 +190,9 @@ const pausedOrderAlertMessage =
 const pausedOrderAlertOk =
   document.getElementById('paused-order-alert-ok');
 
-function showPausedOrderAlert(message) {
-  if (!pausedOrderAlert || !pausedOrderAlertMessage) return;
+function showPausedOrderAlert(...args){return checkoutValidationAlerts.showPausedOrderAlert(...args);}
 
-  pausedOrderAlertMessage.textContent =
-    message ||
-    'Online orders are temporarily paused. Please check back shortly.';
-
-  pausedOrderAlert.style.display = 'flex';
-
-  if (pausedOrderAlertOk) {
-    pausedOrderAlertOk.focus();
-  }
-}
-
-function hidePausedOrderAlert() {
-  if (!pausedOrderAlert) return;
-
-  pausedOrderAlert.style.display = 'none';
-}
+function hidePausedOrderAlert(...args){return checkoutValidationAlerts.hidePausedOrderAlert(...args);}
 
 pausedOrderAlertOk?.addEventListener(
   'click',

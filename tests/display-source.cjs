@@ -2,7 +2,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 function reconstructDisplay(root=path.join(__dirname,'..')){
  const e=JSON.parse(fs.readFileSync(path.join(root,'CHECKOUT-DISPLAY-EXTRACTION-2026-11-24.json'),'utf8'));
- const module=fs.readFileSync(path.join(root,'customer-checkout-display.js'),'utf8');
+ const module=require('./checkout-validation-alerts-source.cjs').reconstructDisplayModule(root);
  assert.equal(hash(module),e.moduleSha256);
  let source=require('./service-source.cjs').reconstructService(root);
  // Undo the separately tested address-required wiring fix for historical source proofs.
