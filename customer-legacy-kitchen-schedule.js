@@ -130,6 +130,66 @@ function getExistingOrderKitchenLoad(order) {
 }
 return {getEffectiveOrderTime,buildKitchenProductionMap,loadKitchenScheduleForDate,getExistingOrderKitchenLoad};
 }
-if(typeof module==='object'&&module.exports)module.exports={create};
-if(root)root.RTKLegacyKitchenSchedule={create};
+function createCapacityProbes(context){
+async function refreshKitchenSlotMap(serviceDate) {
+  const schedule = await context.loadKitchenScheduleForDate(serviceDate);
+context.kitchenSlotMap = context.buildKitchenProductionMap(schedule);
+
+  context.console.log(
+    '[kitchen-schedule] refreshed slot map:',
+    context.kitchenSlotMap
+  );
+
+  return context.kitchenSlotMap;
+}
+
+function getItemKitchenLoad(item) {
+  if (item.kitchenLoad !== undefined) {
+    return Number(item.kitchenLoad);
+  }
+
+  return context.KITCHEN_LOAD_BY_CATEGORY[item.categoryTitle] ?? 0;
+}
+
+function getBasketKitchenLoad() {
+  const basket = Array.isArray(context.window.basket)
+    ? context.window.basket
+    : [];
+
+  return basket.reduce((total, line) => {
+    const item = context.window.ITEMS_BY_ID.get(line.itemId);
+
+    if (!item) return total;
+
+    return total +
+      getItemKitchenLoad(item) *
+      Number(line.qty || 0);
+  }, 0);
+}
+
+function canBasketFitInSlot(readyTime) {
+  const basketLoad =
+    getBasketKitchenLoad();
+
+  if (basketLoad <= 0) {
+    return true;
+  }
+
+  // Work on a copy - don't actually reserve capacity yet
+  const testMap =
+    new Map(context.kitchenSlotMap);
+
+  const result =
+    context.allocateLoadBackwards(
+      readyTime,
+      basketLoad,
+      testMap
+    );
+
+  return result.success;
+}
+return {refreshKitchenSlotMap,getItemKitchenLoad,getBasketKitchenLoad,canBasketFitInSlot};
+}
+if(typeof module==='object'&&module.exports)module.exports={create,createCapacityProbes};
+if(root)root.RTKLegacyKitchenSchedule={create,createCapacityProbes};
 })(typeof window!=='undefined'?window:null);

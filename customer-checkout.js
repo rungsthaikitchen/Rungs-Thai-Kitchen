@@ -423,17 +423,19 @@ function getEffectiveOrderTime(...args){return legacyKitchenSchedule.getEffectiv
 
 function buildKitchenProductionMap(...args){return legacyKitchenSchedule.buildKitchenProductionMap(...args);}
 
-async function refreshKitchenSlotMap(serviceDate) {
-  const schedule = await loadKitchenScheduleForDate(serviceDate);
-kitchenSlotMap = buildKitchenProductionMap(schedule);
-
-  console.log(
-    '[kitchen-schedule] refreshed slot map:',
-    kitchenSlotMap
-  );
-
-  return kitchenSlotMap;
-}
+// BEGIN checkout-capacity-probes boundary
+const checkoutCapacityProbes=window.RTKLegacyKitchenSchedule.createCapacityProbes({
+ get loadKitchenScheduleForDate(){return loadKitchenScheduleForDate;},
+ get buildKitchenProductionMap(){return buildKitchenProductionMap;},
+ get kitchenSlotMap(){return kitchenSlotMap;},
+ get console(){return console;},
+ get KITCHEN_LOAD_BY_CATEGORY(){return KITCHEN_LOAD_BY_CATEGORY;},
+ get window(){return window;},
+ get allocateLoadBackwards(){return allocateLoadBackwards;},
+ set kitchenSlotMap(value){kitchenSlotMap=value;}
+});
+// END checkout-capacity-probes boundary
+async function refreshKitchenSlotMap(...args){return checkoutCapacityProbes.refreshKitchenSlotMap(...args);}
 
 // BEGIN checkout-time-eligibility boundary
 const checkoutTimeEligibility=window.RTKCheckoutTimeEligibility.create({
@@ -525,51 +527,11 @@ const KITCHEN_LOAD_BY_CATEGORY = {
   "Soft Drinks": 0
 };
 
-function getItemKitchenLoad(item) {
-  if (item.kitchenLoad !== undefined) {
-    return Number(item.kitchenLoad);
-  }
+function getItemKitchenLoad(...args){return checkoutCapacityProbes.getItemKitchenLoad(...args);}
 
-  return KITCHEN_LOAD_BY_CATEGORY[item.categoryTitle] ?? 0;
-}
+function getBasketKitchenLoad(...args){return checkoutCapacityProbes.getBasketKitchenLoad(...args);}
 
-function getBasketKitchenLoad() {
-  const basket = Array.isArray(window.basket)
-    ? window.basket
-    : [];
-
-  return basket.reduce((total, line) => {
-    const item = window.ITEMS_BY_ID.get(line.itemId);
-
-    if (!item) return total;
-
-    return total +
-      getItemKitchenLoad(item) *
-      Number(line.qty || 0);
-  }, 0);
-}
-
-function canBasketFitInSlot(readyTime) {
-  const basketLoad =
-    getBasketKitchenLoad();
-
-  if (basketLoad <= 0) {
-    return true;
-  }
-
-  // Work on a copy - don't actually reserve capacity yet
-  const testMap =
-    new Map(kitchenSlotMap);
-
-  const result =
-    allocateLoadBackwards(
-      readyTime,
-      basketLoad,
-      testMap
-    );
-
-  return result.success;
-}
+function canBasketFitInSlot(...args){return checkoutCapacityProbes.canBasketFitInSlot(...args);}
 
 /**
  * Starting from now + LEAD_MINUTES, find the next allowed slot
