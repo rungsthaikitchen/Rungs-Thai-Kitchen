@@ -1,0 +1,36 @@
+{
+  "base": "4fef9124021587ab9dae0c7f7c3839f02fe95fc9",
+  "originalSha256": "51e146ba008729659e2d06ad152414934be00f234122e0b4acbad8774b169684",
+  "moduleSha256": "e0c072f9a70d48c4ed29e732b2b9e645bcc8a8e23748642ef6aeda34ded93a43",
+  "oldModuleSha256": "c103ce8ddf3b74744d7f8c395f61c842e9aa5a508d8a4fd24b8e0d2326eceb7a",
+  "addition": "function createCapacityProbes(context){\nasync function refreshKitchenSlotMap(serviceDate) {\r\n  const schedule = await context.loadKitchenScheduleForDate(serviceDate);\r\ncontext.kitchenSlotMap = context.buildKitchenProductionMap(schedule);\r\n\r\n  context.console.log(\r\n    '[kitchen-schedule] refreshed slot map:',\r\n    context.kitchenSlotMap\r\n  );\r\n\r\n  return context.kitchenSlotMap;\r\n}\n\nfunction getItemKitchenLoad(item) {\r\n  if (item.kitchenLoad !== undefined) {\r\n    return Number(item.kitchenLoad);\r\n  }\r\n\r\n  return context.KITCHEN_LOAD_BY_CATEGORY[item.categoryTitle] ?? 0;\r\n}\n\nfunction getBasketKitchenLoad() {\r\n  const basket = Array.isArray(context.window.basket)\r\n    ? context.window.basket\r\n    : [];\r\n\r\n  return basket.reduce((total, line) => {\r\n    const item = context.window.ITEMS_BY_ID.get(line.itemId);\r\n\r\n    if (!item) return total;\r\n\r\n    return total +\r\n      getItemKitchenLoad(item) *\r\n      Number(line.qty || 0);\r\n  }, 0);\r\n}\n\nfunction canBasketFitInSlot(readyTime) {\r\n  const basketLoad =\r\n    getBasketKitchenLoad();\r\n\r\n  if (basketLoad <= 0) {\r\n    return true;\r\n  }\r\n\r\n  // Work on a copy - don't actually reserve capacity yet\r\n  const testMap =\r\n    new Map(context.kitchenSlotMap);\r\n\r\n  const result =\r\n    context.allocateLoadBackwards(\r\n      readyTime,\r\n      basketLoad,\r\n      testMap\r\n    );\r\n\r\n  return result.success;\r\n}\nreturn {refreshKitchenSlotMap,getItemKitchenLoad,getBasketKitchenLoad,canBasketFitInSlot};\n}\n",
+  "oldExport": "if(typeof module==='object'&&module.exports)module.exports={create};\nif(root)root.RTKLegacyKitchenSchedule={create};",
+  "newExport": "if(typeof module==='object'&&module.exports)module.exports={create,createCapacityProbes};\nif(root)root.RTKLegacyKitchenSchedule={create,createCapacityProbes};",
+  "initialization": "// BEGIN checkout-capacity-probes boundary\nconst checkoutCapacityProbes=window.RTKLegacyKitchenSchedule.createCapacityProbes({\n get loadKitchenScheduleForDate(){return loadKitchenScheduleForDate;},\n get buildKitchenProductionMap(){return buildKitchenProductionMap;},\n get kitchenSlotMap(){return kitchenSlotMap;},\n get console(){return console;},\n get KITCHEN_LOAD_BY_CATEGORY(){return KITCHEN_LOAD_BY_CATEGORY;},\n get window(){return window;},\n get allocateLoadBackwards(){return allocateLoadBackwards;},\n set kitchenSlotMap(value){kitchenSlotMap=value;}\n});\n// END checkout-capacity-probes boundary\n",
+  "regions": [
+    {
+      "name": "refreshKitchenSlotMap",
+      "before": "async function refreshKitchenSlotMap(serviceDate) {\r\n  const schedule = await loadKitchenScheduleForDate(serviceDate);\r\nkitchenSlotMap = buildKitchenProductionMap(schedule);\r\n\r\n  console.log(\r\n    '[kitchen-schedule] refreshed slot map:',\r\n    kitchenSlotMap\r\n  );\r\n\r\n  return kitchenSlotMap;\r\n}",
+      "after": "async function refreshKitchenSlotMap(serviceDate) {\r\n  const schedule = await context.loadKitchenScheduleForDate(serviceDate);\r\ncontext.kitchenSlotMap = context.buildKitchenProductionMap(schedule);\r\n\r\n  context.console.log(\r\n    '[kitchen-schedule] refreshed slot map:',\r\n    context.kitchenSlotMap\r\n  );\r\n\r\n  return context.kitchenSlotMap;\r\n}",
+      "wrapper": "async function refreshKitchenSlotMap(...args){return checkoutCapacityProbes.refreshKitchenSlotMap(...args);}"
+    },
+    {
+      "name": "getItemKitchenLoad",
+      "before": "function getItemKitchenLoad(item) {\r\n  if (item.kitchenLoad !== undefined) {\r\n    return Number(item.kitchenLoad);\r\n  }\r\n\r\n  return KITCHEN_LOAD_BY_CATEGORY[item.categoryTitle] ?? 0;\r\n}",
+      "after": "function getItemKitchenLoad(item) {\r\n  if (item.kitchenLoad !== undefined) {\r\n    return Number(item.kitchenLoad);\r\n  }\r\n\r\n  return context.KITCHEN_LOAD_BY_CATEGORY[item.categoryTitle] ?? 0;\r\n}",
+      "wrapper": "function getItemKitchenLoad(...args){return checkoutCapacityProbes.getItemKitchenLoad(...args);}"
+    },
+    {
+      "name": "getBasketKitchenLoad",
+      "before": "function getBasketKitchenLoad() {\r\n  const basket = Array.isArray(window.basket)\r\n    ? window.basket\r\n    : [];\r\n\r\n  return basket.reduce((total, line) => {\r\n    const item = window.ITEMS_BY_ID.get(line.itemId);\r\n\r\n    if (!item) return total;\r\n\r\n    return total +\r\n      getItemKitchenLoad(item) *\r\n      Number(line.qty || 0);\r\n  }, 0);\r\n}",
+      "after": "function getBasketKitchenLoad() {\r\n  const basket = Array.isArray(context.window.basket)\r\n    ? context.window.basket\r\n    : [];\r\n\r\n  return basket.reduce((total, line) => {\r\n    const item = context.window.ITEMS_BY_ID.get(line.itemId);\r\n\r\n    if (!item) return total;\r\n\r\n    return total +\r\n      getItemKitchenLoad(item) *\r\n      Number(line.qty || 0);\r\n  }, 0);\r\n}",
+      "wrapper": "function getBasketKitchenLoad(...args){return checkoutCapacityProbes.getBasketKitchenLoad(...args);}"
+    },
+    {
+      "name": "canBasketFitInSlot",
+      "before": "function canBasketFitInSlot(readyTime) {\r\n  const basketLoad =\r\n    getBasketKitchenLoad();\r\n\r\n  if (basketLoad <= 0) {\r\n    return true;\r\n  }\r\n\r\n  // Work on a copy - don't actually reserve capacity yet\r\n  const testMap =\r\n    new Map(kitchenSlotMap);\r\n\r\n  const result =\r\n    allocateLoadBackwards(\r\n      readyTime,\r\n      basketLoad,\r\n      testMap\r\n    );\r\n\r\n  return result.success;\r\n}",
+      "after": "function canBasketFitInSlot(readyTime) {\r\n  const basketLoad =\r\n    getBasketKitchenLoad();\r\n\r\n  if (basketLoad <= 0) {\r\n    return true;\r\n  }\r\n\r\n  // Work on a copy - don't actually reserve capacity yet\r\n  const testMap =\r\n    new Map(context.kitchenSlotMap);\r\n\r\n  const result =\r\n    context.allocateLoadBackwards(\r\n      readyTime,\r\n      basketLoad,\r\n      testMap\r\n    );\r\n\r\n  return result.success;\r\n}",
+      "wrapper": "function canBasketFitInSlot(...args){return checkoutCapacityProbes.canBasketFitInSlot(...args);}"
+    }
+  ]
+}
