@@ -5,6 +5,7 @@ const {document,window,alert}=context;
 function openMenuOverlay() {
 	  if (!context.menuOverlay) return;
 	  context.menuOverlay.classList.add('show');
+	  context.menuOverlay.setAttribute('aria-hidden', 'false');
 	  document.body.style.overflow = 'hidden';   // stop background scroll
 	  document.body.classList.add('menu-open');  // 👈 NEW: flag that menu is open
 	}
@@ -13,6 +14,7 @@ function openMenuOverlay() {
 function closeMenuOverlay() {
 	  if (!context.menuOverlay) return;
 	  context.menuOverlay.classList.remove('show');
+	  context.menuOverlay.setAttribute('aria-hidden', 'true');
 	  document.body.style.overflow = '';
 	  document.body.classList.remove('menu-open'); // 👈 NEW: remove flag
 	}
