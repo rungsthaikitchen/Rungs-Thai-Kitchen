@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const {create}=require('../customer-menu-overlay'),e=require('../MENU-OVERLAY-EXTRACTION-2026-11-25.json');
-function element(){const el={style:{},attrs:{},classes:[],listeners:{},addEventListener(k,fn){(this.listeners[k]??=[]).push(fn);},setAttribute(k,v){this.attrs[k]=v;}};el.classList={add(k){if(!el.classes.includes(k))el.classes.push(k);},remove(k){el.classes=el.classes.filter(x=>x!==k);},contains:k=>el.classes.includes(k)};return el;}
+function element(){const el={style:{},attrs:{},classes:[],listeners:{},focus(){},addEventListener(k,fn){(this.listeners[k]??=[]).push(fn);},setAttribute(k,v){this.attrs[k]=v;}};el.classList={add(k){if(!el.classes.includes(k))el.classes.push(k);},remove(k){el.classes=el.classes.filter(x=>x!==k);},contains:k=>el.classes.includes(k)};return el;}
 function fixture(missing=[]){const f={basket:[],calls:[],document:element(),window:element()};f.document.body=element();f.window.scrollY=0;for(const k of e.dependencies.filter(k=>k!=='basket'))f[k]=missing.includes(k)?null:element();f.alert=x=>f.calls.push(['alert',x]);f.openCheckout=n=>f.calls.push(['checkout',n,f.menuOverlay?.classes.slice(),f.document.body.style.overflow]);return f;}
 function old(f){return vm.runInNewContext(e.regions.map(r=>r.name.startsWith('bind')?'function '+r.name+'(){'+r.before+'}':r.before).join('\n')+'\n({openMenuOverlay,closeMenuOverlay,bindEarly,bindLate})',f);}
 const plain=x=>JSON.parse(JSON.stringify(x));
@@ -59,4 +59,27 @@ test('menu visibility is exposed to assistive technology through every close pat
  };
  fire(f.menuCheckoutBtn, 'click');
  assert.deepEqual(f.calls.at(-1), ['checkout', 5.5]);
+});
+
+test('menu takes focus and returns it to whichever control opened it', () => {
+ const f = fixture();
+ const menu = create(f);
+ menu.bindEarly();
+ menu.bindLate();
+
+ for (const control of [f.menuLink, f.menuFab, f.menuClose]) {
+  control.focus = () => { f.document.activeElement = control; };
+ }
+
+ for (const opener of [f.menuLink, f.menuFab]) {
+  fire(opener, 'click', {currentTarget: opener, preventDefault() {}});
+  assert.equal(f.document.activeElement, f.menuClose);
+  fire(f.document, 'keydown', {key: 'Escape'});
+  assert.equal(f.document.activeElement, opener);
+ }
+
+ f.menuLink.focus();
+ menu.openMenuOverlay();
+ fire(f.menuClose, 'click');
+ assert.equal(f.document.activeElement, f.menuLink);
 });

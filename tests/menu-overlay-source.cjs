@@ -4,6 +4,11 @@ function reconstructMenuOverlay(root=path.join(__dirname,'..')){
  const e=JSON.parse(fs.readFileSync(path.join(root,'MENU-OVERLAY-EXTRACTION-2026-11-25.json'),'utf8'));
  const module=fs.readFileSync(path.join(root,'customer-menu-overlay.js'),'utf8');
  const extractionModule=module
+  .replace('let menuOpener;\n\n', '')
+  .replace('openMenuOverlay(trigger = document.activeElement)', 'openMenuOverlay()')
+  .replace(" || context.menuOverlay.classList.contains('show')", '')
+  .replaceAll('openMenuOverlay(e.currentTarget);', 'openMenuOverlay();')
+  .replace(/^[\t ]*(?:menuOpener = (?:trigger|null);|menuOpener\?\.focus\(\);|context\.menuClose\?\.focus\(\);)\r?\n/gm, '')
   .replace(/^[\t ]*context\.menuOverlay\.setAttribute\('aria-hidden', 'false'\);\r?\n/m, '')
   .replace(/^[\t ]*context\.menuOverlay\.setAttribute\('aria-hidden', 'true'\);\r?\n/m, '');
  assert.equal(hash(extractionModule),e.moduleSha256);
