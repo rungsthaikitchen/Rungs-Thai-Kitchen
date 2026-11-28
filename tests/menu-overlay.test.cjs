@@ -4,7 +4,9 @@ function element(){const el={style:{},attrs:{},classes:[],listeners:{},addEventL
 function fixture(missing=[]){const f={basket:[],calls:[],document:element(),window:element()};f.document.body=element();f.window.scrollY=0;for(const k of e.dependencies.filter(k=>k!=='basket'))f[k]=missing.includes(k)?null:element();f.alert=x=>f.calls.push(['alert',x]);f.openCheckout=n=>f.calls.push(['checkout',n,f.menuOverlay?.classes.slice(),f.document.body.style.overflow]);return f;}
 function old(f){return vm.runInNewContext(e.regions.map(r=>r.name.startsWith('bind')?'function '+r.name+'(){'+r.before+'}':r.before).join('\n')+'\n({openMenuOverlay,closeMenuOverlay,bindEarly,bindLate})',f);}
 const plain=x=>JSON.parse(JSON.stringify(x));
-function state(f){return plain({body:f.document.body,overlay:f.menuOverlay,fab:f.menuFab,calls:f.calls,counts:Object.fromEntries(['menuLink','menuClose','menuOverlay','menuCheckoutBtn','menuFab','document','window'].map(k=>[k,f[k]?Object.fromEntries(Object.entries(f[k].listeners).map(([key,a])=>[key,a.length])):null]))});}
+function state(f){return plain({body:f.document.body,overlay:f.menuOverlay && {...f.menuOverlay,attrs:Object.fromEntries(
+ Object.entries(f.menuOverlay.attrs).filter(([name])=>name!=='aria-hidden')
+ )},fab:f.menuFab,calls:f.calls,counts:Object.fromEntries(['menuLink','menuClose','menuOverlay','menuCheckoutBtn','menuFab','document','window'].map(k=>[k,f[k]?Object.fromEntries(Object.entries(f[k].listeners).map(([key,a])=>[key,a.length])):null]))});}
 function fire(el,type,event={}){for(const fn of el?.listeners[type]||[])fn(event);}
 function pair(missing=[]){const a=fixture(missing),b=fixture(missing),x=create(a),y=old(b);x.bindEarly();y.bindEarly();x.bindLate();y.bindLate();assert.deepEqual(state(a),state(b));return {a,b,x,y};}
 test('overlay extraction reconstructs released bootstrap and factory defers DOM work',()=>{require('./menu-overlay-source.cjs').reconstructMenuOverlay();const window={};vm.runInNewContext(fs.readFileSync(require.resolve('../customer-menu-overlay'),'utf8'),{window});create({document:new Proxy({},{get(){throw Error('startup access');}})});assert.equal(typeof window.RTKMenuOverlay.create,'function');});
@@ -19,4 +21,42 @@ test('checkout reads the current basket, refuses empty and closes menu before su
 });
 test('scroll threshold and optional controls preserve released behaviour',()=>{
  for(const missing of [[],['menuFab'],['menuLink','menuClose','menuCheckoutBtn'],['menuOverlay']]){const {a,b,x,y}=pair(missing);for(const n of [0,300,301,200]){a.window.scrollY=b.window.scrollY=n;fire(a.window,'scroll');fire(b.window,'scroll');assert.deepEqual(state(a),state(b));}x.openMenuOverlay();y.openMenuOverlay();x.closeMenuOverlay();y.closeMenuOverlay();assert.deepEqual(state(a),state(b));}
+});
+
+test('menu visibility is exposed to assistive technology through every close path', () => {
+ const f = fixture();
+ const {openMenuOverlay, bindEarly, bindLate} = create(f);
+ bindEarly();
+ bindLate();
+ const menuMarkup = fs.readFileSync(require.resolve('../index.html'), 'utf8');
+ assert.match(menuMarkup, /<div id="menu-overlay"[^>]*aria-hidden="true"/);
+ const expectHidden = hidden => {
+  assert.equal(f.menuOverlay.attrs['aria-hidden'], String(hidden));
+  assert.equal(f.menuOverlay.classList.contains('show'), !hidden);
+ };
+
+ fire(f.menuLink, 'click', {preventDefault() {}});
+ expectHidden(false);
+ fire(f.document, 'keydown', {key: 'Escape'});
+ expectHidden(true);
+
+ fire(f.menuFab, 'click', {preventDefault() {}});
+ expectHidden(false);
+ fire(f.menuClose, 'click');
+ expectHidden(true);
+
+ openMenuOverlay();
+ fire(f.menuOverlay, 'click', {target: f.menuOverlay});
+ expectHidden(true);
+
+ openMenuOverlay();
+ fire(f.menuCheckoutBtn, 'click');
+ expectHidden(false);
+ f.basket.push({unitPrice: 5.5, qty: 1});
+ f.openCheckout = subtotal => {
+  expectHidden(true);
+  f.calls.push(['checkout', subtotal]);
+ };
+ fire(f.menuCheckoutBtn, 'click');
+ assert.deepEqual(f.calls.at(-1), ['checkout', 5.5]);
 });
