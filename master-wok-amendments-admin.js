@@ -14,7 +14,7 @@
    masterWokEnabled&&button.closest('tr')?.dataset.capacityScheduler!=='LEGACY';
   let legacy=false;
   const dialog=document.createElement('dialog');dialog.setAttribute('aria-label','Amend order');dialog.className='rtk-amend-dialog';const style=document.createElement('style');style.textContent='.rtk-amend-dialog p{margin:10px 0}.rtk-amend-dialog table{table-layout:fixed!important}.rtk-amend-dialog table td{padding:6px 4px!important;height:auto!important;white-space:pre-line!important;line-height:1.3!important;font-size:14px!important}.rtk-amend-dialog table tr:first-child{font-weight:bold}';document.head.append(style);dialog.style.cssText='width:500px;max-width:calc(100% - 40px);max-height:90vh;overflow:auto;border:1px solid #ddd;border-radius:12px;padding:22px';
-  dialog.innerHTML='<h2>Amend order</h2><p data-summary></p><p data-time></p><section data-time-confirm hidden><p data-time-confirm-summary></p><p><label>Reason <textarea data-time-confirm-reason maxlength="500" rows="2" style="width:100%"></textarea></label></p><button type="button" class="btn" data-time-confirm-save>Record agreed time</button></section><form hidden><p data-order-type><label>Order type <select name="orderType"><option value="collection">Collection</option><option value="delivery">Delivery</option></select></label></p><div data-delivery><p data-delivery-address><label>Delivery address <textarea name="deliveryAddress" maxlength="1000" rows="3" style="width:100%"></textarea></label></p><p data-area-override><label><input type="checkbox" name="deliveryAreaOverride"> Allow delivery outside the normal 3-mile area</label><br><small>Staff exception only. Set the delivery charge and explain why below. Address verification and delivery timing still apply.</small></p><p><label>Delivery charge <select name="feeMode" data-fee-mode><option value="auto">Calculate automatically</option><option value="manual">Set amount</option></select></label> <label data-fee>Amount (£) <input name="deliveryFee" type="number" min="0" max="100" step="0.01"></label></p></div><p><label>Discount code <input name="discountCode" maxlength="80" autocomplete="off"></label><br><small>Leave blank to remove a code. Existing loyalty is retained where possible.</small></p><fieldset data-legacy-items hidden><legend>Order items</legend><div data-item-quantities></div><p><label>Add Jasmine Rice (£2 per portion) <input type="number" name="jasmineRice" min="0" max="99" step="1" value="0" required></label></p><p data-menu-picker hidden><label>Add a dish <select name="menuItem"></select></label></p><div data-menu-options></div></fieldset><p data-discretionary-discount hidden><label>Discretionary discount (£) <input name="discretionaryDiscount" type="number" min="0" step="0.01" required disabled></label><br><small>Enter the total discretionary discount. Use £0 to remove it.</small></p><p><label>Reason for change <textarea name="reason" required maxlength="500" rows="2" style="width:100%"></textarea></label></p><p data-explanation>The booked time stays the same. For delivery it means arrival at the customer’s door. Agree the change with the customer; this action does not send a message.</p><button class="btn" type="submit">Review changes</button></form><div data-review></div><button class="btn" data-save hidden>Save amendment</button><p role="status"></p><button class="btn" data-close>Close</button><details><summary>Amendment history</summary><div data-history></div></details>';
+  dialog.innerHTML='<h2>Amend order</h2><p data-summary></p><p data-time></p><section data-time-confirm hidden><p data-time-confirm-summary></p><p><label>Reason <textarea data-time-confirm-reason maxlength="500" rows="2" style="width:100%"></textarea></label></p><button type="button" class="btn" data-time-confirm-save>Record agreed time</button></section><form hidden><p data-order-type><label>Order type <select name="orderType"><option value="collection">Collection</option><option value="delivery">Delivery</option></select></label></p><div data-delivery><p data-delivery-address><label>Delivery address <textarea name="deliveryAddress" maxlength="1000" rows="3" style="width:100%"></textarea></label></p><p data-area-override><label><input type="checkbox" name="deliveryAreaOverride"> Allow delivery outside the normal 3-mile area</label><br><small>Staff exception only. Set the delivery charge and explain why below. Address verification and delivery timing still apply.</small></p><p><label>Delivery charge <select name="feeMode" data-fee-mode><option value="auto">Calculate automatically</option><option value="manual">Set amount</option></select></label> <label data-fee>Amount (£) <input name="deliveryFee" type="number" min="0" max="100" step="0.01"></label></p></div><p><label>Discount code <input name="discountCode" maxlength="80" autocomplete="off"></label><br><small>Leave blank to remove a code. Existing loyalty is retained where possible.</small></p><fieldset data-legacy-items hidden><legend>Order items</legend><div data-item-quantities></div><p><label>Add Jasmine Rice (£2 per portion) <input type="number" name="jasmineRice" min="0" max="99" step="1" value="0" required></label></p><div data-menu-pickers hidden></div><button type="button" data-add-dish hidden>Add another dish</button></fieldset><p data-discretionary-discount hidden><label>Discretionary discount (£) <input name="discretionaryDiscount" type="number" min="0" step="0.01" required disabled></label><br><small>Enter the total discretionary discount. Use £0 to remove it.</small></p><p><label>Reason for change <textarea name="reason" required maxlength="500" rows="2" style="width:100%"></textarea></label></p><p data-explanation>The booked time stays the same. For delivery it means arrival at the customer’s door. Agree the change with the customer; this action does not send a message.</p><button class="btn" type="submit">Review changes</button></form><div data-review></div><button class="btn" data-save hidden>Save amendment</button><p role="status"></p><button class="btn" data-close>Close</button><details><summary>Amendment history</summary><div data-history></div></details>';
   document.body.append(dialog);const form=dialog.querySelector('form'),status=dialog.querySelector('[role=status]'),summary=dialog.querySelector('[data-summary]'),review=dialog.querySelector('[data-review]'),save=dialog.querySelector('[data-save]'),close=dialog.querySelector('[data-close]');
   const timePanel=dialog.querySelector('[data-time-confirm]'),timeReason=dialog.querySelector('[data-time-confirm-reason]'),timeButton=dialog.querySelector('[data-time-confirm-save]');
   const itemsPanel=form.querySelector('[data-legacy-items]');
@@ -37,37 +37,63 @@
    manualPanel.hidden=!enabled;
    form.elements.discretionaryDiscount.value=enabled?Number(order.discretionary_discount_amount).toFixed(2):'';
   }
-  const menuPicker=form.querySelector('[data-menu-picker]');
-  const menuOptions=form.querySelector('[data-menu-options]');
-  const menuSelect=form.elements.menuItem;
+  const menuPickers=form.querySelector('[data-menu-pickers]');
+  const addDish=form.querySelector('[data-add-dish]');
   function option(value,text){
    const node=document.createElement('option');
    node.value=value;
    node.textContent=text;
    return node;
   }
-  function menuField(label,input){
+  function menuField(container,label,input){
    const row=document.createElement('p');
    const caption=document.createElement('label');
    caption.append(label+' ',input);
    row.append(caption);
-   menuOptions.append(row);
+   container.append(row);
+  }
+  function appendDishPicker(menu,removable=false){
+   const row=document.createElement('div');
+   const menuSelect=document.createElement('select');
+   const menuOptions=document.createElement('div');
+   menuSelect.name='menuItem';
+   menuSelect.append(option('','Choose a dish'));
+   for(const [id,item] of Object.entries(menu))
+    menuSelect.append(option(id,item.category+' · '+item.name+' ('+money(item.price)+')'));
+   menuField(row,'Add a dish',menuSelect);
+   row.append(menuOptions);
+   if(removable){
+    const remove=document.createElement('button');
+    remove.type='button';
+    remove.textContent='Remove dish';
+    remove.onclick=()=>{
+     row.remove();
+     clearReview();
+     status.textContent='Review the changes before saving.';
+     addDish.focus();
+    };
+    row.append(remove);
+   }
+   menuSelect.addEventListener('change',()=>{
+    menuOptions.replaceChildren();
+    const item=menu[menuSelect.value];
+    if(item)renderDishOptions(menuOptions,item);
+   });
+   menuPickers.append(row);
+   if(removable)menuSelect.focus();
   }
   function showMenu(menu){
-   menuPicker.hidden=!menu;
-   menuSelect.replaceChildren(option('','Choose a dish'));
+   menuPickers.hidden=!menu;
+   addDish.hidden=!menu||!current?.menuSupportsMultiple;
    form.elements.jasmineRice.closest('p').hidden=!!menu;
-   menuOptions.replaceChildren();
-   for(const [id,item] of Object.entries(menu||{}))
-    menuSelect.append(option(id,item.category+' · '+item.name+' ('+money(item.price)+')'));
+   menuPickers.replaceChildren();
+   if(menu)appendDishPicker(menu);
   }
-  menuSelect.addEventListener('change',()=>{
-   menuOptions.replaceChildren();
-   const item=current?.menu?.[menuSelect.value];
-   if(!item)return;
+  addDish.onclick=()=>appendDishPicker(current.menu,true);
+  function renderDishOptions(menuOptions,item){
    const qty=document.createElement('input');
    Object.assign(qty,{type:'number',name:'menuQuantity',min:'1',max:'99',step:'1',required:true,value:'1'});
-   menuField('Portions',qty);
+   menuField(menuOptions,'Portions',qty);
    for(const [name,label,options,required] of [
     ['menuModifier','Protein or option',item.modifiers,item.modifierRequired],
     ['menuExtra','Extra',item.extras,false]
@@ -77,7 +103,7 @@
     Object.assign(select,{name,required});
     select.append(option('',required?'Choose an option':'None'));
     for(const entry of options) select.append(option(entry.id,entry.name+' (+'+money(entry.delta)+')'));
-    menuField(label,select);
+    menuField(menuOptions,label,select);
    }
    if(item.spice){
     const spice=document.createElement('select');
@@ -86,9 +112,9 @@
      if(level>=item.spice.min) spice.append(option(String(level),label));
     });
     spice.value=String(Math.max(item.spice.min,item.spice.default));
-    menuField('Spice',spice);
+    menuField(menuOptions,'Spice',spice);
    }
-  });
+  }
   function showItems(items,menu){
    itemsPanel.hidden=!Array.isArray(items)||items.length===0;
    quantitiesPanel.replaceChildren();
@@ -126,13 +152,20 @@
     input.dataset.lineId, input.valueAsNumber
    ]).filter(([id,quantity])=>current.items.some(item=>item.id===id&&item.qty!==quantity)));
    const jasmineRice=form.elements.jasmineRice.valueAsNumber;
-   const add=menuSelect.value?{
-    id:menuSelect.value,qty:form.elements.menuQuantity.valueAsNumber,
-    modifier:form.elements.menuModifier?.value||null,
-    extra:form.elements.menuExtra?.value||null,
-    spice:form.elements.menuSpice?Number(form.elements.menuSpice.value):null
-   }:null;
-   return Object.keys(quantities).length||jasmineRice||add?{items:{quantities,jasmineRice,...(add?{add}:{})}}:{};
+   const additions=[];
+   for(const row of menuPickers.children){
+    const value=name=>row.querySelector('[name='+name+']')?.value;
+    const id=value('menuItem');
+    if(!id)continue;
+    const spice=value('menuSpice');
+    additions.push({
+     id,qty:Number(value('menuQuantity')),modifier:value('menuModifier')||null,
+     extra:value('menuExtra')||null,spice:spice==null?null:Number(spice)
+    });
+   }
+   const add=current.menuSupportsMultiple?additions:additions[0];
+   return Object.keys(quantities).length||jasmineRice||additions.length
+    ?{items:{quantities,jasmineRice,...(additions.length?{add}:{})}}:{};
 
   }
   let current=null,busy=false,pending=null,pendingTime=null,uncertain=false;
