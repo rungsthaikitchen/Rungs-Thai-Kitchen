@@ -2,6 +2,16 @@
 (function(root){
  function create(context){
   const {window,document,console}=context;
+  let checkoutOpener;
+
+  function restoreCheckoutFocus() {
+    const opener = checkoutOpener;
+    checkoutOpener = null;
+    if (opener && opener !== document.body) opener.focus?.();
+    if (!opener || opener === document.body || document.activeElement !== opener) {
+      document.getElementById('open-checkout')?.focus?.();
+    }
+  }
 // BEGIN extracted opening state
 let checkoutOpening = false;
 function setCheckoutOpening(loading) {
@@ -16,6 +26,7 @@ function setCheckoutOpening(loading) {
 // BEGIN extracted opening function
 async function openCheckout(subtotal) {
   if (checkoutOpening) return;
+  checkoutOpener = document.activeElement;
   checkoutOpening = true;
   setCheckoutOpening(true);
   try {
@@ -119,9 +130,14 @@ if (
       if(openedBasketKey!==(0, context.availabilityBasketKey)())return;
 
 			  context.checkoutModal.style.display = 'flex';
+      document.getElementById('checkout-close')?.focus?.();
 			  } finally {
     checkoutOpening = false;
     setCheckoutOpening(false);
+    if (context.checkoutModal?.style.display !== 'flex') {
+      if (document.activeElement === document.body) restoreCheckoutFocus();
+      checkoutOpener = null;
+    }
   }
 }
  
@@ -133,7 +149,9 @@ if (
 // END extracted opening function
 // BEGIN extracted closing function
 function closeCheckout(){
+  const wasOpen = context.checkoutModal?.style.display === 'flex';
   if (context.checkoutModal) context.checkoutModal.style.display = 'none';
+  if (wasOpen) restoreCheckoutFocus();
 }
 
 // END extracted closing function
