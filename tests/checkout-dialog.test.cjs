@@ -4,7 +4,8 @@ const evidence=require('../CHECKOUT-DIALOG-EXTRACTION-2026-11-19.json');
 const bootstrap=require('./checkout-refactor-source.cjs').reconstruct(),currentModuleSource=fs.readFileSync(require.resolve('../customer-checkout-dialog.js'),'utf8');
 const quoteChange=require('./quote-refresh-change.json');
 assert.equal(currentModuleSource.split(quoteChange.after).length,2);
-const moduleSource=currentModuleSource.replace(quoteChange.after,quoteChange.before);
+const moduleSource=require('./reviewed-checkout-handoff-source.cjs')
+ .removeCheckoutFocus(currentModuleSource).replace(quoteChange.after,quoteChange.before);
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 test('the extracted lifecycle reconstructs the live baseline byte for byte',()=>{
  const parts={};
@@ -75,4 +76,28 @@ test('a basket changed during the price refresh is not shown with an old subtota
  f.context.window.refreshCheckoutPricingAndRender=()=>{began();return waiting;};
  const opening=f.dialog.open(30);await started;f.setKey('changed-during-quote');finish();await opening;
  assert.equal(f.context.checkoutModal.style.display,'none');assert.equal(f.status.hidden,true);
+});
+
+test('checkout moves focus after opening and restores it only when dismissed', async () => {
+ const {context, dialog} = fixture();
+ const doc = context.document;
+ doc.body = {};
+ const focusable = () => ({focus() { doc.activeElement = this; }});
+ const close = focusable();
+ const proceed = focusable();
+ const menuLink = focusable();
+ const getElement = doc.getElementById;
+ doc.getElementById = id => ({'checkout-close': close, 'open-checkout': proceed}[id] ?? getElement(id));
+
+ for (const opener of [proceed, menuLink, doc.body]) {
+  doc.activeElement = opener;
+  await dialog.open(8);
+  assert.equal(doc.activeElement, close);
+  dialog.close();
+  assert.equal(doc.activeElement, opener === doc.body ? proceed : opener);
+  const other = focusable();
+  other.focus();
+  dialog.close();
+  assert.equal(doc.activeElement, other);
+ }
 });
