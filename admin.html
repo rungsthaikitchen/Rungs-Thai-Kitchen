@@ -13,7 +13,7 @@
 <script defer src="/new-customer-verification.js?v=new-customer-20261121"></script>
 <script defer src="/new-customer-history-admin.js?v=contact-save-confirmation-20261125"></script>
 <script defer src="/master-wok-reconciliation.js?v=actual-amount-20261113"></script>
-<script defer src="/master-wok-reconciliation-admin.js?v=eod-autoprint-20261112"></script>
+<script defer src="/master-wok-reconciliation-admin.js?v=legacy-eod-20261126"></script>
 <script src="/master-wok-delivery-admin.js"></script>
   <link rel="stylesheet" href="/admin-order-layout.css?v=20261118" />
   <meta charset="utf-8" />
@@ -2768,10 +2768,11 @@ if (allergenBtn) {
         const mountPoint = document.createElement('span');
         mountPoint.className = 'legacy-payment-admin-control';
         actions.appendChild(mountPoint);
-        import('/legacy-payment-admin-mount.mjs?v=on-demand-preflight-20261125')
+        import('/legacy-payment-admin-mount.mjs?v=complete-order-20261126')
           .then(({mountLegacyPaymentControl}) => mountLegacyPaymentControl({
             document, fetch: window.fetch.bind(window), crypto: window.crypto,
             order: o, container: mountPoint, deferPreflight: true,
+            onComplete: () => window.MasterWokAdminClient.submit({action:'complete',orderId:o.id}),
             onRecorded: () => loadAndRender()
           }))
           .catch(() => { mountPoint.textContent = 'LEGACY payment unavailable'; });

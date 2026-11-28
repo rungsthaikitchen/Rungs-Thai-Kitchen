@@ -20,6 +20,6 @@ test('forcing existing commitments preserves increments, conflict details and ea
  const map=new Map([[date(16,30).toISOString(),2]]),result=actual.forceAllocateExistingLoad(date(16,35),4,map);assert.equal(result.overCapacity,true);assert.deepEqual(result.conflicts,[{time:date(16,30).toISOString(),existingLoad:2,newLoad:3}]);assert.equal(map.size,1);assert.equal(map.get(date(16,30).toISOString()),3);
 });
 test('released basket-fit probe calls extracted allocator on a copy and never reserves real capacity',()=>{
- const source=fs.readFileSync(require.resolve('../customer-checkout.js'),'utf8'),start=source.indexOf('function canBasketFitInSlot('),end=source.indexOf('\r\n}',start)+3,fn=source.slice(start,end);
+ const source=require('./checkout-capacity-probes-source.cjs').reconstructCapacityProbes(),start=source.indexOf('function canBasketFitInSlot('),end=source.indexOf('\r\n}',start)+3,fn=source.slice(start,end);
  for(const occupied of [false,true]){const kitchenSlotMap=new Map(occupied?[[date(16,55).toISOString(),1]]:[]),before=[...kitchenSlotMap],context={kitchenSlotMap,getBasketKitchenLoad:()=>3,allocateLoadBackwards:actual.allocateLoadBackwards};const fit=vm.runInNewContext(fn+'\ncanBasketFitInSlot',context);assert.equal(fit(date(17,0)),!occupied);assert.deepEqual([...kitchenSlotMap],before);}
 });

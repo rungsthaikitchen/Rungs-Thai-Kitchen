@@ -139,7 +139,26 @@ function closeCheckout(){
 // END extracted closing function
   return Object.freeze({open:openCheckout,close:closeCheckout});
  }
- const api=Object.freeze({create});
+function createReviewedHandoff(context){
+function installDelivery(){
+context.window.RTKPrepareReviewedDelivery = address => context.geocodeCustomerAddress(address);
+}
+function installTimeAndOpen(){
+context.window.RTKApplyReviewedTime=async instant=>{
+ const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(instant)).map(p=>[p.type,p.value]));
+ const date=parts.year+'-'+parts.month+'-'+parts.day;
+ context.preferredDateInput.value=date;
+ await context.populatePreferredTimeSelect(date);
+ context.preferredTimeSelect.value=parts.hour+':'+parts.minute;
+ context.preferredTimeSelect.dispatchEvent(new context.Event('change',{bubbles:true}));
+ context.document.getElementById('unavailable-context.basket-dialog')?.close();
+};
+context.window.RTKOpenReviewedCheckout=()=>context.openCheckout(context.basket.reduce((n,i)=>n+i.qty*i.unitPrice,0));
+
+}
+return {installDelivery,installTimeAndOpen};
+}
+ const api=Object.freeze({create,createReviewedHandoff});
  if(typeof module!=='undefined'&&module.exports)module.exports=api;
  if(root)root.RTKCheckoutDialog=api;
 })(typeof window!=='undefined'?window:null);

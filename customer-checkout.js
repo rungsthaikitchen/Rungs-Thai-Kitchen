@@ -86,51 +86,22 @@ const preferredTimeInput =
   
   let lastPreferredDate = null;
 
-function validatePreferredTime() {
-  hideCheckoutBanner();
-
-  const submitBtn =
-    document.getElementById('checkout-submit');
-
-  const raw = preferredTimeInput?.value;
-  if (!raw) return true;
-
-  const chosen = new Date(raw);
-  if(checkoutAvailability.hints){
-    const available=checkoutAvailability.hints.get(chosen.toISOString())===true;
-    if(submitBtn)submitBtn.disabled=!available;
-    return available;
-  }
-
-  const isClosed = inAnyWindow(chosen, CLOSED_RANGES);
-  const isFull   = inAnyWindow(chosen, FULLY_BOOKED);
-
-  if (isClosed) {
-    showCheckoutBanner(
-      'closed',
-      isClosed.message ||
-        'Sorry, we are closed at the selected time.'
-    );
-
-    if (submitBtn) submitBtn.disabled = true;
-    return false;
-  }
-
-  if (isFull) {
-    showCheckoutBanner(
-      'fully_booked',
-      isFull.message ||
-        'We’re fully booked at the selected time.'
-    );
-
-    if (submitBtn) submitBtn.disabled = true;
-    return false;
-  }
-
-  if (submitBtn) submitBtn.disabled = false;
-
-  return true;
-}
+// BEGIN checkout-validation-alerts boundary
+const checkoutValidationAlerts=window.RTKCheckoutDisplay.createValidationAlerts({
+ get hideCheckoutBanner(){return hideCheckoutBanner;},
+ get document(){return document;},
+ get preferredTimeInput(){return preferredTimeInput;},
+ get checkoutAvailability(){return checkoutAvailability;},
+ get inAnyWindow(){return inAnyWindow;},
+ get CLOSED_RANGES(){return CLOSED_RANGES;},
+ get FULLY_BOOKED(){return FULLY_BOOKED;},
+ get showCheckoutBanner(){return showCheckoutBanner;},
+ get pausedOrderAlert(){return pausedOrderAlert;},
+ get pausedOrderAlertMessage(){return pausedOrderAlertMessage;},
+ get pausedOrderAlertOk(){return pausedOrderAlertOk;}
+});
+// END checkout-validation-alerts boundary
+function validatePreferredTime(...args){return checkoutValidationAlerts.validatePreferredTime(...args);}
 
 // 3) Guard your submit handler (fail fast if invalid)
 //    In your existing `checkoutForm.addEventListener('submit', async (e) => { ... })`,
@@ -219,25 +190,9 @@ const pausedOrderAlertMessage =
 const pausedOrderAlertOk =
   document.getElementById('paused-order-alert-ok');
 
-function showPausedOrderAlert(message) {
-  if (!pausedOrderAlert || !pausedOrderAlertMessage) return;
+function showPausedOrderAlert(...args){return checkoutValidationAlerts.showPausedOrderAlert(...args);}
 
-  pausedOrderAlertMessage.textContent =
-    message ||
-    'Online orders are temporarily paused. Please check back shortly.';
-
-  pausedOrderAlert.style.display = 'flex';
-
-  if (pausedOrderAlertOk) {
-    pausedOrderAlertOk.focus();
-  }
-}
-
-function hidePausedOrderAlert() {
-  if (!pausedOrderAlert) return;
-
-  pausedOrderAlert.style.display = 'none';
-}
+function hidePausedOrderAlert(...args){return checkoutValidationAlerts.hidePausedOrderAlert(...args);}
 
 pausedOrderAlertOk?.addEventListener(
   'click',
@@ -358,7 +313,20 @@ function updateCheckoutOrderSummary(...args){return checkoutDisplay.updateChecko
 				function updateAddressRequirement(...args){return checkoutDisplay.updateAddressRequirement(...args);}
 
 				
-				window.RTKPrepareReviewedDelivery = address => geocodeCustomerAddress(address);
+				// BEGIN reviewed-checkout-handoff boundary
+const reviewedCheckoutHandoff=window.RTKCheckoutDialog.createReviewedHandoff({
+ Event,
+ get window(){return window;},
+ get document(){return document;},
+ get geocodeCustomerAddress(){return geocodeCustomerAddress;},
+ get preferredDateInput(){return preferredDateInput;},
+ get populatePreferredTimeSelect(){return populatePreferredTimeSelect;},
+ get preferredTimeSelect(){return preferredTimeSelect;},
+ get openCheckout(){return openCheckout;},
+ get basket(){return basket;}
+});
+// END reviewed-checkout-handoff boundary
+reviewedCheckoutHandoff.installDelivery();
 				// BEGIN checkout-geocoder boundary
 const checkoutGeocoder=window.RTKDeliveryQuotes.createGeocoder({sb,window,console});
 // END checkout-geocoder boundary
@@ -402,40 +370,9 @@ const KITCHEN_STEP_MINUTES = 5;
 
 let kitchenSlotMap = new Map();
 
-function getSlotStart(dt) {
-  const slot = new Date(dt);
 
-  const minutes = slot.getMinutes();
-  const floored =
-    Math.floor(minutes / SLOT_MINUTES) * SLOT_MINUTES;
 
-  slot.setMinutes(floored, 0, 0);
 
-  return slot;
-}
-
-function buildKitchenSlotMap(orders) {
-  const slotMap = new Map();
-
-  for (const order of orders) {
-    if (!order.preferred_time) continue;
-
-    const orderTime = new Date(order.preferred_time);
-    const slotStart = getSlotStart(orderTime);
-
-    const key = slotStart.toISOString();
-
-    const orderLoad =
-      getExistingOrderKitchenLoad(order);
-
-    slotMap.set(
-      key,
-      (slotMap.get(key) || 0) + orderLoad
-    );
-  }
-
-  return slotMap;
-}
 
 // BEGIN legacy-kitchen-allocator boundary
 const legacyKitchenAllocator=window.RTKLegacyKitchenAllocator.create({SLOT_MINUTES,KITCHEN_START_HOUR,KITCHEN_START_MINUTE,KITCHEN_STEP_MINUTES});
@@ -455,17 +392,19 @@ function getEffectiveOrderTime(...args){return legacyKitchenSchedule.getEffectiv
 
 function buildKitchenProductionMap(...args){return legacyKitchenSchedule.buildKitchenProductionMap(...args);}
 
-async function refreshKitchenSlotMap(serviceDate) {
-  const schedule = await loadKitchenScheduleForDate(serviceDate);
-kitchenSlotMap = buildKitchenProductionMap(schedule);
-
-  console.log(
-    '[kitchen-schedule] refreshed slot map:',
-    kitchenSlotMap
-  );
-
-  return kitchenSlotMap;
-}
+// BEGIN checkout-capacity-probes boundary
+const checkoutCapacityProbes=window.RTKLegacyKitchenSchedule.createCapacityProbes({
+ get loadKitchenScheduleForDate(){return loadKitchenScheduleForDate;},
+ get buildKitchenProductionMap(){return buildKitchenProductionMap;},
+ get kitchenSlotMap(){return kitchenSlotMap;},
+ get console(){return console;},
+ get KITCHEN_LOAD_BY_CATEGORY(){return KITCHEN_LOAD_BY_CATEGORY;},
+ get window(){return window;},
+ get allocateLoadBackwards(){return allocateLoadBackwards;},
+ set kitchenSlotMap(value){kitchenSlotMap=value;}
+});
+// END checkout-capacity-probes boundary
+async function refreshKitchenSlotMap(...args){return checkoutCapacityProbes.refreshKitchenSlotMap(...args);}
 
 // BEGIN checkout-time-eligibility boundary
 const checkoutTimeEligibility=window.RTKCheckoutTimeEligibility.create({
@@ -482,7 +421,7 @@ const checkoutTimeEligibility=window.RTKCheckoutTimeEligibility.create({
 // END checkout-time-eligibility boundary
 function toYMD(...args){return checkoutTimeEligibility.toYMD(...args);}
 function parseHm(...args){return checkoutTimeEligibility.parseHm(...args);}
-function isBetween(d, start, end){ return d >= start && d <= end; }
+
 function roundTo5Min(...args){return checkoutTimeEligibility.roundTo5Min(...args);}
 function withinOpenHours(...args){return checkoutTimeEligibility.withinOpenHours(...args);}
 function isClosedDate(...args){return checkoutTimeEligibility.isClosedDate(...args);}
@@ -492,36 +431,7 @@ async function loadKitchenScheduleForDate(...args){return legacyKitchenSchedule.
 
 function getExistingOrderKitchenLoad(...args){return legacyKitchenSchedule.getExistingOrderKitchenLoad(...args);}
 
-async function refreshKitchenScheduleForDateTime(dt) {
-  if (!dt) return;
 
-  await refreshKitchenSlotMap(dt);
-
-  const preferredTimeEl =
-    document.getElementById('cust-preferred-time');
-
-  if (!preferredTimeEl?.value) return;
-
-  const currentlySelected =
-    new Date(preferredTimeEl.value);
-
-  if (!isAllowed(currentlySelected)) {
-    const nextAvailable =
-      await nextAlternativeFulfilment(
-        currentlySelected
-      );
-
-    if (nextAvailable) {
-      preferredTimeEl.value =
-        toLocalInputValue(nextAvailable);
-
-      console.log(
-        '[kitchen-schedule] preferred time moved to:',
-        preferredTimeEl.value
-      );
-    }
-  }
-}
 
 function isAllowed(...args){return checkoutTimeEligibility.isAllowed(...args);}
 
@@ -557,102 +467,19 @@ const KITCHEN_LOAD_BY_CATEGORY = {
   "Soft Drinks": 0
 };
 
-function getItemKitchenLoad(item) {
-  if (item.kitchenLoad !== undefined) {
-    return Number(item.kitchenLoad);
-  }
+function getItemKitchenLoad(...args){return checkoutCapacityProbes.getItemKitchenLoad(...args);}
 
-  return KITCHEN_LOAD_BY_CATEGORY[item.categoryTitle] ?? 0;
-}
+function getBasketKitchenLoad(...args){return checkoutCapacityProbes.getBasketKitchenLoad(...args);}
 
-function getBasketKitchenLoad() {
-  const basket = Array.isArray(window.basket)
-    ? window.basket
-    : [];
-
-  return basket.reduce((total, line) => {
-    const item = window.ITEMS_BY_ID.get(line.itemId);
-
-    if (!item) return total;
-
-    return total +
-      getItemKitchenLoad(item) *
-      Number(line.qty || 0);
-  }, 0);
-}
-
-function canBasketFitInSlot(readyTime) {
-  const basketLoad =
-    getBasketKitchenLoad();
-
-  if (basketLoad <= 0) {
-    return true;
-  }
-
-  // Work on a copy - don't actually reserve capacity yet
-  const testMap =
-    new Map(kitchenSlotMap);
-
-  const result =
-    allocateLoadBackwards(
-      readyTime,
-      basketLoad,
-      testMap
-    );
-
-  return result.success;
-}
+function canBasketFitInSlot(...args){return checkoutCapacityProbes.canBasketFitInSlot(...args);}
 
 /**
  * Starting from now + LEAD_MINUTES, find the next allowed slot
  * using your existing nextAllowed/isAllowed logic.
  */
-function findNextAllowedFromNow() {
-  const start = new Date();
-  start.setMinutes(start.getMinutes() + LEAD_MINUTES);
-  return nextAllowed(start);  // may return null if nothing within +30 days
-}
 
-			function isWedThuLondonForFulfilment(preferredTimeRaw, asapRequested) {
-			  // Option A: ASAP uses "today" in London
-			  if (asapRequested) return isWedThuLondon();
 
-			  try {
-				const raw = String(preferredTimeRaw || '').trim();
-				if (!raw) return false;
 
-				let y, m, d;
-
-				// Format A: "YYYY-MM-DDTHH:MM" or "YYYY-MM-DD HH:MM"
-				if (/^\d{4}-\d{2}-\d{2}/.test(raw)) {
-				  const datePart = raw.split('T')[0].split(' ')[0];
-				  const parts = datePart.split('-').map(n => parseInt(n, 10));
-				  [y, m, d] = parts;
-				}
-				// Format B: "DD/MM/YYYY HH:MM" (your UI)
-				else if (/^\d{2}\/\d{2}\/\d{4}/.test(raw)) {
-				  const datePart = raw.split(' ')[0];
-				  const parts = datePart.split('/').map(n => parseInt(n, 10));
-				  [d, m, y] = parts;
-				} else {
-				  return false;
-				}
-
-				if (![y, m, d].every(Number.isFinite)) return false;
-
-				// Noon UTC avoids DST edge cases
-				const dt = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
-
-				const weekday = new Intl.DateTimeFormat('en-GB', {
-				  timeZone: 'Europe/London',
-				  weekday: 'short'
-				}).format(dt);
-
-				return weekday === 'Wed' || weekday === 'Thu';
-			  } catch {
-				return false;
-			  }
-			}
 			
 			// ---------------- LOYALTY PHONE LOOKUP ----------------
 // BEGIN checkout-loyalty-phone boundary
@@ -676,17 +503,7 @@ checkoutLoyaltyPhone.bind();
 
 			
 		// Single, clean checkout opener
-			window.RTKApplyReviewedTime=async instant=>{
- const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(instant)).map(p=>[p.type,p.value]));
- const date=parts.year+'-'+parts.month+'-'+parts.day;
- preferredDateInput.value=date;
- await populatePreferredTimeSelect(date);
- preferredTimeSelect.value=parts.hour+':'+parts.minute;
- preferredTimeSelect.dispatchEvent(new Event('change',{bubbles:true}));
- document.getElementById('unavailable-basket-dialog')?.close();
-};
-window.RTKOpenReviewedCheckout=()=>openCheckout(basket.reduce((n,i)=>n+i.qty*i.unitPrice,0));
-// BEGIN checkout-dialog boundary
+			reviewedCheckoutHandoff.installTimeAndOpen();// BEGIN checkout-dialog boundary
 function setAvailabilityLoading(loading) {
   preferredTimeSelect?.setAttribute('aria-busy', String(loading));
   const message = document.getElementById('preferred-time-message');
@@ -768,65 +585,23 @@ function stripChillies(...args){return checkoutConfirmation.stripChillies(...arg
 // Submission guard is private to its controller.
 
 		// One key per checkout attempt; reused on retries; cleared on success
-		function getIdempotencyKey() {
-		  const existing = localStorage.getItem("checkout_idempotency_key");
-		  if (existing) return existing;
-
-		  const key = crypto.randomUUID();
-		  localStorage.setItem("checkout_idempotency_key", key);
-		  return key;
-		}
+		// BEGIN checkout-reset-compat boundary
+const checkoutResetCompat=window.RTKCheckoutReset.createCheckoutCompatibility({
+ document,window,console,localStorage,crypto,
+ get appliedDiscountCode(){return appliedDiscountCode;},
+ set appliedDiscountCode(value){appliedDiscountCode=value;},
+ get appliedDiscountAmount(){return appliedDiscountAmount;},
+ set appliedDiscountAmount(value){appliedDiscountAmount=value;},
+ get lastPreferredDate(){return lastPreferredDate;},
+ set lastPreferredDate(value){lastPreferredDate=value;},
+ get hidePreferredTimeMessage(){return hidePreferredTimeMessage;}
+});
+// END checkout-reset-compat boundary
+function getIdempotencyKey(...args){return checkoutResetCompat.getIdempotencyKey(...args);}
 		
 			function updateCheckoutSubmitButton(...args){return checkoutDisplay.updateCheckoutSubmitButton(...args);}
 
-	  function resetCheckoutForNextOrder() {
-  console.log('[checkout] resetting state for next order');
-
-  const fieldsToClear = [
-    'cust-name',
-    'cust-email',
-    'cust-phone',
-    'cust-address',
-    'cust-notes',
-    'cust-preferred-time'
-  ];
-
-  fieldsToClear.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-
-  appliedDiscountCode = null;
-  appliedDiscountAmount = 0;
-
-  const discountMessage =
-    document.getElementById('discount-code-message');
-
-  if (discountMessage) {
-    discountMessage.textContent = '';
-    discountMessage.className = 'discount-code-message';
-  }
-
-  const discountInput =
-    document.getElementById('discount-code') ||
-    document.querySelector('input[name="discount_code"]');
-
-  if (discountInput) {
-    discountInput.value = '';
-  }
-
-  lastPreferredDate = null;
-
-  if (typeof hidePreferredTimeMessage === 'function') {
-    hidePreferredTimeMessage();
-  }
-
-  window.deliveryQuoteState = {};
-
-  localStorage.removeItem('checkout_idempotency_key');
-
-  console.log('[checkout] reset complete');
-}
+	  function resetCheckoutForNextOrder(...args){return checkoutResetCompat.resetCheckoutForNextOrder(...args);}
 
 // Submit checkout → Supabase (with upsert customer + order_ref + preferred_time)
 // BEGIN checkout-submission boundary

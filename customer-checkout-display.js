@@ -100,7 +100,75 @@ function updateCheckoutSubmitButton() {
 			}
 return {updateCheckoutOrderSummary,updateAddressRequirement,showPreferredTimeMessage,hidePreferredTimeMessage,updateCheckoutSubmitButton};
 }
-const api={create};
+function createValidationAlerts(context){
+function validatePreferredTime() {
+  context.hideCheckoutBanner();
+
+  const submitBtn =
+    context.document.getElementById('checkout-submit');
+
+  const raw = context.preferredTimeInput?.value;
+  if (!raw) return true;
+
+  const chosen = new Date(raw);
+  if(context.checkoutAvailability.hints){
+    const available=context.checkoutAvailability.hints.get(chosen.toISOString())===true;
+    if(submitBtn)submitBtn.disabled=!available;
+    return available;
+  }
+
+  const isClosed = context.inAnyWindow(chosen, context.CLOSED_RANGES);
+  const isFull   = context.inAnyWindow(chosen, context.FULLY_BOOKED);
+
+  if (isClosed) {
+    context.showCheckoutBanner(
+      'closed',
+      isClosed.message ||
+        'Sorry, we are closed at the selected time.'
+    );
+
+    if (submitBtn) submitBtn.disabled = true;
+    return false;
+  }
+
+  if (isFull) {
+    context.showCheckoutBanner(
+      'fully_booked',
+      isFull.message ||
+        'We’re fully booked at the selected time.'
+    );
+
+    if (submitBtn) submitBtn.disabled = true;
+    return false;
+  }
+
+  if (submitBtn) submitBtn.disabled = false;
+
+  return true;
+}
+
+function showPausedOrderAlert(message) {
+  if (!context.pausedOrderAlert || !context.pausedOrderAlertMessage) return;
+
+  context.pausedOrderAlertMessage.textContent =
+    message ||
+    'Online orders are temporarily paused. Please check back shortly.';
+
+  context.pausedOrderAlert.style.display = 'flex';
+
+  if (context.pausedOrderAlertOk) {
+    context.pausedOrderAlertOk.focus();
+  }
+}
+
+function hidePausedOrderAlert() {
+  if (!context.pausedOrderAlert) return;
+
+  context.pausedOrderAlert.style.display = 'none';
+}
+return {validatePreferredTime,showPausedOrderAlert,hidePausedOrderAlert};
+}
+const api={create,createValidationAlerts};
 if(typeof module==='object'&&module.exports)module.exports=api;
 if(root)root.RTKCheckoutDisplay=api;
 })(typeof window==='undefined'?null:window);

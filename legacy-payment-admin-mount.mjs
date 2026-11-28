@@ -1,4 +1,4 @@
-import {createLegacyPaymentDialog} from './legacy-payment-admin-dialog.mjs';
+import {createLegacyPaymentDialog} from './legacy-payment-admin-dialog.mjs?v=complete-order-20261126';
 
 /**
  * Explicit opt-in integration point for the existing Admin order row.
@@ -6,7 +6,7 @@ import {createLegacyPaymentDialog} from './legacy-payment-admin-dialog.mjs';
  * No global listeners, automatic activation or production Admin injection.
  */
 export async function mountLegacyPaymentControl({
- document,fetch,crypto,order,container,onRecorded,deferPreflight=false
+ document,fetch,crypto,order,container,onRecorded,onComplete,deferPreflight=false
 }){
  if(!container||!order?.id)throw Error('Order and mount container required');
  const button=document.createElement('button');
@@ -43,7 +43,7 @@ export async function mountLegacyPaymentControl({
     status.textContent='Order total could not be verified.';
     return false;
    }
-   verifiedOrder={...order,total:data.total};
+   verifiedOrder={...order,total:data.total,status:data.status};
    eligible=true;
    button.disabled=false;
    status.textContent='LEGACY payment ready for review.';
@@ -60,6 +60,8 @@ export async function mountLegacyPaymentControl({
   // Reopen a submitted attempt with its original key, never generate another.
   if(dialog){dialog.open();return;}
   dialog=createLegacyPaymentDialog({document,fetch,crypto,order:verifiedOrder,
+   onComplete:!order.is_test&&['accepted','confirmed','customer_accepted_time'].includes(verifiedOrder.status)
+    ? onComplete : undefined,
    onRecorded:async result=>{
     eligible=false;button.disabled=true;
     status.textContent='Payment recorded. Refresh order details.';

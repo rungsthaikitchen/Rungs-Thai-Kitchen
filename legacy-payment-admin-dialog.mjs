@@ -1,7 +1,5 @@
-/* Isolated LEGACY payment dialog. Not loaded by production Admin.
- * Caller must explicitly mount after checking LEGACY preflight and staff access.
- */
-export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorded}){
+/* LEGACY payment dialog opened after staff payment preflight. */
+export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorded,onComplete}){
  if(!order||typeof order.id!=='string')throw Error('Order required');
  const dialog=document.createElement('dialog');
  dialog.setAttribute('aria-label','Record LEGACY payment');
@@ -27,12 +25,19 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
  const method=makeMethod('Payment method','billMethod');
  const tip=makeField('Tip (£)','tipAmount');tip.value='0.00';
  const tipMethod=makeMethod('Tip method (if applicable)','tipMethod',false);
+ let complete=null;
+ if(typeof onComplete==='function'){
+  const label=document.createElement('label');
+  complete=document.createElement('input');complete.type='checkbox';complete.name='completeOrder';
+  label.append(complete,' Also complete this order (already collected or delivered)');
+  form.append(label);
+ }
  const status=document.createElement('p');status.setAttribute('role','status');
  const submit=document.createElement('button');submit.type='submit';submit.textContent='Confirm and record payment';
  const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Cancel';
  form.prepend(heading,summary);form.append(submit,cancel,status);dialog.append(form);
- let busy=false,key=null,submittedPayload=null;
- const fields=[bill,method,tip,tipMethod];
+ let busy=false,key=null,submittedPayload=null,completeAfterPayment=false;
+ const fields=[bill,method,tip,tipMethod,...(complete?[complete]:[])];
  const lockFields=()=>fields.forEach(field=>{field.disabled=true});
  cancel.onclick=()=>{if(!busy)dialog.close()};
  form.addEventListener('submit',async event=>{
@@ -56,6 +61,7 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
    billAmount:amount.toFixed(2),billMethod:method.value,tipAmount:tipAmount.toFixed(2),
    tipMethod:tipAmount>0?tipMethod.value:null,expectedTotal:total.toFixed(2),
    differenceReason:null};
+  if(!submittedPayload)completeAfterPayment=complete?.checked===true;
   submittedPayload=payload;
   lockFields(); // Unknown outcomes must retry the exact same payload and key.
   busy=true;submit.disabled=true;cancel.disabled=true;
@@ -75,11 +81,20 @@ export function createLegacyPaymentDialog({document,fetch,crypto,order,onRecorde
    }
    status.textContent=data.replayed?'Payment already recorded (verified retry).':'Payment recorded successfully.';
    submit.disabled=true;cancel.disabled=false;
+   if(completeAfterPayment){
+    status.textContent='Payment recorded. Completing order…';
+    try{
+     await onComplete();
+     status.textContent='Payment recorded and order completed.';
+    }catch(_){
+     status.textContent='Payment recorded. Completion could not be confirmed. Refresh Admin and use Completed if the order is still open.';
+    }
+   }
    // A successful server acknowledgement must never be reclassified as an
    // unknown payment outcome merely because the Admin refresh callback fails.
    if(typeof onRecorded==='function'){
     try{await onRecorded(data)}
-    catch(_){status.textContent='Payment recorded. Admin refresh failed; reload the order manually.'}
+    catch(_){status.textContent+=' Admin refresh failed; reload the order manually.'}
    }
   }catch(_){
    status.textContent='Outcome unknown. Check the order before retrying; the same payment key will be reused.';
