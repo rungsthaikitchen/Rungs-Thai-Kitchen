@@ -2,21 +2,27 @@
 'use strict';
 function create(context){
 const {document,window,alert}=context;
-function openMenuOverlay() {
-	  if (!context.menuOverlay) return;
+let menuOpener;
+
+function openMenuOverlay(trigger = document.activeElement) {
+	  if (!context.menuOverlay || context.menuOverlay.classList.contains('show')) return;
+	  menuOpener = trigger;
 	  context.menuOverlay.classList.add('show');
 	  context.menuOverlay.setAttribute('aria-hidden', 'false');
 	  document.body.style.overflow = 'hidden';   // stop background scroll
 	  document.body.classList.add('menu-open');  // 👈 NEW: flag that menu is open
+	  context.menuClose?.focus();
 	}
 
 
 function closeMenuOverlay() {
 	  if (!context.menuOverlay) return;
 	  context.menuOverlay.classList.remove('show');
-	  context.menuOverlay.setAttribute('aria-hidden', 'true');
 	  document.body.style.overflow = '';
 	  document.body.classList.remove('menu-open'); // 👈 NEW: remove flag
+	  menuOpener?.focus();
+	  menuOpener = null;
+	  context.menuOverlay.setAttribute('aria-hidden', 'true');
 	}
 
 
@@ -25,7 +31,7 @@ function bindEarly(){
 if (context.menuLink) {
   context.menuLink.addEventListener('click', (e) => {
     e.preventDefault();
-    openMenuOverlay();
+    openMenuOverlay(e.currentTarget);
   });
 }
 
@@ -33,7 +39,7 @@ if (context.menuLink) {
 if (context.menuFab) {
   context.menuFab.addEventListener('click', (e) => {
     e.preventDefault();
-    openMenuOverlay();
+    openMenuOverlay(e.currentTarget);
   });
 }
 
@@ -91,7 +97,7 @@ function bindLate(){
 	  if (context.menuLink) {
 		context.menuLink.addEventListener('click', (e) => {
 		  e.preventDefault();
-		  openMenuOverlay();
+		  openMenuOverlay(e.currentTarget);
 		});
 	  }
 
