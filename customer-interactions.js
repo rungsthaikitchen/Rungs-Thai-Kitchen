@@ -30,7 +30,10 @@ function bindCustomiseEarly(){
 function bindEscape(){
 		document.addEventListener('keydown', (e) => {
 	  if (e.key === 'Escape') {
-		if (typeof (0, context.closeModal) === 'function' && context.modal?.style.display === 'flex') (0, context.closeModal)();
+		if (typeof (0, context.closeModal) === 'function' && context.modal?.style.display === 'flex') {
+		  e.preventDefault?.();
+		  (0, context.closeModal)();
+		}
 		if (typeof (0, context.closeCheckout) === 'function' && context.checkoutModal?.style.display === 'flex') (0, context.closeCheckout)();
 		if (typeof (0, context.hideOrderSuccess) === 'function') (0, context.hideOrderSuccess)();
 	  }

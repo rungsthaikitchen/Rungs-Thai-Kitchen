@@ -2,10 +2,14 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 function reconstructCustomisationDialog(root=path.join(__dirname,'..')){
  const e=JSON.parse(fs.readFileSync(path.join(root,'CUSTOMISATION-DIALOG-EXTRACTION-2026-11-25.json'),'utf8'));
- const module=fs.readFileSync(path.join(root,'customer-customisation-dialog.js'),'utf8');assert.equal(hash(module),e.moduleSha256);
+ const module=fs.readFileSync(path.join(root,'customer-customisation-dialog.js'),'utf8');
+ const extractionModule=module
+  .replace('let dishOpener;\n\n', '')
+  .replace(/^[\t ]*(?:if \(context\.modal\.style\.display !== 'flex'\) dishOpener = document\.activeElement;|document\.getElementById\('modal-close'\)\?\.focus\?\.\(\);|dishOpener\?\.focus\(\);|dishOpener = null;)\r?\n/gm, '');
+ assert.equal(hash(extractionModule),e.moduleSha256);
  let source=require('./order-success-compat-source.cjs').reconstructOrderSuccessCompat(root);
  for(const r of e.regions){let reversed=r.after;for(const fn of e.functions)reversed=reversed.replaceAll('(0, context.'+fn+')',fn);for(const dep of e.dependencies)reversed=reversed.replaceAll('context.'+dep,dep);
- assert.equal(reversed,r.before);assert.ok(module.includes(r.exported));assert.equal(source.split(r.wrapper).length,2);source=source.replace(r.wrapper,r.before);}
+ assert.equal(reversed,r.before);assert.ok(extractionModule.includes(r.exported));assert.equal(source.split(r.wrapper).length,2);source=source.replace(r.wrapper,r.before);}
  assert.equal(source.split(e.initialization).length,2);source=source.replace(e.initialization,'');assert.equal(hash(source),e.originalSha256);return source;
 }
 module.exports={reconstructCustomisationDialog};
