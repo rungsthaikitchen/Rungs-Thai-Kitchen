@@ -1,0 +1,2479 @@
+{
+  "project": "hvrqgufqjslvgiohgkvu",
+  "schema": "master_wok_rehearsal",
+  "purpose": "Reversible backup before retiring only RTK-188 and RTK-189 from capacity testing",
+  "orders": [
+    {
+      "id": "3899276e-bd90-4c3a-8e06-89df9a94501c",
+      "status": "pending",
+      "is_test": false,
+      "order_ref": "RTK-188",
+      "fixture_key": true,
+      "fixture_email": true,
+      "preferred_time": "2026-11-28T18:30:00+00:00"
+    },
+    {
+      "id": "a622d552-9c84-49ae-9243-85815fe51268",
+      "status": "pending",
+      "is_test": false,
+      "order_ref": "RTK-189",
+      "fixture_key": true,
+      "fixture_email": true,
+      "preferred_time": "2026-11-28T20:15:00+00:00"
+    }
+  ],
+  "saved_plan": {
+    "plan": {
+      "wok": {
+        "jobs": [
+          {
+            "group": "noodle",
+            "start": 1082,
+            "finish": 1090,
+            "itemId": "pad-thai",
+            "latest": 1102,
+            "vessel": "large-2",
+            "vessels": [
+              "large-1",
+              "large-2"
+            ],
+            "duration": 8,
+            "earliest": 1082,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1110,\"pad-thai\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],null,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 20,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "noodle",
+            "start": 1083,
+            "finish": 1091,
+            "itemId": "chef-pad-thai",
+            "latest": 1102,
+            "vessel": "large-1",
+            "vessels": [
+              "large-1",
+              "large-2"
+            ],
+            "duration": 8,
+            "earliest": 1082,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1110,\"chef-pad-thai\",[{\"id\":\"tofu\",\"name\":\"Tofu\",\"delta\":0.5}],1,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 19,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1090,
+            "finish": 1095,
+            "itemId": "coconut-rice",
+            "latest": 1105,
+            "vessel": "pan-1",
+            "vessels": [
+              "pan-1",
+              "pan-2",
+              "pan-3",
+              "pan-4",
+              "pan-5"
+            ],
+            "duration": 5,
+            "earliest": 1085,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1110,\"coconut-rice\",[],null,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 15,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "noodle",
+            "start": 1091,
+            "finish": 1099,
+            "itemId": "pad-kee-mao",
+            "latest": 1102,
+            "vessel": "large-2",
+            "vessels": [
+              "large-1",
+              "large-2"
+            ],
+            "duration": 8,
+            "earliest": 1082,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1110,\"pad-kee-mao\",[{\"id\":\"pork\",\"name\":\"Pork\",\"delta\":1.5}],2,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 11,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "noodle",
+            "start": 1092,
+            "finish": 1100,
+            "itemId": "pad-see-ew",
+            "latest": 1102,
+            "vessel": "large-1",
+            "vessels": [
+              "large-1",
+              "large-2"
+            ],
+            "duration": 8,
+            "earliest": 1082,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1110,\"pad-see-ew\",[{\"id\":\"chicken\",\"name\":\"Chicken\",\"delta\":1}],0,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 10,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1093,
+            "finish": 1098,
+            "itemId": "salt-chips",
+            "latest": 1105,
+            "vessel": "small-1",
+            "vessels": [
+              "small-1",
+              "small-2",
+              "large-1",
+              "large-2"
+            ],
+            "duration": 5,
+            "earliest": 1085,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1110,\"salt-chips\",[],1,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 12,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1095,
+            "finish": 1100,
+            "itemId": "stir-pepper",
+            "latest": 1105,
+            "vessel": "small-2",
+            "vessels": [
+              "small-1",
+              "small-2",
+              "large-1",
+              "large-2"
+            ],
+            "duration": 5,
+            "earliest": 1085,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1110,\"stir-pepper\",[{\"id\":\"beef\",\"name\":\"Beef\",\"delta\":1.5}],1,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 10,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1099,
+            "finish": 1104,
+            "itemId": "stir-pepper",
+            "latest": 1105,
+            "vessel": "small-1",
+            "vessels": [
+              "small-1",
+              "small-2",
+              "large-1",
+              "large-2"
+            ],
+            "duration": 5,
+            "earliest": 1085,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1110,\"stir-pepper\",[{\"id\":\"beef\",\"name\":\"Beef\",\"delta\":1.5}],1,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 6,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "salad",
+            "start": 1100,
+            "finish": 1110,
+            "itemId": "beef-salad",
+            "latest": 1100,
+            "vessel": "cold-prep-1",
+            "vessels": [
+              "cold-prep-1"
+            ],
+            "duration": 10,
+            "earliest": 1080,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 2,
+            "recipeKey": "[1110,\"beef-salad\",[],2,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 0,
+            "portionAllocations": [
+              {
+                "qty": 2,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1100,
+            "finish": 1105,
+            "itemId": "rung-curry",
+            "latest": 1105,
+            "vessel": "pan-2",
+            "vessels": [
+              "pan-1",
+              "pan-2",
+              "pan-3",
+              "pan-4",
+              "pan-5"
+            ],
+            "duration": 5,
+            "earliest": 1085,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1110,\"rung-curry\",[{\"id\":\"pork\",\"name\":\"Pork\",\"delta\":1.5}],1,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 5,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1100,
+            "finish": 1105,
+            "itemId": "rung-curry",
+            "latest": 1105,
+            "vessel": "pan-3",
+            "vessels": [
+              "pan-1",
+              "pan-2",
+              "pan-3",
+              "pan-4",
+              "pan-5"
+            ],
+            "duration": 5,
+            "earliest": 1085,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1110,\"rung-curry\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],1,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 5,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1100,
+            "finish": 1105,
+            "itemId": "salt-chickenchips",
+            "latest": 1105,
+            "vessel": "large-2",
+            "vessels": [
+              "small-1",
+              "small-2",
+              "large-1",
+              "large-2"
+            ],
+            "duration": 5,
+            "earliest": 1085,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1110,\"salt-chickenchips\",[],1,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 5,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1105,
+            "finish": 1110,
+            "itemId": "salt-chicken",
+            "latest": 1105,
+            "vessel": "small-1",
+            "vessels": [
+              "small-1",
+              "small-2",
+              "large-1",
+              "large-2"
+            ],
+            "duration": 5,
+            "earliest": 1085,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1110,\"salt-chicken\",[],1,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 0,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1105,
+            "finish": 1110,
+            "itemId": "salt-chicken",
+            "latest": 1105,
+            "vessel": "small-2",
+            "vessels": [
+              "small-1",
+              "small-2",
+              "large-1",
+              "large-2"
+            ],
+            "duration": 5,
+            "earliest": 1085,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1110,\"salt-chicken\",[],1,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 0,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1105,
+            "finish": 1110,
+            "itemId": "salt-chicken",
+            "latest": 1105,
+            "vessel": "large-1",
+            "vessels": [
+              "small-1",
+              "small-2",
+              "large-1",
+              "large-2"
+            ],
+            "duration": 5,
+            "earliest": 1085,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1110,\"salt-chicken\",[],1,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 0,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1105,
+            "finish": 1110,
+            "itemId": "rung-curry",
+            "latest": 1105,
+            "vessel": "pan-1",
+            "vessels": [
+              "pan-1",
+              "pan-2",
+              "pan-3",
+              "pan-4",
+              "pan-5"
+            ],
+            "duration": 5,
+            "earliest": 1085,
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1110,\"rung-curry\",[{\"id\":\"chicken\",\"name\":\"Chicken\",\"delta\":1}],1,null]",
+            "readyMinute": 1110,
+            "holdingMinutes": 0,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "noodle",
+            "start": 1187,
+            "finish": 1195,
+            "itemId": "pad-thai",
+            "latest": 1207,
+            "vessel": "large-1",
+            "vessels": [
+              "large-1",
+              "large-2"
+            ],
+            "duration": 8,
+            "earliest": 1187,
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1215,\"pad-thai\",[{\"id\":\"tofu\",\"name\":\"Tofu\",\"delta\":0.5}],null,null]",
+            "readyMinute": 1215,
+            "holdingMinutes": 20,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1200,
+            "finish": 1205,
+            "itemId": "green-curry",
+            "latest": 1210,
+            "vessel": "pan-4",
+            "vessels": [
+              "pan-1",
+              "pan-2",
+              "pan-3",
+              "pan-4",
+              "pan-5"
+            ],
+            "duration": 5,
+            "earliest": 1190,
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1215,\"green-curry\",[{\"id\":\"pork\",\"name\":\"Pork\",\"delta\":1.5}],2,null]",
+            "readyMinute": 1215,
+            "holdingMinutes": 10,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1204,
+            "finish": 1209,
+            "itemId": "massaman-curry",
+            "latest": 1210,
+            "vessel": "pan-1",
+            "vessels": [
+              "pan-1",
+              "pan-2",
+              "pan-3",
+              "pan-4",
+              "pan-5"
+            ],
+            "duration": 5,
+            "earliest": 1190,
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1215,\"massaman-curry\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],0,null]",
+            "readyMinute": 1215,
+            "holdingMinutes": 6,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1204,
+            "finish": 1209,
+            "itemId": "green-curry",
+            "latest": 1210,
+            "vessel": "pan-2",
+            "vessels": [
+              "pan-1",
+              "pan-2",
+              "pan-3",
+              "pan-4",
+              "pan-5"
+            ],
+            "duration": 5,
+            "earliest": 1190,
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1215,\"green-curry\",[{\"id\":\"pork\",\"name\":\"Pork\",\"delta\":1.5}],2,null]",
+            "readyMinute": 1215,
+            "holdingMinutes": 6,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1204,
+            "finish": 1209,
+            "itemId": "green-curry",
+            "latest": 1210,
+            "vessel": "pan-3",
+            "vessels": [
+              "pan-1",
+              "pan-2",
+              "pan-3",
+              "pan-4",
+              "pan-5"
+            ],
+            "duration": 5,
+            "earliest": 1190,
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1215,\"green-curry\",[{\"id\":\"pork\",\"name\":\"Pork\",\"delta\":1.5}],2,null]",
+            "readyMinute": 1215,
+            "holdingMinutes": 6,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "salad",
+            "start": 1205,
+            "finish": 1215,
+            "itemId": "beef-salad",
+            "latest": 1205,
+            "vessel": "cold-prep-1",
+            "vessels": [
+              "cold-prep-1"
+            ],
+            "duration": 10,
+            "earliest": 1185,
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1215,\"beef-salad\",[],2,null]",
+            "readyMinute": 1215,
+            "holdingMinutes": 0,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1205,
+            "finish": 1210,
+            "itemId": "massaman-curry",
+            "latest": 1210,
+            "vessel": "pan-5",
+            "vessels": [
+              "pan-1",
+              "pan-2",
+              "pan-3",
+              "pan-4",
+              "pan-5"
+            ],
+            "duration": 5,
+            "earliest": 1190,
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1215,\"massaman-curry\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],0,null]",
+            "readyMinute": 1215,
+            "holdingMinutes": 5,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1210,
+            "finish": 1215,
+            "itemId": "massaman-curry",
+            "latest": 1210,
+            "vessel": "pan-1",
+            "vessels": [
+              "pan-1",
+              "pan-2",
+              "pan-3",
+              "pan-4",
+              "pan-5"
+            ],
+            "duration": 5,
+            "earliest": 1190,
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1215,\"massaman-curry\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],0,null]",
+            "readyMinute": 1215,
+            "holdingMinutes": 0,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1210,
+            "finish": 1215,
+            "itemId": "massaman-curry",
+            "latest": 1210,
+            "vessel": "pan-2",
+            "vessels": [
+              "pan-1",
+              "pan-2",
+              "pan-3",
+              "pan-4",
+              "pan-5"
+            ],
+            "duration": 5,
+            "earliest": 1190,
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1215,\"massaman-curry\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],0,null]",
+            "readyMinute": 1215,
+            "holdingMinutes": 0,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1210,
+            "finish": 1215,
+            "itemId": "massaman-curry",
+            "latest": 1210,
+            "vessel": "pan-3",
+            "vessels": [
+              "pan-1",
+              "pan-2",
+              "pan-3",
+              "pan-4",
+              "pan-5"
+            ],
+            "duration": 5,
+            "earliest": 1190,
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1215,\"massaman-curry\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],0,null]",
+            "readyMinute": 1215,
+            "holdingMinutes": 0,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          },
+          {
+            "group": "fast",
+            "start": 1210,
+            "finish": 1215,
+            "itemId": "massaman-curry",
+            "latest": 1210,
+            "vessel": "pan-4",
+            "vessels": [
+              "pan-1",
+              "pan-2",
+              "pan-3",
+              "pan-4",
+              "pan-5"
+            ],
+            "duration": 5,
+            "earliest": 1190,
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "recipeKey": "[1215,\"massaman-curry\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],0,null]",
+            "readyMinute": 1215,
+            "holdingMinutes": 0,
+            "portionAllocations": [
+              {
+                "qty": 1,
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              }
+            ],
+            "holdingLimitMinutes": 20
+          }
+        ],
+        "reason": "CHEF_ATTENTION_NOT_VERIFIED",
+        "status": "PHYSICAL_FIT_PROTOTYPE",
+        "productionBatches": 27,
+        "resourceAllocation": {
+          "jobs": [
+            {
+              "group": "noodle",
+              "start": 1082,
+              "finish": 1090,
+              "itemId": "pad-thai",
+              "latest": 1102,
+              "vessel": "large-2",
+              "vessels": [
+                "large-1",
+                "large-2"
+              ],
+              "duration": 8,
+              "earliest": 1082,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1110,\"pad-thai\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],null,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 20,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "noodle",
+              "start": 1083,
+              "finish": 1091,
+              "itemId": "chef-pad-thai",
+              "latest": 1102,
+              "vessel": "large-1",
+              "vessels": [
+                "large-1",
+                "large-2"
+              ],
+              "duration": 8,
+              "earliest": 1082,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1110,\"chef-pad-thai\",[{\"id\":\"tofu\",\"name\":\"Tofu\",\"delta\":0.5}],1,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 19,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1090,
+              "finish": 1095,
+              "itemId": "coconut-rice",
+              "latest": 1105,
+              "vessel": "pan-1",
+              "vessels": [
+                "pan-1",
+                "pan-2",
+                "pan-3",
+                "pan-4",
+                "pan-5"
+              ],
+              "duration": 5,
+              "earliest": 1085,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1110,\"coconut-rice\",[],null,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 15,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "noodle",
+              "start": 1091,
+              "finish": 1099,
+              "itemId": "pad-kee-mao",
+              "latest": 1102,
+              "vessel": "large-2",
+              "vessels": [
+                "large-1",
+                "large-2"
+              ],
+              "duration": 8,
+              "earliest": 1082,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1110,\"pad-kee-mao\",[{\"id\":\"pork\",\"name\":\"Pork\",\"delta\":1.5}],2,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 11,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "noodle",
+              "start": 1092,
+              "finish": 1100,
+              "itemId": "pad-see-ew",
+              "latest": 1102,
+              "vessel": "large-1",
+              "vessels": [
+                "large-1",
+                "large-2"
+              ],
+              "duration": 8,
+              "earliest": 1082,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1110,\"pad-see-ew\",[{\"id\":\"chicken\",\"name\":\"Chicken\",\"delta\":1}],0,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 10,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1093,
+              "finish": 1098,
+              "itemId": "salt-chips",
+              "latest": 1105,
+              "vessel": "small-1",
+              "vessels": [
+                "small-1",
+                "small-2",
+                "large-1",
+                "large-2"
+              ],
+              "duration": 5,
+              "earliest": 1085,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1110,\"salt-chips\",[],1,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 12,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1095,
+              "finish": 1100,
+              "itemId": "stir-pepper",
+              "latest": 1105,
+              "vessel": "small-2",
+              "vessels": [
+                "small-1",
+                "small-2",
+                "large-1",
+                "large-2"
+              ],
+              "duration": 5,
+              "earliest": 1085,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1110,\"stir-pepper\",[{\"id\":\"beef\",\"name\":\"Beef\",\"delta\":1.5}],1,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 10,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1099,
+              "finish": 1104,
+              "itemId": "stir-pepper",
+              "latest": 1105,
+              "vessel": "small-1",
+              "vessels": [
+                "small-1",
+                "small-2",
+                "large-1",
+                "large-2"
+              ],
+              "duration": 5,
+              "earliest": 1085,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1110,\"stir-pepper\",[{\"id\":\"beef\",\"name\":\"Beef\",\"delta\":1.5}],1,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 6,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "salad",
+              "start": 1100,
+              "finish": 1110,
+              "itemId": "beef-salad",
+              "latest": 1100,
+              "vessel": "cold-prep-1",
+              "vessels": [
+                "cold-prep-1"
+              ],
+              "duration": 10,
+              "earliest": 1080,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 2,
+              "recipeKey": "[1110,\"beef-salad\",[],2,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 0,
+              "portionAllocations": [
+                {
+                  "qty": 2,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1100,
+              "finish": 1105,
+              "itemId": "rung-curry",
+              "latest": 1105,
+              "vessel": "pan-2",
+              "vessels": [
+                "pan-1",
+                "pan-2",
+                "pan-3",
+                "pan-4",
+                "pan-5"
+              ],
+              "duration": 5,
+              "earliest": 1085,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1110,\"rung-curry\",[{\"id\":\"pork\",\"name\":\"Pork\",\"delta\":1.5}],1,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 5,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1100,
+              "finish": 1105,
+              "itemId": "rung-curry",
+              "latest": 1105,
+              "vessel": "pan-3",
+              "vessels": [
+                "pan-1",
+                "pan-2",
+                "pan-3",
+                "pan-4",
+                "pan-5"
+              ],
+              "duration": 5,
+              "earliest": 1085,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1110,\"rung-curry\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],1,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 5,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1100,
+              "finish": 1105,
+              "itemId": "salt-chickenchips",
+              "latest": 1105,
+              "vessel": "large-2",
+              "vessels": [
+                "small-1",
+                "small-2",
+                "large-1",
+                "large-2"
+              ],
+              "duration": 5,
+              "earliest": 1085,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1110,\"salt-chickenchips\",[],1,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 5,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1105,
+              "finish": 1110,
+              "itemId": "salt-chicken",
+              "latest": 1105,
+              "vessel": "small-1",
+              "vessels": [
+                "small-1",
+                "small-2",
+                "large-1",
+                "large-2"
+              ],
+              "duration": 5,
+              "earliest": 1085,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1110,\"salt-chicken\",[],1,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 0,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1105,
+              "finish": 1110,
+              "itemId": "salt-chicken",
+              "latest": 1105,
+              "vessel": "small-2",
+              "vessels": [
+                "small-1",
+                "small-2",
+                "large-1",
+                "large-2"
+              ],
+              "duration": 5,
+              "earliest": 1085,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1110,\"salt-chicken\",[],1,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 0,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1105,
+              "finish": 1110,
+              "itemId": "salt-chicken",
+              "latest": 1105,
+              "vessel": "large-1",
+              "vessels": [
+                "small-1",
+                "small-2",
+                "large-1",
+                "large-2"
+              ],
+              "duration": 5,
+              "earliest": 1085,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1110,\"salt-chicken\",[],1,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 0,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1105,
+              "finish": 1110,
+              "itemId": "rung-curry",
+              "latest": 1105,
+              "vessel": "pan-1",
+              "vessels": [
+                "pan-1",
+                "pan-2",
+                "pan-3",
+                "pan-4",
+                "pan-5"
+              ],
+              "duration": 5,
+              "earliest": 1085,
+              "orderIds": [
+                "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1110,\"rung-curry\",[{\"id\":\"chicken\",\"name\":\"Chicken\",\"delta\":1}],1,null]",
+              "readyMinute": 1110,
+              "holdingMinutes": 0,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "noodle",
+              "start": 1187,
+              "finish": 1195,
+              "itemId": "pad-thai",
+              "latest": 1207,
+              "vessel": "large-1",
+              "vessels": [
+                "large-1",
+                "large-2"
+              ],
+              "duration": 8,
+              "earliest": 1187,
+              "orderIds": [
+                "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1215,\"pad-thai\",[{\"id\":\"tofu\",\"name\":\"Tofu\",\"delta\":0.5}],null,null]",
+              "readyMinute": 1215,
+              "holdingMinutes": 20,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1200,
+              "finish": 1205,
+              "itemId": "green-curry",
+              "latest": 1210,
+              "vessel": "pan-4",
+              "vessels": [
+                "pan-1",
+                "pan-2",
+                "pan-3",
+                "pan-4",
+                "pan-5"
+              ],
+              "duration": 5,
+              "earliest": 1190,
+              "orderIds": [
+                "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1215,\"green-curry\",[{\"id\":\"pork\",\"name\":\"Pork\",\"delta\":1.5}],2,null]",
+              "readyMinute": 1215,
+              "holdingMinutes": 10,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1204,
+              "finish": 1209,
+              "itemId": "massaman-curry",
+              "latest": 1210,
+              "vessel": "pan-1",
+              "vessels": [
+                "pan-1",
+                "pan-2",
+                "pan-3",
+                "pan-4",
+                "pan-5"
+              ],
+              "duration": 5,
+              "earliest": 1190,
+              "orderIds": [
+                "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1215,\"massaman-curry\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],0,null]",
+              "readyMinute": 1215,
+              "holdingMinutes": 6,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1204,
+              "finish": 1209,
+              "itemId": "green-curry",
+              "latest": 1210,
+              "vessel": "pan-2",
+              "vessels": [
+                "pan-1",
+                "pan-2",
+                "pan-3",
+                "pan-4",
+                "pan-5"
+              ],
+              "duration": 5,
+              "earliest": 1190,
+              "orderIds": [
+                "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1215,\"green-curry\",[{\"id\":\"pork\",\"name\":\"Pork\",\"delta\":1.5}],2,null]",
+              "readyMinute": 1215,
+              "holdingMinutes": 6,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1204,
+              "finish": 1209,
+              "itemId": "green-curry",
+              "latest": 1210,
+              "vessel": "pan-3",
+              "vessels": [
+                "pan-1",
+                "pan-2",
+                "pan-3",
+                "pan-4",
+                "pan-5"
+              ],
+              "duration": 5,
+              "earliest": 1190,
+              "orderIds": [
+                "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1215,\"green-curry\",[{\"id\":\"pork\",\"name\":\"Pork\",\"delta\":1.5}],2,null]",
+              "readyMinute": 1215,
+              "holdingMinutes": 6,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "salad",
+              "start": 1205,
+              "finish": 1215,
+              "itemId": "beef-salad",
+              "latest": 1205,
+              "vessel": "cold-prep-1",
+              "vessels": [
+                "cold-prep-1"
+              ],
+              "duration": 10,
+              "earliest": 1185,
+              "orderIds": [
+                "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1215,\"beef-salad\",[],2,null]",
+              "readyMinute": 1215,
+              "holdingMinutes": 0,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1205,
+              "finish": 1210,
+              "itemId": "massaman-curry",
+              "latest": 1210,
+              "vessel": "pan-5",
+              "vessels": [
+                "pan-1",
+                "pan-2",
+                "pan-3",
+                "pan-4",
+                "pan-5"
+              ],
+              "duration": 5,
+              "earliest": 1190,
+              "orderIds": [
+                "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1215,\"massaman-curry\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],0,null]",
+              "readyMinute": 1215,
+              "holdingMinutes": 5,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1210,
+              "finish": 1215,
+              "itemId": "massaman-curry",
+              "latest": 1210,
+              "vessel": "pan-1",
+              "vessels": [
+                "pan-1",
+                "pan-2",
+                "pan-3",
+                "pan-4",
+                "pan-5"
+              ],
+              "duration": 5,
+              "earliest": 1190,
+              "orderIds": [
+                "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1215,\"massaman-curry\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],0,null]",
+              "readyMinute": 1215,
+              "holdingMinutes": 0,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1210,
+              "finish": 1215,
+              "itemId": "massaman-curry",
+              "latest": 1210,
+              "vessel": "pan-2",
+              "vessels": [
+                "pan-1",
+                "pan-2",
+                "pan-3",
+                "pan-4",
+                "pan-5"
+              ],
+              "duration": 5,
+              "earliest": 1190,
+              "orderIds": [
+                "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1215,\"massaman-curry\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],0,null]",
+              "readyMinute": 1215,
+              "holdingMinutes": 0,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1210,
+              "finish": 1215,
+              "itemId": "massaman-curry",
+              "latest": 1210,
+              "vessel": "pan-3",
+              "vessels": [
+                "pan-1",
+                "pan-2",
+                "pan-3",
+                "pan-4",
+                "pan-5"
+              ],
+              "duration": 5,
+              "earliest": 1190,
+              "orderIds": [
+                "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1215,\"massaman-curry\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],0,null]",
+              "readyMinute": 1215,
+              "holdingMinutes": 0,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            },
+            {
+              "group": "fast",
+              "start": 1210,
+              "finish": 1215,
+              "itemId": "massaman-curry",
+              "latest": 1210,
+              "vessel": "pan-4",
+              "vessels": [
+                "pan-1",
+                "pan-2",
+                "pan-3",
+                "pan-4",
+                "pan-5"
+              ],
+              "duration": 5,
+              "earliest": 1190,
+              "orderIds": [
+                "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+              ],
+              "portions": 1,
+              "recipeKey": "[1215,\"massaman-curry\",[{\"id\":\"prawn\",\"name\":\"Prawn\",\"delta\":2}],0,null]",
+              "readyMinute": 1215,
+              "holdingMinutes": 0,
+              "portionAllocations": [
+                {
+                  "qty": 1,
+                  "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+                }
+              ],
+              "holdingLimitMinutes": 20
+            }
+          ],
+          "reason": "FOUR_SHARED_RINGS",
+          "status": "PHYSICAL_FIT_PROTOTYPE",
+          "ringCapacity": 4,
+          "bookingApprovalAllowed": false,
+          "chefConcurrencyVerified": false,
+          "coldPrepCapacityAssumed": 1
+        },
+        "bookingApprovalAllowed": false
+      },
+      "fryer": {
+        "jobs": [
+          {
+            "type": "tofu",
+            "start": 1078,
+            "basket": "large",
+            "finish": 1083,
+            "itemIds": [
+              "chef-pad-thai"
+            ],
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "wokStart": 1083,
+            "allocations": [
+              {
+                "qty": 1,
+                "type": "tofu",
+                "itemId": "chef-pad-thai",
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z",
+                "deadline": 1083,
+                "duration": 5,
+                "wokStart": 1083,
+                "notBefore": 990,
+                "recipeKey": "[1110,\"chef-pad-thai\",[{\"id\":\"tofu\",\"name\":\"Tofu\",\"delta\":0.5}],1,null]"
+              }
+            ]
+          },
+          {
+            "type": "chips",
+            "start": 1088,
+            "basket": "large",
+            "finish": 1093,
+            "itemIds": [
+              "salt-chips"
+            ],
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "wokStart": 1093,
+            "allocations": [
+              {
+                "qty": 1,
+                "type": "chips",
+                "itemId": "salt-chips",
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z",
+                "deadline": 1093,
+                "duration": 5,
+                "wokStart": 1093,
+                "notBefore": 990,
+                "recipeKey": "[1110,\"salt-chips\",[],1,null]"
+              }
+            ]
+          },
+          {
+            "type": "crispyChicken",
+            "start": 1095,
+            "basket": "large",
+            "finish": 1100,
+            "itemIds": [
+              "salt-chickenchips"
+            ],
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "wokStart": 1100,
+            "allocations": [
+              {
+                "qty": 1,
+                "type": "crispyChicken",
+                "itemId": "salt-chickenchips",
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z",
+                "deadline": 1100,
+                "duration": 5,
+                "wokStart": 1100,
+                "notBefore": 990,
+                "recipeKey": "[1110,\"salt-chickenchips\",[],1,null]"
+              }
+            ]
+          },
+          {
+            "type": "chips",
+            "start": 1095,
+            "basket": "small-1",
+            "finish": 1100,
+            "itemIds": [
+              "salt-chickenchips"
+            ],
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "wokStart": 1100,
+            "allocations": [
+              {
+                "qty": 1,
+                "type": "chips",
+                "itemId": "salt-chickenchips",
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z",
+                "deadline": 1100,
+                "duration": 5,
+                "wokStart": 1100,
+                "notBefore": 990,
+                "recipeKey": "[1110,\"salt-chickenchips\",[],1,null]"
+              }
+            ]
+          },
+          {
+            "type": "crispyChicken",
+            "start": 1100,
+            "basket": "large",
+            "finish": 1105,
+            "itemIds": [
+              "salt-chicken"
+            ],
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 3,
+            "wokStart": 1105,
+            "allocations": [
+              {
+                "qty": 1,
+                "type": "crispyChicken",
+                "itemId": "salt-chicken",
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z",
+                "deadline": 1105,
+                "duration": 5,
+                "wokStart": 1105,
+                "notBefore": 990,
+                "recipeKey": "[1110,\"salt-chicken\",[],1,null]"
+              },
+              {
+                "qty": 1,
+                "type": "crispyChicken",
+                "itemId": "salt-chicken",
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z",
+                "deadline": 1105,
+                "duration": 5,
+                "wokStart": 1105,
+                "notBefore": 990,
+                "recipeKey": "[1110,\"salt-chicken\",[],1,null]"
+              },
+              {
+                "qty": 1,
+                "type": "crispyChicken",
+                "itemId": "salt-chicken",
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z",
+                "deadline": 1105,
+                "duration": 5,
+                "wokStart": 1105,
+                "notBefore": 990,
+                "recipeKey": "[1110,\"salt-chicken\",[],1,null]"
+              }
+            ]
+          },
+          {
+            "type": "tofu",
+            "start": 1182,
+            "basket": "large",
+            "finish": 1187,
+            "itemIds": [
+              "pad-thai"
+            ],
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "wokStart": 1187,
+            "allocations": [
+              {
+                "qty": 1,
+                "type": "tofu",
+                "itemId": "pad-thai",
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z",
+                "deadline": 1187,
+                "duration": 5,
+                "wokStart": 1187,
+                "notBefore": 990,
+                "recipeKey": "[1215,\"pad-thai\",[{\"id\":\"tofu\",\"name\":\"Tofu\",\"delta\":0.5}],null,null]"
+              }
+            ]
+          },
+          {
+            "type": "springRollBatch",
+            "start": 1208,
+            "basket": "large",
+            "finish": 1215,
+            "itemIds": [
+              "veg-spring-rolls"
+            ],
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "standalone": true,
+            "allocations": [
+              {
+                "qty": 1,
+                "type": "springRollBatch",
+                "itemId": "veg-spring-rolls",
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z",
+                "deadline": 1215,
+                "duration": 7,
+                "notBefore": 990,
+                "recipeKey": "[1215,\"veg-spring-rolls\",[],null,null]",
+                "standalone": true,
+                "earliestFinish": 0
+              }
+            ],
+            "readyMinute": 1215
+          },
+          {
+            "type": "thaiSausageBatch",
+            "start": 1209,
+            "basket": "small-1",
+            "finish": 1212,
+            "itemIds": [
+              "thai-sausage"
+            ],
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "standalone": true,
+            "allocations": [
+              {
+                "qty": 1,
+                "type": "thaiSausageBatch",
+                "itemId": "thai-sausage",
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z",
+                "deadline": 1215,
+                "duration": 3,
+                "notBefore": 990,
+                "recipeKey": "[1215,\"thai-sausage\",[],null,null]",
+                "standalone": true,
+                "earliestFinish": 0
+              }
+            ],
+            "readyMinute": 1215
+          },
+          {
+            "type": "tofu",
+            "start": 1210,
+            "basket": "small-2",
+            "finish": 1215,
+            "itemIds": [
+              "fried-tofu"
+            ],
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "standalone": true,
+            "allocations": [
+              {
+                "qty": 1,
+                "type": "tofu",
+                "itemId": "fried-tofu",
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z",
+                "deadline": 1215,
+                "duration": 5,
+                "notBefore": 990,
+                "recipeKey": "[1215,\"fried-tofu\",[],null,null]",
+                "standalone": true,
+                "earliestFinish": 0
+              }
+            ],
+            "readyMinute": 1215
+          },
+          {
+            "type": "fishCakeBatch",
+            "start": 1212,
+            "basket": "small-1",
+            "finish": 1215,
+            "itemIds": [
+              "fish-cakes"
+            ],
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "standalone": true,
+            "allocations": [
+              {
+                "qty": 1,
+                "type": "fishCakeBatch",
+                "itemId": "fish-cakes",
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z",
+                "deadline": 1215,
+                "duration": 3,
+                "notBefore": 990,
+                "recipeKey": "[1215,\"fish-cakes\",[],1,null]",
+                "standalone": true,
+                "earliestFinish": 0
+              }
+            ],
+            "readyMinute": 1215
+          }
+        ],
+        "nodes": 21,
+        "reason": "ATTRIBUTED_FRYER_TIMELINE",
+        "status": "PREREQUISITES_PLACED_PROTOTYPE",
+        "inventory": {
+          "reason": "FRY_TIMELINE_NOT_SCHEDULED",
+          "status": "UNVERIFIED",
+          "unmodelled": [],
+          "dependencies": [
+            {
+              "counts": {
+                "crispyChicken": 3
+              },
+              "itemId": "salt-chicken",
+              "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z",
+              "lineIndex": 0,
+              "readyMinute": 1110
+            },
+            {
+              "counts": {
+                "chips": 1,
+                "crispyChicken": 1
+              },
+              "itemId": "salt-chickenchips",
+              "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z",
+              "lineIndex": 6,
+              "readyMinute": 1110
+            },
+            {
+              "counts": {
+                "tofu": 1
+              },
+              "itemId": "chef-pad-thai",
+              "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z",
+              "lineIndex": 10,
+              "readyMinute": 1110
+            },
+            {
+              "counts": {
+                "chips": 1
+              },
+              "itemId": "salt-chips",
+              "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z",
+              "lineIndex": 12,
+              "readyMinute": 1110
+            },
+            {
+              "counts": {
+                "springRollBatch": 1
+              },
+              "itemId": "veg-spring-rolls",
+              "orderId": "candidate:release-nov6-delivery-large-v55-ce9ff087-6b9c-4c4d-92ec-f5319f743370",
+              "lineIndex": 0,
+              "standalone": true,
+              "readyMinute": 1215,
+              "durationMinutes": 7
+            },
+            {
+              "counts": {
+                "fishCakeBatch": 1
+              },
+              "itemId": "fish-cakes",
+              "orderId": "candidate:release-nov6-delivery-large-v55-ce9ff087-6b9c-4c4d-92ec-f5319f743370",
+              "lineIndex": 3,
+              "standalone": true,
+              "readyMinute": 1215,
+              "durationMinutes": 3
+            },
+            {
+              "counts": {
+                "tofu": 1
+              },
+              "itemId": "fried-tofu",
+              "orderId": "candidate:release-nov6-delivery-large-v55-ce9ff087-6b9c-4c4d-92ec-f5319f743370",
+              "lineIndex": 4,
+              "standalone": true,
+              "readyMinute": 1215,
+              "durationMinutes": 5
+            },
+            {
+              "counts": {
+                "thaiSausageBatch": 1
+              },
+              "itemId": "thai-sausage",
+              "orderId": "candidate:release-nov6-delivery-large-v55-ce9ff087-6b9c-4c4d-92ec-f5319f743370",
+              "lineIndex": 6,
+              "standalone": true,
+              "readyMinute": 1215,
+              "durationMinutes": 3
+            },
+            {
+              "counts": {
+                "tofu": 1
+              },
+              "itemId": "pad-thai",
+              "orderId": "candidate:release-nov6-delivery-large-v55-ce9ff087-6b9c-4c4d-92ec-f5319f743370",
+              "lineIndex": 11,
+              "readyMinute": 1215
+            }
+          ],
+          "bookingApprovalAllowed": false
+        },
+        "bookingApprovalAllowed": false
+      },
+      "events": [
+        {
+          "start": 1078,
+          "finish": 1083,
+          "fryType": "tofu",
+          "resource": "large"
+        },
+        {
+          "start": 1082,
+          "finish": 1090,
+          "itemId": "pad-thai",
+          "resource": "hob:large-2"
+        },
+        {
+          "start": 1083,
+          "finish": 1091,
+          "itemId": "chef-pad-thai",
+          "resource": "hob:large-1"
+        },
+        {
+          "start": 1088,
+          "finish": 1093,
+          "fryType": "chips",
+          "resource": "large"
+        },
+        {
+          "start": 1089,
+          "finish": 1090,
+          "itemId": "coconut-rice",
+          "resource": "microwave"
+        },
+        {
+          "start": 1090,
+          "finish": 1095,
+          "itemId": "coconut-rice",
+          "resource": "hob:pan-1"
+        },
+        {
+          "start": 1091,
+          "finish": 1099,
+          "itemId": "pad-kee-mao",
+          "resource": "hob:large-2"
+        },
+        {
+          "start": 1092,
+          "finish": 1100,
+          "itemId": "pad-see-ew",
+          "resource": "hob:large-1"
+        },
+        {
+          "start": 1093,
+          "finish": 1098,
+          "itemId": "salt-chips",
+          "resource": "hob:small-1"
+        },
+        {
+          "start": 1095,
+          "finish": 1100,
+          "itemId": "stir-pepper",
+          "resource": "hob:small-2"
+        },
+        {
+          "start": 1095,
+          "finish": 1100,
+          "fryType": "crispyChicken",
+          "resource": "large"
+        },
+        {
+          "start": 1095,
+          "finish": 1100,
+          "fryType": "chips",
+          "resource": "small-1"
+        },
+        {
+          "start": 1099,
+          "finish": 1104,
+          "itemId": "stir-pepper",
+          "resource": "hob:small-1"
+        },
+        {
+          "start": 1100,
+          "finish": 1110,
+          "itemId": "beef-salad",
+          "resource": "hob:cold-prep-1"
+        },
+        {
+          "start": 1100,
+          "finish": 1105,
+          "itemId": "rung-curry",
+          "resource": "hob:pan-2"
+        },
+        {
+          "start": 1100,
+          "finish": 1105,
+          "itemId": "rung-curry",
+          "resource": "hob:pan-3"
+        },
+        {
+          "start": 1100,
+          "finish": 1105,
+          "itemId": "salt-chickenchips",
+          "resource": "hob:large-2"
+        },
+        {
+          "start": 1100,
+          "finish": 1105,
+          "fryType": "crispyChicken",
+          "resource": "large"
+        },
+        {
+          "start": 1104,
+          "finish": 1110,
+          "itemId": "pork-dumplings",
+          "resource": "microwave"
+        },
+        {
+          "start": 1105,
+          "finish": 1110,
+          "itemId": "salt-chicken",
+          "resource": "hob:small-1"
+        },
+        {
+          "start": 1105,
+          "finish": 1110,
+          "itemId": "salt-chicken",
+          "resource": "hob:small-2"
+        },
+        {
+          "start": 1105,
+          "finish": 1110,
+          "itemId": "salt-chicken",
+          "resource": "hob:large-1"
+        },
+        {
+          "start": 1105,
+          "finish": 1110,
+          "itemId": "rung-curry",
+          "resource": "hob:pan-1"
+        },
+        {
+          "start": 1182,
+          "finish": 1187,
+          "fryType": "tofu",
+          "resource": "large"
+        },
+        {
+          "start": 1187,
+          "finish": 1195,
+          "itemId": "pad-thai",
+          "resource": "hob:large-1"
+        },
+        {
+          "start": 1196,
+          "finish": 1197,
+          "itemId": "moo-ping",
+          "resource": "wok"
+        },
+        {
+          "start": 1198,
+          "finish": 1199,
+          "itemId": "chicken-satay",
+          "resource": "wok"
+        },
+        {
+          "start": 1200,
+          "finish": 1205,
+          "itemId": "green-curry",
+          "resource": "hob:pan-4"
+        },
+        {
+          "start": 1204,
+          "finish": 1209,
+          "itemId": "massaman-curry",
+          "resource": "hob:pan-1"
+        },
+        {
+          "start": 1204,
+          "finish": 1209,
+          "itemId": "green-curry",
+          "resource": "hob:pan-2"
+        },
+        {
+          "start": 1204,
+          "finish": 1209,
+          "itemId": "green-curry",
+          "resource": "hob:pan-3"
+        },
+        {
+          "start": 1205,
+          "finish": 1215,
+          "itemId": "beef-salad",
+          "resource": "hob:cold-prep-1"
+        },
+        {
+          "start": 1205,
+          "finish": 1210,
+          "itemId": "massaman-curry",
+          "resource": "hob:pan-5"
+        },
+        {
+          "start": 1208,
+          "finish": 1215,
+          "fryType": "springRollBatch",
+          "resource": "large"
+        },
+        {
+          "start": 1209,
+          "finish": 1212,
+          "fryType": "thaiSausageBatch",
+          "resource": "small-1"
+        },
+        {
+          "start": 1210,
+          "finish": 1215,
+          "itemId": "massaman-curry",
+          "resource": "hob:pan-1"
+        },
+        {
+          "start": 1210,
+          "finish": 1215,
+          "itemId": "massaman-curry",
+          "resource": "hob:pan-2"
+        },
+        {
+          "start": 1210,
+          "finish": 1215,
+          "itemId": "massaman-curry",
+          "resource": "hob:pan-3"
+        },
+        {
+          "start": 1210,
+          "finish": 1215,
+          "itemId": "massaman-curry",
+          "resource": "hob:pan-4"
+        },
+        {
+          "start": 1210,
+          "finish": 1215,
+          "fryType": "tofu",
+          "resource": "small-2"
+        },
+        {
+          "start": 1210,
+          "finish": 1215,
+          "itemId": "spare-ribs",
+          "resource": "microwave"
+        },
+        {
+          "start": 1212,
+          "finish": 1215,
+          "fryType": "fishCakeBatch",
+          "resource": "small-1"
+        }
+      ],
+      "reason": "STAGING_ONLY_NOT_BOOKING_APPROVAL",
+      "status": "COORDINATED_PROTOTYPE",
+      "delivery": {
+        "trips": [],
+        "version": 1
+      },
+      "auxiliary": {
+        "jobs": [
+          {
+            "start": 1089,
+            "finish": 1090,
+            "itemId": "coconut-rice",
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 1,
+            "resource": "microwave",
+            "appliance": "microwave",
+            "allocations": [
+              {
+                "qty": 1,
+                "itemId": "coconut-rice",
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z",
+                "deadline": 1090,
+                "notBefore": 990,
+                "readyMinute": 1110,
+                "sourceItemId": "coconut-rice",
+                "sourceRecipeKey": "[1110,\"coconut-rice\",[],null,null]"
+              }
+            ],
+            "readyMinute": 1110,
+            "sourceRecipeKey": "[1110,\"coconut-rice\",[],null,null]"
+          },
+          {
+            "start": 1104,
+            "finish": 1110,
+            "itemId": "pork-dumplings",
+            "orderIds": [
+              "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z"
+            ],
+            "portions": 2,
+            "resource": "microwave",
+            "appliance": "microwave",
+            "allocations": [
+              {
+                "qty": 1,
+                "itemId": "pork-dumplings",
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z",
+                "notBefore": 990,
+                "readyMinute": 1110,
+                "sourceItemId": "pork-dumplings",
+                "earliestFinish": 0,
+                "sourceRecipeKey": "[1110,\"pork-dumplings\",[],null,null]"
+              },
+              {
+                "qty": 1,
+                "itemId": "pork-dumplings",
+                "orderId": "3899276e-bd90-4c3a-8e06-89df9a94501c@2026-11-28T18:30:00.000Z",
+                "notBefore": 990,
+                "readyMinute": 1110,
+                "sourceItemId": "pork-dumplings",
+                "earliestFinish": 0,
+                "sourceRecipeKey": "[1110,\"pork-dumplings\",[],null,null]"
+              }
+            ],
+            "readyMinute": 1110,
+            "sourceRecipeKey": "[1110,\"pork-dumplings\",[],null,null]"
+          },
+          {
+            "start": 1196,
+            "finish": 1197,
+            "itemId": "moo-ping",
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "resource": "wok",
+            "appliance": "small-wok",
+            "allocations": [
+              {
+                "qty": 1,
+                "itemId": "moo-ping",
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z",
+                "notBefore": 990,
+                "readyMinute": 1215,
+                "sourceItemId": "moo-ping",
+                "earliestFinish": 0,
+                "sourceRecipeKey": "[1215,\"moo-ping\",[],null,null]"
+              }
+            ],
+            "readyMinute": 1215,
+            "sourceRecipeKey": "[1215,\"moo-ping\",[],null,null]"
+          },
+          {
+            "start": 1198,
+            "finish": 1199,
+            "itemId": "chicken-satay",
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "resource": "wok",
+            "appliance": "small-wok",
+            "allocations": [
+              {
+                "qty": 1,
+                "itemId": "chicken-satay",
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z",
+                "notBefore": 990,
+                "readyMinute": 1215,
+                "sourceItemId": "chicken-satay",
+                "earliestFinish": 0,
+                "sourceRecipeKey": "[1215,\"chicken-satay\",[],null,null]"
+              }
+            ],
+            "readyMinute": 1215,
+            "sourceRecipeKey": "[1215,\"chicken-satay\",[],null,null]"
+          },
+          {
+            "start": 1210,
+            "finish": 1215,
+            "itemId": "spare-ribs",
+            "orderIds": [
+              "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z"
+            ],
+            "portions": 1,
+            "resource": "microwave",
+            "appliance": "microwave",
+            "allocations": [
+              {
+                "qty": 1,
+                "itemId": "spare-ribs",
+                "orderId": "a622d552-9c84-49ae-9243-85815fe51268@2026-11-28T20:15:00.000Z",
+                "notBefore": 990,
+                "readyMinute": 1215,
+                "sourceItemId": "spare-ribs",
+                "earliestFinish": 0,
+                "sourceRecipeKey": "[1215,\"spare-ribs\",[],null,null]"
+              }
+            ],
+            "readyMinute": 1215,
+            "sourceRecipeKey": "[1215,\"spare-ribs\",[],null,null]"
+          }
+        ],
+        "status": "AUXILIARY_PLACED_PROTOTYPE",
+        "bookingApprovalAllowed": false
+      },
+      "modelVersion": "combined-kitchen-four-ring-staging-v1",
+      "resourceModel": "FOUR_SHARED_RINGS",
+      "schemaVersion": 1,
+      "curryHoldPolicy": "EXCEPTION_20_MINUTES",
+      "curryHoldMinutes": 20,
+      "holdingLimitMinutes": 20,
+      "bookingApprovalAllowed": false,
+      "chefConcurrencyVerified": false
+    },
+    "revision": 2,
+    "updated_at": "2026-11-10T07:09:41.200775+00:00",
+    "service_date": "2026-11-28"
+  }
+}
