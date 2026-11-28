@@ -32,3 +32,45 @@ test('actual bound controls preserve quantity floor, basket payload, callback or
 test('unknown dish and add without current item preserve released refusal behaviour',()=>{
  const {a,b,x,y}=pair({id:'dish',name:'Dish',price:8});x.openCustomiseById('missing');y.openCustomiseById('missing');x.bindControls();y.bindControls();a.nodes['modal-add'].listeners.click();b.nodes['modal-add'].listeners.click();assert.deepEqual(snapshot(a),snapshot(b));assert.equal(a.basket.length,0);
 });
+
+test('Escape closes child then parent and restores keyboard focus in order', () => {
+ const f = fixture({id: 'dish', name: 'Dish', price: 8});
+ const listeners = [];
+ const focusable = () => ({focus() { f.document.activeElement = this; }});
+ const menuLink = focusable();
+ const dishButton = focusable();
+ f.nodes['modal-close'] = focusable();
+ f.nodes.modal = f.modal;
+ f.document.addEventListener = (type, fn) => listeners.push(fn);
+ const classes = new Set();
+ const classList = {contains: name => classes.has(name), add: name => classes.add(name), remove: name => classes.delete(name)};
+ f.document.body = {style: {}, classList};
+ f.menuOverlay = {classList, addEventListener() {}, setAttribute() {}};
+ f.menuClose = {...focusable(), addEventListener() {}};
+ const menu = require('../customer-menu-overlay').create(f);
+ const dish = create(f);
+ f.closeModal = dish.closeModal;
+
+ menu.bindEarly();
+ require('../customer-interactions').create(f).bindEscape();
+ menu.bindLate();
+ menu.openMenuOverlay(menuLink);
+ dishButton.focus();
+ dish.openCustomiseById('dish');
+ dish.openCustomiseById('dish');
+ assert.equal(f.document.activeElement, f.nodes['modal-close']);
+
+ const escape = (repeat = false) => {
+  const event = {key: 'Escape', repeat, preventDefault() { this.defaultPrevented = true; }};
+  listeners.forEach(listener => listener(event));
+ };
+ escape();
+ assert.equal(f.modal.style.display, 'none');
+ assert.ok(classes.has('show'));
+ assert.equal(f.document.activeElement, dishButton);
+ escape(true);
+ assert.ok(classes.has('show'));
+ escape();
+ assert.ok(!classes.has('show'));
+ assert.equal(f.document.activeElement, menuLink);
+});

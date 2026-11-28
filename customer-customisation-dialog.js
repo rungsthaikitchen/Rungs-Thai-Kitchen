@@ -2,6 +2,8 @@
 'use strict';
 function create(context){
 const {document,window,console}=context;
+let dishOpener;
+
 function openCustomiseById(itemId) {
   const item = window.ITEMS_BY_ID.get(String(itemId));
   if (!item || !context.modal) {
@@ -9,6 +11,7 @@ function openCustomiseById(itemId) {
     return;
   }
 
+  if (context.modal.style.display !== 'flex') dishOpener = document.activeElement;
   context.currentItem = item;
   context.selectedMods.clear();
   context.selectedExtras = [];
@@ -57,6 +60,7 @@ if (Array.isArray(item.allowedExtras)) {
 	  (0, context.buildSpiceSelector)(!!item.spiceEnabled, defaultSpice, item.spiceMin, item.spiceNote);
 
 	  context.modal.style.display = 'flex';
+	  document.getElementById('modal-close')?.focus?.();
 	}
 
 function closeModal(){
@@ -66,6 +70,8 @@ function closeModal(){
       context.currentAllowedMods = null;
       if (context.modalImg){ context.modalImg.removeAttribute('src'); context.modalImg.style.display = 'none'; }
       (0, context.buildSpiceSelector)(false);
+      dishOpener?.focus();
+      dishOpener = null;
     }
 
 function bindControls(){

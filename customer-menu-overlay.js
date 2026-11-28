@@ -87,7 +87,7 @@ if (context.menuCheckoutBtn) {
 
 // ESC key closes popup too
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && context.menuOverlay?.classList.contains('show')) {
+  if (e.key === 'Escape' && !e.defaultPrevented && !e.repeat && document.getElementById?.('modal')?.style.display !== 'flex' && context.menuOverlay?.classList.contains('show')) {
     closeMenuOverlay();
   }
 });
@@ -116,7 +116,7 @@ function bindLate(){
 
 	  // ESC key closes popup too
 	  document.addEventListener('keydown', (e) => {
-		if (e.key === 'Escape' && context.menuOverlay?.classList.contains('show')) {
+		if (e.key === 'Escape' && !e.defaultPrevented && !e.repeat && document.getElementById?.('modal')?.style.display !== 'flex' && context.menuOverlay?.classList.contains('show')) {
 		  closeMenuOverlay();
 		}
 	  });

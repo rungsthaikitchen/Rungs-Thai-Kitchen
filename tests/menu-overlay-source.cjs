@@ -4,6 +4,7 @@ function reconstructMenuOverlay(root=path.join(__dirname,'..')){
  const e=JSON.parse(fs.readFileSync(path.join(root,'MENU-OVERLAY-EXTRACTION-2026-11-25.json'),'utf8'));
  const module=fs.readFileSync(path.join(root,'customer-menu-overlay.js'),'utf8');
  const extractionModule=module
+  .replaceAll("!e.defaultPrevented && !e.repeat && document.getElementById?.('modal')?.style.display !== 'flex' && ", '')
   .replace('let menuOpener;\n\n', '')
   .replace('openMenuOverlay(trigger = document.activeElement)', 'openMenuOverlay()')
   .replace(" || context.menuOverlay.classList.contains('show')", '')
